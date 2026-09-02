@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom'
-import { FileInput, ClipboardList, ShieldCheck, Users, LogOut, X } from 'lucide-react'
+import { FilePlus2, ClipboardList, ShieldCheck, Users, LogOut, X } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 
 function NavItem({ to, icon: Icon, label, end, onNavigate }) {
@@ -93,7 +93,14 @@ function Sidebar({ abierto, onCerrar }) {
 
         {/* Main Tabs */}
         <div className="flex-1 overflow-y-auto px-4 py-6 space-y-1 custom-scrollbar">
-          <NavItem to="/" icon={FileInput} label="Hoja de Devolución" end onNavigate={onCerrar} />
+          {/*
+            El primer ítem ya no es un formato concreto: ahora abre el
+            selector de los seis formatos. Se deja SIN "end" para que quede
+            marcado como activo también mientras se llena un formulario en
+            /actas/:tipo/nueva -- el usuario nunca pierde la referencia de
+            dónde está en la navegación.
+          */}
+          <NavItem to="/" icon={FilePlus2} label="Nueva Acta" onNavigate={onCerrar} />
           <NavItem to="/historial" icon={ClipboardList} label="Historial de Actas" onNavigate={onCerrar} />
           {isAdmin && <NavItem to="/auditoria" icon={ShieldCheck} label="Auditoría" onNavigate={onCerrar} />}
           {isAdmin && <NavItem to="/usuarios" icon={Users} label="Usuarios" onNavigate={onCerrar} />}

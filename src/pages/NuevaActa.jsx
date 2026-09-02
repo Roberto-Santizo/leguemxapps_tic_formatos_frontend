@@ -1,0 +1,69 @@
+import { Link } from 'react-router-dom'
+import { ChevronRight } from 'lucide-react'
+import { LISTA_FORMATOS } from '../config/formatos.js'
+
+/**
+ * Pantalla de inicio del sistema (ruta "/").
+ *
+ * Antes esta ruta abría directamente la Hoja de Devolución. Ahora los seis
+ * formatos físicos existen en el sistema, así que el inicio es el selector:
+ * una tarjeta por formato que lleva a /actas/:tipo/nueva.
+ */
+function NuevaActa() {
+  return (
+    <div className="flex-1 p-container-padding md:p-8 animate-view-in">
+      <div className="mx-auto max-w-[1200px] space-y-stack-lg">
+        <div>
+          <h1 className="font-headline-lg text-headline-lg text-on-surface">Nueva Acta</h1>
+          <p className="mt-1 font-body-md text-body-md text-on-surface-variant">
+            Selecciona el formato que vas a levantar. Cada uno reproduce la hoja física del
+            Departamento de Tecnologías de la Información.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 gap-column-gap sm:grid-cols-2 xl:grid-cols-3">
+          {LISTA_FORMATOS.map((formato) => {
+            const Icon = formato.icon
+            return (
+              <Link
+                key={formato.id}
+                to={`/actas/${formato.id}/nueva`}
+                className="group flex flex-col gap-stack-md rounded-xl border border-outline-variant bg-surface-container-lowest p-5 shadow-sm transition-all duration-150 hover:border-outline hover:shadow-md"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-outline-variant bg-surface-container-lowest text-primary transition-colors group-hover:border-outline">
+                    <Icon className="h-5 w-5" strokeWidth={2} />
+                  </div>
+                  <span className="font-mono text-label-sm tracking-wide text-on-surface-variant">
+                    {formato.codigo}
+                  </span>
+                </div>
+
+                <div>
+                  <h2 className="font-headline-md text-headline-md text-on-surface">
+                    {formato.tituloCorto}
+                  </h2>
+                  <p className="mt-1 font-body-md text-body-md text-pretty text-on-surface-variant">
+                    {formato.descripcion}
+                  </p>
+                </div>
+
+                <div className="mt-auto flex items-center justify-between gap-2 border-t border-outline-variant pt-3">
+                  <span className="font-label-bold text-label-bold text-on-surface-variant">
+                    {formato.meta}
+                  </span>
+                  <ChevronRight
+                    className="h-4 w-4 shrink-0 text-outline transition-transform group-hover:translate-x-0.5"
+                    strokeWidth={2}
+                  />
+                </div>
+              </Link>
+            )
+          })}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default NuevaActa

@@ -1,7 +1,8 @@
 import { Routes, Route } from 'react-router-dom'
 import AppLayout from './layouts/AppLayout.jsx'
 import Login from './pages/Login.jsx'
-import Devolucion from './pages/Devolucion.jsx'
+import NuevaActa from './pages/NuevaActa.jsx'
+import FormatoActa from './pages/FormatoActa.jsx'
 import Historial from './pages/Historial.jsx'
 import Auditoria from './pages/Auditoria.jsx'
 import Usuarios from './pages/Usuarios.jsx'
@@ -22,7 +23,13 @@ function App() {
           </RequireAuth>
         }
       >
-        <Route index element={<Devolucion />} />
+        {/* El inicio ya no es un formato concreto: es el selector de los
+            seis formatos físicos del Departamento de TIC. */}
+        <Route index element={<NuevaActa />} />
+
+        {/* Un solo motor de formularios para los seis formatos. */}
+        <Route path="actas/:tipo/nueva" element={<FormatoActa />} />
+
         <Route path="historial" element={<Historial />} />
         <Route
           path="auditoria"
