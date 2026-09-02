@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom'
-import { FilePlus2, ClipboardList, ShieldCheck, Users, LogOut, X } from 'lucide-react'
+import { FilePlus2, ClipboardList, BookOpen, ShieldCheck, Users, LogOut, X } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 
 function NavItem({ to, icon: Icon, label, end, onNavigate }) {
@@ -102,6 +102,11 @@ function Sidebar({ abierto, onCerrar }) {
           */}
           <NavItem to="/" icon={FilePlus2} label="Nueva Acta" onNavigate={onCerrar} />
           <NavItem to="/historial" icon={ClipboardList} label="Historial de Actas" onNavigate={onCerrar} />
+          {/* Catálogo (marcas y departamentos): visible para cualquier
+              usuario autenticado -- la API no pide rol admin para /brands
+              ni /departments. Sin "end" para que siga activo dentro de
+              /catalogo/marcas y /catalogo/departamentos. */}
+          <NavItem to="/catalogo" icon={BookOpen} label="Catálogo" onNavigate={onCerrar} />
           {isAdmin && <NavItem to="/auditoria" icon={ShieldCheck} label="Auditoría" onNavigate={onCerrar} />}
           {isAdmin && <NavItem to="/usuarios" icon={Users} label="Usuarios" onNavigate={onCerrar} />}
         </div>

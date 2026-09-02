@@ -3,7 +3,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 // Backend nuevo (Laravel) -- de momento solo se usa para el login. El resto
 // de endpoints (actas, auditoria, usuarios, etc.) siguen apuntando a API_URL
 // hasta que se migren uno por uno.
-const AUTH_API_URL = import.meta.env.VITE_AUTH_API_URL || 'http://32.192.191.85:8000/api'
+const AUTH_API_URL = import.meta.env.VITE_AUTH_API_URL || 'http://98.80.65.140:8000/api'
 
 async function request(path, options = {}) {
   const url = `${API_URL}${path}`
@@ -243,6 +243,62 @@ export async function exportarAuditoriaExcel(token, password) {
   return descargarExcel('/api/auditoria/exportar/excel', token, password)
 }
 
+// ---------------------------------------------------------------------------
+// Catálogo (Laravel): marcas y departamentos.
+// Las rutas /brands y /departments solo exigen jwt.auth -- no piden rol admin,
+// así que cualquier usuario autenticado puede listarlas y editarlas.
+// Se usa laravelRequest (igual que login/registrarUsuario) porque viven en el
+// backend nuevo, no en API_URL.
+// ---------------------------------------------------------------------------
+
+export async function listarMarcas(token) {
+  return laravelRequest('/brands', { token, method: 'GET' })
+}
+
+export async function crearMarca(token, { name }) {
+  return laravelRequest('/brands', {
+    token,
+    method: 'POST',
+    body: JSON.stringify({ name }),
+  })
+}
+
+export async function obtenerMarca(token, id) {
+  return laravelRequest(`/brands/${id}`, { token, method: 'GET' })
+}
+
+export async function actualizarMarca(token, id, { name }) {
+  return laravelRequest(`/brands/${id}`, {
+    token,
+    method: 'PUT',
+    body: JSON.stringify({ name }),
+  })
+}
+
+export async function listarDepartamentos(token) {
+  return laravelRequest('/departments', { token, method: 'GET' })
+}
+
+export async function crearDepartamento(token, { name }) {
+  return laravelRequest('/departments', {
+    token,
+    method: 'POST',
+    body: JSON.stringify({ name }),
+  })
+}
+
+export async function obtenerDepartamento(token, id) {
+  return laravelRequest(`/departments/${id}`, { token, method: 'GET' })
+}
+
+export async function actualizarDepartamento(token, id, { name }) {
+  return laravelRequest(`/departments/${id}`, {
+    token,
+    method: 'PUT',
+    body: JSON.stringify({ name }),
+  })
+}
+
 export default {
   checkApiHealth,
   login,
@@ -263,4 +319,12 @@ export default {
   crearUsuario,
   editarUsuario,
   eliminarUsuario,
+  listarMarcas,
+  crearMarca,
+  obtenerMarca,
+  actualizarMarca,
+  listarDepartamentos,
+  crearDepartamento,
+  obtenerDepartamento,
+  actualizarDepartamento,
 }

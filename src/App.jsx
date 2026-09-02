@@ -3,6 +3,9 @@ import AppLayout from './layouts/AppLayout.jsx'
 import Login from './pages/Login.jsx'
 import NuevaActa from './pages/NuevaActa.jsx'
 import FormatoActa from './pages/FormatoActa.jsx'
+import Catalogo from './pages/Catalogo.jsx'
+import MarcasList from './pages/MarcasList.jsx'
+import DepartamentosList from './pages/DepartamentosList.jsx'
 import Historial from './pages/Historial.jsx'
 import Auditoria from './pages/Auditoria.jsx'
 import Usuarios from './pages/Usuarios.jsx'
@@ -29,6 +32,12 @@ function App() {
 
         {/* Un solo motor de formularios para los seis formatos. */}
         <Route path="actas/:tipo/nueva" element={<FormatoActa />} />
+
+        {/* Catálogo: datos maestros. Sin RequireAdmin -- las rutas
+            /brands y /departments de Laravel solo exigen jwt.auth. */}
+        <Route path="catalogo" element={<Catalogo />} />
+        <Route path="catalogo/marcas" element={<MarcasList />} />
+        <Route path="catalogo/departamentos" element={<DepartamentosList />} />
 
         <Route path="historial" element={<Historial />} />
         <Route
