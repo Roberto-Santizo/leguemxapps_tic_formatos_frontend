@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Tag, Building2, ChevronRight } from 'lucide-react'
+import { Tag, Building2, HardDrive, ChevronRight } from 'lucide-react'
 
 /**
  * Landing de la sección Catálogo: los datos maestros que alimentan los
@@ -23,6 +23,12 @@ const SECCIONES = [
     titulo: 'Departamentos',
     descripcion: 'Áreas de la empresa que se asignan al colaborador en cada acta.',
   },
+  {
+    to: '/catalogo/equipos',
+    icon: HardDrive,
+    titulo: 'Equipos',
+    descripcion: 'Inventario de equipo y las características técnicas de cada uno.',
+  },
 ]
 
 function Catalogo() {
@@ -36,7 +42,7 @@ function Catalogo() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-column-gap sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-column-gap sm:grid-cols-2 lg:grid-cols-3">
           {SECCIONES.map((seccion) => {
             const Icon = seccion.icon
             return (

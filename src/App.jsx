@@ -6,6 +6,8 @@ import FormatoActa from './pages/FormatoActa.jsx'
 import Catalogo from './pages/Catalogo.jsx'
 import MarcasList from './pages/MarcasList.jsx'
 import DepartamentosList from './pages/DepartamentosList.jsx'
+import EquiposList from './pages/EquiposList.jsx'
+import EquipoForm from './pages/EquipoForm.jsx'
 import Historial from './pages/Historial.jsx'
 import Auditoria from './pages/Auditoria.jsx'
 import Usuarios from './pages/Usuarios.jsx'
@@ -38,6 +40,9 @@ function App() {
         <Route path="catalogo" element={<Catalogo />} />
         <Route path="catalogo/marcas" element={<MarcasList />} />
         <Route path="catalogo/departamentos" element={<DepartamentosList />} />
+        <Route path="catalogo/equipos" element={<EquiposList />} />
+        <Route path="catalogo/equipos/nuevo" element={<EquipoForm />} />
+        <Route path="catalogo/equipos/:id" element={<EquipoForm />} />
 
         <Route path="historial" element={<Historial />} />
         <Route

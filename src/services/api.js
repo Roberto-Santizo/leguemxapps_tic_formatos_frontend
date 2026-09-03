@@ -3,7 +3,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 // Backend nuevo (Laravel) -- de momento solo se usa para el login. El resto
 // de endpoints (actas, auditoria, usuarios, etc.) siguen apuntando a API_URL
 // hasta que se migren uno por uno.
-const AUTH_API_URL = import.meta.env.VITE_AUTH_API_URL || 'http://98.80.65.140:8000/api'
+const AUTH_API_URL = import.meta.env.VITE_AUTH_API_URL || 'http://192.168.10.209:8000/api'
 
 async function request(path, options = {}) {
   const url = `${API_URL}${path}`
@@ -55,7 +55,7 @@ function authRequest(path, token, options = {}) {
 // su formato de respuesta { statusCode, message, data }. En error (4xx/5xx)
 // lanza un Error con .status y, si Laravel mandó validación 422, .errors =
 // { campo: ['mensaje', ...] }.
-async function laravelRequest(path, { token, ...options } = {}) {
+export async function laravelRequest(path, { token, ...options } = {}) {
   const response = await fetch(`${AUTH_API_URL}${path}`, {
     ...options,
     headers: {
