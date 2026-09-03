@@ -13,8 +13,6 @@
 //     detalle de cada una. Eso hace `obtenerCaracteristicasDeEquipo`.
 // ---------------------------------------------------------------------------
 
-import { laravelRequest } from './api.js'
-
 export async function listarEquipos(token) {
   return laravelRequest('/equipments', { token, method: 'GET' })
 }

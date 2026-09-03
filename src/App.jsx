@@ -8,6 +8,9 @@ import MarcasList from './pages/MarcasList.jsx'
 import DepartamentosList from './pages/DepartamentosList.jsx'
 import EquiposList from './pages/EquiposList.jsx'
 import EquipoForm from './pages/EquipoForm.jsx'
+import EquipoView from './pages/EquipoView.jsx'
+import EmpleadosList from './pages/EmpleadosList.jsx'
+import EmpleadoForm from './pages/EmpleadoForm.jsx'
 import Historial from './pages/Historial.jsx'
 import Auditoria from './pages/Auditoria.jsx'
 import Usuarios from './pages/Usuarios.jsx'
@@ -43,6 +46,10 @@ function App() {
         <Route path="catalogo/equipos" element={<EquiposList />} />
         <Route path="catalogo/equipos/nuevo" element={<EquipoForm />} />
         <Route path="catalogo/equipos/:id" element={<EquipoForm />} />
+        <Route path="catalogo/equipos/:id/ver" element={<EquipoView />} />
+        <Route path="catalogo/empleados" element={<EmpleadosList />} />
+        <Route path="catalogo/empleados/nuevo" element={<EmpleadoForm />} />
+        <Route path="catalogo/empleados/:id" element={<EmpleadoForm />} />
 
         <Route path="historial" element={<Historial />} />
         <Route

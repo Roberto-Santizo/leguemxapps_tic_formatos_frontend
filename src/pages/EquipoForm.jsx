@@ -2,15 +2,16 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, Loader2, Save } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
-import { listarMarcas } from '../services/api.js'
+import SearchableSelect from '../components/SearchableSelect.jsx'
 import {
+  listarMarcas,
   crearEquipo,
   obtenerEquipo,
   actualizarEquipo,
   crearCaracteristica,
   actualizarCaracteristica,
   obtenerCaracteristicasDeEquipo,
-} from '../services/api.equipos.js'
+} from '../services/api.js'
 import {
   FilasCaracteristicas,
   CaracteristicasDeEquipo,
@@ -286,20 +287,14 @@ function EquipoForm() {
 
                 <div className="flex flex-col gap-1.5">
                   <label className="font-label-bold text-label-bold text-on-surface">Marca</label>
-                  <select
-                    className={inputClasses}
+                  <SearchableSelect
+                    options={marcas}
                     value={form.brand_id}
+                    onChange={(v) => set('brand_id', v)}
                     disabled={guardando}
-                    onChange={(e) => set('brand_id', e.target.value)}
-                    required
-                  >
-                    <option value="">Selecciona una marca</option>
-                    {marcas.map((m) => (
-                      <option key={m.id} value={m.id}>
-                        {m.name}
-                      </option>
-                    ))}
-                  </select>
+                    placeholder="Selecciona una marca"
+                    emptyOptionsText="No hay marcas registradas todavía."
+                  />
                   <p className="font-label-sm text-label-sm text-on-surface-variant">
                     ¿Falta una?{' '}
                     <Link to="/catalogo/marcas" className="underline hover:text-on-surface">

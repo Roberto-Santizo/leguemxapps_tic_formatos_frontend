@@ -182,3 +182,76 @@ abierto. Con características → la lista, editable en sitio, más un enlace
 La validación de nombre duplicado dentro de un mismo equipo es de cliente
 (`hayNombreRepetido` en `CaracteristicasEditor.jsx`): la API no la rechaza.
 Avisa en rojo tanto en las filas del alta como al editar en sitio.
+
+## El ojo ahora es una página completa
+
+Antes el ojo desplegaba solo las características en la misma tabla. Ahora
+navega a `EquipoView.jsx` (`/catalogo/equipos/:id/ver`): marca, modelo,
+serie, tipo, original/usado, más la lista de características.
+
+
+---
+
+# Selector con búsqueda (regla general de catálogo)
+
+`SearchableSelect.jsx` es un combobox reutilizable para cualquier campo que
+jale opciones de otra tabla del catálogo, no solo Marca/Departamento.
+Reemplaza el `<select>` nativo: buscador arriba, lista debajo, "No se
+encontraron coincidencias" si el filtro no matchea. Ya conectado en Marca
+(`EquipoForm.jsx`) y Departamento (`EmpleadoForm.jsx`). Al agregar una
+relación nueva, usar el mismo componente en vez de un `<select>`.
+
+| Copiar este archivo | A esta ruta |
+| --- | --- |
+| `src/components/SearchableSelect.jsx` | `src/components/SearchableSelect.jsx` |
+
+
+---
+
+# Empleados
+
+Cuarta entrada del Catálogo (`GET/POST /employees`, `PUT /employees/{id}`).
+Todos los registros son iguales entre sí — sigue el patrón simple de
+Marcas/Departamentos, no el de estados A/B de Equipos.
+
+## Archivos nuevos
+
+| Copiar este archivo | A esta ruta |
+| --- | --- |
+| `src/pages/EmpleadosList.jsx` | `src/pages/EmpleadosList.jsx` |
+| `src/pages/EmpleadoForm.jsx` | `src/pages/EmpleadoForm.jsx` |
+| `src/pages/EquipoView.jsx` | `src/pages/EquipoView.jsx` |
+| `src/components/SearchableSelect.jsx` | `src/components/SearchableSelect.jsx` |
+| `src/components/ConfirmDialog.jsx` | `src/components/ConfirmDialog.jsx` |
+
+## Archivos que se reemplazan
+
+| Copiar este archivo | A esta ruta | Qué cambia |
+| --- | --- | --- |
+| `src/pages/Catalogo.jsx` | `src/pages/Catalogo.jsx` | Cuarta tarjeta "Empleados", grid a 4 columnas |
+| `src/App.jsx` | `src/App.jsx` | Rutas de Empleados y `catalogo/equipos/:id/ver` |
+| `src/pages/EquiposList.jsx` | `src/pages/EquiposList.jsx` | El ojo navega a la vista completa |
+| `src/pages/EquipoForm.jsx` | `src/pages/EquipoForm.jsx` | Campo Marca usa `SearchableSelect` |
+
+## Un paso manual
+
+Pega `src/services/api.empleados.js` al final de tu `src/services/api.js`
+(4 funciones + entradas en `export default`). `laravelRequest` ya vive ahí.
+
+## Formulario y lista
+
+Código, Nombre, Departamento (con `SearchableSelect`) en una sola pantalla.
+Escritorio: tabla con ojo (diálogo de solo lectura) y lápiz (edición
+directa). Celular: tarjetas; tocar abre el mismo diálogo, y su botón
+"Editar" pide confirmación (`ConfirmDialog`) antes de navegar.
+
+## Avisos de la API
+
+1. El `POST` no devuelve el registro completo — tras crear se recarga la
+   lista.
+2. El `PUT` exige `code`, `name` y `department_id` siempre.
+
+## `api.additions.js` — eliminado de este paquete
+
+Esas funciones de Marcas/Departamentos ya deben estar en tu `api.js`; no
+debe reintroducirse como archivo aparte (causó imports cruzados).

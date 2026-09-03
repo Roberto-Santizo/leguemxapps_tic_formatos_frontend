@@ -1,5 +1,5 @@
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Eye, Pencil, Plus, Loader2, ChevronDown } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 import Buscador from '../components/Buscador.jsx'
@@ -10,7 +10,7 @@ import {
   obtenerCaracteristicasDeEquipo,
   crearCaracteristica,
   actualizarCaracteristica,
-} from '../services/api.equipos.js'
+} from '../services/api.js'
 
 /**
  * Lista de equipos (GET /equipments) con sus dos estados por fila:
@@ -34,6 +34,7 @@ import {
 
 function EquiposList() {
   const { token } = useAuth()
+  const navigate = useNavigate()
 
   const [equipos, setEquipos] = useState([])
   const [conteos, setConteos] = useState({}) // equipmentId -> nº de características
@@ -41,7 +42,8 @@ function EquiposList() {
   const [errorCarga, setErrorCarga] = useState('')
   const [busqueda, setBusqueda] = useState('')
 
-  // Fila desplegada: { id, modo: 'ver' | 'agregar' }
+  // Fila desplegada: solo para el alta ("+"); el ojo ahora navega a
+  // /catalogo/equipos/:id/ver, la vista completa del equipo.
   const [abierta, setAbierta] = useState(null)
   const [detalle, setDetalle] = useState([])
   const [cargandoDetalle, setCargandoDetalle] = useState(false)
@@ -272,19 +274,14 @@ function EquiposList() {
                           <div className="flex items-center justify-end gap-1">
                             {tiene ? (
                               <>
-                                <button
-                                  type="button"
-                                  onClick={() => alternar(equipo.id, 'ver')}
-                                  aria-label={`Ver características de ${equipo.name}`}
-                                  title="Vista rápida"
-                                  className={`${iconoActivo} ${
-                                    desplegada && abierta.modo === 'ver'
-                                      ? 'bg-surface-container-high text-on-surface'
-                                      : ''
-                                  }`}
+                                <Link
+                                  to={`/catalogo/equipos/${equipo.id}/ver`}
+                                  aria-label={`Ver información de ${equipo.name}`}
+                                  title="Ver información completa"
+                                  className={iconoActivo}
                                 >
                                   <Eye className="h-4 w-4" strokeWidth={2} />
-                                </button>
+                                </Link>
                                 <Link
                                   to={`/catalogo/equipos/${equipo.id}`}
                                   aria-label={`Editar ${equipo.name}`}
@@ -365,7 +362,7 @@ function EquiposList() {
                 >
                   <button
                     type="button"
-                    onClick={() => alternar(equipo.id, tiene ? 'ver' : 'agregar')}
+                    onClick={() => (tiene ? navigate(`/catalogo/equipos/${equipo.id}/ver`) : alternar(equipo.id, 'agregar'))}
                     className="flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left transition-colors hover:bg-surface-container-low"
                   >
                     <div className="min-w-0">
@@ -387,13 +384,6 @@ function EquiposList() {
                   {desplegada && (
                     <div className="animate-view-in border-t border-outline-variant px-4 py-3.5 flex flex-col gap-stack-sm">
                       {editorDe(equipo.id, false, !tiene)}
-                      <Link
-                        to={`/catalogo/equipos/${equipo.id}`}
-                        className="inline-flex h-10 items-center justify-center gap-2 self-start rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high"
-                      >
-                        <Pencil className="h-4 w-4" strokeWidth={2} />
-                        Editar datos del equipo
-                      </Link>
                     </div>
                   )}
                 </div>
