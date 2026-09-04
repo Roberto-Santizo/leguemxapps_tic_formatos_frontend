@@ -17,6 +17,9 @@ import EmpleadosList from './pages/EmpleadosList.jsx'
 import EmpleadoForm from './pages/EmpleadoForm.jsx'
 import EmpleadoView from './pages/EmpleadoView.jsx'
 import Historial from './pages/Historial.jsx'
+import HistorialEntregaList from './pages/HistorialEntregaList.jsx'
+import HistorialEntregaView from './pages/HistorialEntregaView.jsx'
+import HistorialProximamente from './pages/HistorialProximamente.jsx'
 import Auditoria from './pages/Auditoria.jsx'
 import Usuarios from './pages/Usuarios.jsx'
 import RequireAuth from './routes/RequireAuth.jsx'
@@ -63,7 +66,13 @@ function App() {
         <Route path="catalogo/empleados/:id" element={<EmpleadoForm />} />
         <Route path="catalogo/empleados/:id/ver" element={<EmpleadoView />} />
 
+        {/* Historial: landing con las 6 hojas -- solo "Entrega de Equipo"
+            está conectada a la API real (delivery_documents); las otras
+            cinco muestran "Próximamente" hasta que Laravel las exponga. */}
         <Route path="historial" element={<Historial />} />
+        <Route path="historial/entrega" element={<HistorialEntregaList />} />
+        <Route path="historial/entrega/:id" element={<HistorialEntregaView />} />
+        <Route path="historial/:tipo" element={<HistorialProximamente />} />
         <Route
           path="auditoria"
           element={

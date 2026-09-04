@@ -24,7 +24,15 @@ function SearchableSelect({
   disabled = false,
   emptyOptionsText = 'No hay opciones registradas todavía.',
   helpText,
+  // Punto en el que el panel deja de ser hoja completa (móvil) y pasa a
+  // desplegable bajo el campo (escritorio). Por defecto 'sm' (640px), igual
+  // que siempre. Un caller puede pedir 'md' (768px) para que coincida con su
+  // propio punto de quiebre móvil/escritorio -- hoy solo lo usa el buscador
+  // de equipo en Entrega de Equipo (ver FormatoActa.jsx), el resto del
+  // sistema sigue exactamente igual que antes.
+  mobileSheetBreakpoint = 'sm',
 }) {
+  const usarMd = mobileSheetBreakpoint === 'md'
   const [abierto, setAbierto] = useState(false)
   const [busqueda, setBusqueda] = useState('')
   const raiz = useRef(null)
@@ -85,10 +93,23 @@ function SearchableSelect({
       {abierto && (
         <>
           {/* Fondo solo en móvil, para leer el panel como hoja completa */}
-          <div className="fixed inset-0 z-40 bg-on-surface/30 sm:hidden" onClick={() => setAbierto(false)} />
+          <div
+            className={
+              usarMd
+                ? 'fixed inset-0 z-40 bg-on-surface/30 md:hidden'
+                : 'fixed inset-0 z-40 bg-on-surface/30 sm:hidden'
+            }
+            onClick={() => setAbierto(false)}
+          />
 
-          <div className="animate-view-in fixed inset-x-4 top-16 bottom-4 z-50 flex flex-col overflow-hidden rounded-xl border border-outline-variant bg-surface shadow-lg sm:absolute sm:inset-x-0 sm:bottom-auto sm:top-full sm:z-30 sm:mt-1.5 sm:max-h-72 sm:rounded-lg">
-            <div className="flex items-center gap-2 border-b border-outline-variant p-2.5 sm:p-2">
+          <div
+            className={
+              usarMd
+                ? 'animate-view-in fixed inset-x-4 top-16 bottom-4 z-50 flex flex-col overflow-hidden rounded-xl border border-outline-variant bg-surface shadow-lg md:absolute md:inset-x-0 md:bottom-auto md:top-full md:z-30 md:mt-1.5 md:max-h-72 md:rounded-lg'
+                : 'animate-view-in fixed inset-x-4 top-16 bottom-4 z-50 flex flex-col overflow-hidden rounded-xl border border-outline-variant bg-surface shadow-lg sm:absolute sm:inset-x-0 sm:bottom-auto sm:top-full sm:z-30 sm:mt-1.5 sm:max-h-72 sm:rounded-lg'
+            }
+          >
+            <div className={`flex items-center gap-2 border-b border-outline-variant p-2.5 ${usarMd ? 'md:p-2' : 'sm:p-2'}`}>
               <div className="relative flex-1">
                 <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-on-surface-variant" strokeWidth={2} />
                 <input
@@ -102,7 +123,7 @@ function SearchableSelect({
               <button
                 type="button"
                 onClick={() => setAbierto(false)}
-                className="grid h-10 w-10 shrink-0 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high sm:hidden"
+                className={`grid h-10 w-10 shrink-0 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high ${usarMd ? 'md:hidden' : 'sm:hidden'}`}
                 aria-label="Cerrar"
               >
                 <X className="h-4 w-4" strokeWidth={2} />

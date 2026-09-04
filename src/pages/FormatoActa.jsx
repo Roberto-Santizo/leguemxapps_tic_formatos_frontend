@@ -1,9 +1,10 @@
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import {
   ArrowLeft,
   CircleUser,
   Laptop,
+  Loader2,
   Lock,
   MessageSquareText,
   PenLine,
@@ -13,9 +14,23 @@ import {
   X,
 } from 'lucide-react'
 import FirmaPad from '../components/FirmaPad.jsx'
+import SearchableSelect from '../components/SearchableSelect.jsx'
 import useLocalStorageState from '../hooks/useLocalStorageState.js'
 import { getFormato } from '../config/formatos.js'
 import EnConstruccion from '../components/EnConstruccion.jsx'
+import { useAuth } from '../context/AuthContext.jsx'
+import { listarEmpleados, listarDepartamentos, listarEquipos, crearDocumentoEntrega } from '../services/api.js'
+
+// Convierte el dataURL (base64) que entrega FirmaPad a un Blob, para poder
+// mandarlo como archivo dentro del FormData de POST /delivery_documents.
+function dataUrlToBlob(dataUrl) {
+  const [meta, base64] = dataUrl.split(',')
+  const mime = meta.match(/:(.*?);/)[1]
+  const binario = atob(base64)
+  const bytes = new Uint8Array(binario.length)
+  for (let i = 0; i < binario.length; i += 1) bytes[i] = binario.charCodeAt(i)
+  return new Blob([bytes], { type: mime })
+}
 
 /*
   Motor único de actas.
@@ -98,6 +113,8 @@ function FormatoActa() {
   const { tipo } = useParams()
   const navigate = useNavigate()
   const formato = getFormato(tipo)
+  const esEntrega = formato?.id === 'entrega'
+  const { token } = useAuth()
 
   const hojaRef = useRef(null)
 
@@ -111,6 +128,96 @@ function FormatoActa() {
   const [filas, setFilas] = useState([])
   const [observaciones, setObservaciones] = useState('')
   const [firmas, setFirmas] = useState({})
+
+  // --- Solo "Entrega de Equipo": es el único formato conectado hoy a la API
+  // real (POST /delivery_documents). El resto sigue como borrador visual. ---
+  const [empleados, setEmpleados] = useState([])
+  const [departamentos, setDepartamentos] = useState([])
+  const [equipos, setEquipos] = useState([])
+  const [cargandoCatalogos, setCargandoCatalogos] = useState(esEntrega)
+  const [empleadoId, setEmpleadoId] = useState('')
+  const [filasEntrega, setFilasEntrega] = useState([{ id: 'fila-entrega-1', equipmentId: '', observaciones: '' }])
+  const [guardando, setGuardando] = useState(false)
+  const [errorGuardar, setErrorGuardar] = useState('')
+
+  useEffect(() => {
+    if (!esEntrega) return
+    let vivo = true
+    setCargandoCatalogos(true)
+    Promise.all([listarEmpleados(token), listarDepartamentos(token), listarEquipos(token)])
+      .then(([emp, dep, eq]) => {
+        if (!vivo) return
+        setEmpleados(Array.isArray(emp) ? emp : [])
+        setDepartamentos(Array.isArray(dep) ? dep : [])
+        setEquipos(Array.isArray(eq) ? eq : [])
+      })
+      .catch((err) => vivo && setErrorGuardar(err.message || 'No se pudieron cargar los catálogos'))
+      .finally(() => vivo && setCargandoCatalogos(false))
+    return () => {
+      vivo = false
+    }
+  }, [esEntrega, token])
+
+  const empleadoSeleccionado = empleados.find((e) => String(e.id) === String(empleadoId))
+  const departamentoAuto = empleadoSeleccionado
+    ? empleadoSeleccionado.department ||
+      departamentos.find((d) => d.id === empleadoSeleccionado.department_id)?.name ||
+      '—'
+    : ''
+
+  function agregarFilaEntrega() {
+    setFilasEntrega((f) => [
+      ...f,
+      { id: `fila-entrega-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, equipmentId: '', observaciones: '' },
+    ])
+  }
+
+  function actualizarFilaEntrega(id, campo, valor) {
+    setFilasEntrega((f) => f.map((fila) => (fila.id === id ? { ...fila, [campo]: valor } : fila)))
+  }
+
+  function quitarFilaEntrega(id) {
+    setFilasEntrega((f) => f.filter((x) => x.id !== id))
+  }
+
+  async function handleFinalizarEntrega() {
+    setErrorGuardar('')
+    if (!empleadoId) {
+      setErrorGuardar('Selecciona el colaborador que recibe el equipo.')
+      return
+    }
+    const itemsValidos = filasEntrega.filter((f) => f.equipmentId)
+    if (itemsValidos.length === 0) {
+      setErrorGuardar('Agrega al menos un equipo entregado.')
+      return
+    }
+    if (!firmas.responsable || !firmas.it) {
+      setErrorGuardar('Faltan firmas por confirmar.')
+      return
+    }
+
+    setGuardando(true)
+    try {
+      const formData = new FormData()
+      formData.append('location', planta === 'Tejar' ? '1' : '2')
+      formData.append('employee_id', empleadoId)
+      if (observaciones.trim()) formData.append('observations', observaciones.trim())
+      formData.append('responsable_signature', dataUrlToBlob(firmas.responsable), 'responsable.png')
+      formData.append('administrador_signature', dataUrlToBlob(firmas.it), 'administrador.png')
+      itemsValidos.forEach((fila, indice) => {
+        formData.append(`items[${indice}][equipment_id]`, fila.equipmentId)
+        if (fila.observaciones.trim()) {
+          formData.append(`items[${indice}][observations]`, fila.observaciones.trim())
+        }
+      })
+      await crearDocumentoEntrega(token, formData)
+      navigate('/historial/entrega')
+    } catch (err) {
+      setErrorGuardar(err.message || 'No se pudo guardar la entrega')
+    } finally {
+      setGuardando(false)
+    }
+  }
 
   const dosPaginas = modalidad === 'dos'
 
@@ -281,16 +388,50 @@ function FormatoActa() {
           <SeccionCard icon={CircleUser} titulo="Datos del Usuario">
             <div className="grid grid-cols-12 gap-x-column-gap gap-y-stack-md p-5">
               <Campo label={formato.labelFecha}>
-                <input type="date" className={inputClass} />
+                {esEntrega ? (
+                  <>
+                    <input type="date" disabled className={`${inputClass} opacity-60`} />
+                    <p className="font-label-sm text-label-sm text-on-surface-variant">
+                      La fecha la asigna el sistema al guardar
+                    </p>
+                  </>
+                ) : (
+                  <input type="date" className={inputClass} />
+                )}
               </Campo>
 
               <Campo label={formato.labelResponsable} span="col-span-12 sm:col-span-8">
-                <input type="text" placeholder="Nombre completo" className={inputClass} />
+                {esEntrega ? (
+                  <SearchableSelect
+                    options={empleados.map((e) => ({ id: e.id, name: e.code ? `${e.code} — ${e.name}` : e.name }))}
+                    value={empleadoId}
+                    onChange={setEmpleadoId}
+                    disabled={cargandoCatalogos}
+                    placeholder="Selecciona el colaborador que recibe"
+                    emptyOptionsText="No hay empleados registrados en el catálogo todavía."
+                  />
+                ) : (
+                  <input type="text" placeholder="Nombre completo" className={inputClass} />
+                )}
               </Campo>
 
               {formato.tieneDepartamento && (
                 <Campo label="Departamento">
-                  <input type="text" placeholder="Área o departamento" className={inputClass} />
+                  {esEntrega ? (
+                    <>
+                      <div className="flex h-11 items-center gap-2 border-b border-outline-variant">
+                        <Lock className="h-4 w-4 shrink-0 text-on-surface-variant" strokeWidth={2} />
+                        <span className="font-body-md text-body-md text-on-surface">
+                          {departamentoAuto || 'Selecciona un colaborador primero'}
+                        </span>
+                      </div>
+                      <p className="font-label-sm text-label-sm text-on-surface-variant">
+                        Se completa solo, según el colaborador
+                      </p>
+                    </>
+                  ) : (
+                    <input type="text" placeholder="Área o departamento" className={inputClass} />
+                  )}
                 </Campo>
               )}
 
@@ -488,7 +629,180 @@ function FormatoActa() {
           )}
 
           {/* Tabla de equipo */}
-          {formato.tieneTabla && (
+          {formato.tieneTabla && esEntrega && (
+            <SeccionCard
+              icon={Rows3}
+              titulo={tituloTabla}
+              acciones={
+                <div className="flex items-center gap-stack-sm">
+                  {filasEntrega.length > 0 && (
+                    <span className="rounded-full border border-outline-variant px-2 py-0.5 font-mono text-label-sm tabular-nums text-on-surface-variant">
+                      {filasEntrega.length}
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    onClick={agregarFilaEntrega}
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 font-label-bold text-label-bold text-on-primary transition-opacity hover:opacity-90"
+                  >
+                    <PlusCircle className="h-4 w-4" strokeWidth={2} />
+                    Agregar fila
+                  </button>
+                </div>
+              }
+            >
+              {filasEntrega.length === 0 ? (
+                <div className="flex flex-col items-center gap-3 px-5 py-10 text-center">
+                  <formato.icon className="h-6 w-6 text-outline" strokeWidth={1.75} />
+                  <div>
+                    <p className="font-label-bold text-label-bold text-on-surface">
+                      {formato.vacioTitulo}
+                    </p>
+                    <p className="mt-1 font-body-md text-body-md text-on-surface-variant">
+                      Agrega el equipo entregado a este colaborador.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={agregarFilaEntrega}
+                    className="inline-flex h-11 items-center gap-2 rounded-lg border border-outline-variant bg-surface-container-lowest px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high"
+                  >
+                    <PlusCircle className="h-4 w-4" strokeWidth={2} />
+                    Agregar equipo
+                  </button>
+                </div>
+              ) : (
+                <>
+                  {/* Escritorio y tablet: tabla, sin cambios */}
+                  <div className="hidden md:block w-full overflow-x-auto">
+                    <table className="w-full min-w-[640px] border-collapse text-left">
+                      <thead>
+                        <tr className="border-b border-outline-variant bg-surface-container-low">
+                          <th className="w-14 py-2.5 pl-5 pr-3 text-right font-label-sm text-label-sm font-bold uppercase tracking-wide text-on-surface-variant">
+                            No.
+                          </th>
+                          <th className="py-2.5 pr-3 font-label-sm text-label-sm font-bold uppercase tracking-wide text-on-surface-variant">
+                            Equipo
+                          </th>
+                          <th className="py-2.5 pr-3 font-label-sm text-label-sm font-bold uppercase tracking-wide text-on-surface-variant">
+                            Observaciones
+                          </th>
+                          <th className="w-12 py-2.5 pr-5" />
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filasEntrega.map((fila, indice) => (
+                          <tr
+                            key={fila.id}
+                            className="border-b border-outline-variant transition-colors hover:bg-surface-container-low"
+                          >
+                            <td className="py-2 pl-5 pr-3 text-right font-mono text-body-md tabular-nums text-on-surface-variant">
+                              {String(indice + 1).padStart(2, '0')}
+                            </td>
+                            <td className="py-2 pr-3">
+                              <SearchableSelect
+                                options={equipos.map((e) => ({ id: e.id, name: e.brand ? `${e.name} — ${e.brand}` : e.name }))}
+                                value={fila.equipmentId}
+                                onChange={(id) => actualizarFilaEntrega(fila.id, 'equipmentId', id)}
+                                disabled={cargandoCatalogos}
+                                placeholder="Selecciona un equipo"
+                                emptyOptionsText="No hay equipos registrados en el catálogo todavía."
+                              />
+                            </td>
+                            <td className="py-2 pr-3">
+                              <input
+                                type="text"
+                                value={fila.observaciones}
+                                onChange={(e) => actualizarFilaEntrega(fila.id, 'observaciones', e.target.value)}
+                                placeholder="Ej. Se entrega sin cargador"
+                                className={celdaInputClass}
+                              />
+                            </td>
+                            <td className="py-2 pr-5">
+                              <button
+                                type="button"
+                                onClick={() => quitarFilaEntrega(fila.id)}
+                                aria-label="Quitar equipo"
+                                title="Quitar (por si te confundiste de equipo)"
+                                className="grid h-9 w-9 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-error-container hover:text-on-error-container"
+                              >
+                                <X className="h-4 w-4" strokeWidth={2} />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Móvil: una tarjeta por equipo, con botón de quitar por si se
+                      equivocaron de equipo, y "Agregar otro equipo" al final para
+                      leer todo de corrido. Sin animate-view-in aquí: el buscador de
+                      equipo abre un panel "fixed" en pantalla completa, y un
+                      ancestro animado (transform) lo dejaría atrapado dentro de la
+                      tarjeta en vez de cubrir toda la pantalla. */}
+                  <div className="flex flex-col gap-stack-sm p-4 md:hidden">
+                    {filasEntrega.map((fila, indice) => (
+                      <div
+                        key={fila.id}
+                        className="rounded-xl border border-outline-variant bg-surface-container-lowest p-4"
+                      >
+                        <div className="mb-stack-sm flex items-center justify-between">
+                          <span className="font-label-bold text-label-bold text-on-surface">
+                            Equipo #{indice + 1}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => quitarFilaEntrega(fila.id)}
+                            aria-label="Quitar equipo"
+                            title="Quitar (por si te confundiste de equipo)"
+                            className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-error-container hover:text-on-error-container"
+                          >
+                            <X className="h-4 w-4" strokeWidth={2} />
+                          </button>
+                        </div>
+                        <div className="flex flex-col gap-stack-sm">
+                          <div className="flex flex-col gap-1.5">
+                            <label className="font-label-bold text-label-bold text-on-surface">Equipo</label>
+                            <SearchableSelect
+                              options={equipos.map((e) => ({ id: e.id, name: e.brand ? `${e.name} — ${e.brand}` : e.name }))}
+                              value={fila.equipmentId}
+                              onChange={(id) => actualizarFilaEntrega(fila.id, 'equipmentId', id)}
+                              disabled={cargandoCatalogos}
+                              placeholder="Selecciona un equipo"
+                              emptyOptionsText="No hay equipos registrados en el catálogo todavía."
+                            />
+                          </div>
+                          <div className="flex flex-col gap-1.5">
+                            <label className="font-label-bold text-label-bold text-on-surface">Observaciones</label>
+                            <input
+                              type="text"
+                              value={fila.observaciones}
+                              onChange={(e) => actualizarFilaEntrega(fila.id, 'observaciones', e.target.value)}
+                              placeholder="Ej. Se entrega sin cargador"
+                              className={inputClass}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+
+                    <button
+                      type="button"
+                      onClick={agregarFilaEntrega}
+                      className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-dashed border-outline px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high"
+                    >
+                      <PlusCircle className="h-4 w-4" strokeWidth={2} />
+                      Agregar otro equipo
+                    </button>
+                  </div>
+                </>
+              )}
+            </SeccionCard>
+          )}
+
+          {/* Tabla de equipo (resto de formatos: borrador visual, sin conectar a API) */}
+          {formato.tieneTabla && !esEntrega && (
             <SeccionCard
               icon={Rows3}
               titulo={tituloTabla}
@@ -771,21 +1085,31 @@ function FormatoActa() {
       {/* Barra de acciones */}
       <div className="sticky bottom-0 z-30 border-t border-outline-variant bg-surface-container-lowest px-container-padding py-3 shadow-sm md:px-8">
         <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-3">
-          <span className="font-label-bold text-label-bold text-on-surface-variant">
-            Borrador · sin guardar
-          </span>
+          {esEntrega && errorGuardar ? (
+            <p className="font-label-sm text-label-sm text-error rounded-lg border border-error/30 bg-error-container/40 px-3 py-2">
+              {errorGuardar}
+            </p>
+          ) : (
+            <span className="font-label-bold text-label-bold text-on-surface-variant">
+              {esEntrega ? 'Complete los datos para guardar' : 'Borrador · sin guardar'}
+            </span>
+          )}
           <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={() => navigate('/')}
-              className="inline-flex h-11 items-center justify-center rounded-lg border border-outline-variant bg-surface-container-lowest px-6 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high"
+              disabled={esEntrega && guardando}
+              className="inline-flex h-11 items-center justify-center rounded-lg border border-outline-variant bg-surface-container-lowest px-6 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high disabled:opacity-60"
             >
               Cancelar
             </button>
             <button
               type="button"
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-primary px-6 font-label-bold text-label-bold text-on-primary shadow-sm transition-opacity hover:opacity-90"
+              onClick={esEntrega ? handleFinalizarEntrega : undefined}
+              disabled={esEntrega && (guardando || cargandoCatalogos)}
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-primary px-6 font-label-bold text-label-bold text-on-primary shadow-sm transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
             >
+              {esEntrega && guardando && <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} />}
               {formato.textoAccion}
             </button>
           </div>
@@ -794,5 +1118,7 @@ function FormatoActa() {
     </div>
   )
 }
+
+export { SeccionCard, Campo }
 
 export default FormatoActa

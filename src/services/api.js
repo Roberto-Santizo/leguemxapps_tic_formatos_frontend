@@ -83,6 +83,40 @@ export async function laravelRequest(path, { token, ...options } = {}) {
   return body.data
 }
 
+// Variante de laravelRequest para envíos multipart/form-data (archivos +
+// campos) -- necesaria para POST /delivery_documents, que recibe las dos
+// firmas como archivo. A propósito NO se fija 'Content-Type': el navegador
+// arma el boundary del multipart solo; si se fija a mano, no puede
+// completarlo y la petición llega rota. El resto (desenvolver
+// { statusCode, message, data }, armar Error con .status/.errors) es igual
+// que laravelRequest.
+async function laravelRequestMultipart(path, { token, formData, method = 'POST' } = {}) {
+  const response = await fetch(`${AUTH_API_URL}${path}`, {
+    method,
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: formData,
+  })
+
+  let body = null
+  try {
+    body = await response.json()
+  } catch (_) {
+    // respuesta sin cuerpo JSON
+  }
+
+  if (!response.ok || !body) {
+    const message = (body && body.message) || `Error ${response.status}`
+    const error = new Error(message)
+    error.status = response.status
+    if (body && body.errors) error.errors = body.errors
+    throw error
+  }
+
+  return body.data
+}
+
 // Login contra el backend Laravel.
 // A diferencia del backend viejo, no regresa id ni username del usuario --
 // solo name, role y el token JWT -- así que armamos "user" combinando eso
@@ -410,6 +444,53 @@ export async function actualizarEmpleado(token, id, { code, name, department_id 
   })
 }
 
+// ---------------------------------------------------------------------------
+// Documentos de Entrega (Laravel): GET/POST /delivery_documents,
+// GET/DELETE /delivery_documents/{id}. Mismo candado que el resto: jwt.auth,
+// sin rol. El usuario autenticado queda registrado en user_id y la fecha de
+// entrega la pone el servidor -- ninguno de los dos se manda en el cuerpo.
+//
+// El alta es multipart/form-data (las dos firmas van como archivo), por eso
+// usa laravelRequestMultipart en vez de laravelRequest. Los equipos
+// entregados viajan como items[i][equipment_id] / items[i][observations]
+// dentro del mismo FormData -- quien arma ese FormData es FormatoActa.jsx.
+//
+// El POST no devuelve el documento creado (data: true); para leerlo hay que
+// pedir obtenerDocumentoEntrega con el listado recargado.
+// ---------------------------------------------------------------------------
+
+export async function listarDocumentosEntrega(token) {
+  return laravelRequest('/delivery_documents', { token, method: 'GET' })
+}
+
+export async function obtenerDocumentoEntrega(token, id) {
+  return laravelRequest(`/delivery_documents/${id}`, { token, method: 'GET' })
+}
+
+export async function crearDocumentoEntrega(token, formData) {
+  return laravelRequestMultipart('/delivery_documents', { token, formData, method: 'POST' })
+}
+
+export async function eliminarDocumentoEntrega(token, id) {
+  return laravelRequest(`/delivery_documents/${id}`, { token, method: 'DELETE' })
+}
+
+// URL pública de un archivo del disco "public" de Laravel (las firmas se
+// guardan ahí como ruta relativa, ej. "signatures/uuid.png"). Por defecto,
+// Storage::disk('public')->url($path) en Laravel arma esa URL como
+// APP_URL + '/storage/' + la ruta -- que es la misma URL/puerto de
+// AUTH_API_URL sin el '/api' final. Si el backend sirve los archivos desde
+// otro dominio, se puede fijar VITE_STORAGE_URL en .env sin tocar este
+// archivo.
+const STORAGE_BASE_URL = (
+  import.meta.env.VITE_STORAGE_URL || AUTH_API_URL.replace(/\/api\/?$/, '')
+).replace(/\/$/, '')
+
+export function urlArchivoPublico(path) {
+  if (!path) return null
+  return `${STORAGE_BASE_URL}/storage/${path}`
+}
+
 export default {
   checkApiHealth,
   login,
@@ -451,4 +532,9 @@ export default {
   obtenerEmpleado,
   crearEmpleado,
   actualizarEmpleado,
+  listarDocumentosEntrega,
+  obtenerDocumentoEntrega,
+  crearDocumentoEntrega,
+  eliminarDocumentoEntrega,
+  urlArchivoPublico,
 }
