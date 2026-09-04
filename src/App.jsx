@@ -5,12 +5,17 @@ import NuevaActa from './pages/NuevaActa.jsx'
 import FormatoActa from './pages/FormatoActa.jsx'
 import Catalogo from './pages/Catalogo.jsx'
 import MarcasList from './pages/MarcasList.jsx'
+import MarcasForm from './pages/MarcasForm.jsx'
+import MarcasView from './pages/MarcasView.jsx'
 import DepartamentosList from './pages/DepartamentosList.jsx'
+import DepartamentosForm from './pages/DepartamentosForm.jsx'
+import DepartamentosView from './pages/DepartamentosView.jsx'
 import EquiposList from './pages/EquiposList.jsx'
 import EquipoForm from './pages/EquipoForm.jsx'
 import EquipoView from './pages/EquipoView.jsx'
 import EmpleadosList from './pages/EmpleadosList.jsx'
 import EmpleadoForm from './pages/EmpleadoForm.jsx'
+import EmpleadoView from './pages/EmpleadoView.jsx'
 import Historial from './pages/Historial.jsx'
 import Auditoria from './pages/Auditoria.jsx'
 import Usuarios from './pages/Usuarios.jsx'
@@ -42,7 +47,13 @@ function App() {
             /brands y /departments de Laravel solo exigen jwt.auth. */}
         <Route path="catalogo" element={<Catalogo />} />
         <Route path="catalogo/marcas" element={<MarcasList />} />
+        <Route path="catalogo/marcas/nuevo" element={<MarcasForm />} />
+        <Route path="catalogo/marcas/:id" element={<MarcasForm />} />
+        <Route path="catalogo/marcas/:id/ver" element={<MarcasView />} />
         <Route path="catalogo/departamentos" element={<DepartamentosList />} />
+        <Route path="catalogo/departamentos/nuevo" element={<DepartamentosForm />} />
+        <Route path="catalogo/departamentos/:id" element={<DepartamentosForm />} />
+        <Route path="catalogo/departamentos/:id/ver" element={<DepartamentosView />} />
         <Route path="catalogo/equipos" element={<EquiposList />} />
         <Route path="catalogo/equipos/nuevo" element={<EquipoForm />} />
         <Route path="catalogo/equipos/:id" element={<EquipoForm />} />
@@ -50,6 +61,7 @@ function App() {
         <Route path="catalogo/empleados" element={<EmpleadosList />} />
         <Route path="catalogo/empleados/nuevo" element={<EmpleadoForm />} />
         <Route path="catalogo/empleados/:id" element={<EmpleadoForm />} />
+        <Route path="catalogo/empleados/:id/ver" element={<EmpleadoView />} />
 
         <Route path="historial" element={<Historial />} />
         <Route

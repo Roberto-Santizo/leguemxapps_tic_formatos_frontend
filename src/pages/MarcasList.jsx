@@ -1,10 +1,8 @@
 import CatalogoLista from '../components/CatalogoLista.jsx'
-import { listarMarcas, crearMarca, actualizarMarca } from '../services/api.js'
+import { listarMarcas } from '../services/api.js'
 
-// Catálogo de marcas (GET/POST /brands, PUT /brands/{id}).
-// Toda la lógica de lista, búsqueda, alta y edición -- y el responsive
-// tabla/tarjetas -- vive en CatalogoLista; aquí solo van los textos y las
-// funciones de API de esta entidad.
+// Catálogo de marcas (GET /brands). Alta y edición viven en su propia
+// página -- ver MarcasForm.jsx y MarcasView.jsx.
 const TEXTOS = {
   titulo: 'Marcas',
   subtitulo: 'Fabricantes disponibles al llenar la columna Marca de un acta.',
@@ -21,14 +19,7 @@ const TEXTOS = {
 }
 
 function MarcasList() {
-  return (
-    <CatalogoLista
-      textos={TEXTOS}
-      onListar={listarMarcas}
-      onCrear={crearMarca}
-      onActualizar={actualizarMarca}
-    />
-  )
+  return <CatalogoLista textos={TEXTOS} onListar={listarMarcas} rutaBase="/catalogo/marcas" />
 }
 
 export default MarcasList

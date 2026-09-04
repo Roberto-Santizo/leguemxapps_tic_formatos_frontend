@@ -1,8 +1,8 @@
 import CatalogoLista from '../components/CatalogoLista.jsx'
-import { listarDepartamentos, crearDepartamento, actualizarDepartamento } from '../services/api.js'
+import { listarDepartamentos } from '../services/api.js'
 
-// Catálogo de departamentos (GET/POST /departments, PUT /departments/{id}).
-// Mismo componente que Marcas: solo cambian textos y funciones de API.
+// Catálogo de departamentos (GET /departments). Alta y edición viven en su
+// propia página -- ver DepartamentosForm.jsx y DepartamentosView.jsx.
 const TEXTOS = {
   titulo: 'Departamentos',
   subtitulo: 'Áreas de la empresa que se asignan al colaborador en cada acta.',
@@ -19,14 +19,7 @@ const TEXTOS = {
 }
 
 function DepartamentosList() {
-  return (
-    <CatalogoLista
-      textos={TEXTOS}
-      onListar={listarDepartamentos}
-      onCrear={crearDepartamento}
-      onActualizar={actualizarDepartamento}
-    />
-  )
+  return <CatalogoLista textos={TEXTOS} onListar={listarDepartamentos} rutaBase="/catalogo/departamentos" />
 }
 
 export default DepartamentosList

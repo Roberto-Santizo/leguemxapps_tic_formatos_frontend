@@ -1,112 +1,24 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
-import { ArrowLeft, Pencil, Plus, X, FileText, Download, Loader2 } from 'lucide-react'
+import { Link, useNavigate } from 'react-router-dom'
+import { ArrowLeft, Eye, Pencil, Plus, FileText, Download, Loader2 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 import Buscador from './Buscador.jsx'
+import ConfirmDialog from './ConfirmDialog.jsx'
 
 /**
  * Lista de un catálogo simple (solo campo `name`): Marcas o Departamentos.
  *
+ * Flujo (igual al de Equipos, en páginas separadas -- no modales):
+ *   - "Nueva marca/departamento" lleva a `rutaBase/nuevo`.
+ *   - Escritorio: fila con ojo (ver, sin confirmación, va a `rutaBase/:id/ver`)
+ *     y lápiz (pide confirmación y va a `rutaBase/:id`, la página de edición).
+ *   - Móvil: la tarjeta entera es el toque -- sin botones -- y lleva a la
+ *     página de detalle (`rutaBase/:id/ver`). Desde ahí, "Editar" pide la
+ *     misma confirmación y lleva a `rutaBase/:id`.
+ *
  * MarcasList.jsx y DepartamentosList.jsx son envolturas de este componente,
- * así que la lógica de cargar / crear / editar / buscar existe UNA sola vez.
- * Lo único que cambia entre ambas pantallas son los textos y las funciones
- * de API que se reciben por props.
- *
- * Responsive: los mismos datos se pintan de dos formas -- tabla en md: y
- * superior, tarjetas apiladas debajo de md -- para que en móvil nunca haya
- * scroll horizontal. No se duplica estado ni lógica, solo el marcado.
- *
- * Solo listar, crear y editar: la API de Laravel para /brands y /departments
- * no expone borrado, así que no hay botón de eliminar.
+ * así que la lógica de cargar / buscar existe UNA sola vez.
  */
-
-const inputClasses =
-  'h-11 w-full rounded-lg border border-outline-variant bg-surface px-3.5 font-body-md text-body-md text-on-surface transition-colors hover:border-outline focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25 disabled:opacity-60'
-
-// Modal de crear/editar. A diferencia de ActaModal NO pide contraseña: la
-// documentación de Laravel para PUT /brands/{id} y PUT /departments/{id} no
-// la exige.
-function CatalogoModal({ abierto, registro, textos, procesando, error, erroresCampo, onGuardar, onCancelar }) {
-  const [name, setName] = useState('')
-
-  const esEdicion = Boolean(registro?.id)
-
-  useEffect(() => {
-    if (abierto) setName(registro?.name ?? '')
-  }, [abierto, registro])
-
-  if (!abierto) return null
-
-  function handleSubmit(e) {
-    e.preventDefault()
-    const limpio = name.trim()
-    if (!limpio) return
-    onGuardar(limpio)
-  }
-
-  return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-on-surface/40 px-4">
-      <div className="bg-surface-container-lowest w-full max-w-md rounded-2xl shadow-lg border border-outline-variant overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-outline-variant">
-          <h3 className="font-headline-lg text-headline-lg text-on-surface">
-            {esEdicion ? textos.tituloEditar : textos.tituloCrear}
-          </h3>
-          <button
-            type="button"
-            onClick={onCancelar}
-            disabled={procesando}
-            className="grid h-9 w-9 shrink-0 place-items-center rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors disabled:opacity-50"
-          >
-            <X className="h-5 w-5" strokeWidth={2} />
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="px-5 py-4 flex flex-col gap-stack-md">
-          <div className="flex flex-col gap-1.5">
-            <label className="font-label-bold text-label-bold text-on-surface">{textos.labelCampo}</label>
-            <input
-              className={inputClasses}
-              value={name}
-              disabled={procesando}
-              onChange={(e) => setName(e.target.value)}
-              placeholder={textos.placeholderCampo}
-              required
-              maxLength={255}
-              autoFocus
-            />
-            {erroresCampo?.name?.[0] && (
-              <p className="font-label-sm text-label-sm text-error">{erroresCampo.name[0]}</p>
-            )}
-          </div>
-
-          {error && (
-            <p className="text-error font-label-sm text-label-sm bg-error-container/40 border border-error/30 rounded-lg px-3 py-2">
-              {error}
-            </p>
-          )}
-
-          <div className="flex justify-end gap-3 pt-2">
-            <button
-              type="button"
-              onClick={onCancelar}
-              disabled={procesando}
-              className="inline-flex h-10 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high disabled:opacity-60"
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              disabled={procesando || !name.trim()}
-              className="inline-flex h-10 items-center justify-center rounded-lg bg-primary px-4 font-label-bold text-label-bold text-on-primary shadow-sm transition-all hover:brightness-110 active:brightness-95 disabled:opacity-60"
-            >
-              {procesando ? 'Guardando...' : esEdicion ? 'Guardar cambios' : 'Crear'}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  )
-}
 
 // Estado vacío / cargando / sin resultados. Se usa igual en la tabla (dentro
 // de un td que ocupa toda la fila) y en la lista de tarjetas.
@@ -164,19 +76,17 @@ function EstadoLista({ cargando, error, hayRegistros, busqueda, textos, onReinte
   )
 }
 
-function CatalogoLista({ textos, onListar, onCrear, onActualizar }) {
+function CatalogoLista({ textos, onListar, rutaBase }) {
   const { token } = useAuth()
+  const navigate = useNavigate()
 
   const [registros, setRegistros] = useState([])
   const [cargando, setCargando] = useState(true)
   const [errorCarga, setErrorCarga] = useState('')
   const [busqueda, setBusqueda] = useState('')
 
-  const [modalAbierto, setModalAbierto] = useState(false)
-  const [enEdicion, setEnEdicion] = useState(null)
-  const [guardando, setGuardando] = useState(false)
-  const [errorModal, setErrorModal] = useState('')
-  const [erroresCampo, setErroresCampo] = useState(null)
+  // Confirmación antes de editar (escritorio: lápiz de la fila).
+  const [confirmando, setConfirmando] = useState(null)
 
   const cargar = useCallback(async () => {
     setCargando(true)
@@ -201,42 +111,8 @@ function CatalogoLista({ textos, onListar, onCrear, onActualizar }) {
     return registros.filter((r) => (r.name || '').toLowerCase().includes(filtro))
   }, [registros, busqueda])
 
-  function abrirCrear() {
-    setEnEdicion(null)
-    setErrorModal('')
-    setErroresCampo(null)
-    setModalAbierto(true)
-  }
-
-  function abrirEditar(registro) {
-    setEnEdicion(registro)
-    setErrorModal('')
-    setErroresCampo(null)
-    setModalAbierto(true)
-  }
-
-  async function handleGuardar(name) {
-    setGuardando(true)
-    setErrorModal('')
-    setErroresCampo(null)
-    try {
-      if (enEdicion?.id) {
-        const actualizado = await onActualizar(token, enEdicion.id, { name })
-        setRegistros((lista) =>
-          lista.map((r) => (r.id === enEdicion.id ? { ...r, ...(actualizado || { name }) } : r)),
-        )
-      } else {
-        const creado = await onCrear(token, { name })
-        setRegistros((lista) => [creado ?? { id: Date.now(), name }, ...lista])
-      }
-      setModalAbierto(false)
-      setEnEdicion(null)
-    } catch (err) {
-      setErrorModal(err.message || 'No se pudo guardar')
-      setErroresCampo(err.errors || null)
-    } finally {
-      setGuardando(false)
-    }
+  function verRegistro(registro) {
+    navigate(`${rutaBase}/${registro.id}/ver`)
   }
 
   const hayRegistros = visibles.length > 0
@@ -256,7 +132,7 @@ function CatalogoLista({ textos, onListar, onCrear, onActualizar }) {
 
   return (
     <>
-      <div className="flex-1 p-container-padding md:p-stack-lg bg-background">
+      <div className="animate-view-in flex-1 p-container-padding md:p-stack-lg bg-background">
         <div className="max-w-[1200px] mx-auto flex flex-col gap-stack-lg">
           <Link
             to="/catalogo"
@@ -296,19 +172,19 @@ function CatalogoLista({ textos, onListar, onCrear, onActualizar }) {
                 <Download className="h-4 w-4" strokeWidth={2.25} />
                 Exportar
               </button>
-              <button
-                onClick={abrirCrear}
+              <Link
+                to={`${rutaBase}/nuevo`}
                 className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-primary px-4 font-label-bold text-label-bold text-on-primary shadow-sm transition-all hover:brightness-110 active:brightness-95"
               >
                 <Plus className="h-4.5 w-4.5" strokeWidth={2} />
                 {textos.textoCrear}
-              </button>
+              </Link>
             </div>
           </div>
 
           <Buscador value={busqueda} onChange={setBusqueda} placeholder={textos.placeholderBusqueda} />
 
-          {/* ---- Desktop y tablet: tabla ---- */}
+          {/* ---- Desktop y tablet: tabla, ojo (ver) + lápiz (editar con confirmación) ---- */}
           <div className="hidden md:block bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm">
             {mostrarEstado ? (
               estado
@@ -337,15 +213,26 @@ function CatalogoLista({ textos, onListar, onCrear, onActualizar }) {
                         {registro.name}
                       </td>
                       <td className="px-5 py-4 text-right">
-                        <button
-                          type="button"
-                          onClick={() => abrirEditar(registro)}
-                          aria-label={`Editar ${registro.name}`}
-                          title="Editar"
-                          className="inline-grid h-9 w-9 place-items-center rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors"
-                        >
-                          <Pencil className="h-4 w-4" strokeWidth={2} />
-                        </button>
+                        <div className="flex items-center justify-end gap-1">
+                          <button
+                            type="button"
+                            onClick={() => verRegistro(registro)}
+                            aria-label={`Ver ${registro.name}`}
+                            title="Ver"
+                            className="inline-grid h-9 w-9 place-items-center rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors"
+                          >
+                            <Eye className="h-4 w-4" strokeWidth={2} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setConfirmando(registro)}
+                            aria-label={`Editar ${registro.name}`}
+                            title="Editar"
+                            className="inline-grid h-9 w-9 place-items-center rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors"
+                          >
+                            <Pencil className="h-4 w-4" strokeWidth={2} />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -354,7 +241,7 @@ function CatalogoLista({ textos, onListar, onCrear, onActualizar }) {
             )}
           </div>
 
-          {/* ---- Móvil: tarjetas apiladas, sin scroll horizontal ---- */}
+          {/* ---- Móvil: tarjetas apiladas, sin botones -- toda la tarjeta lleva al detalle ---- */}
           <div className="md:hidden flex flex-col gap-stack-sm">
             {mostrarEstado ? (
               <div className="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-sm">
@@ -362,9 +249,11 @@ function CatalogoLista({ textos, onListar, onCrear, onActualizar }) {
               </div>
             ) : (
               visibles.map((registro) => (
-                <div
+                <button
                   key={registro.id}
-                  className="flex items-center justify-between gap-3 bg-surface-container-lowest border border-outline-variant rounded-xl shadow-sm px-4 py-3.5"
+                  type="button"
+                  onClick={() => verRegistro(registro)}
+                  className="flex w-full items-center justify-between gap-3 bg-surface-container-lowest border border-outline-variant rounded-xl shadow-sm px-4 py-3.5 text-left transition-colors hover:bg-surface-container-low"
                 >
                   <div className="min-w-0">
                     <p className="font-body-md text-body-md font-medium text-on-surface break-words">
@@ -374,16 +263,7 @@ function CatalogoLista({ textos, onListar, onCrear, onActualizar }) {
                       ID {registro.id}
                     </p>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => abrirEditar(registro)}
-                    aria-label={`Editar ${registro.name}`}
-                    title="Editar"
-                    className="grid h-9 w-9 shrink-0 place-items-center rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors"
-                  >
-                    <Pencil className="h-4 w-4" strokeWidth={2} />
-                  </button>
-                </div>
+                </button>
               ))
             )}
           </div>
@@ -398,17 +278,16 @@ function CatalogoLista({ textos, onListar, onCrear, onActualizar }) {
         </div>
       </div>
 
-      <CatalogoModal
-        abierto={modalAbierto}
-        registro={enEdicion}
-        textos={textos}
-        procesando={guardando}
-        error={errorModal}
-        erroresCampo={erroresCampo}
-        onGuardar={handleGuardar}
-        onCancelar={() => {
-          setModalAbierto(false)
-          setEnEdicion(null)
+      <ConfirmDialog
+        abierto={Boolean(confirmando)}
+        titulo={textos.tituloEditar}
+        mensaje={confirmando ? `¿Desea editar "${confirmando.name}"?` : ''}
+        textoConfirmar="Sí, editar"
+        onCancelar={() => setConfirmando(null)}
+        onConfirmar={() => {
+          const registro = confirmando
+          setConfirmando(null)
+          navigate(`${rutaBase}/${registro.id}`)
         }}
       />
     </>

@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, Loader2, Pencil } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
+import ConfirmDialog from '../components/ConfirmDialog.jsx'
 import { obtenerEquipo, obtenerCaracteristicasDeEquipo } from '../services/api.js'
 
 /**
@@ -9,15 +10,19 @@ import { obtenerEquipo, obtenerCaracteristicasDeEquipo } from '../services/api.j
  * solo mostraba las características en la misma tabla; ahora muestra TODA
  * la información del equipo (marca, modelo, serie, tipo, original/usado)
  * más sus características, en su propia pantalla de solo lectura.
+ *
+ * "Editar" pide confirmación antes de entrar al formulario de edición.
  */
 function EquipoView() {
   const { id } = useParams()
   const { token } = useAuth()
+  const navigate = useNavigate()
 
   const [equipo, setEquipo] = useState(null)
   const [caracteristicas, setCaracteristicas] = useState([])
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState('')
+  const [confirmando, setConfirmando] = useState(false)
 
   useEffect(() => {
     let vivo = true
@@ -69,13 +74,14 @@ function EquipoView() {
                 <h1 className="font-headline-lg text-headline-lg font-bold text-on-surface mb-1">{equipo.name}</h1>
                 <p className="font-body-md text-body-md text-on-surface-variant">Información completa del equipo.</p>
               </div>
-              <Link
-                to={`/catalogo/equipos/${id}`}
+              <button
+                type="button"
+                onClick={() => setConfirmando(true)}
                 className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high"
               >
                 <Pencil className="h-4 w-4" strokeWidth={2} />
                 Editar
-              </Link>
+              </button>
             </div>
 
             <section className="rounded-xl border border-outline-variant bg-surface-container-lowest p-5 shadow-sm">
@@ -110,6 +116,15 @@ function EquipoView() {
           </>
         )}
       </div>
+
+      <ConfirmDialog
+        abierto={confirmando}
+        titulo="Editar equipo"
+        mensaje={equipo ? `¿Desea editar "${equipo.name}"?` : ''}
+        textoConfirmar="Sí, editar"
+        onCancelar={() => setConfirmando(false)}
+        onConfirmar={() => navigate(`/catalogo/equipos/${id}`)}
+      />
     </div>
   )
 }
