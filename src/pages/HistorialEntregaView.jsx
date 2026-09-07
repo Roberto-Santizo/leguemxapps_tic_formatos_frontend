@@ -32,7 +32,8 @@ import {
   actualizarDetalleEntrega,
   eliminarDetalleEntrega,
 } from '../services/api.js'
-import { generatePdfFromElement } from '../utils/generatePdf.js'
+import { generarPdfPapelFisico } from '../utils/generatePdfPapelFisico.js'
+import { construirHtmlEntrega } from '../pdf/plantillaEntrega.js'
 
 const formato = FORMATOS.entrega
 
@@ -187,10 +188,14 @@ function HistorialEntregaView() {
   }
 
   async function handleDescargarPdf() {
-    if (!hojaRef.current) return
+    if (!documento) return
     setGenerandoPdf(true)
     try {
-      await generatePdfFromElement(hojaRef.current, `entrega-equipo-${id}.pdf`)
+      const html = construirHtmlEntrega(documento, formato, {
+        responsable: urlArchivoPublico(documento.responsable_signature),
+        it: urlArchivoPublico(documento.administrador_signature),
+      })
+      await generarPdfPapelFisico(html, `entrega-equipo-${id}.pdf`)
     } catch {
       // Antes fallaba en silencio: el usuario veía la rueda girar y detenerse
       // sin PDF y sin explicación.

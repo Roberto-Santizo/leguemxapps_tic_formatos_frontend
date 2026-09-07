@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Search, ChevronDown, X, Check } from 'lucide-react'
 
 /**
@@ -35,7 +36,10 @@ function SearchableSelect({
   const usarMd = mobileSheetBreakpoint === 'md'
   const [abierto, setAbierto] = useState(false)
   const [busqueda, setBusqueda] = useState('')
+  const [coords, setCoords] = useState(null)
   const raiz = useRef(null)
+  const boton = useRef(null)
+  const panel = useRef(null)
   const inputBusqueda = useRef(null)
 
   const seleccionado = options.find((o) => String(o.id) === String(value))
@@ -43,7 +47,9 @@ function SearchableSelect({
   useEffect(() => {
     if (!abierto) return
     function onClick(e) {
-      if (raiz.current && !raiz.current.contains(e.target)) setAbierto(false)
+      if (raiz.current && raiz.current.contains(e.target)) return
+      if (panel.current && panel.current.contains(e.target)) return
+      setAbierto(false)
     }
     function onKey(e) {
       if (e.key === 'Escape') setAbierto(false)
@@ -63,6 +69,29 @@ function SearchableSelect({
     }
   }, [abierto])
 
+  // El panel de escritorio se dibuja en un portal (document.body), fuera de
+  // cualquier contenedor con scroll/overflow que lo recorte (p. ej. la tabla
+  // de Entrega de Equipo, que necesita overflow-x: auto y por regla del CSS
+  // eso también activa overflow-y). Aquí calculamos su posición "fixed" a
+  // partir del botón disparador, y la recalculamos si cambia el tamaño de la
+  // ventana o si algún ancestro hace scroll (capture:true para enterarnos de
+  // scrolls de contenedores internos, no solo el de la ventana).
+  useEffect(() => {
+    if (!abierto) return
+    function calcular() {
+      if (!boton.current) return
+      const r = boton.current.getBoundingClientRect()
+      setCoords({ top: r.bottom + 6, left: r.left, width: r.width })
+    }
+    calcular()
+    window.addEventListener('resize', calcular)
+    window.addEventListener('scroll', calcular, true)
+    return () => {
+      window.removeEventListener('resize', calcular)
+      window.removeEventListener('scroll', calcular, true)
+    }
+  }, [abierto])
+
   const filtradas = useMemo(() => {
     const q = busqueda.trim().toLowerCase()
     if (!q) return options
@@ -74,9 +103,66 @@ function SearchableSelect({
     setAbierto(false)
   }
 
+  // Contenido compartido (buscador + lista) entre la hoja móvil y el panel
+  // de escritorio -- solo cambia el contenedor que lo envuelve.
+  const contenido = (
+    <>
+      <div className={`flex items-center gap-2 border-b border-outline-variant p-2.5 ${usarMd ? 'md:p-2' : 'sm:p-2'}`}>
+        <div className="relative flex-1">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-on-surface-variant" strokeWidth={2} />
+          <input
+            ref={inputBusqueda}
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+            placeholder="Buscar..."
+            className="h-10 w-full rounded-lg border border-outline-variant bg-surface pl-9 pr-3 font-body-md text-body-md text-on-surface focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25"
+          />
+        </div>
+        <button
+          type="button"
+          onClick={() => setAbierto(false)}
+          className={`grid h-10 w-10 shrink-0 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high ${usarMd ? 'md:hidden' : 'sm:hidden'}`}
+          aria-label="Cerrar"
+        >
+          <X className="h-4 w-4" strokeWidth={2} />
+        </button>
+      </div>
+
+      <div className="flex-1 overflow-y-auto p-1.5">
+        {options.length === 0 ? (
+          <p className="px-3 py-6 text-center font-body-md text-body-md text-on-surface-variant">
+            {emptyOptionsText}
+          </p>
+        ) : filtradas.length === 0 ? (
+          <p className="px-3 py-6 text-center font-body-md text-body-md text-on-surface-variant">
+            No se encontraron coincidencias.
+          </p>
+        ) : (
+          filtradas.map((opcion) => {
+            const activo = String(opcion.id) === String(value)
+            return (
+              <button
+                key={opcion.id}
+                type="button"
+                onClick={() => elegir(opcion)}
+                className={`flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2.5 text-left font-body-md text-body-md transition-colors hover:bg-surface-container-high ${
+                  activo ? 'bg-secondary-container text-on-secondary-container' : 'text-on-surface'
+                }`}
+              >
+                <span className="truncate">{opcion.name}</span>
+                {activo && <Check className="h-4 w-4 shrink-0" strokeWidth={2.25} />}
+              </button>
+            )
+          })
+        )}
+      </div>
+    </>
+  )
+
   return (
     <div ref={raiz} className="relative">
       <button
+        ref={boton}
         type="button"
         disabled={disabled}
         onClick={() => setAbierto((v) => !v)}
@@ -102,63 +188,36 @@ function SearchableSelect({
             onClick={() => setAbierto(false)}
           />
 
+          {/* Móvil: hoja completa, igual que siempre, sin tocar nada aquí. */}
           <div
             className={
               usarMd
-                ? 'animate-view-in fixed inset-x-4 top-16 bottom-4 z-50 flex flex-col overflow-hidden rounded-xl border border-outline-variant bg-surface shadow-lg md:absolute md:inset-x-0 md:bottom-auto md:top-full md:z-30 md:mt-1.5 md:max-h-72 md:rounded-lg'
-                : 'animate-view-in fixed inset-x-4 top-16 bottom-4 z-50 flex flex-col overflow-hidden rounded-xl border border-outline-variant bg-surface shadow-lg sm:absolute sm:inset-x-0 sm:bottom-auto sm:top-full sm:z-30 sm:mt-1.5 sm:max-h-72 sm:rounded-lg'
+                ? 'animate-view-in fixed inset-x-4 top-16 bottom-4 z-50 flex flex-col overflow-hidden rounded-xl border border-outline-variant bg-surface shadow-lg md:hidden'
+                : 'animate-view-in fixed inset-x-4 top-16 bottom-4 z-50 flex flex-col overflow-hidden rounded-xl border border-outline-variant bg-surface shadow-lg sm:hidden'
             }
           >
-            <div className={`flex items-center gap-2 border-b border-outline-variant p-2.5 ${usarMd ? 'md:p-2' : 'sm:p-2'}`}>
-              <div className="relative flex-1">
-                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-on-surface-variant" strokeWidth={2} />
-                <input
-                  ref={inputBusqueda}
-                  value={busqueda}
-                  onChange={(e) => setBusqueda(e.target.value)}
-                  placeholder="Buscar..."
-                  className="h-10 w-full rounded-lg border border-outline-variant bg-surface pl-9 pr-3 font-body-md text-body-md text-on-surface focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25"
-                />
-              </div>
-              <button
-                type="button"
-                onClick={() => setAbierto(false)}
-                className={`grid h-10 w-10 shrink-0 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high ${usarMd ? 'md:hidden' : 'sm:hidden'}`}
-                aria-label="Cerrar"
-              >
-                <X className="h-4 w-4" strokeWidth={2} />
-              </button>
-            </div>
-
-            <div className="flex-1 overflow-y-auto p-1.5">
-              {options.length === 0 ? (
-                <p className="px-3 py-6 text-center font-body-md text-body-md text-on-surface-variant">
-                  {emptyOptionsText}
-                </p>
-              ) : filtradas.length === 0 ? (
-                <p className="px-3 py-6 text-center font-body-md text-body-md text-on-surface-variant">
-                  No se encontraron coincidencias.
-                </p>
-              ) : (
-                filtradas.map((opcion) => {
-                  const activo = String(opcion.id) === String(value)
-                  return (
-                    <button
-                      key={opcion.id}
-                      type="button"
-                      onClick={() => elegir(opcion)}
-                      className={`flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2.5 text-left font-body-md text-body-md transition-colors hover:bg-surface-container-high ${
-                        activo ? 'bg-secondary-container text-on-secondary-container' : 'text-on-surface'
-                      }`}
-                    >
-                      <span className="truncate">{opcion.name}</span>
-                      {activo && <Check className="h-4 w-4 shrink-0" strokeWidth={2.25} />}
-                    </button>
-                  )
-                })
-              )}
-            </div>
+            {contenido}
           </div>
+
+          {/* Escritorio: portal a document.body, posición fixed calculada
+              desde el botón. Así nunca lo recorta un contenedor con scroll
+              (p. ej. la tabla de Entrega de Equipo), a diferencia de la
+              versión anterior que usaba md:absolute dentro de la propia fila. */}
+          {coords &&
+            createPortal(
+              <div
+                ref={panel}
+                style={{ position: 'fixed', top: coords.top, left: coords.left, width: coords.width }}
+                className={
+                  usarMd
+                    ? 'animate-view-in z-30 hidden max-h-72 flex-col overflow-hidden rounded-lg border border-outline-variant bg-surface shadow-lg md:flex'
+                    : 'animate-view-in z-30 hidden max-h-72 flex-col overflow-hidden rounded-lg border border-outline-variant bg-surface shadow-lg sm:flex'
+                }
+              >
+                {contenido}
+              </div>,
+              document.body,
+            )}
         </>
       )}
     </div>

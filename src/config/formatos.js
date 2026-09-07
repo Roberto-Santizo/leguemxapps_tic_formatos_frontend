@@ -242,6 +242,36 @@ export const FORMATOS = {
   },
 }
 
+/**
+ * Vigencia editorial de los 6 formatos, para control de documentos /
+ * auditoría: cuándo se emitió esta versión y hasta cuándo es válida antes de
+ * tener que renovarla. Es la MISMA para los 6 formatos hoy (así ya lo maneja
+ * el sistema). Todavía no hay endpoint en el backend para esto (ver el TODO
+ * en hooks/useLocalStorageState.js), así que por ahora se guarda con ese
+ * mismo hook en localStorage -- editable con un clic directamente en el
+ * membrete de "Nueva Acta" (InlineEditableText), sin tener que tocar código
+ * cada vez que corresponda renovar la edición (ej. en unos años, pasar de
+ * 2026-2027 a 2030-2031).
+ *
+ * `VIGENCIA_DOCUMENTOS` es el valor por defecto/inicial. `VIGENCIA_DOCUMENTOS_STORAGE_KEY`
+ * es la llave de localStorage que usa FormatoActa.jsx con useLocalStorageState
+ * (para que el campo sea editable en pantalla); `leerVigenciaDocumentos()` es
+ * la misma lectura pero para código que no es un componente React (las
+ * plantillas de PDF en src/pdf/), así ambos leen siempre el mismo valor.
+ */
+export const VIGENCIA_DOCUMENTOS = { emision: 'Enero 2026', vigencia: 'Enero 2027' }
+export const VIGENCIA_DOCUMENTOS_STORAGE_KEY = 'legumex_vigencia_documentos'
+
+export function leerVigenciaDocumentos() {
+  try {
+    const guardado = JSON.parse(localStorage.getItem(VIGENCIA_DOCUMENTOS_STORAGE_KEY) || 'null')
+    if (guardado && guardado.emision && guardado.vigencia) return guardado
+  } catch {
+    // localStorage no disponible o valor corrupto -- se usa el valor por defecto
+  }
+  return VIGENCIA_DOCUMENTOS
+}
+
 // Orden en que aparecen las tarjetas del menú.
 export const ORDEN_FORMATOS = [
   'devolucion',

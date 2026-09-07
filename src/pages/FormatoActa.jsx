@@ -15,9 +15,10 @@ import {
 } from 'lucide-react'
 import FirmaPad from '../components/FirmaPad.jsx'
 import SearchableSelect from '../components/SearchableSelect.jsx'
+import InlineEditableText from '../components/InlineEditableText.jsx'
 import { mostrarToast } from '../components/Toast.jsx'
 import useLocalStorageState from '../hooks/useLocalStorageState.js'
-import { getFormato } from '../config/formatos.js'
+import { getFormato, VIGENCIA_DOCUMENTOS, VIGENCIA_DOCUMENTOS_STORAGE_KEY } from '../config/formatos.js'
 import EnConstruccion from '../components/EnConstruccion.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
 import { listarEmpleados, listarDepartamentos, listarEquiposDisponibles, crearDocumentoEntrega } from '../services/api.js'
@@ -132,6 +133,13 @@ function FormatoActa() {
 
   // --- Solo "Entrega de Equipo": es el único formato conectado hoy a la API
   // real (POST /delivery_documents). El resto sigue como borrador visual. ---
+  // Vigencia editorial del formato (Emisión/Vigencia del membrete) -- editable
+  // con un clic (ver render abajo); persiste en localStorage porque el
+  // backend todavía no tiene un endpoint de configuración para esto.
+  const [vigenciaDocumentos, setVigenciaDocumentos] = useLocalStorageState(
+    VIGENCIA_DOCUMENTOS_STORAGE_KEY,
+    VIGENCIA_DOCUMENTOS,
+  )
   const [empleados, setEmpleados] = useState([])
   const [departamentos, setDepartamentos] = useState([])
   const [equipos, setEquipos] = useState([])
@@ -342,11 +350,23 @@ function FormatoActa() {
                 <dt className="font-label-sm text-label-sm uppercase tracking-wide text-on-surface-variant">
                   Emisión
                 </dt>
-                <dd className="font-label-bold text-label-bold text-on-surface">Enero 2026</dd>
+                <dd className="font-label-bold text-label-bold text-on-surface">
+                  <InlineEditableText
+                    value={vigenciaDocumentos.emision}
+                    onChange={(valor) => setVigenciaDocumentos((v) => ({ ...v, emision: valor }))}
+                    title="Clic para corregir la fecha de emisión"
+                  />
+                </dd>
                 <dt className="font-label-sm text-label-sm uppercase tracking-wide text-on-surface-variant">
                   Vigencia
                 </dt>
-                <dd className="font-label-bold text-label-bold text-on-surface">Enero 2027</dd>
+                <dd className="font-label-bold text-label-bold text-on-surface">
+                  <InlineEditableText
+                    value={vigenciaDocumentos.vigencia}
+                    onChange={(valor) => setVigenciaDocumentos((v) => ({ ...v, vigencia: valor }))}
+                    title="Clic para corregir la fecha de vigencia"
+                  />
+                </dd>
               </dl>
             </div>
 

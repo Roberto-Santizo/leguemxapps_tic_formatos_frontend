@@ -28,7 +28,8 @@ import {
   listarDetallesEntrega,
   urlArchivoPublico,
 } from '../services/api.js'
-import { generatePdfFromElement } from '../utils/generatePdf.js'
+import { generarPdfPapelFisico } from '../utils/generatePdfPapelFisico.js'
+import { construirHtmlDevolucion } from '../pdf/plantillaDevolucion.js'
 
 const formato = FORMATOS.devolucion
 
@@ -158,10 +159,14 @@ function HistorialDevolucionView() {
   }
 
   async function handleDescargarPdf() {
-    if (!hojaRef.current) return
+    if (!documento) return
     setGenerandoPdf(true)
     try {
-      await generatePdfFromElement(hojaRef.current, `devolucion-equipo-${id}.pdf`)
+      const html = construirHtmlDevolucion(documento, formato, {
+        entrega: urlArchivoPublico(documento.responsable_signature),
+        recibe: urlArchivoPublico(documento.administrador_signature),
+      })
+      await generarPdfPapelFisico(html, `devolucion-equipo-${id}.pdf`)
     } catch {
       mostrarToast('No se pudo generar el PDF', { tipo: 'error' })
     } finally {
