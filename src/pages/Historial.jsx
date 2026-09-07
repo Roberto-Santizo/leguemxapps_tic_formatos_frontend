@@ -22,7 +22,7 @@ function Historial() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-column-gap sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-column-gap sm:grid-cols-2 xl:grid-cols-3">
           {LISTA_FORMATOS.map((formato) => {
             const Icon = formato.icon
             return (

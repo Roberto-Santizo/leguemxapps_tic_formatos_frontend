@@ -294,11 +294,7 @@ function EquiposList() {
                                 </Link>
                                 <button
                                   type="button"
-                                  onClick={() => {
-                                    // eslint-disable-next-line no-console
-                                    console.log('[DEBUG] clic en editar equipo', equipo)
-                                    setConfirmando(equipo)
-                                  }}
+                                  onClick={() => setConfirmando(equipo)}
                                   aria-label={`Editar ${equipo.name}`}
                                   title="Editar equipo y características"
                                   className={iconoActivo}
@@ -418,8 +414,6 @@ function EquiposList() {
         )}
       </div>
 
-      {/* eslint-disable-next-line no-console */}
-      {console.log('[DEBUG] render EquiposList, confirmando =', confirmando)}
       <ConfirmDialog
         abierto={Boolean(confirmando)}
         titulo="Editar equipo"

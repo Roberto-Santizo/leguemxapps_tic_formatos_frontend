@@ -78,6 +78,11 @@ function SearchableSelect({
   useEffect(() => {
     if (abierto) {
       setMostrarMobil(true)
+      // El botón que se tocó queda visible en pantalla mientras la hoja está
+      // abierta -- sin esto, en un formulario largo el campo podía quedar
+      // scrolleado fuera de vista mientras la hoja (anclada abajo) se veía
+      // sin relación aparente con lo que se tocó.
+      boton.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
       // Dos rAF anidados: uno solo no basta, porque puede caer en el mismo
       // frame en el que el navegador todavía no pintó el estado inicial
       // (opacity-0), y entonces la transición se pierde y la hoja aparece de
@@ -193,7 +198,9 @@ function SearchableSelect({
         type="button"
         disabled={disabled}
         onClick={() => setAbierto((v) => !v)}
-        className="flex h-11 w-full items-center justify-between gap-2 rounded-lg border border-outline-variant bg-surface px-3.5 font-body-md text-body-md text-on-surface transition-colors hover:border-outline focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25 disabled:opacity-60"
+        className={`flex h-11 w-full items-center justify-between gap-2 rounded-lg border bg-surface px-3.5 font-body-md text-body-md text-on-surface transition-colors hover:border-outline focus:outline-none disabled:opacity-60 ${
+          abierto ? 'border-primary ring-2 ring-primary/25' : 'border-outline-variant focus:border-primary focus:ring-2 focus:ring-primary/25'
+        }`}
       >
         <span className={seleccionado ? 'truncate text-on-surface' : 'truncate text-on-surface-variant'}>
           {seleccionado ? seleccionado.name : placeholder}
@@ -203,30 +210,33 @@ function SearchableSelect({
 
       {helpText && <p className="mt-1.5 font-label-sm text-label-sm text-on-surface-variant">{helpText}</p>}
 
-      {mostrarMobil && (
-        <>
-          {/* Fondo solo en móvil, para leer el panel como hoja. Anima su
-              opacidad junto con la hoja en vez de aparecer/desaparecer de golpe. */}
+      {mostrarMobil &&
+        createPortal(
+          // Móvil: mismo patrón de ventana centrada que ConfirmDialog (fondo
+          // oscuro + tarjeta centrada, con la misma animación de
+          // opacidad+escala), en vez de una hoja pegada abajo -- así elegir un
+          // equipo/colaborador se siente igual que cualquier otra ventana
+          // emergente del sistema, no como una alerta aparte. Portal a
+          // document.body por la misma razón que ConfirmDialog: un ancestro
+          // con animate-view-in crea su propio contexto de apilamiento y
+          // puede atrapar un position:fixed dentro de él.
           <div
-            className={`fixed inset-0 z-40 bg-on-surface/30 transition-opacity duration-150 ${visibleMobil ? 'opacity-100' : 'opacity-0'} ${
-              usarMd ? 'md:hidden' : 'sm:hidden'
-            }`}
-            onClick={() => setAbierto(false)}
-          />
-
-          {/* Móvil: hoja anclada abajo que crece según el contenido (hasta un
-              máximo), en vez de un alto fijo casi de pantalla completa sin
-              importar si la lista tiene 3 opciones o 30. Entra deslizándose
-              desde abajo con fade, y sale con la misma transición. */}
-          <div
-            className={`fixed inset-x-4 bottom-4 z-50 flex max-h-[70vh] flex-col overflow-hidden rounded-xl border border-outline-variant bg-surface shadow-lg transition-all duration-150 ${
-              visibleMobil ? 'translate-y-0 opacity-100' : 'translate-y-3 opacity-0'
+            className={`fixed inset-0 z-50 flex items-center justify-center bg-on-surface/40 p-4 transition-opacity duration-200 ${
+              visibleMobil ? 'opacity-100' : 'opacity-0'
             } ${usarMd ? 'md:hidden' : 'sm:hidden'}`}
+            onClick={() => setAbierto(false)}
           >
-            {contenido}
-          </div>
-        </>
-      )}
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className={`flex max-h-[70vh] w-full max-w-sm flex-col overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest shadow-lg transition-all duration-200 ease-out ${
+                visibleMobil ? 'translate-y-0 scale-100 opacity-100' : 'translate-y-2 scale-95 opacity-0'
+              }`}
+            >
+              {contenido}
+            </div>
+          </div>,
+          document.body,
+        )}
 
       {/* Escritorio: portal a document.body, posición fixed calculada desde
           el botón. Así nunca lo recorta un contenedor con scroll (p. ej. la

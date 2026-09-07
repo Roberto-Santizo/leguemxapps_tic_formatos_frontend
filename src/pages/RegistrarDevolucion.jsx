@@ -4,6 +4,7 @@ import { ArrowLeft, CircleUser, Loader2, MessageSquareText, PenLine, Rows3 } fro
 import { useAuth } from '../context/AuthContext.jsx'
 import FirmaPad from '../components/FirmaPad.jsx'
 import EstadoVacio from '../components/EstadoVacio.jsx'
+import ConfirmDialog from '../components/ConfirmDialog.jsx'
 import { mostrarToast } from '../components/Toast.jsx'
 import { SeccionCard, Campo } from './FormatoActa.jsx'
 import { FORMATOS } from '../config/formatos.js'
@@ -53,7 +54,7 @@ const celdaInputClass =
  */
 function RegistrarDevolucion() {
   const { id } = useParams()
-  const { token } = useAuth()
+  const { token, omitirConfirmacion, marcarOmitirConfirmacion } = useAuth()
   const navigate = useNavigate()
 
   const [entrega, setEntrega] = useState(null)
@@ -66,6 +67,9 @@ function RegistrarDevolucion() {
   const [firmas, setFirmas] = useState({})
   const [guardando, setGuardando] = useState(false)
   const [errorGuardar, setErrorGuardar] = useState('')
+  // Igual que en FormatoActa.jsx: confirmación antes de guardar, con su
+  // propio "no volver a preguntar en esta sesión".
+  const [confirmandoFinalizar, setConfirmandoFinalizar] = useState(false)
 
   useEffect(() => {
     let vivo = true
@@ -104,17 +108,35 @@ function RegistrarDevolucion() {
 
   const itemsMarcados = pendientes.filter((it) => seleccion[it.id]?.marcado)
 
-  async function handleFinalizarDevolucion() {
+  function validarDevolucion() {
     setErrorGuardar('')
     if (itemsMarcados.length === 0) {
       setErrorGuardar('Selecciona al menos un equipo que se esté devolviendo.')
-      return
+      return false
     }
     if (!firmas.entrega || !firmas.recibe) {
       setErrorGuardar('Faltan firmas por confirmar.')
+      return false
+    }
+    return true
+  }
+
+  function handleClicFinalizarDevolucion() {
+    if (!validarDevolucion()) return
+    if (omitirConfirmacion.devolucion) {
+      handleFinalizarDevolucion()
       return
     }
+    setConfirmandoFinalizar(true)
+  }
 
+  function handleConfirmarFinalizarDevolucion(_password, noPreguntar) {
+    if (noPreguntar) marcarOmitirConfirmacion('devolucion')
+    setConfirmandoFinalizar(false)
+    handleFinalizarDevolucion()
+  }
+
+  async function handleFinalizarDevolucion() {
     setGuardando(true)
     try {
       const formData = new FormData()
@@ -248,7 +270,9 @@ function RegistrarDevolucion() {
                     />
                   </div>
                 ) : (
-                  <div className="w-full overflow-x-auto">
+                  <>
+                  {/* Escritorio y tablet: tabla, sin cambios */}
+                  <div className="hidden md:block w-full overflow-x-auto">
                     <table className="w-full min-w-[720px] border-collapse text-left">
                       <thead>
                         <tr className="border-b border-outline-variant bg-surface-container-low">
@@ -303,6 +327,61 @@ function RegistrarDevolucion() {
                       </tbody>
                     </table>
                   </div>
+
+                  {/* Móvil: una tarjeta por artículo pendiente; se toca la
+                      tarjeta completa para marcar/desmarcar, igual que otras
+                      listas seleccionables del sistema. */}
+                  <div className="flex flex-col gap-stack-sm p-4 md:hidden">
+                    {pendientes.map((item) => {
+                      const marcado = Boolean(seleccion[item.id]?.marcado)
+                      return (
+                        <div
+                          key={item.id}
+                          className={`rounded-xl border p-4 transition-colors ${
+                            marcado ? 'border-primary bg-primary/5' : 'border-outline-variant bg-surface-container-lowest'
+                          }`}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => toggleItem(item.id)}
+                            className="flex w-full items-start gap-3 text-left"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={marcado}
+                              onChange={() => toggleItem(item.id)}
+                              className="mt-0.5 h-4.5 w-4.5 shrink-0 rounded border-outline-variant text-primary focus:ring-primary/25"
+                            />
+                            <div className="min-w-0 flex-1">
+                              <p className="font-label-bold text-label-bold text-on-surface break-words">
+                                {item.equipment_name || '—'}
+                              </p>
+                              <p className="font-body-md text-body-md text-on-surface-variant break-words">
+                                {item.equipment_brand || '—'} · {item.equipment_model || '—'}
+                                {item.equipment_serie ? ` · ${item.equipment_serie}` : ''}
+                              </p>
+                            </div>
+                          </button>
+
+                          {marcado && (
+                            <div className="mt-stack-sm flex flex-col gap-1.5 pl-7">
+                              <label className="font-label-bold text-label-bold text-on-surface">
+                                Observaciones de la devolución
+                              </label>
+                              <input
+                                type="text"
+                                value={seleccion[item.id]?.observaciones || ''}
+                                onChange={(e) => actualizarObsItem(item.id, e.target.value)}
+                                placeholder="Ej. Regresa en buen estado"
+                                className={inputClass}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                  </>
                 )}
               </SeccionCard>
 
@@ -374,7 +453,7 @@ function RegistrarDevolucion() {
               </Link>
               <button
                 type="button"
-                onClick={handleFinalizarDevolucion}
+                onClick={handleClicFinalizarDevolucion}
                 disabled={guardando || pendientes.length === 0}
                 className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-primary px-6 font-label-bold text-label-bold text-on-primary shadow-sm transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
               >
@@ -385,6 +464,16 @@ function RegistrarDevolucion() {
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        abierto={confirmandoFinalizar}
+        titulo="Finalizar devolución"
+        mensaje="¿Confirmas que los datos y las firmas son correctos? Se guardará como una devolución registrada."
+        textoConfirmar="Sí, finalizar"
+        permitirNoPreguntar
+        onCancelar={() => setConfirmandoFinalizar(false)}
+        onConfirmar={handleConfirmarFinalizarDevolucion}
+      />
     </div>
   )
 }

@@ -332,7 +332,9 @@ function HistorialEntregaView() {
                     <p className="font-label-bold text-label-bold text-on-surface">Sin equipo registrado</p>
                   </div>
                 ) : (
-                  <div className="w-full overflow-x-auto">
+                  <>
+                  {/* Escritorio y tablet: tabla, sin cambios */}
+                  <div className="hidden md:block w-full overflow-x-auto">
                     <table className="w-full min-w-[760px] border-collapse text-left">
                       <thead>
                         <tr className="border-b border-outline-variant bg-surface-container-low">
@@ -455,6 +457,148 @@ function HistorialEntregaView() {
                       </tbody>
                     </table>
                   </div>
+
+                  {/* Móvil: una tarjeta por artículo, mismo patrón que la
+                      tabla de equipo al crear una Entrega (FormatoActa.jsx). */}
+                  <div className="flex flex-col gap-stack-sm p-4 md:hidden">
+                    {documento.items.map((item, indice) => (
+                      <div
+                        key={item.id}
+                        className="rounded-xl border border-outline-variant bg-surface-container-lowest p-4"
+                      >
+                        <div className="mb-stack-sm flex items-start justify-between gap-2">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span className="shrink-0 font-mono text-body-md tabular-nums text-on-surface-variant">
+                              {String(indice + 1).padStart(2, '0')}
+                            </span>
+                            <span className="font-label-bold text-label-bold text-on-surface break-words">
+                              {item.equipment_name || '—'}
+                            </span>
+                            {item.returned && (
+                              <span className="shrink-0 rounded-full bg-surface-container-high px-2 py-0.5 font-label-sm text-label-sm text-on-surface-variant">
+                                Devuelto
+                              </span>
+                            )}
+                          </div>
+                          {!item.returned && (
+                            <button
+                              type="button"
+                              onClick={() => setQuitando(item)}
+                              aria-label="Quitar equipo de la entrega"
+                              title="Quitar (se agregó por error)"
+                              className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-error-container hover:text-on-error-container"
+                            >
+                              <Trash2 className="h-4 w-4" strokeWidth={2} />
+                            </button>
+                          )}
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <p className="font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider mb-0.5">
+                              Marca
+                            </p>
+                            <p className="font-body-md text-body-md text-on-surface break-words">
+                              {item.equipment_brand || '—'}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider mb-0.5">
+                              Modelo
+                            </p>
+                            <p className="font-body-md text-body-md text-on-surface break-words">
+                              {item.equipment_model || '—'}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider mb-0.5">
+                              No. Serie
+                            </p>
+                            <p className="font-mono text-body-md uppercase text-on-surface">
+                              {item.equipment_serie || '—'}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider mb-0.5">
+                              Estado
+                            </p>
+                            <p className="font-body-md text-body-md text-on-surface">{item.is_used || '—'}</p>
+                          </div>
+                        </div>
+
+                        <div className="mt-stack-sm">
+                          <p className="font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider mb-0.5">
+                            Observaciones
+                          </p>
+                          {item.returned ? (
+                            <p className="font-body-md text-body-md text-on-surface break-words">
+                              {item.observations || '—'}
+                            </p>
+                          ) : (
+                            <InlineEditableText
+                              value={item.observations || 'Sin observaciones'}
+                              onChange={(valor) => corregirObservacion(item.id, valor)}
+                              title="Corregir observación"
+                            />
+                          )}
+                        </div>
+                      </div>
+                    ))}
+
+                    {agregandoEquipo && (
+                      <div className="rounded-xl border border-dashed border-outline bg-surface-container-low/40 p-4">
+                        <div className="flex flex-col gap-stack-sm">
+                          <div className="flex flex-col gap-1.5">
+                            <label className="font-label-bold text-label-bold text-on-surface">Equipo</label>
+                            <SearchableSelect
+                              options={equipos.map((e) => ({ id: e.id, name: e.brand ? `${e.name} — ${e.brand}` : e.name }))}
+                              value={nuevoEquipoId}
+                              onChange={setNuevoEquipoId}
+                              disabled={guardandoEquipo}
+                              placeholder="Selecciona el equipo a agregar"
+                              emptyOptionsText="No hay equipos registrados en el catálogo todavía."
+                              mobileSheetBreakpoint="md"
+                            />
+                          </div>
+                          <div className="flex flex-col gap-1.5">
+                            <label className="font-label-bold text-label-bold text-on-surface">Observaciones</label>
+                            <input
+                              type="text"
+                              value={nuevoEquipoObs}
+                              onChange={(e) => setNuevoEquipoObs(e.target.value)}
+                              placeholder="Observaciones (opcional)"
+                              disabled={guardandoEquipo}
+                              className="h-11 w-full rounded-lg border border-outline-variant bg-surface px-3.5 font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/70 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25"
+                            />
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={confirmarAgregarEquipo}
+                              disabled={guardandoEquipo || !nuevoEquipoId}
+                              className="inline-flex h-10 flex-1 items-center justify-center gap-2 rounded-lg bg-primary px-4 font-label-bold text-label-bold text-on-primary shadow-sm transition-all hover:brightness-110 disabled:opacity-50"
+                            >
+                              {guardandoEquipo ? (
+                                <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} />
+                              ) : (
+                                <Check className="h-4 w-4" strokeWidth={2.5} />
+                              )}
+                              Confirmar
+                            </button>
+                            <button
+                              type="button"
+                              onClick={cancelarAgregarEquipo}
+                              disabled={guardandoEquipo}
+                              className="inline-flex h-10 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high"
+                            >
+                              Cancelar
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  </>
                 )}
               </SeccionCard>
 

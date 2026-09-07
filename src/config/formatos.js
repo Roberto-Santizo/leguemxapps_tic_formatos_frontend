@@ -272,15 +272,12 @@ export function leerVigenciaDocumentos() {
   return VIGENCIA_DOCUMENTOS
 }
 
-// Orden en que aparecen las tarjetas del menú.
-export const ORDEN_FORMATOS = [
-  'devolucion',
-  'entrega',
-  'responsabilidad',
-  'prestamo',
-  'telefonos',
-  'desecho',
-]
+// Orden en que aparecen las tarjetas del menú de "Nueva Acta" e "Historial
+// de Actas". Solo se listan los 3 formatos activos hoy (Entrega, Devolución
+// y Entrega de Teléfonos); Responsabilidad, Préstamo y Desecho se quedan
+// definidos en FORMATOS (por si algún registro histórico del backend todavía
+// los referencia) pero ya no aparecen en ninguna de las dos pantallas.
+export const ORDEN_FORMATOS = ['entrega', 'devolucion', 'telefonos']
 
 export const LISTA_FORMATOS = ORDEN_FORMATOS.map((id) => FORMATOS[id])
 

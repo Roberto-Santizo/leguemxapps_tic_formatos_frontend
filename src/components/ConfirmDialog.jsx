@@ -16,6 +16,13 @@ import { AlertTriangle } from 'lucide-react'
  *     paleta del sistema ya reserva para errores y borrado. El foco arranca en
  *     Cancelar, no en Confirmar.
  *
+ * `permitirNoPreguntar`: agrega un checkbox "No volver a preguntarme en esta
+ * sesión" (hoy lo usan Finalizar Entrega y Finalizar Devolución, que se
+ * llenan varias veces seguidas). Si se marca, `onConfirmar` recibe `true`
+ * como segundo argumento -- quien llama decide qué hacer con eso (guardarlo
+ * en AuthContext, por ejemplo). No afecta a los usos existentes: ese segundo
+ * argumento siempre puede ignorarse.
+ *
  * Entra y sale con la misma transición corta (150ms, opacidad + escala), en
  * vez de aparecer animado y desaparecer de golpe.
  *
@@ -37,6 +44,8 @@ function ConfirmDialog({
   textoCancelar = 'Cancelar',
   variante = 'normal',
   requierePassword = false,
+  permitirNoPreguntar = false,
+  textoNoPreguntar = 'No volver a preguntarme en esta sesión',
   procesando = false,
   error = '',
   onConfirmar,
@@ -51,6 +60,7 @@ function ConfirmDialog({
   const [visible, setVisible] = useState(false)
   const [password, setPassword] = useState('')
   const [errorLocal, setErrorLocal] = useState('')
+  const [noPreguntar, setNoPreguntar] = useState(false)
 
   // Monta antes de animar la entrada, y espera a que termine la transición de
   // salida antes de desmontar -- así el cierre también se ve, no solo se corta.
@@ -59,6 +69,7 @@ function ConfirmDialog({
       setMontado(true)
       setPassword('')
       setErrorLocal('')
+      setNoPreguntar(false)
       return
     }
     setVisible(false)
@@ -109,7 +120,7 @@ function ConfirmDialog({
       return
     }
     setErrorLocal('')
-    onConfirmar(requierePassword ? password : undefined)
+    onConfirmar(requierePassword ? password : undefined, noPreguntar)
   }
 
   const errorAMostrar = error || errorLocal
@@ -162,6 +173,18 @@ function ConfirmDialog({
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
+        )}
+
+        {permitirNoPreguntar && (
+          <label className="mt-4 flex cursor-pointer items-center gap-2.5 font-body-md text-body-md text-on-surface-variant">
+            <input
+              type="checkbox"
+              checked={noPreguntar}
+              onChange={(e) => setNoPreguntar(e.target.checked)}
+              className="h-4 w-4 shrink-0 rounded border-outline-variant text-primary focus:outline-none focus:ring-2 focus:ring-primary/25"
+            />
+            {textoNoPreguntar}
+          </label>
         )}
 
         {errorAMostrar && (

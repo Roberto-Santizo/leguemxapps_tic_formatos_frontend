@@ -48,7 +48,7 @@ function Catalogo() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-column-gap sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-stack-lg sm:grid-cols-2 2xl:grid-cols-4">
           {SECCIONES.map((seccion) => {
             const Icon = seccion.icon
             return (

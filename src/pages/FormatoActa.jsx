@@ -20,6 +20,7 @@ import { mostrarToast } from '../components/Toast.jsx'
 import useLocalStorageState from '../hooks/useLocalStorageState.js'
 import { getFormato, VIGENCIA_DOCUMENTOS, VIGENCIA_DOCUMENTOS_STORAGE_KEY } from '../config/formatos.js'
 import EnConstruccion from '../components/EnConstruccion.jsx'
+import ConfirmDialog from '../components/ConfirmDialog.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
 import { listarEmpleados, listarDepartamentos, listarEquiposDisponibles, crearDocumentoEntrega } from '../services/api.js'
 
@@ -116,7 +117,7 @@ function FormatoActa() {
   const navigate = useNavigate()
   const formato = getFormato(tipo)
   const esEntrega = formato?.id === 'entrega'
-  const { token } = useAuth()
+  const { token, omitirConfirmacion, marcarOmitirConfirmacion } = useAuth()
 
   const hojaRef = useRef(null)
 
@@ -148,6 +149,11 @@ function FormatoActa() {
   const [filasEntrega, setFilasEntrega] = useState([])
   const [guardando, setGuardando] = useState(false)
   const [errorGuardar, setErrorGuardar] = useState('')
+  // Pide confirmación antes de guardar la entrega -- antes "Finalizar
+  // Entrega" guardaba directo con un solo clic, sin preguntar. Trae su
+  // propio "no volver a preguntar en esta sesión" (ver AuthContext), útil
+  // cuando se están llenando varias entregas seguidas.
+  const [confirmandoFinalizar, setConfirmandoFinalizar] = useState(false)
 
   useEffect(() => {
     if (!esEntrega) return
@@ -192,21 +198,45 @@ function FormatoActa() {
     setFilasEntrega((f) => f.filter((x) => x.id !== id))
   }
 
-  async function handleFinalizarEntrega() {
+  // Valida lo mismo que antes validaba handleFinalizarEntrega, pero sin
+  // guardar todavía -- eso permite meter la confirmación en medio: primero
+  // se valida, y solo si está todo completo tiene sentido preguntar
+  // "¿seguro?" (un formulario incompleto simplemente muestra su error, igual
+  // que siempre).
+  function validarEntrega() {
     setErrorGuardar('')
     if (!empleadoId) {
       setErrorGuardar('Selecciona el colaborador que recibe el equipo.')
-      return
+      return false
     }
-    const itemsValidos = filasEntrega.filter((f) => f.equipmentId)
-    if (itemsValidos.length === 0) {
+    if (filasEntrega.filter((f) => f.equipmentId).length === 0) {
       setErrorGuardar('Agrega al menos un equipo entregado.')
-      return
+      return false
     }
     if (!firmas.responsable || !firmas.it) {
       setErrorGuardar('Faltan firmas por confirmar.')
+      return false
+    }
+    return true
+  }
+
+  function handleClicFinalizarEntrega() {
+    if (!validarEntrega()) return
+    if (omitirConfirmacion.entrega) {
+      handleFinalizarEntrega()
       return
     }
+    setConfirmandoFinalizar(true)
+  }
+
+  function handleConfirmarFinalizarEntrega(_password, noPreguntar) {
+    if (noPreguntar) marcarOmitirConfirmacion('entrega')
+    setConfirmandoFinalizar(false)
+    handleFinalizarEntrega()
+  }
+
+  async function handleFinalizarEntrega() {
+    const itemsValidos = filasEntrega.filter((f) => f.equipmentId)
 
     setGuardando(true)
     try {
@@ -1133,7 +1163,7 @@ function FormatoActa() {
             </button>
             <button
               type="button"
-              onClick={esEntrega ? handleFinalizarEntrega : undefined}
+              onClick={esEntrega ? handleClicFinalizarEntrega : undefined}
               disabled={esEntrega && (guardando || cargandoCatalogos)}
               className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-primary px-6 font-label-bold text-label-bold text-on-primary shadow-sm transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
             >
@@ -1143,6 +1173,18 @@ function FormatoActa() {
           </div>
         </div>
       </div>
+
+      {esEntrega && (
+        <ConfirmDialog
+          abierto={confirmandoFinalizar}
+          titulo="Finalizar entrega"
+          mensaje="¿Confirmas que los datos y las firmas son correctos? Se guardará como una entrega registrada."
+          textoConfirmar="Sí, finalizar"
+          permitirNoPreguntar
+          onCancelar={() => setConfirmandoFinalizar(false)}
+          onConfirmar={handleConfirmarFinalizarEntrega}
+        />
+      )}
     </div>
   )
 }
