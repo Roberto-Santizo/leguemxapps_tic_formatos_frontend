@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Eye, Pencil, Plus, ChevronDown, HardDrive } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 import Buscador from '../components/Buscador.jsx'
+import ConfirmDialog from '../components/ConfirmDialog.jsx'
 import EstadoVacio from '../components/EstadoVacio.jsx'
 import { SkeletonTabla, SkeletonTarjetas } from '../components/Skeleton.jsx'
 import { CaracteristicasDeEquipo } from '../components/CaracteristicasEditor.jsx'
@@ -49,6 +50,11 @@ function EquiposList() {
   const [abierta, setAbierta] = useState(null)
   const [detalle, setDetalle] = useState([])
   const [cargandoDetalle, setCargandoDetalle] = useState(false)
+
+  // Editar pide confirmación antes de entrar al formulario, igual que en
+  // Empleados y en el resto del catálogo -- antes el lápiz aquí navegaba
+  // directo, sin preguntar.
+  const [confirmando, setConfirmando] = useState(null) // equipo o null
 
   const cargar = useCallback(async () => {
     setCargando(true)
@@ -281,19 +287,24 @@ function EquiposList() {
                                 <Link
                                   to={`/catalogo/equipos/${equipo.id}/ver`}
                                   aria-label={`Ver información de ${equipo.name}`}
-                                  title="Ver información completa"
+                                  title="Ver"
                                   className={iconoActivo}
                                 >
                                   <Eye className="h-4 w-4" strokeWidth={2} />
                                 </Link>
-                                <Link
-                                  to={`/catalogo/equipos/${equipo.id}`}
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    // eslint-disable-next-line no-console
+                                    console.log('[DEBUG] clic en editar equipo', equipo)
+                                    setConfirmando(equipo)
+                                  }}
                                   aria-label={`Editar ${equipo.name}`}
                                   title="Editar equipo y características"
                                   className={iconoActivo}
                                 >
                                   <Pencil className="h-4 w-4" strokeWidth={2} />
-                                </Link>
+                                </button>
                               </>
                             ) : (
                               <>
@@ -406,6 +417,17 @@ function EquiposList() {
           </p>
         )}
       </div>
+
+      {/* eslint-disable-next-line no-console */}
+      {console.log('[DEBUG] render EquiposList, confirmando =', confirmando)}
+      <ConfirmDialog
+        abierto={Boolean(confirmando)}
+        titulo="Editar equipo"
+        mensaje={confirmando ? `¿Desea editar "${confirmando.name}"?` : ''}
+        textoConfirmar="Sí, editar"
+        onCancelar={() => setConfirmando(null)}
+        onConfirmar={() => navigate(`/catalogo/equipos/${confirmando.id}`)}
+      />
     </div>
   )
 }

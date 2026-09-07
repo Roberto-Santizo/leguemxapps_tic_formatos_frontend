@@ -165,7 +165,7 @@ function EmpleadosList() {
                     <td className="px-5 py-4 text-on-surface-variant break-words">{nombreDepartamento(emp)}</td>
                     <td className="px-5 py-4">
                       <div className="flex items-center justify-end gap-1">
-                        <button type="button" onClick={() => verEmpleado(emp)} title="Ver detalle" className={iconoActivo}>
+                        <button type="button" onClick={() => verEmpleado(emp)} title="Ver" className={iconoActivo}>
                           <Eye className="h-4 w-4" strokeWidth={2} />
                         </button>
                         <button type="button" onClick={() => setConfirmando(emp)} title="Editar empleado" className={iconoActivo}>

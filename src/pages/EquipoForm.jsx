@@ -4,6 +4,7 @@ import { ArrowLeft, Loader2, Save } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 import { mostrarToast } from '../components/Toast.jsx'
 import SearchableSelect from '../components/SearchableSelect.jsx'
+import { SkeletonFormulario } from '../components/Skeleton.jsx'
 import {
   listarMarcas,
   crearEquipo,
@@ -241,12 +242,7 @@ function EquipoForm() {
         </div>
 
         {cargando ? (
-          <div className="flex items-center gap-2.5 rounded-xl border border-outline-variant bg-surface-container-lowest px-5 py-14 justify-center">
-            <Loader2 className="h-5 w-5 animate-spin text-outline" strokeWidth={2} />
-            <span className="font-body-md text-body-md text-on-surface-variant">
-              Cargando equipo...
-            </span>
-          </div>
+          <SkeletonFormulario campos={6} />
         ) : (
           <form onSubmit={handleSubmit} className="flex flex-col gap-stack-lg">
             <section className="rounded-xl border border-outline-variant bg-surface-container-lowest p-5 shadow-sm flex flex-col gap-stack-md">

@@ -57,4 +57,54 @@ export function SkeletonTarjetas({ filas = 4 }) {
   )
 }
 
+/**
+ * Fantasma con forma de sección de formulario (tarjeta + label/input
+ * apilados), para reemplazar la rueda girando centrada en las páginas de
+ * alta/edición (EquipoForm, EmpleadoForm, CatalogoFormPage) mientras se
+ * obtiene el registro a editar.
+ */
+export function SkeletonFormulario({ campos = 4 }) {
+  return (
+    <div
+      className="flex flex-col gap-stack-md rounded-xl border border-outline-variant bg-surface-container-lowest p-5 shadow-sm"
+      aria-hidden="true"
+    >
+      {Array.from({ length: campos }).map((_, campo) => (
+        <div key={campo} className="flex flex-col gap-1.5">
+          <div className={`${barra} h-3 w-28`} />
+          <div className={`${barra} h-11 w-full`} />
+        </div>
+      ))}
+    </div>
+  )
+}
+
+/**
+ * Fantasma con forma de vista de detalle (una o más tarjetas de sección con
+ * pares etiqueta/valor), para EquipoView, CatalogoRegistroView e Historial
+ * (Entrega/Devolución) mientras se obtiene el registro.
+ */
+export function SkeletonDetalle({ secciones = 1, camposPorSeccion = 4 }) {
+  return (
+    <div className="flex flex-col gap-stack-md" aria-hidden="true">
+      {Array.from({ length: secciones }).map((_, seccion) => (
+        <div
+          key={seccion}
+          className="rounded-xl border border-outline-variant bg-surface-container-lowest p-5 shadow-sm"
+        >
+          <div className={`${barra} mb-4 h-4 w-40`} />
+          <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))' }}>
+            {Array.from({ length: camposPorSeccion }).map((_, campo) => (
+              <div key={campo} className="flex flex-col gap-1.5">
+                <div className={`${barra} h-3 ${ANCHOS[(seccion + campo) % ANCHOS.length]}`} />
+                <div className={`${barra} h-3.5 w-3/4`} />
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 export default SkeletonTabla

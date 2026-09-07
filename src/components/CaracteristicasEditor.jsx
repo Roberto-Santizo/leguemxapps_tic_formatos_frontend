@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Plus, Trash2, Loader2, Check, X } from 'lucide-react'
 import InlineEditableText from './InlineEditableText.jsx'
+import { mostrarToast } from './Toast.jsx'
 
 /**
  * Características de un equipo, en sus dos situaciones:
@@ -185,6 +186,7 @@ export function CaracteristicasDeEquipo({
         await onCrear({ ...fila, equipment_id: equipmentId })
       }
       cerrarAlta()
+      mostrarToast(filas.length > 1 ? 'Características guardadas' : 'Característica guardada')
     } catch (err) {
       setError(err.message || 'No se pudo guardar la característica')
     } finally {
@@ -204,6 +206,7 @@ export function CaracteristicasDeEquipo({
         description: campo === 'description' ? valor : caracteristica.description,
         equipment_id: equipmentId,
       })
+      mostrarToast('Característica actualizada')
     } catch (err) {
       setError(err.message || 'No se pudo actualizar la característica')
     }

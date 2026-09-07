@@ -1,7 +1,8 @@
-import { useState } from 'react'
-import { UserPlus, X, CheckCircle2 } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { UserPlus, X, CheckCircle2, Users, Loader2 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 import { registrarUsuario } from '../services/api.js'
+import EstadoVacio from '../components/EstadoVacio.jsx'
 
 function iniciales(nombre) {
   if (!nombre) return '—'
@@ -28,6 +29,10 @@ const inputClasses =
  * Modal para registrar un usuario nuevo (POST /register de Laravel).
  * De momento no hay edición: la API todavía no expone un endpoint para
  * editar o eliminar usuarios existentes.
+ *
+ * Entra y sale con la misma transición corta que ConfirmDialog (150ms,
+ * opacidad + escala) -- antes aparecía y desaparecía de golpe, distinto al
+ * resto de los diálogos del sistema.
  */
 function RegistrarUsuarioModal({ abierto, procesando, error, erroresCampo, onGuardar, onCancelar }) {
   const [form, setForm] = useState({
@@ -38,7 +43,27 @@ function RegistrarUsuarioModal({ abierto, procesando, error, erroresCampo, onGua
     role: 'user',
   })
 
-  if (!abierto) return null
+  const [montado, setMontado] = useState(abierto)
+  const [visible, setVisible] = useState(false)
+
+  useEffect(() => {
+    if (abierto) {
+      setMontado(true)
+      let frame2
+      const frame1 = requestAnimationFrame(() => {
+        frame2 = requestAnimationFrame(() => setVisible(true))
+      })
+      return () => {
+        cancelAnimationFrame(frame1)
+        if (frame2) cancelAnimationFrame(frame2)
+      }
+    }
+    setVisible(false)
+    const t = setTimeout(() => setMontado(false), 150)
+    return () => clearTimeout(t)
+  }, [abierto])
+
+  if (!montado) return null
 
   function actualizar(campo, valor) {
     setForm((f) => ({ ...f, [campo]: valor }))
@@ -54,15 +79,22 @@ function RegistrarUsuarioModal({ abierto, procesando, error, erroresCampo, onGua
   }
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-on-surface/40 px-4">
-      <div className="bg-surface-container-lowest w-full max-w-md rounded-2xl shadow-lg border border-outline-variant overflow-hidden">
+    <div
+      className={`fixed inset-0 z-[60] flex items-center justify-center bg-on-surface/40 px-4 transition-opacity duration-150 ${visible ? 'opacity-100' : 'opacity-0'}`}
+    >
+      <div
+        className={`bg-surface-container-lowest w-full max-w-md rounded-2xl shadow-lg border border-outline-variant overflow-hidden transition-all duration-150 ${
+          visible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+        }`}
+      >
         <div className="flex items-center justify-between px-5 py-4 border-b border-outline-variant">
           <h3 className="font-headline-lg text-headline-lg text-on-surface">Registrar usuario</h3>
           <button
             type="button"
             onClick={onCancelar}
             disabled={procesando}
-            className="grid h-9 w-9 shrink-0 place-items-center rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors disabled:opacity-50"
+            aria-label="Cerrar"
+            className="grid h-11 w-11 shrink-0 place-items-center rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors disabled:opacity-50"
           >
             <X className="h-5 w-5" strokeWidth={2} />
           </button>
@@ -166,9 +198,14 @@ function RegistrarUsuarioModal({ abierto, procesando, error, erroresCampo, onGua
             <button
               type="submit"
               disabled={procesando}
-              className="inline-flex h-10 items-center justify-center rounded-lg bg-primary px-4 font-label-bold text-label-bold text-on-primary shadow-sm transition-all hover:brightness-110 active:brightness-95 disabled:opacity-60"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-primary px-4 font-label-bold text-label-bold text-on-primary shadow-sm transition-all hover:brightness-110 active:brightness-95 disabled:opacity-60"
             >
-              {procesando ? 'Registrando...' : 'Registrar'}
+              {procesando ? (
+                <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} />
+              ) : (
+                <UserPlus className="h-4 w-4" strokeWidth={2} />
+              )}
+              Registrar
             </button>
           </div>
         </form>
@@ -240,11 +277,21 @@ function Usuarios() {
           {/* Usuarios registrados en esta sesión */}
           <div className="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm">
             {registradosEnSesion.length === 0 ? (
-              <div className="p-8 text-center">
-                <p className="font-body-md text-body-md text-on-surface-variant">
-                  Aún no has registrado ningún usuario en esta sesión.
-                </p>
-              </div>
+              <EstadoVacio
+                icon={Users}
+                titulo="Aún no has registrado ningún usuario"
+                descripcion="Los usuarios que registres en esta sesión aparecerán aquí."
+                accion={
+                  <button
+                    type="button"
+                    onClick={abrirCrear}
+                    className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high"
+                  >
+                    <UserPlus className="h-4 w-4" strokeWidth={2} />
+                    Registrar usuario
+                  </button>
+                }
+              />
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[640px] text-left border-collapse text-sm">

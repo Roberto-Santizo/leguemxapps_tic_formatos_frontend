@@ -21,6 +21,7 @@ import EstadoVacio from '../components/EstadoVacio.jsx'
 import InlineEditableText from '../components/InlineEditableText.jsx'
 import SearchableSelect from '../components/SearchableSelect.jsx'
 import { mostrarToast } from '../components/Toast.jsx'
+import { SkeletonDetalle } from '../components/Skeleton.jsx'
 import { SeccionCard, Campo } from './FormatoActa.jsx'
 import { FORMATOS } from '../config/formatos.js'
 import {
@@ -234,10 +235,7 @@ function HistorialEntregaView() {
           </Link>
 
           {cargando ? (
-            <div className="flex items-center gap-2.5 rounded-xl border border-outline-variant bg-surface-container-lowest px-5 py-14 justify-center">
-              <Loader2 className="h-5 w-5 animate-spin text-outline" strokeWidth={2} />
-              <span className="font-body-md text-body-md text-on-surface-variant">Cargando documento...</span>
-            </div>
+            <SkeletonDetalle secciones={3} camposPorSeccion={3} />
           ) : error || !documento ? (
             <div className="rounded-xl border border-outline-variant bg-surface-container-lowest shadow-sm">
               <EstadoVacio

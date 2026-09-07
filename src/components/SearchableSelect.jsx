@@ -37,6 +37,12 @@ function SearchableSelect({
   const [abierto, setAbierto] = useState(false)
   const [busqueda, setBusqueda] = useState('')
   const [coords, setCoords] = useState(null)
+  // Hoja móvil: monta antes de animar la entrada y espera a que termine la
+  // transición de salida antes de desmontar (mismo patrón que ConfirmDialog),
+  // en vez de aparecer y desaparecer de golpe como antes. El panel de
+  // escritorio no se toca -- sigue igual que siempre.
+  const [mostrarMobil, setMostrarMobil] = useState(false)
+  const [visibleMobil, setVisibleMobil] = useState(false)
   const raiz = useRef(null)
   const boton = useRef(null)
   const panel = useRef(null)
@@ -67,6 +73,27 @@ function SearchableSelect({
       setBusqueda('')
       setTimeout(() => inputBusqueda.current?.focus(), 0)
     }
+  }, [abierto])
+
+  useEffect(() => {
+    if (abierto) {
+      setMostrarMobil(true)
+      // Dos rAF anidados: uno solo no basta, porque puede caer en el mismo
+      // frame en el que el navegador todavía no pintó el estado inicial
+      // (opacity-0), y entonces la transición se pierde y la hoja aparece de
+      // golpe en vez de animar.
+      let frame2
+      const frame1 = requestAnimationFrame(() => {
+        frame2 = requestAnimationFrame(() => setVisibleMobil(true))
+      })
+      return () => {
+        cancelAnimationFrame(frame1)
+        if (frame2) cancelAnimationFrame(frame2)
+      }
+    }
+    setVisibleMobil(false)
+    const t = setTimeout(() => setMostrarMobil(false), 150)
+    return () => clearTimeout(t)
   }, [abierto])
 
   // El panel de escritorio se dibuja en un portal (document.body), fuera de
@@ -176,50 +203,51 @@ function SearchableSelect({
 
       {helpText && <p className="mt-1.5 font-label-sm text-label-sm text-on-surface-variant">{helpText}</p>}
 
-      {abierto && (
+      {mostrarMobil && (
         <>
-          {/* Fondo solo en móvil, para leer el panel como hoja completa */}
+          {/* Fondo solo en móvil, para leer el panel como hoja. Anima su
+              opacidad junto con la hoja en vez de aparecer/desaparecer de golpe. */}
           <div
-            className={
-              usarMd
-                ? 'fixed inset-0 z-40 bg-on-surface/30 md:hidden'
-                : 'fixed inset-0 z-40 bg-on-surface/30 sm:hidden'
-            }
+            className={`fixed inset-0 z-40 bg-on-surface/30 transition-opacity duration-150 ${visibleMobil ? 'opacity-100' : 'opacity-0'} ${
+              usarMd ? 'md:hidden' : 'sm:hidden'
+            }`}
             onClick={() => setAbierto(false)}
           />
 
-          {/* Móvil: hoja completa, igual que siempre, sin tocar nada aquí. */}
+          {/* Móvil: hoja anclada abajo que crece según el contenido (hasta un
+              máximo), en vez de un alto fijo casi de pantalla completa sin
+              importar si la lista tiene 3 opciones o 30. Entra deslizándose
+              desde abajo con fade, y sale con la misma transición. */}
           <div
-            className={
-              usarMd
-                ? 'animate-view-in fixed inset-x-4 top-16 bottom-4 z-50 flex flex-col overflow-hidden rounded-xl border border-outline-variant bg-surface shadow-lg md:hidden'
-                : 'animate-view-in fixed inset-x-4 top-16 bottom-4 z-50 flex flex-col overflow-hidden rounded-xl border border-outline-variant bg-surface shadow-lg sm:hidden'
-            }
+            className={`fixed inset-x-4 bottom-4 z-50 flex max-h-[70vh] flex-col overflow-hidden rounded-xl border border-outline-variant bg-surface shadow-lg transition-all duration-150 ${
+              visibleMobil ? 'translate-y-0 opacity-100' : 'translate-y-3 opacity-0'
+            } ${usarMd ? 'md:hidden' : 'sm:hidden'}`}
           >
             {contenido}
           </div>
-
-          {/* Escritorio: portal a document.body, posición fixed calculada
-              desde el botón. Así nunca lo recorta un contenedor con scroll
-              (p. ej. la tabla de Entrega de Equipo), a diferencia de la
-              versión anterior que usaba md:absolute dentro de la propia fila. */}
-          {coords &&
-            createPortal(
-              <div
-                ref={panel}
-                style={{ position: 'fixed', top: coords.top, left: coords.left, width: coords.width }}
-                className={
-                  usarMd
-                    ? 'animate-view-in z-30 hidden max-h-72 flex-col overflow-hidden rounded-lg border border-outline-variant bg-surface shadow-lg md:flex'
-                    : 'animate-view-in z-30 hidden max-h-72 flex-col overflow-hidden rounded-lg border border-outline-variant bg-surface shadow-lg sm:flex'
-                }
-              >
-                {contenido}
-              </div>,
-              document.body,
-            )}
         </>
       )}
+
+      {/* Escritorio: portal a document.body, posición fixed calculada desde
+          el botón. Así nunca lo recorta un contenedor con scroll (p. ej. la
+          tabla de Entrega de Equipo), a diferencia de la versión anterior que
+          usaba md:absolute dentro de la propia fila. Sigue igual que siempre. */}
+      {abierto &&
+        coords &&
+        createPortal(
+          <div
+            ref={panel}
+            style={{ position: 'fixed', top: coords.top, left: coords.left, width: coords.width }}
+            className={
+              usarMd
+                ? 'animate-view-in z-30 hidden max-h-72 flex-col overflow-hidden rounded-lg border border-outline-variant bg-surface shadow-lg md:flex'
+                : 'animate-view-in z-30 hidden max-h-72 flex-col overflow-hidden rounded-lg border border-outline-variant bg-surface shadow-lg sm:flex'
+            }
+          >
+            {contenido}
+          </div>,
+          document.body,
+        )}
     </div>
   )
 }

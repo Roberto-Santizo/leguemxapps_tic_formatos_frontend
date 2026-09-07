@@ -1,21 +1,33 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { AlertTriangle } from 'lucide-react'
 
 /**
- * Diálogo de confirmación ligero, mismo lenguaje que .dialog del sistema
- * (fondo con blur, tarjeta centrada, título + acciones) -- no una alerta
- * genérica del navegador. Se usa antes de abrir la edición de un empleado
- * desde la tarjeta móvil, para evitar ediciones accidentales.
+ * Único diálogo de confirmación del sistema -- antes existían dos
+ * (ConfirmDialog y ConfirmModal) con distinto radio, z-index, animación y
+ * política de Escape. ConfirmModal ya no existe: su único uso real (pedir
+ * contraseña antes de exportar a Excel, en BotonExcel.jsx) se cubre aquí con
+ * `requierePassword`.
  *
- * Dos variantes:
- *   - 'normal'  (por defecto) → idéntico a como se veía antes: botón de
- *     confirmar en bg-primary. Las llamadas existentes no cambian en nada.
+ * Variantes:
+ *   - 'normal'  (por defecto) → botón de confirmar en bg-primary.
  *   - 'peligro' → para acciones que NO se pueden deshacer (eliminar). Añade la
  *     insignia de advertencia y pinta el botón de confirmar con el rojo que la
- *     paleta del sistema ya reserva para errores y borrado.
+ *     paleta del sistema ya reserva para errores y borrado. El foco arranca en
+ *     Cancelar, no en Confirmar.
  *
- * En 'peligro' el foco arranca en Cancelar, no en Confirmar: si el usuario
- * llega con el Enter apretado, no borra por inercia.
+ * Entra y sale con la misma transición corta (150ms, opacidad + escala), en
+ * vez de aparecer animado y desaparecer de golpe.
+ *
+ * Se pinta con un portal a document.body (igual que el panel de escritorio
+ * de SearchableSelect) en vez de quedar donde el JSX de cada pantalla lo
+ * coloca. Motivo: toda pantalla envuelve su contenido en `animate-view-in`,
+ * y una animación que mueve opacity/transform crea su propio contexto de
+ * apilamiento en CSS -- sin el portal, este diálogo (aunque sea
+ * position:fixed) quedaba atrapado dentro de ese contexto y el Sidebar
+ * (que vive fuera, con su propio z-index) podía quedar por encima del fondo
+ * oscuro en vez de taparse, e incluso llegar a ocultar el diálogo por
+ * completo en algunas pantallas.
  */
 function ConfirmDialog({
   abierto,
@@ -24,11 +36,52 @@ function ConfirmDialog({
   textoConfirmar = 'Sí, continuar',
   textoCancelar = 'Cancelar',
   variante = 'normal',
+  requierePassword = false,
+  procesando = false,
+  error = '',
   onConfirmar,
   onCancelar,
 }) {
   const cancelarRef = useRef(null)
+  const passwordRef = useRef(null)
+  const cajaRef = useRef(null)
   const peligro = variante === 'peligro'
+
+  const [montado, setMontado] = useState(abierto)
+  const [visible, setVisible] = useState(false)
+  const [password, setPassword] = useState('')
+  const [errorLocal, setErrorLocal] = useState('')
+
+  // Monta antes de animar la entrada, y espera a que termine la transición de
+  // salida antes de desmontar -- así el cierre también se ve, no solo se corta.
+  useEffect(() => {
+    if (abierto) {
+      setMontado(true)
+      setPassword('')
+      setErrorLocal('')
+      return
+    }
+    setVisible(false)
+    const t = setTimeout(() => setMontado(false), 200)
+    return () => clearTimeout(t)
+  }, [abierto])
+
+  // Dispara la animación de entrada una vez que el diálogo ya está montado
+  // (todavía invisible). Va en un efecto aparte, con useLayoutEffect en vez
+  // de useEffect, porque useLayoutEffect corre de forma síncrona justo
+  // después de que el DOM se actualiza y ANTES de que el navegador pinte --
+  // forzar aquí un reflow (offsetHeight) garantiza que el estado inicial
+  // invisible ya quedó "confirmado" antes de programar, en el siguiente
+  // frame, el cambio a visible. Con un useEffect normal ese orden no está
+  // garantizado en todos los navegadores (sobre todo móviles), y ahí la
+  // transición de apertura podía perderse aunque la de cierre sí se viera.
+  useLayoutEffect(() => {
+    if (!montado || !abierto) return
+    // eslint-disable-next-line no-unused-expressions
+    cajaRef.current?.offsetHeight
+    const frame = requestAnimationFrame(() => setVisible(true))
+    return () => cancelAnimationFrame(frame)
+  }, [montado, abierto])
 
   useEffect(() => {
     if (!abierto) return
@@ -43,23 +96,39 @@ function ConfirmDialog({
   // botón que lo disparó, detrás del fondo oscuro.
   useEffect(() => {
     if (!abierto) return
-    const t = setTimeout(() => cancelarRef.current?.focus(), 0)
+    const t = setTimeout(() => (requierePassword ? passwordRef.current : cancelarRef.current)?.focus(), 0)
     return () => clearTimeout(t)
-  }, [abierto])
+  }, [abierto, requierePassword])
 
-  if (!abierto) return null
+  if (!montado) return null
 
-  return (
+  function confirmar(e) {
+    e?.preventDefault()
+    if (requierePassword && !password) {
+      setErrorLocal('Ingresa tu contraseña para continuar.')
+      return
+    }
+    setErrorLocal('')
+    onConfirmar(requierePassword ? password : undefined)
+  }
+
+  const errorAMostrar = error || errorLocal
+
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-on-surface/40 p-4"
-      onClick={() => onCancelar?.()}
+      className={`fixed inset-0 z-50 flex items-center justify-center bg-on-surface/40 p-4 transition-opacity duration-200 ${visible ? 'opacity-100' : 'opacity-0'}`}
+      onClick={() => !procesando && onCancelar?.()}
     >
-      <div
+      <form
+        ref={cajaRef}
+        onSubmit={confirmar}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titulo ? 'confirm-dialog-titulo' : undefined}
         onClick={(e) => e.stopPropagation()}
-        className="animate-view-in w-full max-w-sm rounded-xl border border-outline-variant bg-surface-container-lowest p-5 shadow-lg"
+        className={`w-full max-w-sm rounded-xl border border-outline-variant bg-surface-container-lowest p-5 shadow-lg transition-all duration-200 ease-out ${
+          visible ? 'translate-y-0 opacity-100 scale-100' : 'translate-y-2 opacity-0 scale-95'
+        }`}
       >
         <div className={peligro ? 'flex items-start gap-3.5' : undefined}>
           {peligro && (
@@ -77,32 +146,54 @@ function ConfirmDialog({
                 {titulo}
               </h2>
             )}
-            <p className="font-body-md text-body-md text-on-surface-variant break-words">{mensaje}</p>
+            {mensaje && <p className="font-body-md text-body-md text-on-surface-variant break-words">{mensaje}</p>}
           </div>
         </div>
 
+        {requierePassword && (
+          <div className="mt-4 flex flex-col gap-1.5">
+            <label className="font-label-bold text-label-bold text-on-surface">Tu contraseña</label>
+            <input
+              ref={passwordRef}
+              type="password"
+              disabled={procesando}
+              className="h-11 w-full rounded-lg border border-outline-variant bg-surface px-3.5 font-body-md text-body-md text-on-surface transition-colors hover:border-outline focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+        )}
+
+        {errorAMostrar && (
+          <p className="mt-3 rounded-lg border border-error/30 bg-error-container/40 px-3 py-2 font-label-sm text-label-sm text-error">
+            {errorAMostrar}
+          </p>
+        )}
+
         <div className="mt-5 flex justify-end gap-2.5">
           <button
-            ref={cancelarRef}
+            ref={requierePassword ? null : cancelarRef}
             type="button"
+            disabled={procesando}
             onClick={onCancelar}
-            className="inline-flex h-10 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high"
+            className="inline-flex h-10 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high disabled:opacity-60"
           >
             {textoCancelar}
           </button>
           <button
-            type="button"
-            onClick={onConfirmar}
+            type="submit"
+            disabled={procesando}
             className={[
-              'inline-flex h-10 items-center justify-center rounded-lg px-4 font-label-bold text-label-bold shadow-sm transition-all hover:brightness-110 active:brightness-95',
+              'inline-flex h-10 items-center justify-center rounded-lg px-4 font-label-bold text-label-bold shadow-sm transition-all hover:brightness-110 active:brightness-95 disabled:opacity-60',
               peligro ? 'bg-error text-on-error' : 'bg-primary text-on-primary',
             ].join(' ')}
           >
-            {textoConfirmar}
+            {procesando ? 'Procesando...' : textoConfirmar}
           </button>
         </div>
-      </div>
-    </div>
+      </form>
+    </div>,
+    document.body,
   )
 }
 

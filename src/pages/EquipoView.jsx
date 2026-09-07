@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, History, Loader2, Pencil } from 'lucide-react'
+import { ArrowLeft, History, Pencil } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 import ConfirmDialog from '../components/ConfirmDialog.jsx'
+import { SkeletonDetalle } from '../components/Skeleton.jsx'
 import { obtenerEquipo, obtenerCaracteristicasDeEquipo, historialEquipo } from '../services/api.js'
 
 /**
@@ -65,10 +66,7 @@ function EquipoView() {
         </Link>
 
         {cargando ? (
-          <div className="flex items-center gap-2.5 rounded-xl border border-outline-variant bg-surface-container-lowest px-5 py-14 justify-center">
-            <Loader2 className="h-5 w-5 animate-spin text-outline" strokeWidth={2} />
-            <span className="font-body-md text-body-md text-on-surface-variant">Cargando equipo...</span>
-          </div>
+          <SkeletonDetalle secciones={3} camposPorSeccion={3} />
         ) : error ? (
           <p className="font-label-sm text-label-sm text-error rounded-lg border border-error/30 bg-error-container/40 px-3 py-2">
             {error}

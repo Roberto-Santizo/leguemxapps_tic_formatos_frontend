@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, Loader2, Save } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 import { mostrarToast } from './Toast.jsx'
+import { SkeletonFormulario } from './Skeleton.jsx'
 
 const inputClasses =
   'h-11 w-full rounded-lg border border-outline-variant bg-surface px-3.5 font-body-md text-body-md text-on-surface transition-colors hover:border-outline focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25 disabled:opacity-60'
@@ -84,10 +85,7 @@ function CatalogoFormPage({ textos, onObtener, onCrear, onActualizar, rutaBase }
         </div>
 
         {cargando ? (
-          <div className="flex items-center gap-2.5 rounded-xl border border-outline-variant bg-surface-container-lowest px-5 py-14 justify-center">
-            <Loader2 className="h-5 w-5 animate-spin text-outline" strokeWidth={2} />
-            <span className="font-body-md text-body-md text-on-surface-variant">Cargando...</span>
-          </div>
+          <SkeletonFormulario campos={1} />
         ) : (
           <form onSubmit={handleSubmit} className="flex flex-col gap-stack-lg">
             <section className="rounded-xl border border-outline-variant bg-surface-container-lowest p-5 shadow-sm flex flex-col gap-stack-md">
