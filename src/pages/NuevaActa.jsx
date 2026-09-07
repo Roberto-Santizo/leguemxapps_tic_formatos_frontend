@@ -2,12 +2,21 @@ import { Link } from 'react-router-dom'
 import { ChevronRight } from 'lucide-react'
 import { LISTA_FORMATOS } from '../config/formatos.js'
 
+// "Devolución de Equipo" ya no se llena desde una hoja en blanco: una
+// devolución siempre nace de una entrega real, así que su tarjeta lleva a
+// buscar al responsable (BuscarDevolucion.jsx) en vez de a /actas/:tipo/nueva
+// como las demás -- ahí se resuelve a qué entrega corresponde y se abre la
+// hoja ya con los datos completos.
+function rutaDeFormato(formato) {
+  return formato.id === 'devolucion' ? '/historial/devolucion/nueva' : `/actas/${formato.id}/nueva`
+}
+
 /**
  * Pantalla de inicio del sistema (ruta "/").
  *
  * Antes esta ruta abría directamente la Hoja de Devolución. Ahora los seis
  * formatos físicos existen en el sistema, así que el inicio es el selector:
- * una tarjeta por formato que lleva a /actas/:tipo/nueva.
+ * una tarjeta por formato.
  */
 function NuevaActa() {
   return (
@@ -27,8 +36,8 @@ function NuevaActa() {
             return (
               <Link
                 key={formato.id}
-                to={`/actas/${formato.id}/nueva`}
-                className="group flex flex-col gap-stack-md rounded-xl border border-outline-variant bg-surface-container-lowest p-5 shadow-sm transition-all duration-150 hover:border-outline hover:shadow-md"
+                to={rutaDeFormato(formato)}
+                className="group flex flex-col gap-stack-md rounded-xl border border-outline-variant bg-surface-container-lowest p-5 shadow-sm transition-all duration-150 hover:border-outline hover:shadow-md active:scale-[0.99]"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-outline-variant bg-surface-container-lowest text-primary transition-colors group-hover:border-outline">

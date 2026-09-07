@@ -7,6 +7,8 @@ const TEXTOS = {
   tituloEditar: 'Editar departamento',
   labelCampo: 'Nombre del departamento',
   placeholderCampo: 'Ej. Recursos Humanos',
+  avisoCreado: 'Departamento creado',
+  avisoActualizado: 'Departamento actualizado',
 }
 
 function DepartamentosForm() {

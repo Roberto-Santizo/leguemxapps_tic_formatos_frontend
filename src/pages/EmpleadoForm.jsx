@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, Loader2, Save } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
+import { mostrarToast } from '../components/Toast.jsx'
 import SearchableSelect from '../components/SearchableSelect.jsx'
 import { listarDepartamentos, obtenerEmpleado, crearEmpleado, actualizarEmpleado } from '../services/api.js'
 
@@ -29,6 +30,7 @@ function EmpleadoForm() {
   const [cargando, setCargando] = useState(esEdicion)
   const [guardando, setGuardando] = useState(false)
   const [error, setError] = useState('')
+  const [erroresCampo, setErroresCampo] = useState(null)
 
   useEffect(() => {
     let vivo = true
@@ -65,6 +67,7 @@ function EmpleadoForm() {
     if (!completo) return
     setGuardando(true)
     setError('')
+    setErroresCampo(null)
     const payload = { code: code.trim(), name: name.trim(), department_id: Number(departmentId) }
     try {
       if (esEdicion) {
@@ -72,9 +75,13 @@ function EmpleadoForm() {
       } else {
         await crearEmpleado(token, payload)
       }
+      mostrarToast(esEdicion ? 'Empleado actualizado' : 'Empleado creado')
       navigate('/catalogo/empleados')
     } catch (err) {
       setError(err.message || 'No se pudo guardar el empleado')
+      // Igual que EquipoForm: si la API señala el campo (p. ej. código
+      // repetido), se marca debajo del campo y no solo en el aviso general.
+      setErroresCampo(err.errors || null)
     } finally {
       setGuardando(false)
     }
@@ -114,6 +121,9 @@ function EmpleadoForm() {
                   placeholder="Ej. EMP-001"
                   required
                 />
+                {erroresCampo?.code?.[0] && (
+                  <p className="font-label-sm text-label-sm text-error">{erroresCampo.code[0]}</p>
+                )}
               </div>
 
               <div className="flex flex-col gap-1.5">
@@ -127,6 +137,9 @@ function EmpleadoForm() {
                   placeholder="Ej. Roberto Santizo"
                   required
                 />
+                {erroresCampo?.name?.[0] && (
+                  <p className="font-label-sm text-label-sm text-error">{erroresCampo.name[0]}</p>
+                )}
               </div>
 
               <div className="flex flex-col gap-1.5">

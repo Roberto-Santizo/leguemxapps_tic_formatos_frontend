@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Eye, Pencil, Plus, Loader2 } from 'lucide-react'
+import { ArrowLeft, Eye, Pencil, Plus, Users } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 import Buscador from '../components/Buscador.jsx'
 import ConfirmDialog from '../components/ConfirmDialog.jsx'
+import EstadoVacio from '../components/EstadoVacio.jsx'
+import { SkeletonTabla, SkeletonTarjetas } from '../components/Skeleton.jsx'
 import { listarEmpleados, listarDepartamentos } from '../services/api.js'
 
 /**
@@ -59,44 +61,46 @@ function EmpleadosList() {
   }, [empleados, busqueda, nombreDepartamento])
 
   const hayRegistros = visibles.length > 0
-  const mostrarEstado = cargando || errorCarga || !hayRegistros
+  // La carga tiene sus propios esqueletos, con la forma de la tabla y de las
+  // tarjetas, así que se separa de los estados "sin contenido".
+  const sinContenido = !cargando && (Boolean(errorCarga) || !hayRegistros)
 
-  const estado = cargando ? (
-    <div className="flex flex-col items-center gap-3 px-5 py-14 text-center">
-      <Loader2 className="h-6 w-6 animate-spin text-outline" strokeWidth={2} />
-      <p className="font-body-md text-body-md text-on-surface-variant">Cargando empleados...</p>
-    </div>
-  ) : errorCarga ? (
-    <div className="flex flex-col items-center gap-3 px-5 py-14 text-center">
-      <p className="font-label-bold text-label-bold text-on-surface">No se pudo cargar el catálogo</p>
-      <p className="font-body-md text-body-md text-on-surface-variant">{errorCarga}</p>
-      <button
-        type="button"
-        onClick={cargar}
-        className="inline-flex h-10 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high"
-      >
-        Reintentar
-      </button>
-    </div>
+  const botonSecundario =
+    'inline-flex h-10 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high'
+
+  const estado = errorCarga ? (
+    <EstadoVacio
+      variante="error"
+      titulo="No se pudo cargar el catálogo"
+      descripcion={errorCarga}
+      accion={
+        <button type="button" onClick={cargar} className={botonSecundario}>
+          Reintentar
+        </button>
+      }
+    />
   ) : busqueda ? (
-    <div className="flex flex-col items-center gap-3 px-5 py-14 text-center">
-      <p className="font-label-bold text-label-bold text-on-surface">No se encontraron resultados</p>
-      <p className="font-body-md text-body-md text-on-surface-variant break-words">
-        Ninguna coincidencia para “{busqueda}”.
-      </p>
-      <button
-        type="button"
-        onClick={() => setBusqueda('')}
-        className="inline-flex h-10 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high"
-      >
-        Limpiar búsqueda
-      </button>
-    </div>
+    <EstadoVacio
+      variante="busqueda"
+      titulo="No se encontraron resultados"
+      descripcion={`Ninguna coincidencia para “${busqueda}”.`}
+      accion={
+        <button type="button" onClick={() => setBusqueda('')} className={botonSecundario}>
+          Limpiar búsqueda
+        </button>
+      }
+    />
   ) : (
-    <div className="flex flex-col items-center gap-1.5 px-5 py-14 text-center">
-      <p className="font-label-bold text-label-bold text-on-surface">Aún no hay empleados registrados</p>
-      <p className="font-body-md text-body-md text-on-surface-variant">Crea el primero para asignarlo a un departamento.</p>
-    </div>
+    <EstadoVacio
+      icon={Users}
+      titulo="Aún no hay empleados registrados"
+      descripcion="Crea el primero para asignarlo a un departamento."
+      accion={
+        <Link to="/catalogo/empleados/nuevo" className={botonSecundario}>
+          Nuevo empleado
+        </Link>
+      }
+    />
   )
 
   const iconoActivo =
@@ -139,7 +143,9 @@ function EmpleadosList() {
 
         {/* ---- Escritorio: tabla, ojo (ver) + lápiz (editar con confirmación) ---- */}
         <div className="hidden md:block bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm">
-          {mostrarEstado ? (
+          {cargando ? (
+            <SkeletonTabla columnas={4} filas={5} />
+          ) : sinContenido ? (
             estado
           ) : (
             <table className="w-full text-left border-collapse text-sm">
@@ -176,7 +182,9 @@ function EmpleadosList() {
 
         {/* ---- Móvil: tarjetas apiladas, sin botones -- toda la tarjeta lleva al detalle ---- */}
         <div className="md:hidden flex flex-col gap-stack-sm">
-          {mostrarEstado ? (
+          {cargando ? (
+            <SkeletonTarjetas filas={4} />
+          ) : sinContenido ? (
             <div className="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-sm">{estado}</div>
           ) : (
             visibles.map((emp) => (
@@ -184,7 +192,7 @@ function EmpleadosList() {
                 key={emp.id}
                 type="button"
                 onClick={() => verEmpleado(emp)}
-                className="flex w-full items-center justify-between gap-3 rounded-xl border border-outline-variant bg-surface-container-lowest px-4 py-3.5 text-left shadow-sm transition-colors hover:bg-surface-container-low"
+                className="flex w-full items-center justify-between gap-3 rounded-xl border border-outline-variant bg-surface-container-lowest px-4 py-3.5 text-left shadow-sm transition-all hover:bg-surface-container-low active:scale-[0.99] active:bg-surface-container-low"
               >
                 <div className="min-w-0">
                   <p className="font-body-md text-body-md font-medium text-on-surface break-words">{emp.name}</p>
@@ -197,7 +205,7 @@ function EmpleadosList() {
           )}
         </div>
 
-        {!mostrarEstado && (
+        {!cargando && !sinContenido && (
           <p className="font-label-sm text-label-sm text-on-surface-variant tabular-nums">
             {visibles.length === empleados.length ? `${empleados.length} empleados` : `${visibles.length} de ${empleados.length} empleados`}
           </p>

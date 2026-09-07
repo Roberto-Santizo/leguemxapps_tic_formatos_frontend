@@ -1,8 +1,10 @@
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Eye, Pencil, Plus, Loader2, ChevronDown } from 'lucide-react'
+import { ArrowLeft, Eye, Pencil, Plus, ChevronDown, HardDrive } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 import Buscador from '../components/Buscador.jsx'
+import EstadoVacio from '../components/EstadoVacio.jsx'
+import { SkeletonTabla, SkeletonTarjetas } from '../components/Skeleton.jsx'
 import { CaracteristicasDeEquipo } from '../components/CaracteristicasEditor.jsx'
 import {
   listarEquipos,
@@ -117,46 +119,46 @@ function EquiposList() {
   }, [equipos, busqueda])
 
   const hayRegistros = visibles.length > 0
-  const mostrarEstado = cargando || errorCarga || !hayRegistros
+  // La carga tiene sus propios esqueletos (misma forma que la tabla y las
+  // tarjetas), así que se separa de los estados "sin contenido".
+  const sinContenido = !cargando && (Boolean(errorCarga) || !hayRegistros)
 
-  const estado = cargando ? (
-    <div className="flex flex-col items-center gap-3 px-5 py-14 text-center">
-      <Loader2 className="h-6 w-6 animate-spin text-outline" strokeWidth={2} />
-      <p className="font-body-md text-body-md text-on-surface-variant">Cargando equipos...</p>
-    </div>
-  ) : errorCarga ? (
-    <div className="flex flex-col items-center gap-3 px-5 py-14 text-center">
-      <p className="font-label-bold text-label-bold text-on-surface">No se pudo cargar el catálogo</p>
-      <p className="font-body-md text-body-md text-on-surface-variant">{errorCarga}</p>
-      <button
-        type="button"
-        onClick={cargar}
-        className="inline-flex h-10 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high"
-      >
-        Reintentar
-      </button>
-    </div>
+  const botonSecundario =
+    'inline-flex h-10 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high'
+
+  const estado = errorCarga ? (
+    <EstadoVacio
+      variante="error"
+      titulo="No se pudo cargar el catálogo"
+      descripcion={errorCarga}
+      accion={
+        <button type="button" onClick={cargar} className={botonSecundario}>
+          Reintentar
+        </button>
+      }
+    />
   ) : busqueda ? (
-    <div className="flex flex-col items-center gap-3 px-5 py-14 text-center">
-      <p className="font-label-bold text-label-bold text-on-surface">No se encontraron resultados</p>
-      <p className="font-body-md text-body-md text-on-surface-variant break-words">
-        Ninguna coincidencia para “{busqueda}”.
-      </p>
-      <button
-        type="button"
-        onClick={() => setBusqueda('')}
-        className="inline-flex h-10 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high"
-      >
-        Limpiar búsqueda
-      </button>
-    </div>
+    <EstadoVacio
+      variante="busqueda"
+      titulo="No se encontraron resultados"
+      descripcion={`Ninguna coincidencia para “${busqueda}”.`}
+      accion={
+        <button type="button" onClick={() => setBusqueda('')} className={botonSecundario}>
+          Limpiar búsqueda
+        </button>
+      }
+    />
   ) : (
-    <div className="flex flex-col items-center gap-1.5 px-5 py-14 text-center">
-      <p className="font-label-bold text-label-bold text-on-surface">Aún no hay equipos registrados</p>
-      <p className="font-body-md text-body-md text-on-surface-variant">
-        Crea el primero para poder asignarle características.
-      </p>
-    </div>
+    <EstadoVacio
+      icon={HardDrive}
+      titulo="Aún no hay equipos registrados"
+      descripcion="Crea el primero para poder asignarle características."
+      accion={
+        <Link to="/catalogo/equipos/nuevo" className={botonSecundario}>
+          Nuevo equipo
+        </Link>
+      }
+    />
   )
 
   // Editor compartido por la fila desplegada de escritorio y la tarjeta de
@@ -219,7 +221,9 @@ function EquiposList() {
 
         {/* ---- Escritorio y tablet: tabla ---- */}
         <div className="hidden md:block bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm">
-          {mostrarEstado ? (
+          {cargando ? (
+            <SkeletonTabla columnas={5} filas={5} />
+          ) : sinContenido ? (
             estado
           ) : (
             <table className="w-full text-left border-collapse text-sm">
@@ -346,7 +350,9 @@ function EquiposList() {
 
         {/* ---- Móvil: tarjetas apiladas; se toca la tarjeta completa ---- */}
         <div className="md:hidden flex flex-col gap-stack-sm">
-          {mostrarEstado ? (
+          {cargando ? (
+            <SkeletonTarjetas filas={4} />
+          ) : sinContenido ? (
             <div className="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-sm">
               {estado}
             </div>
@@ -363,7 +369,7 @@ function EquiposList() {
                   <button
                     type="button"
                     onClick={() => (tiene ? navigate(`/catalogo/equipos/${equipo.id}/ver`) : alternar(equipo.id, 'agregar'))}
-                    className="flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left transition-colors hover:bg-surface-container-low"
+                    className="flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left transition-all hover:bg-surface-container-low active:bg-surface-container-low"
                   >
                     <div className="min-w-0">
                       <p className="font-body-md text-body-md font-medium text-on-surface break-words">
@@ -392,7 +398,7 @@ function EquiposList() {
           )}
         </div>
 
-        {!mostrarEstado && (
+        {!cargando && !sinContenido && (
           <p className="font-label-sm text-label-sm text-on-surface-variant tabular-nums">
             {visibles.length === equipos.length
               ? `${equipos.length} equipos`

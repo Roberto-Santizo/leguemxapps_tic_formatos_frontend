@@ -39,7 +39,7 @@ const SECCIONES = [
 
 function Catalogo() {
   return (
-    <div className="flex-1 p-container-padding md:p-stack-lg bg-background">
+    <div className="flex-1 animate-view-in p-container-padding md:p-stack-lg bg-background">
       <div className="max-w-[1200px] mx-auto flex flex-col gap-stack-lg">
         <div>
           <h1 className="font-headline-lg text-headline-lg font-bold text-on-surface mb-1">Catálogo</h1>
@@ -55,7 +55,7 @@ function Catalogo() {
               <Link
                 key={seccion.to}
                 to={seccion.to}
-                className="group flex flex-col gap-stack-md rounded-2xl border border-outline-variant bg-surface-container-lowest p-6 shadow-sm transition-all duration-150 hover:border-outline hover:shadow-md"
+                className="group flex flex-col gap-stack-md rounded-2xl border border-outline-variant bg-surface-container-lowest p-6 shadow-sm transition-all duration-150 hover:border-outline hover:shadow-md active:scale-[0.99]"
               >
                 <div className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-secondary-container text-on-secondary-container">
                   <Icon className="h-6 w-6" strokeWidth={2} />

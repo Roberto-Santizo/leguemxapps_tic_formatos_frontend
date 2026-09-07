@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, Loader2, Save } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
+import { mostrarToast } from './Toast.jsx'
 
 const inputClasses =
   'h-11 w-full rounded-lg border border-outline-variant bg-surface px-3.5 font-body-md text-body-md text-on-surface transition-colors hover:border-outline focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25 disabled:opacity-60'
@@ -53,6 +54,9 @@ function CatalogoFormPage({ textos, onObtener, onCrear, onActualizar, rutaBase }
       } else {
         await onCrear(token, { name: limpio })
       }
+      // Confirmación explícita: antes el guardado terminaba en un cambio de
+      // pantalla silencioso y el usuario no sabía si había pasado algo.
+      mostrarToast(esEdicion ? textos.avisoActualizado : textos.avisoCreado)
       navigate(rutaBase)
     } catch (err) {
       setError(err.message || 'No se pudo guardar')

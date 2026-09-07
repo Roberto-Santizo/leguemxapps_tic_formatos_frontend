@@ -7,6 +7,8 @@ const TEXTOS = {
   tituloEditar: 'Editar marca',
   labelCampo: 'Nombre de la marca',
   placeholderCampo: 'Ej. Dell',
+  avisoCreado: 'Marca creada',
+  avisoActualizado: 'Marca actualizada',
 }
 
 function MarcasForm() {

@@ -350,6 +350,24 @@ export async function listarEquipos(token) {
   return laravelRequest('/equipments', { token, method: 'GET' })
 }
 
+// Equipo sin entrega activa (nunca entregado, o su última entrega ya se
+// devolvió) -- es la lista correcta para elegir equipo al armar una entrega
+// nueva o al agregar uno a una ya existente, en vez de listarEquipos (que
+// trae TODO el inventario, incluido lo que ya está en manos de alguien).
+export async function listarEquiposDisponibles(token, { type, search } = {}) {
+  const params = new URLSearchParams()
+  if (type) params.set('type', type)
+  if (search) params.set('search', search)
+  const query = params.toString()
+  return laravelRequest(`/equipments/available${query ? `?${query}` : ''}`, { token, method: 'GET' })
+}
+
+// Historial de a quién se le ha entregado un equipo y si ya lo devolvió,
+// de la más reciente a la más antigua.
+export async function historialEquipo(token, id) {
+  return laravelRequest(`/equipments/${id}/history`, { token, method: 'GET' })
+}
+
 export async function obtenerEquipo(token, id) {
   return laravelRequest(`/equipments/${id}`, { token, method: 'GET' })
 }
@@ -475,6 +493,118 @@ export async function eliminarDocumentoEntrega(token, id) {
   return laravelRequest(`/delivery_documents/${id}`, { token, method: 'DELETE' })
 }
 
+// ---------------------------------------------------------------------------
+// Detalles de Documento de Entrega (delivery_document_details): mantenimiento
+// sobre una entrega YA creada -- agregar un equipo que se quedó fuera,
+// corregir la observación de uno ya entregado, o quitar un renglón que se
+// agregó por error. La creación normal de una entrega (con todos sus
+// equipos de una vez) sigue yendo por crearDocumentoEntrega; esto es solo
+// para editar después.
+//
+// El filtro `pending` (GET) deja solo los detalles sin devolución
+// registrada -- es la lista que usa la pantalla de Devolución para saber
+// qué sigue pendiente de esa entrega.
+// ---------------------------------------------------------------------------
+
+export async function listarDetallesEntrega(token, { deliveryDocumentId, equipmentId, pending } = {}) {
+  const params = new URLSearchParams()
+  if (deliveryDocumentId != null) params.set('deliveryDocumentId', deliveryDocumentId)
+  if (equipmentId != null) params.set('equipmentId', equipmentId)
+  if (pending) params.set('pending', 'true')
+  const query = params.toString()
+  return laravelRequest(`/delivery_document_details${query ? `?${query}` : ''}`, { token, method: 'GET' })
+}
+
+export async function agregarDetalleEntrega(token, { delivery_document_id, equipment_id, observations }) {
+  return laravelRequest('/delivery_document_details', {
+    token,
+    method: 'POST',
+    body: JSON.stringify({ delivery_document_id, equipment_id, observations }),
+  })
+}
+
+// Solo corrige la observación: cambiar equipo o documento equivale a
+// rehacer la entrega (regla de la API).
+export async function actualizarDetalleEntrega(token, id, { observations }) {
+  return laravelRequest(`/delivery_document_details/${id}`, {
+    token,
+    method: 'PUT',
+    body: JSON.stringify({ observations }),
+  })
+}
+
+// Borrado definitivo (sin soft delete) -- la pantalla debe confirmar antes.
+export async function eliminarDetalleEntrega(token, id) {
+  return laravelRequest(`/delivery_document_details/${id}`, { token, method: 'DELETE' })
+}
+
+// ---------------------------------------------------------------------------
+// Documentos de Devolución (Laravel): GET/POST /return_documents,
+// GET/PUT /return_documents/{id}. Una devolución siempre nace de una entrega
+// (delivery_document_id) y puede ser parcial -- solo se envían los equipos
+// que regresan. Mismo candado que el resto: jwt.auth, sin rol. El usuario
+// autenticado queda en user_id y la fecha (return_date) la pone el servidor.
+//
+// El alta es multipart/form-data porque lleva las dos firmas como archivo
+// (igual que crearDocumentoEntrega); cada item apunta al
+// delivery_document_detail_id de la entrega original, no al equipment_id.
+// El POST no devuelve el documento creado (data: true); para leerlo hay que
+// pedir obtenerDocumentoDevolucion aparte.
+// ---------------------------------------------------------------------------
+
+export async function listarDocumentosDevolucion(token, { deliveryDocumentId, employeeId } = {}) {
+  const params = new URLSearchParams()
+  if (deliveryDocumentId != null) params.set('deliveryDocumentId', deliveryDocumentId)
+  if (employeeId != null) params.set('employeeId', employeeId)
+  const query = params.toString()
+  return laravelRequest(`/return_documents${query ? `?${query}` : ''}`, { token, method: 'GET' })
+}
+
+export async function obtenerDocumentoDevolucion(token, id) {
+  return laravelRequest(`/return_documents/${id}`, { token, method: 'GET' })
+}
+
+export async function crearDocumentoDevolucion(token, formData) {
+  return laravelRequestMultipart('/return_documents', { token, formData, method: 'POST' })
+}
+
+// Solo corrige observaciones generales de la devolución.
+export async function actualizarDocumentoDevolucion(token, id, { observations }) {
+  return laravelRequest(`/return_documents/${id}`, {
+    token,
+    method: 'PUT',
+    body: JSON.stringify({ observations }),
+  })
+}
+
+// Detalles de Documento de Devolución (return_document_details): cada
+// equipo incluido en una devolución. Lo normal es crearlos junto al
+// documento (crearDocumentoDevolucion); estas sirven para completar una
+// devolución ya firmada o corregir la observación de un equipo devuelto.
+export async function listarDetallesDevolucion(token, { returnDocumentId } = {}) {
+  const query = returnDocumentId != null ? `?returnDocumentId=${returnDocumentId}` : ''
+  return laravelRequest(`/return_document_details${query}`, { token, method: 'GET' })
+}
+
+export async function agregarDetalleDevolucion(
+  token,
+  { return_document_id, delivery_document_detail_id, observations },
+) {
+  return laravelRequest('/return_document_details', {
+    token,
+    method: 'POST',
+    body: JSON.stringify({ return_document_id, delivery_document_detail_id, observations }),
+  })
+}
+
+export async function actualizarDetalleDevolucion(token, id, { observations }) {
+  return laravelRequest(`/return_document_details/${id}`, {
+    token,
+    method: 'PUT',
+    body: JSON.stringify({ observations }),
+  })
+}
+
 // URL pública de un archivo del disco "public" de Laravel (las firmas se
 // guardan ahí como ruta relativa, ej. "signatures/uuid.png"). Por defecto,
 // Storage::disk('public')->url($path) en Laravel arma esa URL como
@@ -523,6 +653,8 @@ export default {
   obtenerEquipo,
   crearEquipo,
   actualizarEquipo,
+  listarEquiposDisponibles,
+  historialEquipo,
   listarCaracteristicas,
   obtenerCaracteristica,
   crearCaracteristica,
@@ -536,5 +668,16 @@ export default {
   obtenerDocumentoEntrega,
   crearDocumentoEntrega,
   eliminarDocumentoEntrega,
+  listarDetallesEntrega,
+  agregarDetalleEntrega,
+  actualizarDetalleEntrega,
+  eliminarDetalleEntrega,
+  listarDocumentosDevolucion,
+  obtenerDocumentoDevolucion,
+  crearDocumentoDevolucion,
+  actualizarDocumentoDevolucion,
+  listarDetallesDevolucion,
+  agregarDetalleDevolucion,
+  actualizarDetalleDevolucion,
   urlArchivoPublico,
 }

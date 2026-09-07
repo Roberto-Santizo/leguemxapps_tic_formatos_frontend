@@ -1,22 +1,19 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import {
   ArrowLeft,
   Check,
   CircleUser,
   Download,
+  ExternalLink,
   Loader2,
-  Lock,
   MessageSquareText,
   PenLine,
   PlusCircle,
   Rows3,
-  Trash2,
-  Undo2,
   X,
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
-import ConfirmDialog from '../components/ConfirmDialog.jsx'
 import EstadoVacio from '../components/EstadoVacio.jsx'
 import InlineEditableText from '../components/InlineEditableText.jsx'
 import SearchableSelect from '../components/SearchableSelect.jsx'
@@ -24,19 +21,19 @@ import { mostrarToast } from '../components/Toast.jsx'
 import { SeccionCard, Campo } from './FormatoActa.jsx'
 import { FORMATOS } from '../config/formatos.js'
 import {
-  obtenerDocumentoEntrega,
-  eliminarDocumentoEntrega,
+  obtenerDocumentoDevolucion,
+  actualizarDocumentoDevolucion,
+  actualizarDetalleDevolucion,
+  agregarDetalleDevolucion,
+  listarDetallesEntrega,
   urlArchivoPublico,
-  listarEquiposDisponibles,
-  agregarDetalleEntrega,
-  actualizarDetalleEntrega,
-  eliminarDetalleEntrega,
 } from '../services/api.js'
 import { generatePdfFromElement } from '../utils/generatePdf.js'
 
-const formato = FORMATOS.entrega
+const formato = FORMATOS.devolucion
 
 function nombrePlanta(location) {
+  if (location === 'Planta Tejar' || location === 'Planta Parramos') return location
   return Number(location) === 1 ? 'Planta Tejar' : 'Planta Parramos'
 }
 
@@ -44,14 +41,12 @@ const valorClass =
   'flex h-11 items-center rounded-lg border border-outline-variant bg-surface-container-low px-3.5 font-body-md text-body-md text-on-surface'
 
 /**
- * Firma guardada en el storage del backend. Si la imagen no carga (ruta
- * distinta, archivo borrado, storage sin publicar) el navegador dibuja su
- * ícono de imagen rota, que en un acta se ve como un error del sistema. Aquí
- * se sustituye por el mismo recuadro de "Sin firma" que ya existe.
+ * Firma guardada en el storage -- mismo comportamiento que
+ * HistorialEntregaView.jsx: si la imagen no carga, se muestra "Sin firma"
+ * en vez del ícono de imagen rota del navegador.
  */
 function FirmaImagen({ url, alt }) {
   const [fallo, setFallo] = useState(false)
-
   if (!url || fallo) {
     return (
       <span className="font-label-sm text-label-sm text-on-surface-variant">
@@ -59,96 +54,78 @@ function FirmaImagen({ url, alt }) {
       </span>
     )
   }
-
-  return (
-    <img
-      src={url}
-      alt={alt}
-      onError={() => setFallo(true)}
-      className="max-h-full max-w-full object-contain"
-    />
-  )
+  return <img src={url} alt={alt} onError={() => setFallo(true)} className="max-h-full max-w-full object-contain" />
 }
 
 /**
- * Detalle de un Documento de Entrega (GET /delivery_documents/{id}) --
- * destino del ojo/tarjeta en HistorialEntregaList. Se pide por id, así que
- * funciona con URL directa o al recargar la página, igual que EquipoView.
- *
- * Se maqueta como el formato físico de la acta (mismo membrete, secciones y
- * clases que FormatoActa.jsx) pero de solo lectura y con los datos reales,
- * porque es justo el contenido que se exporta con el botón PDF.
+ * Detalle de un Documento de Devolución (GET /return_documents/{id}) --
+ * destino del ojo/tarjeta en HistorialDevolucionList. Solo lectura salvo las
+ * observaciones (generales y por equipo), que sí se pueden corregir --
+ * es lo único que permite la API sobre una devolución ya firmada.
  */
-function HistorialEntregaView() {
+function HistorialDevolucionView() {
   const { id } = useParams()
   const { token } = useAuth()
-  const navigate = useNavigate()
   const hojaRef = useRef(null)
 
   const [documento, setDocumento] = useState(null)
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState('')
-
-  const [eliminando, setEliminando] = useState(false)
-  const [borrando, setBorrando] = useState(false)
-  const [errorBorrar, setErrorBorrar] = useState('')
-
   const [generandoPdf, setGenerandoPdf] = useState(false)
 
-  // --- Mantenimiento del equipo ya entregado: agregar uno que se quedó
-  // fuera, corregir la observación de uno, o quitarlo (delivery_document_details) ---
-  const [equipos, setEquipos] = useState([])
+  // --- Completar una devolución ya firmada: agregar un equipo pendiente de
+  // la misma entrega que se quedó fuera (POST /return_document_details) ---
   const [agregandoEquipo, setAgregandoEquipo] = useState(false)
-  const [nuevoEquipoId, setNuevoEquipoId] = useState('')
-  const [nuevoEquipoObs, setNuevoEquipoObs] = useState('')
+  const [pendientes, setPendientes] = useState([])
+  const [nuevoDetalleId, setNuevoDetalleId] = useState('')
+  const [nuevoDetalleObs, setNuevoDetalleObs] = useState('')
   const [guardandoEquipo, setGuardandoEquipo] = useState(false)
-  const [quitando, setQuitando] = useState(null) // item o null
-  const [quitandoEnCurso, setQuitandoEnCurso] = useState(false)
-  const [errorQuitar, setErrorQuitar] = useState('')
-
-  function recargar() {
-    return obtenerDocumentoEntrega(token, id).then((data) => setDocumento(data))
-  }
 
   useEffect(() => {
     let vivo = true
     setCargando(true)
     setError('')
-    obtenerDocumentoEntrega(token, id)
+    obtenerDocumentoDevolucion(token, id)
       .then((data) => vivo && setDocumento(data))
-      .catch((err) => vivo && setError(err.message || 'No se pudo cargar el documento de entrega'))
+      .catch((err) => vivo && setError(err.message || 'No se pudo cargar el documento de devolución'))
       .finally(() => vivo && setCargando(false))
     return () => {
       vivo = false
     }
   }, [id, token])
 
+  function recargar() {
+    return obtenerDocumentoDevolucion(token, id).then((data) => setDocumento(data))
+  }
+
+  // Lo que se puede agregar a ESTA devolución es el equipo que sigue
+  // pendiente de la misma entrega de origen (todavía no se devolvió en
+  // ningún documento) -- se reutiliza el mismo listado que arma la pantalla
+  // de "Registrar devolución", no un catálogo aparte.
   function abrirAgregarEquipo() {
     setAgregandoEquipo(true)
-    if (equipos.length === 0) {
-      listarEquiposDisponibles(token)
-        .then((data) => setEquipos(Array.isArray(data) ? data : []))
-        .catch(() => setEquipos([]))
-    }
+    listarDetallesEntrega(token, { deliveryDocumentId: documento.delivery_document_id, pending: true })
+      .then((data) => setPendientes(Array.isArray(data) ? data : []))
+      .catch(() => setPendientes([]))
   }
 
   function cancelarAgregarEquipo() {
     setAgregandoEquipo(false)
-    setNuevoEquipoId('')
-    setNuevoEquipoObs('')
+    setNuevoDetalleId('')
+    setNuevoDetalleObs('')
   }
 
   async function confirmarAgregarEquipo() {
-    if (!nuevoEquipoId) return
+    if (!nuevoDetalleId) return
     setGuardandoEquipo(true)
     try {
-      await agregarDetalleEntrega(token, {
-        delivery_document_id: Number(id),
-        equipment_id: Number(nuevoEquipoId),
-        observations: nuevoEquipoObs.trim() || undefined,
+      await agregarDetalleDevolucion(token, {
+        return_document_id: Number(id),
+        delivery_document_detail_id: Number(nuevoDetalleId),
+        observations: nuevoDetalleObs.trim() || undefined,
       })
       await recargar()
-      mostrarToast('Equipo agregado a la entrega')
+      mostrarToast('Equipo agregado a la devolución')
       cancelarAgregarEquipo()
     } catch (err) {
       mostrarToast(err.message || 'No se pudo agregar el equipo', { tipo: 'error' })
@@ -157,9 +134,19 @@ function HistorialEntregaView() {
     }
   }
 
-  async function corregirObservacion(itemId, observations) {
+  async function corregirObservacionGeneral(observations) {
     try {
-      await actualizarDetalleEntrega(token, itemId, { observations })
+      await actualizarDocumentoDevolucion(token, id, { observations })
+      setDocumento((doc) => ({ ...doc, observations }))
+      mostrarToast('Observación actualizada')
+    } catch (err) {
+      mostrarToast(err.message || 'No se pudo corregir la observación', { tipo: 'error' })
+    }
+  }
+
+  async function corregirObservacionItem(itemId, observations) {
+    try {
+      await actualizarDetalleDevolucion(token, itemId, { observations })
       setDocumento((doc) => ({
         ...doc,
         items: doc.items.map((it) => (it.id === itemId ? { ...it, observations } : it)),
@@ -170,62 +157,28 @@ function HistorialEntregaView() {
     }
   }
 
-  async function confirmarQuitarEquipo() {
-    const item = quitando
-    setQuitandoEnCurso(true)
-    setErrorQuitar('')
-    try {
-      await eliminarDetalleEntrega(token, item.id)
-      setDocumento((doc) => ({ ...doc, items: doc.items.filter((it) => it.id !== item.id) }))
-      setQuitando(null)
-      mostrarToast('Equipo quitado de la entrega')
-    } catch (err) {
-      setErrorQuitar(err.message || 'No se pudo quitar el equipo')
-    } finally {
-      setQuitandoEnCurso(false)
-    }
-  }
-
   async function handleDescargarPdf() {
     if (!hojaRef.current) return
     setGenerandoPdf(true)
     try {
-      await generatePdfFromElement(hojaRef.current, `entrega-equipo-${id}.pdf`)
+      await generatePdfFromElement(hojaRef.current, `devolucion-equipo-${id}.pdf`)
     } catch {
-      // Antes fallaba en silencio: el usuario veía la rueda girar y detenerse
-      // sin PDF y sin explicación.
       mostrarToast('No se pudo generar el PDF', { tipo: 'error' })
     } finally {
       setGenerandoPdf(false)
     }
   }
 
-  async function confirmarEliminar() {
-    setBorrando(true)
-    setErrorBorrar('')
-    try {
-      await eliminarDocumentoEntrega(token, id)
-      mostrarToast('Entrega eliminada')
-      navigate('/historial/entrega', { replace: true })
-    } catch (err) {
-      setErrorBorrar(err.message || 'No se pudo eliminar el documento')
-      setBorrando(false)
-    }
-  }
-
   return (
     <div className="flex-1 animate-view-in">
-      {/* El ref del PDF NO envuelve el botón "volver": antes la captura lo
-          incluía y el acta descargada salía con una flecha de navegación
-          impresa. Ahora arranca en el membrete. */}
       <div className="p-container-padding md:p-8">
         <div className="mx-auto max-w-4xl space-y-stack-lg pb-4">
           <Link
-            to="/historial/entrega"
+            to="/historial/devolucion"
             className="inline-flex h-10 items-center gap-2 self-start rounded-lg border border-outline-variant bg-surface-container-high px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:border-outline hover:bg-surface-container-highest"
           >
             <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={2.5} />
-            Entrega de Equipo
+            Devolución de Equipo
           </Link>
 
           {cargando ? (
@@ -238,12 +191,10 @@ function HistorialEntregaView() {
               <EstadoVacio
                 variante="error"
                 titulo={error ? 'No se pudo cargar el documento' : 'Documento no encontrado'}
-                descripcion={
-                  error || 'Es posible que esta entrega ya se haya eliminado desde otra sesión.'
-                }
+                descripcion={error || 'Es posible que esta devolución ya no exista.'}
                 accion={
                   <Link
-                    to="/historial/entrega"
+                    to="/historial/devolucion"
                     className="inline-flex h-10 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high"
                   >
                     Volver al historial
@@ -253,7 +204,7 @@ function HistorialEntregaView() {
             </div>
           ) : (
             <div ref={hojaRef} className="space-y-stack-lg">
-              {/* Membrete -- mismo bloque que FormatoActa.jsx */}
+              {/* Membrete */}
               <div className="overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest shadow-sm">
                 <div className="flex flex-wrap items-start justify-between gap-column-gap p-stack-lg">
                   <div className="flex items-start gap-stack-md">
@@ -293,10 +244,10 @@ function HistorialEntregaView() {
               {/* Datos del usuario */}
               <SeccionCard icon={CircleUser} titulo="Datos del Usuario">
                 <div className="grid grid-cols-12 gap-x-column-gap gap-y-stack-md p-5">
-                  <Campo label="Fecha de Entrega">
-                    <div className={valorClass}>{documento.delivery_date || '—'}</div>
+                  <Campo label="Fecha de Devolución">
+                    <div className={valorClass}>{documento.return_date || '—'}</div>
                   </Campo>
-                  <Campo label="Responsable que Recibe" span="col-span-12 sm:col-span-8">
+                  <Campo label="Colaborador" span="col-span-12 sm:col-span-8">
                     <div className={valorClass}>{documento.employee_name || '—'}</div>
                   </Campo>
                   <Campo label="Departamento">
@@ -305,13 +256,22 @@ function HistorialEntregaView() {
                   <Campo label="Planta">
                     <div className={valorClass}>{nombrePlanta(documento.location)}</div>
                   </Campo>
+                  <Campo label="Entrega de origen" span="col-span-12 sm:col-span-4">
+                    <Link
+                      to={`/historial/entrega/${documento.delivery_document_id}`}
+                      className="flex h-11 items-center justify-between gap-2 rounded-lg border border-outline-variant bg-surface-container-low px-3.5 font-body-md text-body-md text-on-surface transition-colors hover:bg-surface-container-high"
+                    >
+                      Ver entrega #{documento.delivery_document_id}
+                      <ExternalLink className="h-4 w-4 shrink-0 text-on-surface-variant" strokeWidth={2} />
+                    </Link>
+                  </Campo>
                 </div>
               </SeccionCard>
 
-              {/* Tabla de equipo */}
+              {/* Tabla de equipo devuelto */}
               <SeccionCard
                 icon={Rows3}
-                titulo={formato.tituloTablaCorta}
+                titulo="Equipo Devuelto"
                 acciones={
                   <button
                     type="button"
@@ -330,13 +290,13 @@ function HistorialEntregaView() {
                   </div>
                 ) : (
                   <div className="w-full overflow-x-auto">
-                    <table className="w-full min-w-[760px] border-collapse text-left">
+                    <table className="w-full min-w-[640px] border-collapse text-left">
                       <thead>
                         <tr className="border-b border-outline-variant bg-surface-container-low">
                           <th className="w-14 py-2.5 pl-5 pr-3 text-right font-label-sm text-label-sm font-bold uppercase tracking-wide text-on-surface-variant">
                             No.
                           </th>
-                          {['Equipo', 'Marca', 'Modelo', 'No. Serie', 'Estado', 'Observaciones'].map((col) => (
+                          {['Equipo', 'Marca', 'Modelo', 'No. Serie', 'Observaciones'].map((col) => (
                             <th
                               key={col}
                               className="py-2.5 pr-3 font-label-sm text-label-sm font-bold uppercase tracking-wide text-on-surface-variant"
@@ -344,7 +304,6 @@ function HistorialEntregaView() {
                               {col}
                             </th>
                           ))}
-                          <th className="w-12 py-2.5 pr-5" />
                         </tr>
                       </thead>
                       <tbody>
@@ -354,44 +313,19 @@ function HistorialEntregaView() {
                               {String(indice + 1).padStart(2, '0')}
                             </td>
                             <td className="py-2 pr-3 font-medium text-on-surface break-words">
-                              <div className="flex items-center gap-2">
-                                <span>{item.equipment_name || '—'}</span>
-                                {item.returned && (
-                                  <span className="shrink-0 rounded-full bg-surface-container-high px-2 py-0.5 font-label-sm text-label-sm text-on-surface-variant">
-                                    Devuelto
-                                  </span>
-                                )}
-                              </div>
+                              {item.equipment_name || '—'}
                             </td>
                             <td className="py-2 pr-3 text-on-surface-variant break-words">{item.equipment_brand || '—'}</td>
                             <td className="py-2 pr-3 text-on-surface-variant break-words">{item.equipment_model || '—'}</td>
                             <td className="py-2 pr-3 font-mono uppercase text-on-surface-variant">
                               {item.equipment_serie || '—'}
                             </td>
-                            <td className="py-2 pr-3 text-on-surface-variant">{item.is_used || '—'}</td>
-                            <td className="py-2 pr-3 text-on-surface-variant break-words">
-                              {item.returned ? (
-                                item.observations || '—'
-                              ) : (
-                                <InlineEditableText
-                                  value={item.observations || 'Sin observaciones'}
-                                  onChange={(valor) => corregirObservacion(item.id, valor)}
-                                  title="Corregir observación"
-                                />
-                              )}
-                            </td>
-                            <td className="py-2 pr-5">
-                              {!item.returned && (
-                                <button
-                                  type="button"
-                                  onClick={() => setQuitando(item)}
-                                  aria-label="Quitar equipo de la entrega"
-                                  title="Quitar (se agregó por error)"
-                                  className="grid h-8 w-8 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-error-container hover:text-on-error-container"
-                                >
-                                  <Trash2 className="h-4 w-4" strokeWidth={2} />
-                                </button>
-                              )}
+                            <td className="py-2 pr-5 text-on-surface-variant break-words">
+                              <InlineEditableText
+                                value={item.observations || 'Sin observaciones'}
+                                onChange={(valor) => corregirObservacionItem(item.id, valor)}
+                                title="Corregir observación"
+                              />
                             </td>
                           </tr>
                         ))}
@@ -399,21 +333,24 @@ function HistorialEntregaView() {
                         {agregandoEquipo && (
                           <tr className="border-b border-outline-variant bg-surface-container-low/40">
                             <td className="py-2 pl-5 pr-3" />
-                            <td className="py-2 pr-3" colSpan={4}>
+                            <td className="py-2 pr-3" colSpan={3}>
                               <SearchableSelect
-                                options={equipos.map((e) => ({ id: e.id, name: e.brand ? `${e.name} — ${e.brand}` : e.name }))}
-                                value={nuevoEquipoId}
-                                onChange={setNuevoEquipoId}
+                                options={pendientes.map((it) => ({
+                                  id: it.id,
+                                  name: it.equipment_brand ? `${it.equipment_name} — ${it.equipment_brand}` : it.equipment_name,
+                                }))}
+                                value={nuevoDetalleId}
+                                onChange={setNuevoDetalleId}
                                 disabled={guardandoEquipo}
-                                placeholder="Selecciona el equipo a agregar"
-                                emptyOptionsText="No hay equipos registrados en el catálogo todavía."
+                                placeholder="Selecciona el equipo pendiente"
+                                emptyOptionsText="Ya no queda equipo pendiente de esta entrega."
                               />
                             </td>
                             <td className="py-2 pr-3" colSpan={2}>
                               <input
                                 type="text"
-                                value={nuevoEquipoObs}
-                                onChange={(e) => setNuevoEquipoObs(e.target.value)}
+                                value={nuevoDetalleObs}
+                                onChange={(e) => setNuevoDetalleObs(e.target.value)}
                                 placeholder="Observaciones (opcional)"
                                 disabled={guardandoEquipo}
                                 className="h-10 w-full rounded-lg border border-outline-variant bg-surface px-3 font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/70 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25"
@@ -424,7 +361,7 @@ function HistorialEntregaView() {
                                 <button
                                   type="button"
                                   onClick={confirmarAgregarEquipo}
-                                  disabled={guardandoEquipo || !nuevoEquipoId}
+                                  disabled={guardandoEquipo || !nuevoDetalleId}
                                   aria-label="Confirmar equipo"
                                   title="Confirmar"
                                   className="grid h-8 w-8 place-items-center rounded-lg text-primary transition-colors hover:bg-primary/10 disabled:opacity-40"
@@ -455,28 +392,16 @@ function HistorialEntregaView() {
                 )}
               </SeccionCard>
 
-              {/* Cláusula de responsabilidad -- mismo texto fijo del formato */}
-              {formato.clausulas.length > 0 && (
-                <SeccionCard icon={Lock} titulo={formato.tituloClausula} nota="Texto fijo del formato">
-                  <div className="space-y-3 p-5">
-                    {formato.clausulas.map((texto) => (
-                      <p
-                        key={texto.slice(0, 40)}
-                        className="border-l-2 border-outline-variant pl-4 font-body-md text-body-md leading-relaxed text-pretty text-on-surface"
-                      >
-                        {texto}
-                      </p>
-                    ))}
-                  </div>
-                </SeccionCard>
-              )}
-
-              {/* Observaciones generales */}
+              {/* Observaciones generales -- editable, único campo que la API
+                  permite corregir sobre una devolución ya firmada. */}
               <SeccionCard icon={MessageSquareText} titulo="Observaciones Generales">
                 <div className="p-5">
-                  <p className="font-body-md text-body-md text-on-surface-variant">
-                    {documento.observations || 'Sin observaciones.'}
-                  </p>
+                  <InlineEditableText
+                    value={documento.observations || 'Sin observaciones'}
+                    onChange={corregirObservacionGeneral}
+                    title="Corregir observación"
+                    className="font-body-md text-body-md text-on-surface-variant"
+                  />
                 </div>
               </SeccionCard>
 
@@ -511,16 +436,6 @@ function HistorialEntregaView() {
       {!cargando && !error && documento && (
         <div className="sticky bottom-0 z-30 border-t border-outline-variant bg-surface-container-lowest px-container-padding py-3 shadow-sm md:px-8">
           <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-end gap-3">
-            {documento.items?.some((it) => !it.returned) && (
-              <button
-                type="button"
-                onClick={() => navigate(`/historial/entrega/${id}/devolucion`)}
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-outline-variant bg-surface-container-lowest px-6 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high"
-              >
-                <Undo2 className="h-4 w-4" strokeWidth={2.25} />
-                Registrar devolución
-              </button>
-            )}
             <button
               type="button"
               onClick={handleDescargarPdf}
@@ -534,53 +449,11 @@ function HistorialEntregaView() {
               )}
               Descargar PDF
             </button>
-            <button
-              type="button"
-              onClick={() => setEliminando(true)}
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-error/30 bg-surface-container-lowest px-6 font-label-bold text-label-bold text-error transition-colors hover:bg-error-container"
-            >
-              <Trash2 className="h-4 w-4" strokeWidth={2.25} />
-              Eliminar
-            </button>
           </div>
         </div>
       )}
-
-      <ConfirmDialog
-        abierto={eliminando}
-        variante="peligro"
-        titulo="Eliminar documento de entrega"
-        mensaje={`¿Desea eliminar esta entrega? Esta acción no se puede deshacer.${errorBorrar ? ` ${errorBorrar}` : ''}`}
-        textoConfirmar={borrando ? 'Eliminando...' : 'Sí, eliminar'}
-        onCancelar={() => {
-          if (borrando) return
-          setEliminando(false)
-          setErrorBorrar('')
-        }}
-        onConfirmar={confirmarEliminar}
-      />
-
-      <ConfirmDialog
-        abierto={Boolean(quitando)}
-        variante="peligro"
-        titulo="Quitar equipo de la entrega"
-        mensaje={
-          quitando
-            ? `¿Desea quitar "${quitando.equipment_name}" de esta entrega? Esta acción no se puede deshacer.${
-                errorQuitar ? ` ${errorQuitar}` : ''
-              }`
-            : ''
-        }
-        textoConfirmar={quitandoEnCurso ? 'Quitando...' : 'Sí, quitar'}
-        onCancelar={() => {
-          if (quitandoEnCurso) return
-          setQuitando(null)
-          setErrorQuitar('')
-        }}
-        onConfirmar={confirmarQuitarEquipo}
-      />
     </div>
   )
 }
 
-export default HistorialEntregaView
+export default HistorialDevolucionView

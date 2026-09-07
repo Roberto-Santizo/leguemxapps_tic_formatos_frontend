@@ -9,7 +9,7 @@
  */
 function EnConstruccion({ icon: Icon, titulo, descripcion }) {
   return (
-    <div className="flex-1 p-container-padding md:p-stack-lg bg-background">
+    <div className="flex-1 animate-view-in p-container-padding md:p-stack-lg bg-background">
       <div className="max-w-[1200px] mx-auto flex flex-col gap-stack-lg">
         <div>
           <h1 className="font-headline-lg text-headline-lg font-bold text-on-surface mb-1">{titulo}</h1>

@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Eye, Pencil, Plus, FileText, Download, Loader2 } from 'lucide-react'
+import { ArrowLeft, Eye, Pencil, Plus, FileText, Download } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 import Buscador from './Buscador.jsx'
 import ConfirmDialog from './ConfirmDialog.jsx'
+import EstadoVacio from './EstadoVacio.jsx'
+import { SkeletonTabla, SkeletonTarjetas } from './Skeleton.jsx'
 
 /**
  * Lista de un catálogo simple (solo campo `name`): Marcas o Departamentos.
@@ -20,60 +22,50 @@ import ConfirmDialog from './ConfirmDialog.jsx'
  * así que la lógica de cargar / buscar existe UNA sola vez.
  */
 
-// Estado vacío / cargando / sin resultados. Se usa igual en la tabla (dentro
-// de un td que ocupa toda la fila) y en la lista de tarjetas.
-function EstadoLista({ cargando, error, hayRegistros, busqueda, textos, onReintentar, onLimpiar }) {
-  if (cargando) {
-    return (
-      <div className="flex flex-col items-center gap-3 px-5 py-14 text-center">
-        <Loader2 className="h-6 w-6 animate-spin text-outline" strokeWidth={2} />
-        <p className="font-body-md text-body-md text-on-surface-variant">
-          Cargando {textos.plural}...
-        </p>
-      </div>
-    )
-  }
+const botonSecundario =
+  'inline-flex h-10 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high'
 
+/**
+ * Estado sin contenido: error, búsqueda sin coincidencias, o catálogo vacío.
+ * La carga ya NO pasa por aquí -- tiene sus propios esqueletos, que conservan
+ * la forma de la tabla y de las tarjetas para que no salte el layout.
+ *
+ * El estado vacío usa el mismo ícono que la tarjeta de Catálogo desde la que
+ * se entró (textos.icono), para que la pantalla se sienta continuación de esa
+ * tarjeta y no un lugar distinto.
+ */
+function EstadoLista({ error, hayRegistros, busqueda, textos, onReintentar, onLimpiar }) {
   if (error) {
     return (
-      <div className="flex flex-col items-center gap-3 px-5 py-14 text-center">
-        <p className="font-label-bold text-label-bold text-on-surface">No se pudo cargar el catálogo</p>
-        <p className="font-body-md text-body-md text-on-surface-variant">{error}</p>
-        <button
-          type="button"
-          onClick={onReintentar}
-          className="inline-flex h-10 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high"
-        >
-          Reintentar
-        </button>
-      </div>
+      <EstadoVacio
+        variante="error"
+        titulo="No se pudo cargar el catálogo"
+        descripcion={error}
+        accion={
+          <button type="button" onClick={onReintentar} className={botonSecundario}>
+            Reintentar
+          </button>
+        }
+      />
     )
   }
 
   if (!hayRegistros && busqueda) {
     return (
-      <div className="flex flex-col items-center gap-3 px-5 py-14 text-center">
-        <p className="font-label-bold text-label-bold text-on-surface">No se encontraron resultados</p>
-        <p className="font-body-md text-body-md text-on-surface-variant break-words">
-          Ninguna coincidencia para “{busqueda}”.
-        </p>
-        <button
-          type="button"
-          onClick={onLimpiar}
-          className="inline-flex h-10 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high"
-        >
-          Limpiar búsqueda
-        </button>
-      </div>
+      <EstadoVacio
+        variante="busqueda"
+        titulo="No se encontraron resultados"
+        descripcion={`Ninguna coincidencia para “${busqueda}”.`}
+        accion={
+          <button type="button" onClick={onLimpiar} className={botonSecundario}>
+            Limpiar búsqueda
+          </button>
+        }
+      />
     )
   }
 
-  return (
-    <div className="flex flex-col items-center gap-1.5 px-5 py-14 text-center">
-      <p className="font-label-bold text-label-bold text-on-surface">{textos.vacioTitulo}</p>
-      <p className="font-body-md text-body-md text-on-surface-variant">{textos.vacioTexto}</p>
-    </div>
-  )
+  return <EstadoVacio icon={textos.icono} titulo={textos.vacioTitulo} descripcion={textos.vacioTexto} />
 }
 
 function CatalogoLista({ textos, onListar, rutaBase }) {
@@ -116,11 +108,10 @@ function CatalogoLista({ textos, onListar, rutaBase }) {
   }
 
   const hayRegistros = visibles.length > 0
-  const mostrarEstado = cargando || errorCarga || !hayRegistros
+  const sinContenido = !cargando && (Boolean(errorCarga) || !hayRegistros)
 
   const estado = (
     <EstadoLista
-      cargando={cargando}
       error={errorCarga}
       hayRegistros={hayRegistros}
       busqueda={busqueda}
@@ -186,7 +177,9 @@ function CatalogoLista({ textos, onListar, rutaBase }) {
 
           {/* ---- Desktop y tablet: tabla, ojo (ver) + lápiz (editar con confirmación) ---- */}
           <div className="hidden md:block bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm">
-            {mostrarEstado ? (
+            {cargando ? (
+              <SkeletonTabla columnas={3} filas={5} />
+            ) : sinContenido ? (
               estado
             ) : (
               <table className="w-full text-left border-collapse text-sm">
@@ -243,7 +236,9 @@ function CatalogoLista({ textos, onListar, rutaBase }) {
 
           {/* ---- Móvil: tarjetas apiladas, sin botones -- toda la tarjeta lleva al detalle ---- */}
           <div className="md:hidden flex flex-col gap-stack-sm">
-            {mostrarEstado ? (
+            {cargando ? (
+              <SkeletonTarjetas filas={4} />
+            ) : sinContenido ? (
               <div className="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-sm">
                 {estado}
               </div>
@@ -253,7 +248,7 @@ function CatalogoLista({ textos, onListar, rutaBase }) {
                   key={registro.id}
                   type="button"
                   onClick={() => verRegistro(registro)}
-                  className="flex w-full items-center justify-between gap-3 bg-surface-container-lowest border border-outline-variant rounded-xl shadow-sm px-4 py-3.5 text-left transition-colors hover:bg-surface-container-low"
+                  className="flex w-full items-center justify-between gap-3 bg-surface-container-lowest border border-outline-variant rounded-xl shadow-sm px-4 py-3.5 text-left transition-all hover:bg-surface-container-low active:scale-[0.99] active:bg-surface-container-low"
                 >
                   <div className="min-w-0">
                     <p className="font-body-md text-body-md font-medium text-on-surface break-words">
@@ -268,7 +263,7 @@ function CatalogoLista({ textos, onListar, rutaBase }) {
             )}
           </div>
 
-          {!mostrarEstado && (
+          {!cargando && !sinContenido && (
             <p className="font-label-sm text-label-sm text-on-surface-variant tabular-nums">
               {visibles.length === registros.length
                 ? `${registros.length} ${textos.plural}`

@@ -217,7 +217,7 @@ function Usuarios() {
 
   return (
     <>
-      <div className="flex-1 p-container-padding md:p-stack-lg bg-background">
+      <div className="flex-1 animate-view-in p-container-padding md:p-stack-lg bg-background">
         <div className="max-w-[1200px] mx-auto flex flex-col gap-stack-lg">
           {/* Header */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">

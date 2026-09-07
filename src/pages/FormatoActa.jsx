@@ -15,11 +15,12 @@ import {
 } from 'lucide-react'
 import FirmaPad from '../components/FirmaPad.jsx'
 import SearchableSelect from '../components/SearchableSelect.jsx'
+import { mostrarToast } from '../components/Toast.jsx'
 import useLocalStorageState from '../hooks/useLocalStorageState.js'
 import { getFormato } from '../config/formatos.js'
 import EnConstruccion from '../components/EnConstruccion.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
-import { listarEmpleados, listarDepartamentos, listarEquipos, crearDocumentoEntrega } from '../services/api.js'
+import { listarEmpleados, listarDepartamentos, listarEquiposDisponibles, crearDocumentoEntrega } from '../services/api.js'
 
 // Convierte el dataURL (base64) que entrega FirmaPad a un Blob, para poder
 // mandarlo como archivo dentro del FormData de POST /delivery_documents.
@@ -136,7 +137,7 @@ function FormatoActa() {
   const [equipos, setEquipos] = useState([])
   const [cargandoCatalogos, setCargandoCatalogos] = useState(esEntrega)
   const [empleadoId, setEmpleadoId] = useState('')
-  const [filasEntrega, setFilasEntrega] = useState([{ id: 'fila-entrega-1', equipmentId: '', observaciones: '' }])
+  const [filasEntrega, setFilasEntrega] = useState([])
   const [guardando, setGuardando] = useState(false)
   const [errorGuardar, setErrorGuardar] = useState('')
 
@@ -144,7 +145,10 @@ function FormatoActa() {
     if (!esEntrega) return
     let vivo = true
     setCargandoCatalogos(true)
-    Promise.all([listarEmpleados(token), listarDepartamentos(token), listarEquipos(token)])
+    // Solo equipo SIN entrega activa: nunca entregado, o ya devuelto de su
+    // última entrega. Antes se usaba listarEquipos (todo el inventario) y se
+    // podía elegir por error un equipo que ya tenía otro colaborador.
+    Promise.all([listarEmpleados(token), listarDepartamentos(token), listarEquiposDisponibles(token)])
       .then(([emp, dep, eq]) => {
         if (!vivo) return
         setEmpleados(Array.isArray(emp) ? emp : [])
@@ -211,6 +215,9 @@ function FormatoActa() {
         }
       })
       await crearDocumentoEntrega(token, formData)
+      // Confirmación explícita: antes el único indicio de que se había
+      // guardado era el cambio de pantalla.
+      mostrarToast('Entrega registrada')
       navigate('/historial/entrega')
     } catch (err) {
       setErrorGuardar(err.message || 'No se pudo guardar la entrega')
@@ -771,6 +778,7 @@ function FormatoActa() {
                               disabled={cargandoCatalogos}
                               placeholder="Selecciona un equipo"
                               emptyOptionsText="No hay equipos registrados en el catálogo todavía."
+                              mobileSheetBreakpoint="md"
                             />
                           </div>
                           <div className="flex flex-col gap-1.5">

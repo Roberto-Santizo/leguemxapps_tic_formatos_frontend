@@ -1,3 +1,4 @@
+import { Building2 } from 'lucide-react'
 import CatalogoLista from '../components/CatalogoLista.jsx'
 import { listarDepartamentos } from '../services/api.js'
 
@@ -16,6 +17,8 @@ const TEXTOS = {
   placeholderCampo: 'Ej. Recursos Humanos',
   vacioTitulo: 'Aún no hay departamentos registrados',
   vacioTexto: 'Crea el primero para que aparezca al llenar las actas.',
+  // Mismo ícono que la tarjeta de Catálogo desde la que se entra.
+  icono: Building2,
 }
 
 function DepartamentosList() {

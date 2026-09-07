@@ -1,3 +1,4 @@
+import { Tag } from 'lucide-react'
 import CatalogoLista from '../components/CatalogoLista.jsx'
 import { listarMarcas } from '../services/api.js'
 
@@ -16,6 +17,8 @@ const TEXTOS = {
   placeholderCampo: 'Ej. Dell',
   vacioTitulo: 'Aún no hay marcas registradas',
   vacioTexto: 'Crea la primera para que aparezca al llenar las actas.',
+  // Mismo ícono que la tarjeta de Catálogo desde la que se entra.
+  icono: Tag,
 }
 
 function MarcasList() {

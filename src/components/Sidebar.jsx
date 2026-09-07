@@ -2,6 +2,16 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import { FilePlus2, ClipboardList, BookOpen, ShieldCheck, Users, LogOut, X } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 
+// Etiqueta visible del rol. Antes aquí se resolvía con un ternario que dejaba
+// a "adminagricola" mostrándose como "Usuario", mientras la tabla de Usuarios
+// lo llama "Admin Agrícola": el mismo rol con dos nombres según la pantalla.
+// Esto es solo texto -- los permisos siguen saliendo de isAdmin, sin cambios.
+const ETIQUETA_ROL = {
+  admin: 'Administrador',
+  adminagricola: 'Admin Agrícola',
+  user: 'Usuario',
+}
+
 function NavItem({ to, icon: Icon, label, end, onNavigate }) {
   return (
     <NavLink
@@ -73,11 +83,16 @@ function Sidebar({ abierto, onCerrar }) {
               />
             </div>
             <div className="min-w-0">
-              <h1 className="font-headline-md text-headline-md font-extrabold text-on-surface leading-tight truncate">
-                Control Operativo
+              {/* El sistema se llamaba distinto según dónde lo vieras:
+                  "Control Operativo" aquí y "LEGUMEX" en el encabezado móvil.
+                  Ahora el nombre es uno solo -- con el mismo tratamiento
+                  tipográfico que usa MobileHeader -- y "Control Operativo"
+                  baja a descriptor, que es lo que realmente es. */}
+              <h1 className="font-headline-lg text-headline-lg font-bold tracking-tight text-on-surface leading-tight truncate">
+                LEGUMEX
               </h1>
-              <p className="font-label-sm text-label-sm text-on-surface-variant leading-tight">
-                Administración
+              <p className="font-label-sm text-label-sm text-on-surface-variant leading-tight truncate">
+                Control Operativo
               </p>
             </div>
           </div>
@@ -85,7 +100,7 @@ function Sidebar({ abierto, onCerrar }) {
           <button
             onClick={onCerrar}
             aria-label="Cerrar menú"
-            className="md:hidden grid h-9 w-9 shrink-0 place-items-center rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors"
+            className="md:hidden grid h-11 w-11 shrink-0 place-items-center rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface active:bg-surface-container-highest transition-colors"
           >
             <X className="h-5 w-5" strokeWidth={2} />
           </button>
@@ -120,7 +135,7 @@ function Sidebar({ abierto, onCerrar }) {
             <div className="min-w-0">
               <p className="font-label-bold text-label-bold text-on-surface truncate">{user?.name}</p>
               <p className="font-label-sm text-label-sm text-on-surface-variant capitalize truncate">
-                {user?.role === 'admin' ? 'Administrador' : 'Usuario'}
+                {ETIQUETA_ROL[user?.role] ?? 'Usuario'}
               </p>
             </div>
           </div>

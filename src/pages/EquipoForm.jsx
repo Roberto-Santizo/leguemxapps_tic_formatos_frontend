@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, Loader2, Save } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
+import { mostrarToast } from '../components/Toast.jsx'
 import SearchableSelect from '../components/SearchableSelect.jsx'
 import {
   listarMarcas,
@@ -207,6 +208,7 @@ function EquipoForm() {
           }
         }
       }
+      mostrarToast(esEdicion ? 'Equipo actualizado' : 'Equipo creado')
       navigate('/catalogo/equipos')
     } catch (err) {
       setError(err.message || 'No se pudo guardar el equipo')

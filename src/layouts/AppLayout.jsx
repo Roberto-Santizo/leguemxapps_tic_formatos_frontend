@@ -3,6 +3,7 @@ import { Outlet } from 'react-router-dom'
 import Sidebar from '../components/Sidebar.jsx'
 import MobileHeader from '../components/MobileHeader.jsx'
 import Footer from '../components/Footer.jsx'
+import { Toaster } from '../components/Toast.jsx'
 
 function AppLayout() {
   const [menuAbierto, setMenuAbierto] = useState(false)
@@ -16,6 +17,10 @@ function AppLayout() {
         <Outlet />
         <Footer />
       </main>
+
+      {/* Avisos de "ya quedó / no se pudo". Se monta una sola vez aquí; las
+          pantallas solo llaman mostrarToast() -- no hay provider ni props. */}
+      <Toaster />
     </div>
   )
 }

@@ -19,6 +19,10 @@ import EmpleadoView from './pages/EmpleadoView.jsx'
 import Historial from './pages/Historial.jsx'
 import HistorialEntregaList from './pages/HistorialEntregaList.jsx'
 import HistorialEntregaView from './pages/HistorialEntregaView.jsx'
+import RegistrarDevolucion from './pages/RegistrarDevolucion.jsx'
+import HistorialDevolucionList from './pages/HistorialDevolucionList.jsx'
+import HistorialDevolucionView from './pages/HistorialDevolucionView.jsx'
+import BuscarDevolucion from './pages/BuscarDevolucion.jsx'
 import HistorialProximamente from './pages/HistorialProximamente.jsx'
 import Auditoria from './pages/Auditoria.jsx'
 import Usuarios from './pages/Usuarios.jsx'
@@ -72,6 +76,14 @@ function App() {
         <Route path="historial" element={<Historial />} />
         <Route path="historial/entrega" element={<HistorialEntregaList />} />
         <Route path="historial/entrega/:id" element={<HistorialEntregaView />} />
+        {/* Una devolución nace de una entrega puntual -- por eso cuelga de
+            su detalle en vez de vivir en "Nueva Acta". */}
+        <Route path="historial/entrega/:id/devolucion" element={<RegistrarDevolucion />} />
+        {/* Devolución ya está conectada a la API real (return_documents);
+            se saca de la lista genérica de "Próximamente". */}
+        <Route path="historial/devolucion" element={<HistorialDevolucionList />} />
+        <Route path="historial/devolucion/nueva" element={<BuscarDevolucion />} />
+        <Route path="historial/devolucion/:id" element={<HistorialDevolucionView />} />
         <Route path="historial/:tipo" element={<HistorialProximamente />} />
         <Route
           path="auditoria"
