@@ -48,7 +48,7 @@ function Catalogo() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-stack-lg sm:grid-cols-2 2xl:grid-cols-4">
+        <div className="grid max-w-3xl grid-cols-1 gap-stack-lg sm:grid-cols-2">
           {SECCIONES.map((seccion) => {
             const Icon = seccion.icon
             return (
@@ -57,7 +57,7 @@ function Catalogo() {
                 to={seccion.to}
                 className="group flex flex-col gap-stack-md rounded-2xl border border-outline-variant bg-surface-container-lowest p-6 shadow-sm transition-all duration-150 hover:border-outline hover:shadow-md active:scale-[0.99]"
               >
-                <div className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-secondary-container text-on-secondary-container">
+                <div className="grid h-14 w-14 shrink-0 place-items-center rounded-xl border border-outline-variant bg-surface-container-lowest text-primary transition-colors group-hover:border-outline">
                   <Icon className="h-6 w-6" strokeWidth={2} />
                 </div>
 

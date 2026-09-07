@@ -18,7 +18,7 @@ function EnConstruccion({ icon: Icon, titulo, descripcion }) {
         <div className="rounded-2xl border border-outline-variant bg-surface-container-lowest shadow-sm px-6 py-16 sm:px-10">
           <div className="mx-auto flex max-w-md flex-col items-center gap-4 text-center">
             {Icon && (
-              <div className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-secondary-container text-on-secondary-container">
+              <div className="grid h-14 w-14 shrink-0 place-items-center rounded-xl border border-outline-variant bg-surface-container-lowest text-primary">
                 <Icon className="h-6 w-6" strokeWidth={2} />
               </div>
             )}

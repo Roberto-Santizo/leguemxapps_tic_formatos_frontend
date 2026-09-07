@@ -1,9 +1,10 @@
 import { AlertTriangle, SearchX, Inbox } from 'lucide-react'
 
 /**
- * Estado vacío / de error / sin resultados, con la misma insignia circular que
- * ya usa EnConstruccion (h-14, bg-secondary-container) para que las pantallas
- * "sin contenido" del sistema se vean todas de la misma familia.
+ * Estado vacío / de error / sin resultados, con la misma insignia que ya usa
+ * EnConstruccion (h-14, cuadro con borde bg-surface-container-lowest,
+ * mismo estilo que los iconos de Nueva Acta/Historial/Catálogo) para que las
+ * pantallas "sin contenido" del sistema se vean todas de la misma familia.
  *
  * El envoltorio reproduce exactamente el bloque que hoy tienen las listas
  * (flex-col centrado, px-5 py-14, text-center), así que se puede sustituir el
@@ -25,12 +26,12 @@ function EstadoVacio({ icon: Icon, variante = 'vacio', titulo, descripcion, acci
   const IconoFinal = Icon ?? (esError ? AlertTriangle : variante === 'busqueda' ? SearchX : Inbox)
 
   const insignia = esError
-    ? 'bg-error-container text-on-error-container'
-    : 'bg-secondary-container text-on-secondary-container'
+    ? 'rounded-full bg-error-container text-on-error-container'
+    : 'rounded-xl border border-outline-variant bg-surface-container-lowest text-primary'
 
   return (
     <div className="flex flex-col items-center gap-4 px-5 py-14 text-center">
-      <div className={`grid h-14 w-14 shrink-0 place-items-center rounded-full ${insignia}`}>
+      <div className={`grid h-14 w-14 shrink-0 place-items-center ${insignia}`}>
         <IconoFinal className="h-6 w-6" strokeWidth={2} />
       </div>
 
