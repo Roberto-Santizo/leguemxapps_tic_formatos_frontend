@@ -40,7 +40,7 @@ function Historial() {
                     {formato.tituloCorto}
                   </h2>
                   <p className="font-body-md text-body-md text-on-surface-variant">
-                    {formato.descripcion}
+                    {formato.descripcionHistorial || formato.descripcion}
                   </p>
                 </div>
 

@@ -40,7 +40,7 @@ function NuevaActa() {
                 className="group flex flex-col gap-stack-md rounded-xl border border-outline-variant bg-surface-container-lowest p-5 shadow-sm transition-all duration-150 hover:border-outline hover:shadow-md active:scale-[0.99]"
               >
                 <div className="flex items-start justify-between gap-3">
-                  <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-outline-variant bg-surface-container-lowest text-primary transition-colors group-hover:border-outline">
+                  <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-secondary-container text-on-secondary-container">
                     <Icon className="h-5 w-5" strokeWidth={2} />
                   </div>
                   <span className="font-mono text-label-sm tracking-wide text-on-surface-variant">
