@@ -153,7 +153,7 @@ function SearchableSelect({
         <button
           type="button"
           onClick={() => setAbierto(false)}
-          className={`grid h-10 w-10 shrink-0 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high ${usarMd ? 'md:hidden' : 'sm:hidden'}`}
+          className={`grid h-10 w-10 shrink-0 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high active:scale-[0.97] transition-transform ${usarMd ? 'md:hidden' : 'sm:hidden'}`}
           aria-label="Cerrar"
         >
           <X className="h-4 w-4" strokeWidth={2} />
@@ -177,7 +177,7 @@ function SearchableSelect({
                 key={opcion.id}
                 type="button"
                 onClick={() => elegir(opcion)}
-                className={`flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2.5 text-left font-body-md text-body-md transition-colors hover:bg-surface-container-high ${
+                className={`flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2.5 text-left font-body-md text-body-md transition-colors active:scale-[0.97] transition-transform ${
                   activo ? 'bg-secondary-container text-on-secondary-container' : 'text-on-surface'
                 }`}
               >
@@ -198,7 +198,7 @@ function SearchableSelect({
         type="button"
         disabled={disabled}
         onClick={() => setAbierto((v) => !v)}
-        className={`flex h-11 w-full items-center justify-between gap-2 rounded-lg border bg-surface px-3.5 font-body-md text-body-md text-on-surface transition-colors hover:border-outline focus:outline-none disabled:opacity-60 ${
+        className={`flex h-11 w-full items-center justify-between gap-2 rounded-lg border bg-surface px-3.5 font-body-md text-body-md text-on-surface transition-colors hover:border-outline focus:outline-none disabled:opacity-60 active:scale-[0.97] transition-transform ${
           abierto ? 'border-primary ring-2 ring-primary/25' : 'border-outline-variant focus:border-primary focus:ring-2 focus:ring-primary/25'
         }`}
       >

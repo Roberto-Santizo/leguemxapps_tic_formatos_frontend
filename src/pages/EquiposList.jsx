@@ -130,7 +130,7 @@ function EquiposList() {
   const sinContenido = !cargando && (Boolean(errorCarga) || !hayRegistros)
 
   const botonSecundario =
-    'inline-flex h-10 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high'
+    'inline-flex h-10 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high active:scale-[0.97] transition-transform'
 
   const estado = errorCarga ? (
     <EstadoVacio
@@ -193,7 +193,7 @@ function EquiposList() {
   const iconoInactivo =
     'inline-grid h-9 w-9 place-items-center rounded-lg text-on-surface-variant opacity-55 cursor-not-allowed'
   const iconoActivo =
-    'inline-grid h-9 w-9 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface'
+    'inline-grid h-9 w-9 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface active:scale-[0.97] transition-transform'
 
   return (
     <div className="animate-view-in flex-1 p-container-padding md:p-stack-lg bg-background">
@@ -323,7 +323,7 @@ function EquiposList() {
                                   onClick={() => alternar(equipo.id, 'agregar')}
                                   aria-label={`Agregar característica a ${equipo.name}`}
                                   title="Agregar característica"
-                                  className="ml-1 inline-grid h-9 w-9 place-items-center rounded-lg border border-outline-variant bg-surface text-on-surface transition-colors hover:border-outline hover:bg-surface-container-high"
+                                  className="ml-1 inline-grid h-9 w-9 place-items-center rounded-lg border border-outline-variant bg-surface text-on-surface transition-colors hover:border-outline hover:bg-surface-container-high active:scale-[0.97] transition-transform"
                                 >
                                   <Plus className="h-4 w-4" strokeWidth={2.25} />
                                 </button>
@@ -376,7 +376,7 @@ function EquiposList() {
                   <button
                     type="button"
                     onClick={() => (tiene ? navigate(`/catalogo/equipos/${equipo.id}/ver`) : alternar(equipo.id, 'agregar'))}
-                    className="flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left transition-all hover:bg-surface-container-low active:bg-surface-container-low"
+                    className="flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left transition-all hover:bg-surface-container-low active:bg-surface-container-low active:scale-[0.99]"
                   >
                     <div className="min-w-0">
                       <p className="font-body-md text-body-md font-medium text-on-surface break-words">

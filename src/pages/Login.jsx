@@ -100,7 +100,7 @@ function Login() {
           <button
             type="submit"
             disabled={loading}
-            className="mt-1 inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-primary font-label-bold text-label-bold text-on-primary shadow-sm transition-all hover:brightness-110 active:brightness-95 disabled:opacity-50"
+            className="mt-1 inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-primary font-label-bold text-label-bold text-on-primary shadow-sm transition-all hover:brightness-110 active:brightness-95 active:scale-[0.97] disabled:opacity-50"
           >
             {loading && <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2.5} aria-hidden="true" />}
             {loading ? 'Ingresando...' : 'Iniciar Sesión'}

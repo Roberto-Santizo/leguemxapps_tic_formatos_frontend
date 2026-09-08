@@ -68,7 +68,7 @@ function ElijeSiNo({ label, value, onChange, disabled, ayuda }) {
             type="button"
             disabled={disabled}
             onClick={() => onChange(opcion.valor)}
-            className={`inline-flex h-11 min-w-[84px] items-center justify-center rounded-lg border px-4 font-label-bold text-label-bold transition-colors disabled:opacity-60 ${
+            className={`inline-flex h-11 min-w-[84px] items-center justify-center rounded-lg border px-4 font-label-bold text-label-bold transition-colors active:scale-[0.97] transition-transform disabled:opacity-60 ${
               value === opcion.valor
                 ? 'border-primary bg-primary text-on-primary shadow-sm'
                 : 'border-outline-variant bg-surface text-on-surface hover:bg-surface-container-high'
@@ -412,7 +412,7 @@ function EquipoForm() {
               <button
                 type="submit"
                 disabled={guardando || !completo || hayDuplicadoEnBorrador}
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-primary px-5 font-label-bold text-label-bold text-on-primary shadow-sm transition-all hover:brightness-110 active:brightness-95 disabled:opacity-60"
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-primary px-5 font-label-bold text-label-bold text-on-primary shadow-sm transition-all hover:brightness-110 active:brightness-95 active:scale-[0.97] disabled:opacity-60"
               >
                 {guardando ? (
                   <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} />

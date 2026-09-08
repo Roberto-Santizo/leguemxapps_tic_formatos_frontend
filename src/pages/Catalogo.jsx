@@ -48,7 +48,12 @@ function Catalogo() {
           </p>
         </div>
 
-        <div className="grid max-w-3xl grid-cols-1 gap-stack-lg sm:grid-cols-2">
+        {/* Grilla fluida (mismo patrón que ya usa SkeletonDetalle en
+            Skeleton.jsx): cada tarjeta nunca baja de 280px, así que en vez de
+            un ancho tope fijo (que dejaba un hueco vacío en pantallas anchas)
+            o de saltar a 4 columnas apretadas, el número de columnas se
+            acomoda solo al ancho real disponible. */}
+        <div className="grid gap-stack-lg" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))' }}>
           {SECCIONES.map((seccion) => {
             const Icon = seccion.icon
             return (

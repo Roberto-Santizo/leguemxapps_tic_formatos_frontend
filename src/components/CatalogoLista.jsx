@@ -23,7 +23,7 @@ import { SkeletonTabla, SkeletonTarjetas } from './Skeleton.jsx'
  */
 
 const botonSecundario =
-  'inline-flex h-10 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high'
+  'inline-flex h-10 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high active:scale-[0.97] transition-transform'
 
 /**
  * Estado sin contenido: error, búsqueda sin coincidencias, o catálogo vacío.
@@ -212,7 +212,7 @@ function CatalogoLista({ textos, onListar, rutaBase }) {
                             onClick={() => verRegistro(registro)}
                             aria-label={`Ver ${registro.name}`}
                             title="Ver"
-                            className="inline-grid h-9 w-9 place-items-center rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors"
+                            className="inline-grid h-9 w-9 place-items-center rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors active:scale-[0.97] transition-transform"
                           >
                             <Eye className="h-4 w-4" strokeWidth={2} />
                           </button>
@@ -221,7 +221,7 @@ function CatalogoLista({ textos, onListar, rutaBase }) {
                             onClick={() => setConfirmando(registro)}
                             aria-label={`Editar ${registro.name}`}
                             title="Editar"
-                            className="inline-grid h-9 w-9 place-items-center rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors"
+                            className="inline-grid h-9 w-9 place-items-center rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors active:scale-[0.97] transition-transform"
                           >
                             <Pencil className="h-4 w-4" strokeWidth={2} />
                           </button>

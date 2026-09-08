@@ -199,7 +199,7 @@ function ConfirmDialog({
             type="button"
             disabled={procesando}
             onClick={onCancelar}
-            className="inline-flex h-10 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high disabled:opacity-60"
+            className="inline-flex h-10 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high disabled:opacity-60 active:scale-[0.97] transition-transform"
           >
             {textoCancelar}
           </button>
@@ -207,7 +207,7 @@ function ConfirmDialog({
             type="submit"
             disabled={procesando}
             className={[
-              'inline-flex h-10 items-center justify-center rounded-lg px-4 font-label-bold text-label-bold shadow-sm transition-all hover:brightness-110 active:brightness-95 disabled:opacity-60',
+              'inline-flex h-10 items-center justify-center rounded-lg px-4 font-label-bold text-label-bold shadow-sm transition-all hover:brightness-110 active:brightness-95 active:scale-[0.97] disabled:opacity-60',
               peligro ? 'bg-error text-on-error' : 'bg-primary text-on-primary',
             ].join(' ')}
           >

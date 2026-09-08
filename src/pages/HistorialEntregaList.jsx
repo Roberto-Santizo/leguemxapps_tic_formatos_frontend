@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Eye, Trash2 } from 'lucide-react'
+import { ArrowLeft, Eye, Plus, Trash2 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 import Buscador from '../components/Buscador.jsx'
 import ConfirmDialog from '../components/ConfirmDialog.jsx'
@@ -83,7 +83,7 @@ function HistorialEntregaList() {
   const sinContenido = !cargando && (Boolean(errorCarga) || !hayRegistros)
 
   const botonSecundario =
-    'inline-flex h-10 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high'
+    'inline-flex h-10 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high active:scale-[0.97] transition-transform'
 
   const estado = errorCarga ? (
     <EstadoVacio
@@ -121,7 +121,7 @@ function HistorialEntregaList() {
   )
 
   const iconoActivo =
-    'inline-grid h-9 w-9 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface'
+    'inline-grid h-9 w-9 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface active:scale-[0.97] transition-transform'
 
   function verDocumento(documento) {
     navigate(`/historial/entrega/${documento.id}`)
@@ -138,13 +138,22 @@ function HistorialEntregaList() {
           Historial de Actas
         </Link>
 
-        <div>
-          <h1 className="font-headline-lg text-headline-lg font-bold text-on-surface mb-1">
-            Entrega de Equipo
-          </h1>
-          <p className="font-body-md text-body-md text-on-surface-variant">
-            Documentos de entrega registrados, con el equipo incluido en cada uno.
-          </p>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+          <div>
+            <h1 className="font-headline-lg text-headline-lg font-bold text-on-surface mb-1">
+              Entrega de Equipo
+            </h1>
+            <p className="font-body-md text-body-md text-on-surface-variant">
+              Documentos de entrega registrados, con el equipo incluido en cada uno.
+            </p>
+          </div>
+          <Link
+            to="/actas/entrega/nueva"
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-primary px-4 font-label-bold text-label-bold text-on-primary shadow-sm transition-all hover:brightness-110 active:brightness-95 active:scale-[0.97]"
+          >
+            <Plus className="h-4.5 w-4.5" strokeWidth={2} />
+            Registrar entrega
+          </Link>
         </div>
 
         <Buscador value={busqueda} onChange={setBusqueda} placeholder="Buscar por colaborador, departamento o planta..." />

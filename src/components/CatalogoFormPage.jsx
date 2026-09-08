@@ -123,7 +123,7 @@ function CatalogoFormPage({ textos, onObtener, onCrear, onActualizar, rutaBase }
               <button
                 type="submit"
                 disabled={guardando || !name.trim()}
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-primary px-5 font-label-bold text-label-bold text-on-primary shadow-sm transition-all hover:brightness-110 active:brightness-95 disabled:opacity-60"
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-primary px-5 font-label-bold text-label-bold text-on-primary shadow-sm transition-all hover:brightness-110 active:brightness-95 active:scale-[0.97] disabled:opacity-60"
               >
                 {guardando ? (
                   <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} />

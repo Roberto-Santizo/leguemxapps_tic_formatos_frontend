@@ -30,18 +30,22 @@ function NuevaActa() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-column-gap sm:grid-cols-2 xl:grid-cols-3">
+        {/* Solo 2 formatos activos hoy -- grilla fluida en vez de un tope fijo
+            de columnas, mismo motivo que Historial.jsx: con solo 2 tarjetas,
+            xl:grid-cols-3 dejaba una tercera columna vacía y las tarjetas se
+            veían chicas y descuadradas. */}
+        <div className="grid gap-column-gap" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))' }}>
           {LISTA_FORMATOS.map((formato) => {
             const Icon = formato.icon
             return (
               <Link
                 key={formato.id}
                 to={rutaDeFormato(formato)}
-                className="group flex flex-col gap-stack-md rounded-xl border border-outline-variant bg-surface-container-lowest p-5 shadow-sm transition-all duration-150 hover:border-outline hover:shadow-md active:scale-[0.99]"
+                className="group flex flex-col gap-stack-md rounded-xl border border-outline-variant bg-surface-container-lowest p-6 shadow-sm transition-all duration-150 hover:border-outline hover:shadow-md active:scale-[0.99]"
               >
                 <div className="flex items-start justify-between gap-3">
-                  <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-outline-variant bg-surface-container-lowest text-primary transition-colors group-hover:border-outline">
-                    <Icon className="h-5 w-5" strokeWidth={2} />
+                  <div className="grid h-14 w-14 shrink-0 place-items-center rounded-xl border border-outline-variant bg-surface-container-lowest text-primary transition-colors group-hover:border-outline">
+                    <Icon className="h-6 w-6" strokeWidth={2} />
                   </div>
                   <span className="font-mono text-label-sm tracking-wide text-on-surface-variant">
                     {formato.codigo}
@@ -49,7 +53,7 @@ function NuevaActa() {
                 </div>
 
                 <div>
-                  <h2 className="font-headline-md text-headline-md text-on-surface">
+                  <h2 className="font-headline-lg text-headline-lg text-on-surface">
                     {formato.tituloCorto}
                   </h2>
                   <p className="mt-1 font-body-md text-body-md text-pretty text-on-surface-variant">

@@ -96,7 +96,7 @@ export function FilasCaracteristicas({ filas, onChange, disabled }) {
                 disabled={disabled || filas.length === 1}
                 aria-label="Quitar característica"
                 title={filas.length === 1 ? 'Debe quedar al menos una fila' : 'Quitar'}
-                className="grid h-11 w-11 shrink-0 place-items-center self-end rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface disabled:cursor-not-allowed disabled:opacity-55 disabled:hover:bg-transparent sm:mt-[26px] sm:self-start"
+                className="grid h-11 w-11 shrink-0 place-items-center self-end rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface disabled:cursor-not-allowed disabled:opacity-55 disabled:hover:bg-transparent sm:mt-[26px] sm:self-start active:scale-[0.97] transition-transform"
               >
                 <Trash2 className="h-4 w-4" strokeWidth={2} />
               </button>
@@ -109,7 +109,7 @@ export function FilasCaracteristicas({ filas, onChange, disabled }) {
         type="button"
         onClick={agregar}
         disabled={disabled}
-        className="inline-flex h-11 items-center justify-center gap-2 self-start rounded-lg border border-dashed border-outline px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high disabled:opacity-60"
+        className="inline-flex h-11 items-center justify-center gap-2 self-start rounded-lg border border-dashed border-outline px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high disabled:opacity-60 active:scale-[0.97] transition-transform"
       >
         <Plus className="h-4 w-4" strokeWidth={2.25} />
         Agregar otra
@@ -297,7 +297,7 @@ export function CaracteristicasDeEquipo({
                         disabled={guardando || nuevas.length === 1}
                         aria-label="Quitar esta fila"
                         title={nuevas.length === 1 ? 'Debe quedar al menos una fila' : 'Quitar'}
-                        className="grid h-11 w-11 shrink-0 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface disabled:cursor-not-allowed disabled:opacity-55 disabled:hover:bg-transparent"
+                        className="grid h-11 w-11 shrink-0 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface disabled:cursor-not-allowed disabled:opacity-55 disabled:hover:bg-transparent active:scale-[0.97] transition-transform"
                       >
                         <Trash2 className="h-4 w-4" strokeWidth={2} />
                       </button>
@@ -315,7 +315,7 @@ export function CaracteristicasDeEquipo({
                 type="button"
                 onClick={() => setNuevas((filas) => [...filas, { name: '', description: '' }])}
                 disabled={guardando}
-                className="inline-flex h-10 items-center justify-center gap-2 self-start rounded-lg border border-dashed border-outline px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high disabled:opacity-60"
+                className="inline-flex h-10 items-center justify-center gap-2 self-start rounded-lg border border-dashed border-outline px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high disabled:opacity-60 active:scale-[0.97] transition-transform"
               >
                 <Plus className="h-4 w-4" strokeWidth={2.25} />
                 Agregar otra
@@ -326,7 +326,7 @@ export function CaracteristicasDeEquipo({
                   type="button"
                   onClick={confirmarNueva}
                   disabled={guardando}
-                  className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-primary px-4 font-label-bold text-label-bold text-on-primary shadow-sm transition-all hover:brightness-110 active:brightness-95 disabled:opacity-60"
+                  className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-primary px-4 font-label-bold text-label-bold text-on-primary shadow-sm transition-all hover:brightness-110 active:brightness-95 active:scale-[0.97] disabled:opacity-60"
                 >
                   {guardando ? (
                     <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} />
@@ -339,7 +339,7 @@ export function CaracteristicasDeEquipo({
                   type="button"
                   onClick={cerrarAlta}
                   disabled={guardando}
-                  className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high disabled:opacity-60"
+                  className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high disabled:opacity-60 active:scale-[0.97] transition-transform"
                 >
                   <X className="h-4 w-4" strokeWidth={2.25} />
                   Cancelar
@@ -350,7 +350,7 @@ export function CaracteristicasDeEquipo({
             <button
               type="button"
               onClick={() => setAgregando(true)}
-              className="inline-flex h-10 items-center justify-center gap-2 self-start rounded-lg border border-dashed border-outline px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high"
+              className="inline-flex h-10 items-center justify-center gap-2 self-start rounded-lg border border-dashed border-outline px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high active:scale-[0.97] transition-transform"
             >
               <Plus className="h-4 w-4" strokeWidth={2.25} />
               Agregar característica

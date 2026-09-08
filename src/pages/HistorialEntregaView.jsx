@@ -320,7 +320,7 @@ function HistorialEntregaView() {
                     type="button"
                     onClick={abrirAgregarEquipo}
                     disabled={agregandoEquipo}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-outline-variant bg-surface-container-lowest px-3 py-1.5 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high disabled:opacity-50"
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-outline-variant bg-surface-container-lowest px-3 py-1.5 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high disabled:opacity-50 active:scale-[0.97] transition-transform"
                   >
                     <PlusCircle className="h-4 w-4" strokeWidth={2} />
                     Agregar equipo
@@ -392,7 +392,7 @@ function HistorialEntregaView() {
                                   onClick={() => setQuitando(item)}
                                   aria-label="Quitar equipo de la entrega"
                                   title="Quitar (se agregó por error)"
-                                  className="grid h-8 w-8 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-error-container hover:text-on-error-container"
+                                  className="grid h-8 w-8 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-error-container hover:text-on-error-container active:scale-[0.97] transition-transform"
                                 >
                                   <Trash2 className="h-4 w-4" strokeWidth={2} />
                                 </button>
@@ -432,7 +432,7 @@ function HistorialEntregaView() {
                                   disabled={guardandoEquipo || !nuevoEquipoId}
                                   aria-label="Confirmar equipo"
                                   title="Confirmar"
-                                  className="grid h-8 w-8 place-items-center rounded-lg text-primary transition-colors hover:bg-primary/10 disabled:opacity-40"
+                                  className="grid h-8 w-8 place-items-center rounded-lg text-primary transition-colors hover:bg-primary/10 disabled:opacity-40 active:scale-[0.97] transition-transform"
                                 >
                                   {guardandoEquipo ? (
                                     <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} />
@@ -446,7 +446,7 @@ function HistorialEntregaView() {
                                   disabled={guardandoEquipo}
                                   aria-label="Cancelar"
                                   title="Cancelar"
-                                  className="grid h-8 w-8 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high"
+                                  className="grid h-8 w-8 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high active:scale-[0.97] transition-transform"
                                 >
                                   <X className="h-4 w-4" strokeWidth={2} />
                                 </button>
@@ -486,7 +486,7 @@ function HistorialEntregaView() {
                               onClick={() => setQuitando(item)}
                               aria-label="Quitar equipo de la entrega"
                               title="Quitar (se agregó por error)"
-                              className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-error-container hover:text-on-error-container"
+                              className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-error-container hover:text-on-error-container active:scale-[0.97] transition-transform"
                             >
                               <Trash2 className="h-4 w-4" strokeWidth={2} />
                             </button>
@@ -576,7 +576,7 @@ function HistorialEntregaView() {
                               type="button"
                               onClick={confirmarAgregarEquipo}
                               disabled={guardandoEquipo || !nuevoEquipoId}
-                              className="inline-flex h-10 flex-1 items-center justify-center gap-2 rounded-lg bg-primary px-4 font-label-bold text-label-bold text-on-primary shadow-sm transition-all hover:brightness-110 disabled:opacity-50"
+                              className="inline-flex h-10 flex-1 items-center justify-center gap-2 rounded-lg bg-primary px-4 font-label-bold text-label-bold text-on-primary shadow-sm transition-all hover:brightness-110 active:scale-[0.97] disabled:opacity-50"
                             >
                               {guardandoEquipo ? (
                                 <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} />
@@ -589,7 +589,7 @@ function HistorialEntregaView() {
                               type="button"
                               onClick={cancelarAgregarEquipo}
                               disabled={guardandoEquipo}
-                              className="inline-flex h-10 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high"
+                              className="inline-flex h-10 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high active:scale-[0.97] transition-transform"
                             >
                               Cancelar
                             </button>
@@ -662,7 +662,7 @@ function HistorialEntregaView() {
               <button
                 type="button"
                 onClick={() => navigate(`/historial/entrega/${id}/devolucion`)}
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-outline-variant bg-surface-container-lowest px-6 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high"
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-outline-variant bg-surface-container-lowest px-6 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high active:scale-[0.97] transition-transform"
               >
                 <Undo2 className="h-4 w-4" strokeWidth={2.25} />
                 Registrar devolución
@@ -672,7 +672,7 @@ function HistorialEntregaView() {
               type="button"
               onClick={handleDescargarPdf}
               disabled={generandoPdf}
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-outline-variant bg-surface-container-lowest px-6 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high disabled:opacity-60"
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-outline-variant bg-surface-container-lowest px-6 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high disabled:opacity-60 active:scale-[0.97] transition-transform"
             >
               {generandoPdf ? (
                 <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} />
@@ -684,7 +684,7 @@ function HistorialEntregaView() {
             <button
               type="button"
               onClick={() => setEliminando(true)}
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-error/30 bg-surface-container-lowest px-6 font-label-bold text-label-bold text-error transition-colors hover:bg-error-container"
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-error/30 bg-surface-container-lowest px-6 font-label-bold text-label-bold text-error transition-colors hover:bg-error-container active:scale-[0.97] transition-transform"
             >
               <Trash2 className="h-4 w-4" strokeWidth={2.25} />
               Eliminar

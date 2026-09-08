@@ -344,7 +344,7 @@ function RegistrarDevolucion() {
                           <button
                             type="button"
                             onClick={() => toggleItem(item.id)}
-                            className="flex w-full items-start gap-3 text-left"
+                            className="flex w-full items-start gap-3 text-left active:scale-[0.99] transition-transform"
                           >
                             <input
                               type="checkbox"
@@ -455,7 +455,7 @@ function RegistrarDevolucion() {
                 type="button"
                 onClick={handleClicFinalizarDevolucion}
                 disabled={guardando || pendientes.length === 0}
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-primary px-6 font-label-bold text-label-bold text-on-primary shadow-sm transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-primary px-6 font-label-bold text-label-bold text-on-primary shadow-sm transition-opacity hover:opacity-90 active:scale-[0.97] transition-transform disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {guardando && <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} />}
                 {formato.textoAccion}

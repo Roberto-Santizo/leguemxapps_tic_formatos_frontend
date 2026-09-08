@@ -94,7 +94,7 @@ function RegistrarUsuarioModal({ abierto, procesando, error, erroresCampo, onGua
             onClick={onCancelar}
             disabled={procesando}
             aria-label="Cerrar"
-            className="grid h-11 w-11 shrink-0 place-items-center rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors disabled:opacity-50"
+            className="grid h-11 w-11 shrink-0 place-items-center rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors disabled:opacity-50 active:scale-[0.97] transition-transform"
           >
             <X className="h-5 w-5" strokeWidth={2} />
           </button>
@@ -191,14 +191,14 @@ function RegistrarUsuarioModal({ abierto, procesando, error, erroresCampo, onGua
               type="button"
               onClick={onCancelar}
               disabled={procesando}
-              className="inline-flex h-10 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high disabled:opacity-60"
+              className="inline-flex h-10 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high disabled:opacity-60 active:scale-[0.97] transition-transform"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={procesando}
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-primary px-4 font-label-bold text-label-bold text-on-primary shadow-sm transition-all hover:brightness-110 active:brightness-95 disabled:opacity-60"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-primary px-4 font-label-bold text-label-bold text-on-primary shadow-sm transition-all hover:brightness-110 active:brightness-95 active:scale-[0.97] disabled:opacity-60"
             >
               {procesando ? (
                 <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} />
@@ -267,7 +267,7 @@ function Usuarios() {
             </div>
             <button
               onClick={abrirCrear}
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-primary px-4 font-label-bold text-label-bold text-on-primary shadow-sm transition-all hover:brightness-110 active:brightness-95"
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-primary px-4 font-label-bold text-label-bold text-on-primary shadow-sm transition-all hover:brightness-110 active:brightness-95 active:scale-[0.97]"
             >
               <UserPlus className="h-4.5 w-4.5" strokeWidth={2} />
               Registrar usuario
@@ -285,7 +285,7 @@ function Usuarios() {
                   <button
                     type="button"
                     onClick={abrirCrear}
-                    className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high"
+                    className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high active:scale-[0.97] transition-transform"
                   >
                     <UserPlus className="h-4 w-4" strokeWidth={2} />
                     Registrar usuario

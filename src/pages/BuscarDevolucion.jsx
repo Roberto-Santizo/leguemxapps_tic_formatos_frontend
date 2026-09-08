@@ -138,7 +138,7 @@ function BuscarDevolucion() {
                     key={entrega.id}
                     type="button"
                     onClick={() => navigate(`/historial/entrega/${entrega.id}/devolucion`)}
-                    className="flex items-center justify-between gap-3 rounded-xl border border-outline-variant bg-surface-container-low px-4 py-3.5 text-left transition-colors hover:bg-surface-container-high"
+                    className="flex items-center justify-between gap-3 rounded-xl border border-outline-variant bg-surface-container-low px-4 py-3.5 text-left transition-colors hover:bg-surface-container-high active:scale-[0.97] transition-transform"
                   >
                     <div className="min-w-0">
                       <p className="font-body-md text-body-md font-medium text-on-surface">

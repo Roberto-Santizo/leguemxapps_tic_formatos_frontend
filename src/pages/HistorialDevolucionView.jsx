@@ -280,7 +280,7 @@ function HistorialDevolucionView() {
                     type="button"
                     onClick={abrirAgregarEquipo}
                     disabled={agregandoEquipo}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-outline-variant bg-surface-container-lowest px-3 py-1.5 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high disabled:opacity-50"
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-outline-variant bg-surface-container-lowest px-3 py-1.5 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high disabled:opacity-50 active:scale-[0.97] transition-transform"
                   >
                     <PlusCircle className="h-4 w-4" strokeWidth={2} />
                     Agregar equipo
@@ -369,7 +369,7 @@ function HistorialDevolucionView() {
                                   disabled={guardandoEquipo || !nuevoDetalleId}
                                   aria-label="Confirmar equipo"
                                   title="Confirmar"
-                                  className="grid h-8 w-8 place-items-center rounded-lg text-primary transition-colors hover:bg-primary/10 disabled:opacity-40"
+                                  className="grid h-8 w-8 place-items-center rounded-lg text-primary transition-colors hover:bg-primary/10 disabled:opacity-40 active:scale-[0.97] transition-transform"
                                 >
                                   {guardandoEquipo ? (
                                     <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} />
@@ -383,7 +383,7 @@ function HistorialDevolucionView() {
                                   disabled={guardandoEquipo}
                                   aria-label="Cancelar"
                                   title="Cancelar"
-                                  className="grid h-8 w-8 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high"
+                                  className="grid h-8 w-8 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high active:scale-[0.97] transition-transform"
                                 >
                                   <X className="h-4 w-4" strokeWidth={2} />
                                 </button>
@@ -485,7 +485,7 @@ function HistorialDevolucionView() {
                               type="button"
                               onClick={confirmarAgregarEquipo}
                               disabled={guardandoEquipo || !nuevoDetalleId}
-                              className="inline-flex h-10 flex-1 items-center justify-center gap-2 rounded-lg bg-primary px-4 font-label-bold text-label-bold text-on-primary shadow-sm transition-all hover:brightness-110 disabled:opacity-50"
+                              className="inline-flex h-10 flex-1 items-center justify-center gap-2 rounded-lg bg-primary px-4 font-label-bold text-label-bold text-on-primary shadow-sm transition-all hover:brightness-110 active:scale-[0.97] disabled:opacity-50"
                             >
                               {guardandoEquipo ? (
                                 <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} />
@@ -498,7 +498,7 @@ function HistorialDevolucionView() {
                               type="button"
                               onClick={cancelarAgregarEquipo}
                               disabled={guardandoEquipo}
-                              className="inline-flex h-10 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high"
+                              className="inline-flex h-10 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high active:scale-[0.97] transition-transform"
                             >
                               Cancelar
                             </button>
@@ -559,7 +559,7 @@ function HistorialDevolucionView() {
               type="button"
               onClick={handleDescargarPdf}
               disabled={generandoPdf}
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-outline-variant bg-surface-container-lowest px-6 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high disabled:opacity-60"
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-outline-variant bg-surface-container-lowest px-6 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high disabled:opacity-60 active:scale-[0.97] transition-transform"
             >
               {generandoPdf ? (
                 <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} />

@@ -112,7 +112,7 @@ function FirmaPad({ titulo, subtitulo, firmaUrl, onConfirmar, onReiniciar }) {
           <button
             type="button"
             onClick={handleReiniciar}
-            className="rounded-md px-2 py-1 font-label-sm text-label-sm text-on-surface-variant underline-offset-2 transition-colors hover:text-error hover:underline"
+            className="rounded-md px-2 py-1 font-label-sm text-label-sm text-on-surface-variant underline-offset-2 transition-colors hover:text-error hover:underline active:scale-[0.97] transition-transform"
           >
             Reiniciar firma
           </button>
@@ -132,7 +132,7 @@ function FirmaPad({ titulo, subtitulo, firmaUrl, onConfirmar, onReiniciar }) {
             setModo('dibujar')
             setPreviewSubida(null)
           }}
-          className={`px-3 py-1 rounded font-label-sm text-label-sm transition-colors ${
+          className={`px-3 py-1 rounded font-label-sm text-label-sm transition-colors active:scale-[0.97] transition-transform ${
             modo === 'dibujar' ? 'bg-primary text-on-primary shadow-sm' : 'text-on-surface-variant hover:text-on-surface'
           }`}
         >
@@ -144,7 +144,7 @@ function FirmaPad({ titulo, subtitulo, firmaUrl, onConfirmar, onReiniciar }) {
             setModo('subir')
             limpiarLienzo()
           }}
-          className={`px-3 py-1 rounded font-label-sm text-label-sm transition-colors ${
+          className={`px-3 py-1 rounded font-label-sm text-label-sm transition-colors active:scale-[0.97] transition-transform ${
             modo === 'subir' ? 'bg-primary text-on-primary shadow-sm' : 'text-on-surface-variant hover:text-on-surface'
           }`}
         >
@@ -157,7 +157,7 @@ function FirmaPad({ titulo, subtitulo, firmaUrl, onConfirmar, onReiniciar }) {
             limpiarLienzo()
             setPreviewSubida(null)
           }}
-          className={`px-3 py-1 rounded font-label-sm text-label-sm transition-colors ${
+          className={`px-3 py-1 rounded font-label-sm text-label-sm transition-colors active:scale-[0.97] transition-transform ${
             modo === 'historico' ? 'bg-primary text-on-primary shadow-sm' : 'text-on-surface-variant hover:text-on-surface'
           }`}
         >
@@ -213,7 +213,7 @@ function FirmaPad({ titulo, subtitulo, firmaUrl, onConfirmar, onReiniciar }) {
           <button
             type="button"
             onClick={limpiarLienzo}
-            className="rounded-md px-2 py-1 font-label-sm text-label-sm text-on-surface-variant underline-offset-2 transition-colors hover:text-error hover:underline"
+            className="rounded-md px-2 py-1 font-label-sm text-label-sm text-on-surface-variant underline-offset-2 transition-colors hover:text-error hover:underline active:scale-[0.97] transition-transform"
           >
             Borrar trazo
           </button>
@@ -224,7 +224,7 @@ function FirmaPad({ titulo, subtitulo, firmaUrl, onConfirmar, onReiniciar }) {
           type="button"
           onClick={handleConfirmar}
           disabled={modo !== 'historico' && vacio}
-          className="rounded-lg bg-surface-container-high px-3 py-1.5 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-highest active:brightness-95 disabled:opacity-40 disabled:cursor-not-allowed"
+          className="rounded-lg bg-surface-container-high px-3 py-1.5 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-highest active:brightness-95 active:scale-[0.97] transition-transform disabled:opacity-40 disabled:cursor-not-allowed"
         >
           Confirmar firma
         </button>

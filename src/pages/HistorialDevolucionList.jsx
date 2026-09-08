@@ -61,7 +61,7 @@ function HistorialDevolucionList() {
   const sinContenido = !cargando && (Boolean(errorCarga) || !hayRegistros)
 
   const botonSecundario =
-    'inline-flex h-10 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high'
+    'inline-flex h-10 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high active:scale-[0.97] transition-transform'
 
   const estado = errorCarga ? (
     <EstadoVacio
@@ -99,7 +99,7 @@ function HistorialDevolucionList() {
   )
 
   const iconoActivo =
-    'inline-grid h-9 w-9 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface'
+    'inline-grid h-9 w-9 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface active:scale-[0.97] transition-transform'
 
   function verDocumento(documento) {
     navigate(`/historial/devolucion/${documento.id}`)

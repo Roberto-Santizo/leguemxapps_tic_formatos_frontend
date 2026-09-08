@@ -100,7 +100,7 @@ function Sidebar({ abierto, onCerrar }) {
           <button
             onClick={onCerrar}
             aria-label="Cerrar menú"
-            className="md:hidden grid h-11 w-11 shrink-0 place-items-center rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface active:bg-surface-container-highest transition-colors"
+            className="md:hidden grid h-11 w-11 shrink-0 place-items-center rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface active:bg-surface-container-highest transition-colors active:scale-[0.97] transition-transform"
           >
             <X className="h-5 w-5" strokeWidth={2} />
           </button>
@@ -141,7 +141,7 @@ function Sidebar({ abierto, onCerrar }) {
           </div>
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 min-h-11 px-3 py-2.5 rounded-lg text-on-surface-variant font-body-md hover:bg-surface-container-high hover:text-on-surface transition-colors duration-150 group"
+            className="w-full flex items-center gap-3 min-h-11 px-3 py-2.5 rounded-lg text-on-surface-variant font-body-md hover:bg-surface-container-high hover:text-on-surface transition-colors duration-150 group active:scale-[0.97] transition-transform"
           >
             <LogOut className="h-5 w-5 shrink-0 transition-transform group-hover:scale-110" strokeWidth={2} />
             <span className="font-label-bold text-label-bold">Cerrar Sesión</span>
