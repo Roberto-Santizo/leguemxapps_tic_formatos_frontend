@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { UserPlus, X, CheckCircle2, Users, Loader2 } from 'lucide-react'
+import { UserPlus, X, CheckCircle2, Users, Loader2, Eye, EyeOff } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 import { registrarUsuario } from '../services/api.js'
 import EstadoVacio from '../components/EstadoVacio.jsx'
@@ -45,6 +45,8 @@ function RegistrarUsuarioModal({ abierto, procesando, error, erroresCampo, onGua
 
   const [montado, setMontado] = useState(abierto)
   const [visible, setVisible] = useState(false)
+  const [mostrarPassword, setMostrarPassword] = useState(false)
+  const [mostrarConfirmacion, setMostrarConfirmacion] = useState(false)
 
   useEffect(() => {
     if (abierto) {
@@ -135,16 +137,32 @@ function RegistrarUsuarioModal({ abierto, procesando, error, erroresCampo, onGua
 
           <div className="flex flex-col gap-1.5">
             <label className="font-label-bold text-label-bold text-on-surface">Contraseña</label>
-            <input
-              type="password"
-              className={inputClasses}
-              value={form.password}
-              disabled={procesando}
-              onChange={(e) => actualizar('password', e.target.value)}
-              required
-              minLength={8}
-              placeholder="Mínimo 8 caracteres"
-            />
+            <div className="relative">
+              <input
+                type={mostrarPassword ? 'text' : 'password'}
+                className={`${inputClasses} pr-11`}
+                value={form.password}
+                disabled={procesando}
+                onChange={(e) => actualizar('password', e.target.value)}
+                required
+                minLength={8}
+                placeholder="Mínimo 8 caracteres"
+              />
+              <button
+                type="button"
+                onClick={() => setMostrarPassword((v) => !v)}
+                disabled={procesando}
+                aria-label={mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                tabIndex={-1}
+                className="absolute right-1 top-1/2 -translate-y-1/2 grid h-9 w-9 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface disabled:opacity-50 active:scale-[0.97] transition-transform"
+              >
+                {mostrarPassword ? (
+                  <EyeOff className="h-4 w-4" strokeWidth={2} />
+                ) : (
+                  <Eye className="h-4 w-4" strokeWidth={2} />
+                )}
+              </button>
+            </div>
             {errorDe('password') && (
               <p className="font-label-sm text-label-sm text-error">{errorDe('password')}</p>
             )}
@@ -152,15 +170,31 @@ function RegistrarUsuarioModal({ abierto, procesando, error, erroresCampo, onGua
 
           <div className="flex flex-col gap-1.5">
             <label className="font-label-bold text-label-bold text-on-surface">Confirmar contraseña</label>
-            <input
-              type="password"
-              className={inputClasses}
-              value={form.password_confirmation}
-              disabled={procesando}
-              onChange={(e) => actualizar('password_confirmation', e.target.value)}
-              required
-              minLength={8}
-            />
+            <div className="relative">
+              <input
+                type={mostrarConfirmacion ? 'text' : 'password'}
+                className={`${inputClasses} pr-11`}
+                value={form.password_confirmation}
+                disabled={procesando}
+                onChange={(e) => actualizar('password_confirmation', e.target.value)}
+                required
+                minLength={8}
+              />
+              <button
+                type="button"
+                onClick={() => setMostrarConfirmacion((v) => !v)}
+                disabled={procesando}
+                aria-label={mostrarConfirmacion ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                tabIndex={-1}
+                className="absolute right-1 top-1/2 -translate-y-1/2 grid h-9 w-9 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface disabled:opacity-50 active:scale-[0.97] transition-transform"
+              >
+                {mostrarConfirmacion ? (
+                  <EyeOff className="h-4 w-4" strokeWidth={2} />
+                ) : (
+                  <Eye className="h-4 w-4" strokeWidth={2} />
+                )}
+              </button>
+            </div>
           </div>
 
           <div className="flex flex-col gap-1.5">
