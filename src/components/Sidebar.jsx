@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom'
-import { FilePlus2, ClipboardList, BookOpen, ShieldCheck, Users, LogOut, X } from 'lucide-react'
+import { FilePlus2, ClipboardList, BookOpen, Users, LogOut, X } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 
 // Etiqueta visible del rol. Antes aquí se resolvía con un ternario que dejaba
@@ -122,7 +122,6 @@ function Sidebar({ abierto, onCerrar }) {
               ni /departments. Sin "end" para que siga activo dentro de
               /catalogo/marcas y /catalogo/departamentos. */}
           <NavItem to="/catalogo" icon={BookOpen} label="Catálogo" onNavigate={onCerrar} />
-          {isAdmin && <NavItem to="/auditoria" icon={ShieldCheck} label="Auditoría" onNavigate={onCerrar} />}
           {isAdmin && <NavItem to="/usuarios" icon={Users} label="Usuarios" onNavigate={onCerrar} />}
         </div>
 

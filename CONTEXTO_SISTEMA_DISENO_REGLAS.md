@@ -1,36 +1,200 @@
 # LEGUMEX — Qué es el sistema, cómo está diseñado, y reglas de trabajo
 
+> Este archivo es el punto de partida para cualquier agente de IA (o persona) que retome
+> este proyecto sin haber estado en las sesiones anteriores. No es una lista de mejoras
+> pendientes ni de tareas por hacer -- es una descripción de cómo está el sistema HOY y de
+> las reglas de trabajo que se han pedido explícitamente. Para tareas puntuales
+> pendientes/en curso, ver `PLAN_PENDIENTE_PROXIMA_SESION.md` si existe (es bitácora, no
+> permanente). Para el detalle de una revisión visual/UX ya hecha, ver `AUDITORIA_VISUAL_UX.md`.
+
 ## Qué es
 
-Sistema interno de Agroindustria Legumex, S.A. para digitalizar las hojas de control del Departamento de TIC (entrega y devolución de equipo, responsabilidad, etc.) y llevar un catálogo de datos maestros (empleados, equipos, marcas, departamentos). Antes esas hojas se llenaban en papel; ahora se llenan en pantalla y, para "Entrega de Equipo", quedan guardadas en el backend con historial consultable.
+Sistema interno de Agroindustria Legumex, S.A. para digitalizar las hojas de control del
+Departamento de TIC (entrega y devolución de equipo, responsabilidad, préstamo, desecho,
+teléfonos) y llevar un catálogo de datos maestros (empleados, equipos, marcas,
+departamentos). Antes esas hojas se llenaban en papel; ahora se llenan en pantalla y, para
+los formatos activos, quedan guardadas en el backend con historial consultable.
 
 ## Stack técnico
 
-- **Frontend** (lo que se trabaja en esta carpeta, `LEGUMEXFRONTENFORMATOS`): React 18 + Vite + React Router v7 + Tailwind CSS 3. Librerías puntuales: `lucide-react` (íconos), `jspdf` + `html2canvas` (exportar actas a PDF), `react-signature-canvas` (captura de firma).
-- **Backend**: Laravel, API REST bajo el prefijo de `AUTH_API_URL` (`VITE_AUTH_API_URL` en `.env`), con autenticación JWT (`jwt.auth`) y respuesta siempre en el sobre `{ statusCode, message, data }` (con `.errors` en validaciones 422). Lo administra otra persona — este frontend solo lo consume.
+- **Frontend** (esta carpeta, `LEGUMEXFRONTENFORMATOS`): React 18 + Vite + React Router v7
+  + Tailwind CSS 3. Librerías puntuales: `lucide-react` (íconos), `jspdf` + `html2canvas`
+  (exportar actas a PDF), `react-signature-canvas` (captura de firma).
+- **Backend**: Laravel, API REST bajo el prefijo de `AUTH_API_URL` (`VITE_AUTH_API_URL` en
+  `.env`), con autenticación JWT (`jwt.auth`) y respuesta siempre en el sobre
+  `{ statusCode, message, data }` (con `.errors` en validaciones 422). Lo administra otra
+  persona -- este frontend solo lo consume; no se inventan endpoints ni comportamientos del
+  backend, si no está documentado o confirmado se pregunta antes de asumir.
+
+## Estado de los 6 formatos físicos (importante, cambió)
+
+Los seis formatos están definidos en `src/config/formatos.js` (objeto `FORMATOS`), pero
+**hoy solo 2 están activos y visibles** en las pantallas de "Nueva Acta" e "Historial de
+Actas": **Entrega de Equipo** y **Devolución de Equipo**. Esto lo controla el array
+`ORDEN_FORMATOS` (`['entrega', 'devolucion']`) del mismo archivo -- es la única fuente de
+verdad para qué tarjetas se muestran en ambas pantallas (`NuevaActa.jsx` y
+`Historial.jsx` simplemente mapean sobre `LISTA_FORMATOS`, que se deriva de
+`ORDEN_FORMATOS`).
+
+Los otros cuatro (`responsabilidad`, `prestamo`, `desecho`, `telefonos`) siguen definidos
+dentro de `FORMATOS` -- por si algún registro histórico del backend todavía los
+referencia -- pero **no aparecen en ninguna pantalla**. En particular, "Entrega de
+Teléfonos" se quitó explícitamente de Nueva Acta e Historial porque su botón "Finalizar
+Entrega" no está conectado a ningún endpoint del backend (el formulario se llenaba y se
+perdía sin aviso). Si en el futuro se conecta un backend real para alguno de estos cuatro,
+el cambio es agregarlo de nuevo a `ORDEN_FORMATOS` -- no hace falta tocar componentes.
+
+De los 2 activos:
+- **Entrega de Equipo**: conectado a backend real (`listarDocumentosEntrega`,
+  `eliminarDocumentoEntrega`, etc. en `src/services/api.js`), con historial completo
+  (listar, ver, eliminar) en `HistorialEntregaList.jsx` / `HistorialEntregaView.jsx`.
+- **Devolución de Equipo**: también conectado a backend real, pero con un flujo distinto --
+  una devolución no se llena desde una hoja en blanco, siempre nace de una entrega ya
+  existente. Por eso su tarjeta en "Nueva Acta" no lleva a `/actas/devolucion/nueva` como
+  las demás, lleva a `/historial/devolucion/nueva` (`BuscarDevolucion.jsx`), donde primero
+  se busca al responsable/la entrega correspondiente y luego se abre la hoja ya con los
+  datos completos (`RegistrarDevolucion.jsx`). Su historial (`HistorialDevolucionList.jsx`)
+  permite buscar y ver, pero no eliminar.
+
+## Motor único de formularios
+
+Los seis formatos físicos comparten la misma gramática (membrete, datos del usuario, tabla
+de equipo, cláusula fija, observaciones, firmas), así que **no existe una página por
+formato**: existe `FormatoActa.jsx`, que lee la configuración de `src/config/formatos.js`
+según el `id` de la URL y arma el formulario dinámicamente. Agregar un séptimo formato, o
+reactivar uno de los cuatro inactivos, es agregar/editar una entrada en `formatos.js` --
+nunca escribir un componente de página nuevo para eso.
 
 ## Diseño visual
 
-- Paleta monocromática tipo "ink" corporativa (Material 3, solo modo claro), con nombres de token M3 (`primary`, `surface`, `on-surface-variant`, `outline`, etc.) definidos en `tailwind.config.js`. El negro/gris es el color principal; el rojo (`error`, `error-container`) está reservado exclusivamente para eliminar y errores — no se usa para nada más.
-- Tipografía y tamaños también van por clases con nombre semántico (`font-label-bold text-label-bold`, `font-body-md text-body-md`, `font-headline-lg text-headline-lg`, etc.), no tamaños sueltos de Tailwind.
-- Transición de entrada consistente: clase `animate-view-in` (fade + leve desplazamiento) al entrar a una vista o al agregar una fila/tarjeta nueva. Ojo: por ser una animación con `transform`, no debe ponerse en un elemento que contenga dentro un panel con `position: fixed` (como el buscador con buscador de opciones), porque lo deja atrapado dentro de esa caja en vez de cubrir toda la pantalla — ya pasó una vez y se corrigió quitándola de ahí.
-- Patrón repetido en TODO el sistema para listas: **escritorio** = tabla con íconos de acción (ojo=ver, lápiz=editar, basura=eliminar); **móvil** = tarjetas apiladas, sin botones visibles, tocar la tarjeta entera navega al detalle. El punto de quiebre entre "móvil" y "escritorio" en el layout general es **768px** (`md:` de Tailwind).
-- Patrón repetido para filas repetibles de un formulario (características de un equipo, equipos de una entrega, etc.): en escritorio pueden ir en tabla; en móvil siempre van como tarjetas apiladas con cada campo etiquetado arriba, más un botón punteado "Agregar otra/otro" al final, nunca una tabla angosta con scroll horizontal.
-- Selects que jalan datos de otra tabla del catálogo (Marca, Departamento, Equipo, Empleado) nunca son un `<select>` plano: siempre usan el componente `SearchableSelect` (buscador con lista filtrable), porque esas listas pueden crecer. En escritorio es un desplegable bajo el campo; en móvil se abre como hoja completa (fondo oscuro + buscador arriba + lista), igual que una alerta de confirmación.
+- Paleta monocromática tipo "ink" corporativa (Material 3, solo modo claro), con nombres de
+  token M3 (`primary`, `surface`, `on-surface-variant`, `outline`, etc.) definidos en
+  `tailwind.config.js`. El negro/gris es el color principal; el rojo (`error`,
+  `error-container`) está reservado exclusivamente para eliminar y errores -- no se usa
+  para nada más.
+- Tipografía y tamaños también van por clases con nombre semántico (`font-label-bold
+  text-label-bold`, `font-body-md text-body-md`, `font-headline-lg text-headline-lg`,
+  etc.), no tamaños sueltos de Tailwind.
+- Transición de entrada consistente: clase `animate-view-in` (fade + leve desplazamiento)
+  al entrar a una vista o al agregar una fila/tarjeta nueva. Ojo: por ser una animación con
+  `transform`, no debe ponerse en un elemento que contenga dentro un panel con `position:
+  fixed` (como el buscador con lista de opciones), porque lo deja atrapado dentro de esa
+  caja en vez de cubrir toda la pantalla -- ya pasó una vez y se corrigió quitándola de ahí.
+- **Animación de "presión" en botones/tarjetas clicables**: todo `<button>` y todo `<Link>`
+  clicable del sistema (102 elementos en 29 archivos, ya aplicado en todo el proyecto)
+  lleva `active:scale-[0.97] transition-transform` (botones normales) o
+  `active:scale-[0.99]` (tarjetas grandes tipo Catálogo/Nueva Acta/Historial). Si un botón
+  ya tenía otro efecto `active:` (como `active:brightness-95`), se combinan, no se
+  reemplazan. Cualquier botón o tarjeta clicable nueva que se agregue debe llevar esta
+  misma clase para no romper la consistencia.
+- **Grillas de tarjetas fluidas**: en vez de un tope fijo de columnas (`sm:grid-cols-2
+  xl:grid-cols-3`) con un `max-w` angosto, las pantallas de selección de tarjetas
+  (`Catalogo.jsx`, `Historial.jsx`, `NuevaActa.jsx`) usan un `style` inline
+  `gridTemplateColumns: 'repeat(auto-fit, minmax(Npx, 1fr))'` dentro de un contenedor
+  `max-w-[1200px]` (el mismo ancho en las tres pantallas, para que el espacio lateral se
+  vea igual en todas). Esto evita huecos vacíos cuando el número de tarjetas no llena las
+  columnas fijas, y hace que las tarjetas crezcan para ocupar el ancho disponible. Patrón
+  ya usado antes en `SkeletonDetalle` (`Skeleton.jsx`), reutilizado en vez de inventado.
+- Patrón repetido en TODO el sistema para listas: **escritorio** = tabla con íconos de
+  acción (ojo=ver, lápiz=editar, basura=eliminar); **móvil** = tarjetas apiladas, sin
+  botones visibles, tocar la tarjeta entera navega al detalle. El punto de quiebre entre
+  "móvil" y "escritorio" en el layout general es **768px** (`md:` de Tailwind).
+- Patrón repetido para filas repetibles de un formulario (características de un equipo,
+  equipos de una entrega, etc.): en escritorio pueden ir en tabla; en móvil siempre van
+  como tarjetas apiladas con cada campo etiquetado arriba, más un botón punteado "Agregar
+  otra/otro" al final, nunca una tabla angosta con scroll horizontal.
+- Selects que jalan datos de otra tabla del catálogo (Marca, Departamento, Equipo,
+  Empleado) nunca son un `<select>` plano: siempre usan el componente `SearchableSelect`
+  (buscador con lista filtrable), porque esas listas pueden crecer. En escritorio es un
+  desplegable bajo el campo; en móvil se abre como hoja completa (fondo oscuro + buscador
+  arriba + lista), igual que una alerta de confirmación.
+- **Texto editable inline** (`InlineEditableText.jsx`, usado p. ej. en la vigencia del
+  membrete de Nueva Acta): el ícono de lápiz que indica que el texto es editable queda
+  siempre visible a baja opacidad (`opacity-40`), no solo con `group-hover`, porque en
+  móvil/táctil el hover nunca se dispara -- sube de opacidad al pasar el mouse en
+  escritorio, pero en táctil el affordance debe verse siempre.
+- Botón de "registrar nuevo" en las listas de historial: siempre visible en el encabezado
+  de la pantalla (junto al título), no solo cuando la lista está vacía -- patrón consistente
+  entre `HistorialEntregaList.jsx` y `HistorialDevolucionList.jsx`.
+
+## Sección de Auditoría -- estado actual, NO TOCAR sin permiso explícito
+
+`src/pages/Auditoria.jsx` hoy es un placeholder ("Próximamente"). En `src/services/api.js`
+ya existen escritas `obtenerAuditoria(token)` y `exportarAuditoriaExcel(token, password)`,
+pero **nunca se comprobó si el backend de Laravel realmente responde esos endpoints** --
+pueden ser de una fase anterior sin que existan del lado del servidor todavía. Esta sección
+se dejó explícitamente sin construir/tocar por instrucción directa del usuario. **Ningún
+agente debe implementar, modificar o "mejorar" nada de Auditoría sin que el usuario lo pida
+explícitamente en esa sesión**, incluyendo no asumir la forma de los datos que devolvería
+el endpoint.
 
 ## Reglas de código del proyecto
 
-- **Un solo archivo de API**: todas las funciones que llaman al backend viven en `src/services/api.js`. Nunca se crean archivos de API separados por sección (ya se intentó antes y causó un bug de importaciones cruzadas — quedó documentado como lección aprendida).
-- **Motor único de formularios**: las seis hojas físicas no son seis páginas distintas: son una sola (`FormatoActa.jsx`) configurada por `src/config/formatos.js` según el tipo. Si se agrega un formato nuevo, va en ese archivo de configuración, no como página aparte.
-- Vistas de "ver" siempre cargan el registro por ID contra la API (no por estado de navegación), para que funcionen con URL directa y con refrescar la página.
+- **Un solo archivo de API**: todas las funciones que llaman al backend viven en
+  `src/services/api.js`. Nunca se crean archivos de API separados por sección (ya se
+  intentó antes y causó un bug de importaciones cruzadas -- quedó documentado como lección
+  aprendida). (Hay `api.additions.js`, `api.empleados.js`, `api.equipos.js` como
+  excepciones ya existentes de antes de esta regla -- no se agregan más archivos así.)
+- **Motor único de formularios**: ver sección arriba -- todo cambio a un formato físico va
+  en `src/config/formatos.js`, no como página nueva.
+- Vistas de "ver" siempre cargan el registro por ID contra la API (no por estado de
+  navegación), para que funcionen con URL directa y con refrescar la página.
 - "Editar" y "Nuevo" siempre son una página dedicada, nunca un modal.
-- No se inventan endpoints ni comportamientos del backend: si no está documentado o confirmado, se pregunta antes de asumir.
+- No se inventan endpoints ni comportamientos del backend: si no está documentado o
+  confirmado, se pregunta antes de asumir.
+- No se crean componentes compartidos nuevos (por ejemplo un `<Button>` genérico) sin
+  autorización explícita, aunque parezca que "ordenaría" el código -- el estilo actual es
+  cada elemento con su propia clase de Tailwind repetida, y así se ha mantenido a propósito
+  incluso al tocar 102 botones en 29 archivos.
 
-## Regla de trabajo (la más importante)
+## Reglas de trabajo (las más importantes)
 
-**Nunca se implementa ni se construye nada sin antes presentar el plan y recibir confirmación explícita del usuario.** Esto aplica a cualquier cambio en este proyecto, por pequeño que parezca: primero se plantea qué se va a hacer y por qué, se espera el visto bueno (o los ajustes que pida), y solo entonces se toca código. Esta regla la pidió el usuario explícitamente y quedó guardada como regla permanente del proyecto.
+**Nunca se implementa ni se construye nada sin antes presentar el plan y recibir
+confirmación explícita del usuario**, salvo que el propio usuario ya haya dado la
+instrucción concreta y completa de qué cambiar (en ese caso se ejecuta directamente, sin
+volver a pedir permiso para lo ya autorizado). Esto aplica a cualquier cambio en este
+proyecto, por pequeño que parezca: ante la duda, se plantea qué se va a hacer y por qué, se
+espera el visto bueno (o los ajustes que pida), y solo entonces se toca código.
 
 Reglas relacionadas que se han repetido en las peticiones de trabajo:
-- No quitar ni agregar cosas al diseño que no se pidieron; usar el mismo estilo visual existente (tamaños de botón, espaciados, colores) en vez de inventar uno nuevo.
-- Tocar solo los archivos necesarios para el cambio pedido.
-- Guiarse por el código y los patrones ya existentes en el proyecto; si algo no está claro, preguntar en vez de suponer.
+- **No tocar la sección de Auditoría** sin que el usuario lo pida explícitamente en esa
+  sesión (ver sección dedicada arriba).
+- No quitar ni agregar cosas al diseño que no se pidieron; usar el mismo estilo visual
+  existente (tamaños de botón, espaciados, colores, anchos de contenedor) en vez de
+  inventar uno nuevo -- por ejemplo, cualquier pantalla de tarjetas nueva debe respetar el
+  mismo `max-w-[1200px]` y el mismo patrón de grilla fluida que ya usan Catálogo, Nueva
+  Acta e Historial, no un ancho distinto "a ojo".
+- Reusar componentes y patrones ya existentes (`ConfirmDialog`, `Toast`, `EstadoVacio`,
+  `SearchableSelect`, `InlineEditableText`, `Buscador`, `Skeleton*`, `BotonExcel`, etc.) en
+  vez de crear uno nuevo con el mismo propósito.
+- No crear componentes compartidos nuevos sin autorización explícita.
+- Tocar solo los archivos estrictamente necesarios para el cambio pedido.
+- Guiarse por el código y los patrones ya existentes en el proyecto; si algo no está claro,
+  preguntar en vez de suponer.
+- Antes de dar un cambio visual por terminado, verificar espaciados/tamaños contra la
+  pantalla de referencia más parecida que ya exista (por ejemplo, comparar contra Catálogo
+  al tocar Historial o Nueva Acta), no solo que "se vea bien" de forma aislada.
+
+## Flujo de trabajo técnico (cuando se edita desde un entorno con puente al dispositivo)
+
+Cuando el trabajo se hace desde una sesión en la nube con acceso al equipo del usuario vía
+herramientas de "device bridge" (sin edición directa en el equipo del usuario), el flujo
+correcto es:
+1. Traer (stage) el/los archivo(s) reales del proyecto del usuario a un entorno de trabajo
+   local a la sesión.
+2. Editar esa copia local.
+3. **Verificar la sintaxis de cada archivo tocado (por ejemplo con esbuild, cargando JSX
+   con `loader: 'jsx', jsx: 'automatic'`) antes de darlo por bueno.**
+4. Copiar el archivo verificado a la carpeta de salida de la sesión.
+5. Confirmar (commit) ese archivo de vuelta a la ruta real del proyecto en el equipo del
+   usuario -- el trabajo no está terminado hasta que el archivo quede guardado ahí, no solo
+   entregado en el chat.
+
+No editar nunca "a ciegas" sin pasar por el paso de verificación de sintaxis, y no dar un
+cambio por completo sin haber hecho el commit al proyecto real del usuario.
+
+---
+
+*Este archivo se debe mantener actualizado según el sistema evolucione -- a diferencia de
+`PLAN_PENDIENTE_PROXIMA_SESION.md` (que es bitácora desechable), este es el documento de
+contexto permanente del proyecto.*

@@ -9,6 +9,7 @@ import { SkeletonTabla, SkeletonTarjetas } from '../components/Skeleton.jsx'
 import { CaracteristicasDeEquipo } from '../components/CaracteristicasEditor.jsx'
 import {
   listarEquipos,
+  listarEquiposDisponibles,
   listarCaracteristicas,
   obtenerCaracteristicasDeEquipo,
   crearCaracteristica,
@@ -41,6 +42,11 @@ function EquiposList() {
 
   const [equipos, setEquipos] = useState([])
   const [conteos, setConteos] = useState({}) // equipmentId -> nº de características
+  // Ids que SÍ aparecen en /equipments/available -- esos están libres. El
+  // resto del inventario (los que no están en este set) está en posesión de
+  // alguien. No hay un campo de estado en el equipo: se deriva cruzando con
+  // este listado.
+  const [disponibles, setDisponibles] = useState(null) // null = todavía no se sabe
   const [cargando, setCargando] = useState(true)
   const [errorCarga, setErrorCarga] = useState('')
   const [busqueda, setBusqueda] = useState('')
@@ -60,12 +66,16 @@ function EquiposList() {
     setCargando(true)
     setErrorCarga('')
     try {
-      const [lista, caracts] = await Promise.all([
+      const [lista, caracts, libres] = await Promise.all([
         listarEquipos(token),
         listarCaracteristicas(token).catch(() => []),
+        // Si falla, se deja "disponibles" en null y el badge de estado no
+        // se muestra -- mejor omitirlo que mostrar un estado equivocado.
+        listarEquiposDisponibles(token).catch(() => null),
       ])
       const equiposLista = Array.isArray(lista) ? lista : []
       setEquipos(equiposLista)
+      setDisponibles(Array.isArray(libres) ? new Set(libres.map((e) => e.id)) : null)
 
       // El listado de características trae el NOMBRE del equipo, no su id
       // (así está documentado), así que el conteo se arma por nombre y se
@@ -190,6 +200,30 @@ function EquiposList() {
     )
   }
 
+  // Badge de estado por fila/tarjeta. `libre` es undefined mientras no se
+  // sabe (disponibles === null, ej. falló la llamada) -- en ese caso no se
+  // pinta nada en vez de arriesgar un estado incorrecto.
+  function EstadoEquipo({ equipoId }) {
+    if (!disponibles) return null
+    const libre = disponibles.has(equipoId)
+    return (
+      <span
+        className={[
+          'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 font-label-sm text-label-sm font-medium whitespace-nowrap',
+          libre
+            ? 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300'
+            : 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300',
+        ].join(' ')}
+      >
+        <span
+          className={['h-1.5 w-1.5 rounded-full', libre ? 'bg-green-600' : 'bg-amber-600'].join(' ')}
+          aria-hidden="true"
+        />
+        {libre ? 'Disponible' : 'En posesión'}
+      </span>
+    )
+  }
+
   const iconoInactivo =
     'inline-grid h-9 w-9 place-items-center rounded-lg text-on-surface-variant opacity-55 cursor-not-allowed'
   const iconoActivo =
@@ -228,7 +262,7 @@ function EquiposList() {
         {/* ---- Escritorio y tablet: tabla ---- */}
         <div className="hidden md:block bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm">
           {cargando ? (
-            <SkeletonTabla columnas={5} filas={5} />
+            <SkeletonTabla columnas={6} filas={5} />
           ) : sinContenido ? (
             estado
           ) : (
@@ -246,6 +280,9 @@ function EquiposList() {
                   </th>
                   <th className="w-56 px-5 py-3.5 font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider whitespace-nowrap">
                     Características
+                  </th>
+                  <th className="w-32 px-5 py-3.5 font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider whitespace-nowrap">
+                    Estado
                   </th>
                   <th className="w-36 px-5 py-3.5 font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider whitespace-nowrap text-right">
                     Acciones
@@ -279,6 +316,9 @@ function EquiposList() {
                               No contiene características
                             </span>
                           )}
+                        </td>
+                        <td className="px-5 py-4">
+                          <EstadoEquipo equipoId={equipo.id} />
                         </td>
                         <td className="px-5 py-4">
                           <div className="flex items-center justify-end gap-1">
@@ -335,7 +375,7 @@ function EquiposList() {
 
                       {desplegada && (
                         <tr className="bg-surface-container-low">
-                          <td colSpan={5} className="px-5 py-4">
+                          <td colSpan={6} className="px-5 py-4">
                             <div className="animate-view-in">
                               <p className="font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider mb-2.5">
                                 {abierta.modo === 'ver'
@@ -385,6 +425,9 @@ function EquiposList() {
                       <p className="font-label-sm text-label-sm text-on-surface-variant break-words">
                         {equipo.brand || '—'} · {tiene ? `${total} caract.` : 'Sin características'}
                       </p>
+                      <div className="mt-1.5">
+                        <EstadoEquipo equipoId={equipo.id} />
+                      </div>
                     </div>
                     <ChevronDown
                       className={`h-4 w-4 shrink-0 text-on-surface-variant transition-transform duration-200 ${

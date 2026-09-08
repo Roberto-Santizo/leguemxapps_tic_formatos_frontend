@@ -24,7 +24,6 @@ import HistorialDevolucionList from './pages/HistorialDevolucionList.jsx'
 import HistorialDevolucionView from './pages/HistorialDevolucionView.jsx'
 import BuscarDevolucion from './pages/BuscarDevolucion.jsx'
 import HistorialProximamente from './pages/HistorialProximamente.jsx'
-import Auditoria from './pages/Auditoria.jsx'
 import Usuarios from './pages/Usuarios.jsx'
 import RequireAuth from './routes/RequireAuth.jsx'
 import RequireAdmin from './routes/RequireAdmin.jsx'
@@ -85,14 +84,6 @@ function App() {
         <Route path="historial/devolucion/nueva" element={<BuscarDevolucion />} />
         <Route path="historial/devolucion/:id" element={<HistorialDevolucionView />} />
         <Route path="historial/:tipo" element={<HistorialProximamente />} />
-        <Route
-          path="auditoria"
-          element={
-            <RequireAdmin>
-              <Auditoria />
-            </RequireAdmin>
-          }
-        />
         <Route
           path="usuarios"
           element={
