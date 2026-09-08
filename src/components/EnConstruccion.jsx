@@ -9,7 +9,7 @@
  */
 function EnConstruccion({ icon: Icon, titulo, descripcion }) {
   return (
-    <div className="flex-1 p-container-padding md:p-stack-lg bg-background">
+    <div className="flex-1 animate-view-in p-container-padding md:p-stack-lg bg-background">
       <div className="max-w-[1200px] mx-auto flex flex-col gap-stack-lg">
         <div>
           <h1 className="font-headline-lg text-headline-lg font-bold text-on-surface mb-1">{titulo}</h1>
@@ -18,7 +18,7 @@ function EnConstruccion({ icon: Icon, titulo, descripcion }) {
         <div className="rounded-2xl border border-outline-variant bg-surface-container-lowest shadow-sm px-6 py-16 sm:px-10">
           <div className="mx-auto flex max-w-md flex-col items-center gap-4 text-center">
             {Icon && (
-              <div className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-secondary-container text-on-secondary-container">
+              <div className="grid h-14 w-14 shrink-0 place-items-center rounded-xl border border-outline-variant bg-surface-container-lowest text-primary">
                 <Icon className="h-6 w-6" strokeWidth={2} />
               </div>
             )}

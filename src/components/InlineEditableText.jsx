@@ -62,11 +62,16 @@ function InlineEditableText({ value, onChange, className = '', inputClassName = 
       type="button"
       onClick={() => setEditing(true)}
       title={title || 'Clic para editar'}
-      className={`group inline-flex items-center gap-1 text-left hover:text-secondary transition-colors cursor-text ${className}`}
+      className={`group inline-flex items-center gap-1 text-left hover:text-secondary transition-colors active:scale-[0.97] transition-transform cursor-text ${className}`}
     >
       <span>{value}</span>
+      {/* Antes solo aparecía con group-hover, así que en celular (sin hover)
+          nunca se veía ningún indicio de que el texto es editable. Ahora
+          queda siempre visible a baja opacidad -- funciona como affordance
+          permanente en táctil -- y sube de opacidad al pasar el mouse en
+          escritorio. */}
       <Pencil
-        className="h-3 w-3 opacity-0 group-hover:opacity-60 transition-opacity"
+        className="h-3 w-3 opacity-40 group-hover:opacity-70 transition-opacity"
         strokeWidth={2.25}
       />
     </button>

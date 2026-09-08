@@ -37,3 +37,58 @@ body {
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #a9adb9;
 }
+/* ── Pegar al final de src/index.css ─────────────────────────────────────
+   Fade-in corto al entrar a cada vista (menú de formatos y formularios).
+   Respeta la preferencia de movimiento reducido del sistema operativo. */
+
+@keyframes viewIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.animate-view-in {
+  animation: viewIn 0.22s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-view-in {
+    animation: none;
+  }
+}
+
+
+
+
+
+
+
+/* ── Pegar al final de src/index.css ─────────────────────────────────────
+   Fade-in corto al entrar a cada vista (menú de formatos y formularios).
+   Respeta la preferencia de movimiento reducido del sistema operativo. */
+
+@keyframes viewIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.animate-view-in {
+  animation: viewIn 0.22s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-view-in {
+    animation: none;
+  }
+}

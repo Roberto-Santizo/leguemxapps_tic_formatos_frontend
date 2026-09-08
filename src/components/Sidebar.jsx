@@ -1,6 +1,16 @@
 import { NavLink, useNavigate } from 'react-router-dom'
-import { FileInput, ClipboardList, ShieldCheck, Users, LogOut, X } from 'lucide-react'
+import { FilePlus2, ClipboardList, BookOpen, Users, LogOut, X } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
+
+// Etiqueta visible del rol. Antes aquí se resolvía con un ternario que dejaba
+// a "adminagricola" mostrándose como "Usuario", mientras la tabla de Usuarios
+// lo llama "Admin Agrícola": el mismo rol con dos nombres según la pantalla.
+// Esto es solo texto -- los permisos siguen saliendo de isAdmin, sin cambios.
+const ETIQUETA_ROL = {
+  admin: 'Administrador',
+  adminagricola: 'Admin Agrícola',
+  user: 'Usuario',
+}
 
 function NavItem({ to, icon: Icon, label, end, onNavigate }) {
   return (
@@ -73,11 +83,16 @@ function Sidebar({ abierto, onCerrar }) {
               />
             </div>
             <div className="min-w-0">
-              <h1 className="font-headline-md text-headline-md font-extrabold text-on-surface leading-tight truncate">
-                Control Operativo
+              {/* El sistema se llamaba distinto según dónde lo vieras:
+                  "Control Operativo" aquí y "LEGUMEX" en el encabezado móvil.
+                  Ahora el nombre es uno solo -- con el mismo tratamiento
+                  tipográfico que usa MobileHeader -- y "Control Operativo"
+                  baja a descriptor, que es lo que realmente es. */}
+              <h1 className="font-headline-lg text-headline-lg font-bold tracking-tight text-on-surface leading-tight truncate">
+                LEGUMEX
               </h1>
-              <p className="font-label-sm text-label-sm text-on-surface-variant leading-tight">
-                Administración
+              <p className="font-label-sm text-label-sm text-on-surface-variant leading-tight truncate">
+                Control Operativo
               </p>
             </div>
           </div>
@@ -85,7 +100,7 @@ function Sidebar({ abierto, onCerrar }) {
           <button
             onClick={onCerrar}
             aria-label="Cerrar menú"
-            className="md:hidden grid h-9 w-9 shrink-0 place-items-center rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors"
+            className="md:hidden grid h-11 w-11 shrink-0 place-items-center rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface active:bg-surface-container-highest transition-colors active:scale-[0.97] transition-transform"
           >
             <X className="h-5 w-5" strokeWidth={2} />
           </button>
@@ -93,9 +108,20 @@ function Sidebar({ abierto, onCerrar }) {
 
         {/* Main Tabs */}
         <div className="flex-1 overflow-y-auto px-4 py-6 space-y-1 custom-scrollbar">
-          <NavItem to="/" icon={FileInput} label="Hoja de Devolución" end onNavigate={onCerrar} />
+          {/*
+            El primer ítem ya no es un formato concreto: ahora abre el
+            selector de los seis formatos. Se deja SIN "end" para que quede
+            marcado como activo también mientras se llena un formulario en
+            /actas/:tipo/nueva -- el usuario nunca pierde la referencia de
+            dónde está en la navegación.
+          */}
+          <NavItem to="/" icon={FilePlus2} label="Nueva Acta" onNavigate={onCerrar} />
           <NavItem to="/historial" icon={ClipboardList} label="Historial de Actas" onNavigate={onCerrar} />
-          {isAdmin && <NavItem to="/auditoria" icon={ShieldCheck} label="Auditoría" onNavigate={onCerrar} />}
+          {/* Catálogo (marcas y departamentos): visible para cualquier
+              usuario autenticado -- la API no pide rol admin para /brands
+              ni /departments. Sin "end" para que siga activo dentro de
+              /catalogo/marcas y /catalogo/departamentos. */}
+          <NavItem to="/catalogo" icon={BookOpen} label="Catálogo" onNavigate={onCerrar} />
           {isAdmin && <NavItem to="/usuarios" icon={Users} label="Usuarios" onNavigate={onCerrar} />}
         </div>
 
@@ -108,13 +134,13 @@ function Sidebar({ abierto, onCerrar }) {
             <div className="min-w-0">
               <p className="font-label-bold text-label-bold text-on-surface truncate">{user?.name}</p>
               <p className="font-label-sm text-label-sm text-on-surface-variant capitalize truncate">
-                {user?.role === 'admin' ? 'Administrador' : 'Usuario'}
+                {ETIQUETA_ROL[user?.role] ?? 'Usuario'}
               </p>
             </div>
           </div>
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 min-h-11 px-3 py-2.5 rounded-lg text-on-surface-variant font-body-md hover:bg-surface-container-high hover:text-on-surface transition-colors duration-150 group"
+            className="w-full flex items-center gap-3 min-h-11 px-3 py-2.5 rounded-lg text-on-surface-variant font-body-md hover:bg-surface-container-high hover:text-on-surface transition-colors duration-150 group active:scale-[0.97] transition-transform"
           >
             <LogOut className="h-5 w-5 shrink-0 transition-transform group-hover:scale-110" strokeWidth={2} />
             <span className="font-label-bold text-label-bold">Cerrar Sesión</span>

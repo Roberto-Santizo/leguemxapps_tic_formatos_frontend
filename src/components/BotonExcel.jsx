@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { Download } from 'lucide-react'
-import ConfirmModal from './ConfirmModal.jsx'
+import ConfirmDialog from './ConfirmDialog.jsx'
 
 /**
  * Botón "Exportar" reutilizable para Historial y Auditoría (Fase 8).
- * Pide contraseña con ConfirmModal antes de exportar y dispara la descarga
+ * Pide contraseña con ConfirmDialog (único diálogo de confirmación del
+ * sistema, ver su comentario) antes de exportar y dispara la descarga
  * del archivo .xlsx que devuelve `onExportar`.
  *
  * Props:
@@ -43,13 +44,13 @@ function BotonExcel({ onExportar, nombreArchivo = 'Exportar.xlsx', etiqueta = 'E
       <button
         type="button"
         onClick={() => setModalAbierto(true)}
-        className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high active:brightness-95"
+        className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high active:brightness-95 active:scale-[0.97] transition-transform"
       >
         <Download className="h-4 w-4" strokeWidth={2.25} />
         {etiqueta}
       </button>
 
-      <ConfirmModal
+      <ConfirmDialog
         abierto={modalAbierto}
         titulo="Exportar a Excel"
         mensaje="Ingresa tu contraseña para confirmar la exportación."

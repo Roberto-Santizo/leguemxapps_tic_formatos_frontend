@@ -68,7 +68,7 @@ function ConfirmModal({
             type="button"
             onClick={onCancelar}
             disabled={procesando}
-            className="grid h-9 w-9 shrink-0 place-items-center rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors disabled:opacity-50"
+            className="grid h-9 w-9 shrink-0 place-items-center rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors disabled:opacity-50 active:scale-[0.97] transition-transform"
           >
             <X className="h-5 w-5" strokeWidth={2} />
           </button>
@@ -106,14 +106,14 @@ function ConfirmModal({
               type="button"
               onClick={onCancelar}
               disabled={procesando}
-              className="inline-flex h-10 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high disabled:opacity-60"
+              className="inline-flex h-10 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high disabled:opacity-60 active:scale-[0.97] transition-transform"
             >
               {textoCancelar}
             </button>
             <button
               type="submit"
               disabled={procesando}
-              className={`inline-flex h-10 items-center justify-center rounded-lg px-4 font-label-bold text-label-bold transition-all disabled:opacity-60 ${colorConfirmar}`}
+              className={`inline-flex h-10 items-center justify-center rounded-lg px-4 font-label-bold text-label-bold transition-all active:scale-[0.97] disabled:opacity-60 ${colorConfirmar}`}
             >
               {procesando ? 'Procesando...' : textoConfirmar}
             </button>

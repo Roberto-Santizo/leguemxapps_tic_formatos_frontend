@@ -16,6 +16,15 @@ function readStoredSession() {
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(readStoredSession)
 
+  // Banderas de "no volver a preguntar en esta sesión" para confirmaciones
+  // puntuales (hoy: Finalizar Entrega / Finalizar Devolución). A propósito
+  // NO se guardan en localStorage -- viven solo en memoria, así que una
+  // recarga de página o un logout las borra y la próxima vez vuelve a
+  // preguntar, tal como se pidió ("se acabó la sesión, te vuelve a
+  // preguntar"). Es un objeto { claveDeAccion: true } para que cada acción
+  // tenga su propio "no preguntar" independiente.
+  const [omitirConfirmacion, setOmitirConfirmacion] = useState({})
+
   useEffect(() => {
     try {
       if (session) localStorage.setItem(STORAGE_KEY, JSON.stringify(session))
@@ -36,6 +45,11 @@ export function AuthProvider({ children }) {
 
   function logout() {
     setSession(null)
+    setOmitirConfirmacion({})
+  }
+
+  function marcarOmitirConfirmacion(clave) {
+    setOmitirConfirmacion((prev) => ({ ...prev, [clave]: true }))
   }
 
   const value = {
@@ -45,6 +59,8 @@ export function AuthProvider({ children }) {
     logout,
     isAuthenticated: Boolean(session?.token),
     isAdmin: session?.user?.role === 'admin',
+    omitirConfirmacion,
+    marcarOmitirConfirmacion,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
