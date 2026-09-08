@@ -3,9 +3,10 @@
 > Este archivo es el punto de partida para cualquier agente de IA (o persona) que retome
 > este proyecto sin haber estado en las sesiones anteriores. No es una lista de mejoras
 > pendientes ni de tareas por hacer -- es una descripción de cómo está el sistema HOY y de
-> las reglas de trabajo que se han pedido explícitamente. Para tareas puntuales
-> pendientes/en curso, ver `PLAN_PENDIENTE_PROXIMA_SESION.md` si existe (es bitácora, no
-> permanente). Para el detalle de una revisión visual/UX ya hecha, ver `AUDITORIA_VISUAL_UX.md`.
+> las reglas de trabajo que se han pedido explícitamente. Es el único archivo `.md` de
+> contexto del proyecto (los demás que existían -- `LEEME.md`, `AUDITORIA_VISUAL_UX.md`,
+> `PLAN_PENDIENTE_PROXIMA_SESION.md`, `RESUMEN_IMPLEMENTADO.md` -- se unificaron aquí y se
+> borraron el 2026-09-08 por estar desactualizados o ya resueltos).
 
 ## Qué es
 
@@ -117,16 +118,24 @@ nunca escribir un componente de página nuevo para eso.
   de la pantalla (junto al título), no solo cuando la lista está vacía -- patrón consistente
   entre `HistorialEntregaList.jsx` y `HistorialDevolucionList.jsx`.
 
-## Sección de Auditoría -- estado actual, NO TOCAR sin permiso explícito
+## Sección de Auditoría -- eliminada (2026-09-08)
 
-`src/pages/Auditoria.jsx` hoy es un placeholder ("Próximamente"). En `src/services/api.js`
-ya existen escritas `obtenerAuditoria(token)` y `exportarAuditoriaExcel(token, password)`,
-pero **nunca se comprobó si el backend de Laravel realmente responde esos endpoints** --
-pueden ser de una fase anterior sin que existan del lado del servidor todavía. Esta sección
-se dejó explícitamente sin construir/tocar por instrucción directa del usuario. **Ningún
-agente debe implementar, modificar o "mejorar" nada de Auditoría sin que el usuario lo pida
-explícitamente en esa sesión**, incluyendo no asumir la forma de los datos que devolvería
-el endpoint.
+La sección de Auditoría (`src/pages/Auditoria.jsx`, la ruta `/auditoria`, y su ítem en
+`Sidebar.jsx`) se eliminó por completo del sistema, por instrucción explícita del usuario,
+después de confirmarse contra el swagger completo del backend que **no existe ningún
+endpoint de auditoría/logs del sistema** (se revisaron todos los tags documentados: Auth,
+Usuarios, Marcas, Departamentos, Equipos, Características, Empleados, Documentos de
+Entrega/Devolución y sus detalles -- ninguno expone algo así). Las funciones
+`obtenerAuditoria(token)` y `exportarAuditoriaExcel(token, password)` que quedaron escritas
+en `src/services/api.js` de una fase anterior siguen ahí sin usarse; si se llegan a limpiar
+o el backend agrega un endpoint real de logs a futuro, es tema aparte y requiere pedirlo
+explícitamente en esa sesión -- no reconstruir esta sección por iniciativa propia.
+
+Si se necesita algo parecido a "quién tuvo qué equipo y cuándo", eso sí existe hoy con datos
+reales: `GET /equipments/{id}/history` y los listados de `/delivery_documents` /
+`/return_documents` con sus filtros -- es auditoría de movimientos de equipo, no de cambios
+al catálogo (crear/editar/eliminar Marcas, Departamentos, Equipos, Empleados no deja
+ningún rastro en la API actual).
 
 ## Reglas de código del proyecto
 
