@@ -227,14 +227,14 @@ function EquiposList() {
   const iconoInactivo =
     'inline-grid h-9 w-9 place-items-center rounded-lg text-on-surface-variant opacity-55 cursor-not-allowed'
   const iconoActivo =
-    'inline-grid h-9 w-9 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface active:scale-[0.97] transition-transform'
+    'inline-grid h-9 w-9 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface active:scale-[0.90] transition-transform'
 
   return (
     <div className="animate-view-in flex-1 p-container-padding md:p-stack-lg bg-background">
       <div className="max-w-[1200px] mx-auto flex flex-col gap-stack-lg">
         <Link
           to="/catalogo"
-          className="inline-flex h-10 items-center gap-2 self-start rounded-lg border border-outline-variant bg-surface-container-high px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:border-outline hover:bg-surface-container-highest"
+          className="inline-flex h-10 items-center gap-2 self-start rounded-lg border border-outline-variant bg-surface-container-high px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:border-outline hover:bg-surface-container-highest active:scale-[0.97] transition-transform"
         >
           <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={2.5} />
           Catálogo
@@ -363,7 +363,7 @@ function EquiposList() {
                                   onClick={() => alternar(equipo.id, 'agregar')}
                                   aria-label={`Agregar característica a ${equipo.name}`}
                                   title="Agregar característica"
-                                  className="ml-1 inline-grid h-9 w-9 place-items-center rounded-lg border border-outline-variant bg-surface text-on-surface transition-colors hover:border-outline hover:bg-surface-container-high active:scale-[0.97] transition-transform"
+                                  className="ml-1 inline-grid h-9 w-9 place-items-center rounded-lg border border-outline-variant bg-surface text-on-surface transition-colors hover:border-outline hover:bg-surface-container-high active:scale-[0.90] transition-transform"
                                 >
                                   <Plus className="h-4 w-4" strokeWidth={2.25} />
                                 </button>

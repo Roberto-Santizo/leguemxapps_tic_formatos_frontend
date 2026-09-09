@@ -127,7 +127,7 @@ function CatalogoLista({ textos, onListar, rutaBase }) {
         <div className="max-w-[1200px] mx-auto flex flex-col gap-stack-lg">
           <Link
             to="/catalogo"
-            className="inline-flex h-10 items-center gap-2 self-start rounded-lg border border-outline-variant bg-surface-container-high px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:border-outline hover:bg-surface-container-highest"
+            className="inline-flex h-10 items-center gap-2 self-start rounded-lg border border-outline-variant bg-surface-container-high px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:border-outline hover:bg-surface-container-highest active:scale-[0.97] transition-transform"
           >
             <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={2.5} />
             Catálogo
@@ -212,7 +212,7 @@ function CatalogoLista({ textos, onListar, rutaBase }) {
                             onClick={() => verRegistro(registro)}
                             aria-label={`Ver ${registro.name}`}
                             title="Ver"
-                            className="inline-grid h-9 w-9 place-items-center rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors active:scale-[0.97] transition-transform"
+                            className="inline-grid h-9 w-9 place-items-center rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors active:scale-[0.90] transition-transform"
                           >
                             <Eye className="h-4 w-4" strokeWidth={2} />
                           </button>
@@ -221,7 +221,7 @@ function CatalogoLista({ textos, onListar, rutaBase }) {
                             onClick={() => setConfirmando(registro)}
                             aria-label={`Editar ${registro.name}`}
                             title="Editar"
-                            className="inline-grid h-9 w-9 place-items-center rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors active:scale-[0.97] transition-transform"
+                            className="inline-grid h-9 w-9 place-items-center rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors active:scale-[0.90] transition-transform"
                           >
                             <Pencil className="h-4 w-4" strokeWidth={2} />
                           </button>

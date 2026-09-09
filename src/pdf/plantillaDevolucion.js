@@ -7,8 +7,10 @@
 // varios equipos según la devolución sea parcial o completa.
 // ============================================================================
 
-import { mast, title, sec, fld, observaciones, signs, foot, page, esc } from './designSystemPdf.js'
+import { mast, title, sec, fld, clause, observaciones, signs, foot, page, esc } from './designSystemPdf.js'
 import { leerVigenciaDocumentos } from '../config/formatos.js'
+import { formatearFecha, constanciaDevolucion } from '../utils/fecha.js'
+import { esExtravio, textoSinPrefijoExtravio } from '../utils/extravio.js'
 
 function nombrePlanta(location) {
   if (location === 'Planta Tejar' || location === 'Planta Parramos') return location
@@ -16,14 +18,16 @@ function nombrePlanta(location) {
 }
 
 function filaEquipo(item, indice) {
+  const extravio = esExtravio(item.observations)
+  const observaciones = extravio ? textoSinPrefijoExtravio(item.observations) : item.observations
   return `
-  <tr>
+  <tr${extravio ? ' class="extravio"' : ''}>
     <td class="num">${String(indice + 1).padStart(2, '0')}</td>
-    <td>${esc(item.equipment_name)}</td>
+    <td>${esc(item.equipment_name)}${extravio ? ' <span class="badge-extravio">Extravío</span>' : ''}</td>
     <td>${esc(item.equipment_brand) || '&mdash;'}</td>
     <td>${esc(item.equipment_model) || '&mdash;'}</td>
     <td>${esc(item.equipment_serie) || '&mdash;'}</td>
-    <td>${esc(item.observations) || '&mdash;'}</td>
+    <td>${esc(observaciones) || '&mdash;'}</td>
   </tr>`
 }
 
@@ -39,11 +43,11 @@ export function construirHtmlDevolucion(documento, formato, firmaUrls) {
     : `<tr><td colspan="6" class="tabla-vacia">Sin equipo registrado.</td></tr>`
 
   const body = `
-  ${mast({ codigo: formato.codigo, ...leerVigenciaDocumentos() })}
+  ${mast({ codigo: formato.codigo, ...leerVigenciaDocumentos(), pagina: 1, totalPaginas: 1 })}
   ${title(formato.titulo)}
   ${sec('Datos del Usuario')}
   <div class="fields">
-    ${fld('Fecha de Devolución', { span: 3, val: documento.return_date })}
+    ${fld('Fecha de Devolución', { span: 3, val: formatearFecha(documento.return_date) })}
     ${fld('Planta', { span: 3, val: nombrePlanta(documento.location) })}
     ${fld('Colaborador', { span: 6, val: documento.employee_name })}
     ${fld('Departamento', { span: 3, val: documento.employee_department })}
@@ -58,6 +62,7 @@ export function construirHtmlDevolucion(documento, formato, firmaUrls) {
     </tr></thead>
     <tbody>${filas}</tbody>
   </table>
+  ${clause(constanciaDevolucion(documento.return_date))}
   ${sec('Observaciones Generales')}
   ${observaciones(documento.observations)}
   ${sec(formato.tituloFirmas)}

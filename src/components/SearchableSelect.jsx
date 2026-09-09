@@ -153,7 +153,7 @@ function SearchableSelect({
         <button
           type="button"
           onClick={() => setAbierto(false)}
-          className={`grid h-10 w-10 shrink-0 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high active:scale-[0.97] transition-transform ${usarMd ? 'md:hidden' : 'sm:hidden'}`}
+          className={`grid h-10 w-10 shrink-0 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high active:scale-[0.90] transition-transform ${usarMd ? 'md:hidden' : 'sm:hidden'}`}
           aria-label="Cerrar"
         >
           <X className="h-4 w-4" strokeWidth={2} />

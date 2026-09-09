@@ -109,7 +109,7 @@ export function Toaster() {
                 quitarAviso(aviso.id)
               }}
               aria-label="Cerrar aviso"
-              className="-mr-1 grid h-9 w-9 shrink-0 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface active:scale-[0.97] transition-transform"
+              className="-mr-1 grid h-9 w-9 shrink-0 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface active:scale-[0.90] transition-transform"
             >
               <X className="h-4 w-4" strokeWidth={2} />
             </button>

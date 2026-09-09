@@ -100,7 +100,7 @@ function Sidebar({ abierto, onCerrar }) {
           <button
             onClick={onCerrar}
             aria-label="Cerrar menú"
-            className="md:hidden grid h-11 w-11 shrink-0 place-items-center rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface active:bg-surface-container-highest transition-colors active:scale-[0.97] transition-transform"
+            className="md:hidden grid h-11 w-11 shrink-0 place-items-center rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface active:bg-surface-container-highest transition-colors active:scale-[0.90] transition-transform"
           >
             <X className="h-5 w-5" strokeWidth={2} />
           </button>

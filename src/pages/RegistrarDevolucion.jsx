@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, CircleUser, Loader2, MessageSquareText, PenLine, Rows3 } from 'lucide-react'
+import { ArrowLeft, CircleUser, Loader2, Lock, MessageSquareText, PenLine, Rows3 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 import FirmaPad from '../components/FirmaPad.jsx'
 import EstadoVacio from '../components/EstadoVacio.jsx'
@@ -9,10 +9,13 @@ import { mostrarToast } from '../components/Toast.jsx'
 import { SeccionCard, Campo } from './FormatoActa.jsx'
 import { FORMATOS } from '../config/formatos.js'
 import { obtenerDocumentoEntrega, listarDetallesEntrega, crearDocumentoDevolucion } from '../services/api.js'
+import { formatearFecha, constanciaDevolucion } from '../utils/fecha.js'
+import { marcarExtravio } from '../utils/extravio.js'
 
 const formato = FORMATOS.devolucion
 
 function nombrePlanta(location) {
+  if (location === 'Planta Tejar' || location === 'Planta Parramos') return location
   return Number(location) === 1 ? 'Planta Tejar' : 'Planta Parramos'
 }
 
@@ -85,7 +88,7 @@ function RegistrarDevolucion() {
         const lista = Array.isArray(detalles) ? detalles : []
         setPendientes(lista)
         setSeleccion(
-          Object.fromEntries(lista.map((it) => [it.id, { marcado: false, observaciones: '' }])),
+          Object.fromEntries(lista.map((it) => [it.id, { marcado: false, observaciones: '', extravio: false }])),
         )
       })
       .catch((err) => vivo && setError(err.message || 'No se pudo cargar la entrega'))
@@ -104,6 +107,21 @@ function RegistrarDevolucion() {
 
   function actualizarObsItem(detailId, valor) {
     setSeleccion((prev) => ({ ...prev, [detailId]: { ...prev[detailId], observaciones: valor } }))
+  }
+
+  // Extravío cuenta como devuelto (se marca junto con los demás, tal como se
+  // pidió) -- por eso al activarlo también se fuerza `marcado: true`. Al
+  // desactivarlo no se desmarca solo, por si el usuario ya lo había marcado
+  // aparte antes de usar el botón de extravío.
+  function toggleExtravio(detailId) {
+    setSeleccion((prev) => {
+      const actual = prev[detailId] || {}
+      const nuevoExtravio = !actual.extravio
+      return {
+        ...prev,
+        [detailId]: { ...actual, extravio: nuevoExtravio, marcado: nuevoExtravio ? true : actual.marcado },
+      }
+    })
   }
 
   const itemsMarcados = pendientes.filter((it) => seleccion[it.id]?.marcado)
@@ -146,7 +164,10 @@ function RegistrarDevolucion() {
       formData.append('administrador_signature', dataUrlToBlob(firmas.recibe), 'administrador.png')
       itemsMarcados.forEach((item, indice) => {
         formData.append(`items[${indice}][delivery_document_detail_id]`, item.id)
-        const obs = seleccion[item.id]?.observaciones?.trim()
+        const itemSeleccion = seleccion[item.id]
+        const obs = itemSeleccion?.extravio
+          ? marcarExtravio(itemSeleccion.observaciones)
+          : itemSeleccion?.observaciones?.trim()
         if (obs) formData.append(`items[${indice}][observations]`, obs)
       })
       await crearDocumentoDevolucion(token, formData)
@@ -165,7 +186,7 @@ function RegistrarDevolucion() {
         <div className="mx-auto max-w-4xl space-y-stack-lg pb-4">
           <Link
             to={`/historial/entrega/${id}`}
-            className="inline-flex h-10 items-center gap-2 self-start rounded-lg border border-outline-variant bg-surface-container-high px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:border-outline hover:bg-surface-container-highest"
+            className="inline-flex h-10 items-center gap-2 self-start rounded-lg border border-outline-variant bg-surface-container-high px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:border-outline hover:bg-surface-container-highest active:scale-[0.97] transition-transform"
           >
             <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={2.5} />
             Entrega
@@ -235,7 +256,7 @@ function RegistrarDevolucion() {
               <SeccionCard icon={CircleUser} titulo="Datos del Usuario">
                 <div className="grid grid-cols-12 gap-x-column-gap gap-y-stack-md p-5">
                   <Campo label="Fecha de Entrega">
-                    <div className={valorClass}>{entrega.delivery_date || '—'}</div>
+                    <div className={valorClass}>{formatearFecha(entrega.delivery_date)}</div>
                   </Campo>
                   <Campo label="Colaborador" span="col-span-12 sm:col-span-8">
                     <div className={valorClass}>{entrega.employee_name || '—'}</div>
@@ -285,15 +306,21 @@ function RegistrarDevolucion() {
                               {col}
                             </th>
                           ))}
+                          <th className="py-2.5 pr-5 font-label-sm text-label-sm font-bold uppercase tracking-wide text-on-surface-variant">
+                            Extravío
+                          </th>
                         </tr>
                       </thead>
                       <tbody>
                         {pendientes.map((item) => {
                           const marcado = Boolean(seleccion[item.id]?.marcado)
+                          const extravio = Boolean(seleccion[item.id]?.extravio)
                           return (
                             <tr
                               key={item.id}
-                              className={`border-b border-outline-variant transition-colors ${marcado ? 'bg-primary/5' : ''}`}
+                              className={`border-b border-outline-variant transition-colors ${
+                                extravio ? 'bg-error-container/30' : marcado ? 'bg-primary/5' : ''
+                              }`}
                             >
                               <td className="py-2 pl-5 pr-3">
                                 <input
@@ -311,15 +338,30 @@ function RegistrarDevolucion() {
                               <td className="py-2 pr-3 font-mono uppercase text-on-surface-variant">
                                 {item.equipment_serie || '—'}
                               </td>
-                              <td className="py-2 pr-5">
+                              <td className="py-2 pr-3">
                                 <input
                                   type="text"
                                   value={seleccion[item.id]?.observaciones || ''}
                                   onChange={(e) => actualizarObsItem(item.id, e.target.value)}
                                   disabled={!marcado}
-                                  placeholder="Ej. Regresa en buen estado"
+                                  placeholder={extravio ? 'Ej. No tuvo devolución' : 'Ej. Regresa en buen estado'}
                                   className={`${celdaInputClass} disabled:opacity-50`}
                                 />
+                              </td>
+                              <td className="py-2 pr-5">
+                                <button
+                                  type="button"
+                                  onClick={() => toggleExtravio(item.id)}
+                                  title="Marcar este equipo como extravío (no hubo devolución real)"
+                                  className={[
+                                    'inline-flex h-8 items-center gap-1.5 rounded-lg border px-3 font-label-sm text-label-sm font-bold uppercase tracking-wide transition-colors active:scale-[0.90] transition-transform',
+                                    extravio
+                                      ? 'border-error bg-error text-on-error'
+                                      : 'border-outline-variant bg-surface text-on-surface-variant hover:bg-error-container/40 hover:text-on-error-container',
+                                  ].join(' ')}
+                                >
+                                  Extravío
+                                </button>
                               </td>
                             </tr>
                           )
@@ -334,11 +376,16 @@ function RegistrarDevolucion() {
                   <div className="flex flex-col gap-stack-sm p-4 md:hidden">
                     {pendientes.map((item) => {
                       const marcado = Boolean(seleccion[item.id]?.marcado)
+                      const extravio = Boolean(seleccion[item.id]?.extravio)
                       return (
                         <div
                           key={item.id}
                           className={`rounded-xl border p-4 transition-colors ${
-                            marcado ? 'border-primary bg-primary/5' : 'border-outline-variant bg-surface-container-lowest'
+                            extravio
+                              ? 'border-error bg-error-container/30'
+                              : marcado
+                                ? 'border-primary bg-primary/5'
+                                : 'border-outline-variant bg-surface-container-lowest'
                           }`}
                         >
                           <button
@@ -372,17 +419,43 @@ function RegistrarDevolucion() {
                                 type="text"
                                 value={seleccion[item.id]?.observaciones || ''}
                                 onChange={(e) => actualizarObsItem(item.id, e.target.value)}
-                                placeholder="Ej. Regresa en buen estado"
+                                placeholder={extravio ? 'Ej. No tuvo devolución' : 'Ej. Regresa en buen estado'}
                                 className={inputClass}
                               />
                             </div>
                           )}
+
+                          <div className="mt-stack-sm pl-7">
+                            <button
+                              type="button"
+                              onClick={() => toggleExtravio(item.id)}
+                              className={[
+                                'inline-flex h-9 items-center gap-1.5 rounded-lg border px-3.5 font-label-sm text-label-sm font-bold uppercase tracking-wide transition-colors active:scale-[0.90] transition-transform',
+                                extravio
+                                  ? 'border-error bg-error text-on-error'
+                                  : 'border-outline-variant bg-surface text-on-surface-variant hover:bg-error-container/40 hover:text-on-error-container',
+                              ].join(' ')}
+                            >
+                              Extravío
+                            </button>
+                          </div>
                         </div>
                       )
                     })}
                   </div>
                   </>
                 )}
+              </SeccionCard>
+
+              {/* Constancia de devolución -- mismo texto de la hoja física,
+                  con el día/mes/año de hoy ya resueltos (se guardará con esa
+                  misma fecha real al finalizar) en vez de dejarlos en blanco. */}
+              <SeccionCard icon={Lock} titulo={formato.tituloClausula} nota="Texto fijo del formato">
+                <div className="p-5">
+                  <p className="border-l-2 border-outline-variant pl-4 font-body-md text-body-md leading-relaxed text-pretty text-on-surface">
+                    {constanciaDevolucion(new Date())}
+                  </p>
+                </div>
               </SeccionCard>
 
               {/* Observaciones generales */}

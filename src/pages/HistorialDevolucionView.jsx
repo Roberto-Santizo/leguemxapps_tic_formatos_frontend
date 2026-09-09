@@ -7,6 +7,7 @@ import {
   Download,
   ExternalLink,
   Loader2,
+  Lock,
   MessageSquareText,
   PenLine,
   PlusCircle,
@@ -30,6 +31,8 @@ import {
   urlArchivoPublico,
 } from '../services/api.js'
 import { generarPdfPapelFisico } from '../utils/generatePdfPapelFisico.js'
+import { formatearFecha, constanciaDevolucion } from '../utils/fecha.js'
+import { esExtravio, textoSinPrefijoExtravio, marcarExtravio } from '../utils/extravio.js'
 import { construirHtmlDevolucion } from '../pdf/plantillaDevolucion.js'
 
 const formato = FORMATOS.devolucion
@@ -181,7 +184,7 @@ function HistorialDevolucionView() {
         <div className="mx-auto max-w-4xl space-y-stack-lg pb-4">
           <Link
             to="/historial/devolucion"
-            className="inline-flex h-10 items-center gap-2 self-start rounded-lg border border-outline-variant bg-surface-container-high px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:border-outline hover:bg-surface-container-highest"
+            className="inline-flex h-10 items-center gap-2 self-start rounded-lg border border-outline-variant bg-surface-container-high px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:border-outline hover:bg-surface-container-highest active:scale-[0.97] transition-transform"
           >
             <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={2.5} />
             Devolución de Equipo
@@ -248,7 +251,7 @@ function HistorialDevolucionView() {
               <SeccionCard icon={CircleUser} titulo="Datos del Usuario">
                 <div className="grid grid-cols-12 gap-x-column-gap gap-y-stack-md p-5">
                   <Campo label="Fecha de Devolución">
-                    <div className={valorClass}>{documento.return_date || '—'}</div>
+                    <div className={valorClass}>{formatearFecha(documento.return_date)}</div>
                   </Campo>
                   <Campo label="Colaborador" span="col-span-12 sm:col-span-8">
                     <div className={valorClass}>{documento.employee_name || '—'}</div>
@@ -280,7 +283,7 @@ function HistorialDevolucionView() {
                     type="button"
                     onClick={abrirAgregarEquipo}
                     disabled={agregandoEquipo}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-outline-variant bg-surface-container-lowest px-3 py-1.5 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high disabled:opacity-50 active:scale-[0.97] transition-transform"
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-outline-variant bg-surface-container-lowest px-3 py-1.5 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high disabled:opacity-50 active:scale-[0.90] transition-transform"
                   >
                     <PlusCircle className="h-4 w-4" strokeWidth={2} />
                     Agregar equipo
@@ -312,13 +315,20 @@ function HistorialDevolucionView() {
                         </tr>
                       </thead>
                       <tbody>
-                        {documento.items.map((item, indice) => (
-                          <tr key={item.id} className="border-b border-outline-variant">
+                        {documento.items.map((item, indice) => {
+                          const extravio = esExtravio(item.observations)
+                          return (
+                          <tr key={item.id} className={`border-b border-outline-variant ${extravio ? 'bg-error-container/30' : ''}`}>
                             <td className="py-2 pl-5 pr-3 text-right font-mono text-body-md tabular-nums text-on-surface-variant">
                               {String(indice + 1).padStart(2, '0')}
                             </td>
                             <td className="py-2 pr-3 font-medium text-on-surface break-words">
                               {item.equipment_name || '—'}
+                              {extravio && (
+                                <span className="ml-2 inline-flex items-center rounded-full bg-error px-2 py-0.5 font-label-sm text-label-sm font-bold uppercase tracking-wide text-on-error">
+                                  Extravío
+                                </span>
+                              )}
                             </td>
                             <td className="py-2 pr-3 text-on-surface-variant break-words">{item.equipment_brand || '—'}</td>
                             <td className="py-2 pr-3 text-on-surface-variant break-words">{item.equipment_model || '—'}</td>
@@ -327,13 +337,14 @@ function HistorialDevolucionView() {
                             </td>
                             <td className="py-2 pr-5 text-on-surface-variant break-words">
                               <InlineEditableText
-                                value={item.observations || 'Sin observaciones'}
-                                onChange={(valor) => corregirObservacionItem(item.id, valor)}
+                                value={extravio ? textoSinPrefijoExtravio(item.observations) : item.observations || 'Sin observaciones'}
+                                onChange={(valor) => corregirObservacionItem(item.id, extravio ? marcarExtravio(valor) : valor)}
                                 title="Corregir observación"
                               />
                             </td>
                           </tr>
-                        ))}
+                          )
+                        })}
 
                         {agregandoEquipo && (
                           <tr className="border-b border-outline-variant bg-surface-container-low/40">
@@ -369,7 +380,7 @@ function HistorialDevolucionView() {
                                   disabled={guardandoEquipo || !nuevoDetalleId}
                                   aria-label="Confirmar equipo"
                                   title="Confirmar"
-                                  className="grid h-8 w-8 place-items-center rounded-lg text-primary transition-colors hover:bg-primary/10 disabled:opacity-40 active:scale-[0.97] transition-transform"
+                                  className="grid h-8 w-8 place-items-center rounded-lg text-primary transition-colors hover:bg-primary/10 disabled:opacity-40 active:scale-[0.90] transition-transform"
                                 >
                                   {guardandoEquipo ? (
                                     <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} />
@@ -383,7 +394,7 @@ function HistorialDevolucionView() {
                                   disabled={guardandoEquipo}
                                   aria-label="Cancelar"
                                   title="Cancelar"
-                                  className="grid h-8 w-8 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high active:scale-[0.97] transition-transform"
+                                  className="grid h-8 w-8 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high active:scale-[0.90] transition-transform"
                                 >
                                   <X className="h-4 w-4" strokeWidth={2} />
                                 </button>
@@ -397,18 +408,27 @@ function HistorialDevolucionView() {
 
                   {/* Móvil: una tarjeta por artículo devuelto. */}
                   <div className="flex flex-col gap-stack-sm p-4 md:hidden">
-                    {documento.items.map((item, indice) => (
+                    {documento.items.map((item, indice) => {
+                      const extravio = esExtravio(item.observations)
+                      return (
                       <div
                         key={item.id}
-                        className="rounded-xl border border-outline-variant bg-surface-container-lowest p-4"
+                        className={`rounded-xl border p-4 ${
+                          extravio ? 'border-error bg-error-container/30' : 'border-outline-variant bg-surface-container-lowest'
+                        }`}
                       >
-                        <div className="mb-stack-sm flex items-center gap-2">
+                        <div className="mb-stack-sm flex flex-wrap items-center gap-2">
                           <span className="shrink-0 font-mono text-body-md tabular-nums text-on-surface-variant">
                             {String(indice + 1).padStart(2, '0')}
                           </span>
                           <span className="font-label-bold text-label-bold text-on-surface break-words">
                             {item.equipment_name || '—'}
                           </span>
+                          {extravio && (
+                            <span className="inline-flex items-center rounded-full bg-error px-2 py-0.5 font-label-sm text-label-sm font-bold uppercase tracking-wide text-on-error">
+                              Extravío
+                            </span>
+                          )}
                         </div>
 
                         <div className="grid grid-cols-2 gap-3">
@@ -443,13 +463,14 @@ function HistorialDevolucionView() {
                             Observaciones
                           </p>
                           <InlineEditableText
-                            value={item.observations || 'Sin observaciones'}
-                            onChange={(valor) => corregirObservacionItem(item.id, valor)}
+                            value={extravio ? textoSinPrefijoExtravio(item.observations) : item.observations || 'Sin observaciones'}
+                            onChange={(valor) => corregirObservacionItem(item.id, extravio ? marcarExtravio(valor) : valor)}
                             title="Corregir observación"
                           />
                         </div>
                       </div>
-                    ))}
+                      )
+                    })}
 
                     {agregandoEquipo && (
                       <div className="rounded-xl border border-dashed border-outline bg-surface-container-low/40 p-4">
@@ -509,6 +530,17 @@ function HistorialDevolucionView() {
                   </div>
                   </>
                 )}
+              </SeccionCard>
+
+              {/* Constancia de devolución -- mismo texto de la hoja física,
+                  con el día/mes/año ya resueltos de return_date en vez de
+                  dejarlos en blanco (ver constanciaDevolucion en utils/fecha.js). */}
+              <SeccionCard icon={Lock} titulo={formato.tituloClausula} nota="Texto fijo del formato">
+                <div className="p-5">
+                  <p className="border-l-2 border-outline-variant pl-4 font-body-md text-body-md leading-relaxed text-pretty text-on-surface">
+                    {constanciaDevolucion(documento.return_date)}
+                  </p>
+                </div>
               </SeccionCard>
 
               {/* Observaciones generales -- editable, único campo que la API

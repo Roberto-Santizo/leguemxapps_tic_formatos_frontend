@@ -5,9 +5,11 @@ import { useAuth } from '../context/AuthContext.jsx'
 import EstadoVacio from '../components/EstadoVacio.jsx'
 import SearchableSelect from '../components/SearchableSelect.jsx'
 import { FORMATOS } from '../config/formatos.js'
-import { listarDocumentosEntrega } from '../services/api.js'
+import { listarDocumentosEntrega, listarDetallesEntrega } from '../services/api.js'
+import { formatearFecha } from '../utils/fecha.js'
 
 function nombrePlanta(location) {
+  if (location === 'Planta Tejar' || location === 'Planta Parramos') return location
   return Number(location) === 1 ? 'Planta Tejar' : 'Planta Parramos'
 }
 
@@ -58,6 +60,34 @@ function BuscarDevolucion() {
     [entregas, empleado],
   )
 
+  // Cuando hay varias entregas para elegir, se consulta por cada una si le
+  // queda equipo pendiente de devolver (mismo endpoint que ya usa
+  // RegistrarDevolucion.jsx: listarDetallesEntrega con pending:true) -- así
+  // se puede avisar cuál ya está completamente devuelta antes de entrar,
+  // en vez de que el usuario la abra y se encuentre con "nada pendiente".
+  // Estado por entrega: 'cargando' | 'activa' (le queda equipo) | 'devuelta'.
+  const [estadoEntregas, setEstadoEntregas] = useState({})
+
+  useEffect(() => {
+    if (entregasDelEmpleado.length <= 1) return
+    let vivo = true
+    entregasDelEmpleado.forEach((entrega) => {
+      setEstadoEntregas((prev) => (prev[entrega.id] ? prev : { ...prev, [entrega.id]: 'cargando' }))
+      listarDetallesEntrega(token, { deliveryDocumentId: entrega.id, pending: true })
+        .then((data) => {
+          if (!vivo) return
+          const pendientes = Array.isArray(data) ? data.length : 0
+          setEstadoEntregas((prev) => ({ ...prev, [entrega.id]: pendientes > 0 ? 'activa' : 'devuelta' }))
+        })
+        // Si falla la consulta de una entrega puntual, se deja como "activa"
+        // (no bloquear el clic) en vez de asumir que ya está devuelta.
+        .catch(() => vivo && setEstadoEntregas((prev) => ({ ...prev, [entrega.id]: 'activa' })))
+    })
+    return () => {
+      vivo = false
+    }
+  }, [entregasDelEmpleado, token])
+
   // Con una sola entrega no hace falta preguntar cuál: se salta directo a
   // la hoja de devolución de esa entrega.
   useEffect(() => {
@@ -71,7 +101,7 @@ function BuscarDevolucion() {
       <div className="mx-auto max-w-2xl space-y-stack-lg">
         <Link
           to="/historial/devolucion"
-          className="inline-flex h-10 items-center gap-2 self-start rounded-lg border border-outline-variant bg-surface-container-high px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:border-outline hover:bg-surface-container-highest"
+          className="inline-flex h-10 items-center gap-2 self-start rounded-lg border border-outline-variant bg-surface-container-high px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:border-outline hover:bg-surface-container-highest active:scale-[0.97] transition-transform"
         >
           <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={2.5} />
           Devolución de Equipo
@@ -133,24 +163,45 @@ function BuscarDevolucion() {
                   {empleado} tiene {entregasDelEmpleado.length} entregas registradas -- elige cuál se está
                   devolviendo
                 </p>
-                {entregasDelEmpleado.map((entrega) => (
+                {entregasDelEmpleado.map((entrega) => {
+                  const estado = estadoEntregas[entrega.id]
+                  const yaDevuelta = estado === 'devuelta'
+                  return (
                   <button
                     key={entrega.id}
                     type="button"
+                    disabled={yaDevuelta}
                     onClick={() => navigate(`/historial/entrega/${entrega.id}/devolucion`)}
-                    className="flex items-center justify-between gap-3 rounded-xl border border-outline-variant bg-surface-container-low px-4 py-3.5 text-left transition-colors hover:bg-surface-container-high active:scale-[0.97] transition-transform"
+                    className={`flex items-center justify-between gap-3 rounded-xl border border-outline-variant bg-surface-container-low px-4 py-3.5 text-left transition-colors ${
+                      yaDevuelta
+                        ? 'cursor-not-allowed opacity-60'
+                        : 'hover:bg-surface-container-high active:scale-[0.97] transition-transform'
+                    }`}
                   >
                     <div className="min-w-0">
-                      <p className="font-body-md text-body-md font-medium text-on-surface">
-                        {entrega.delivery_date || '—'} · {nombrePlanta(entrega.location)}
-                      </p>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="font-body-md text-body-md font-medium text-on-surface">
+                          {formatearFecha(entrega.delivery_date)} · {nombrePlanta(entrega.location)}
+                        </p>
+                        {estado === 'activa' && (
+                          <span className="rounded-full bg-primary/10 px-2 py-0.5 font-label-sm text-label-sm font-bold uppercase tracking-wide text-primary">
+                            Activa
+                          </span>
+                        )}
+                        {yaDevuelta && (
+                          <span className="rounded-full bg-surface-container-high px-2 py-0.5 font-label-sm text-label-sm font-bold uppercase tracking-wide text-on-surface-variant">
+                            Ya devuelta
+                          </span>
+                        )}
+                      </div>
                       <p className="font-label-sm text-label-sm text-on-surface-variant tabular-nums">
                         {Array.isArray(entrega.items) ? entrega.items.length : 0} equipo(s) en esta entrega
                       </p>
                     </div>
                     <ChevronRight className="h-4 w-4 shrink-0 text-outline" strokeWidth={2} />
                   </button>
-                ))}
+                  )
+                })}
               </div>
             )}
           </div>

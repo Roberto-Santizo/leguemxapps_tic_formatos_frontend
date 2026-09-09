@@ -7,7 +7,7 @@ function MobileHeader({ onAbrirMenu }) {
         <button
           aria-label="Abrir menú"
           onClick={onAbrirMenu}
-          className="grid h-11 w-11 shrink-0 place-items-center rounded-lg text-on-surface-variant hover:bg-surface-container-high active:bg-surface-container-highest transition-colors active:scale-[0.97] transition-transform"
+          className="grid h-11 w-11 shrink-0 place-items-center rounded-lg text-on-surface-variant hover:bg-surface-container-high active:bg-surface-container-highest transition-colors active:scale-[0.90] transition-transform"
         >
           <Menu className="h-6 w-6" strokeWidth={2} />
         </button>

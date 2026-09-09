@@ -96,7 +96,7 @@ function RegistrarUsuarioModal({ abierto, procesando, error, erroresCampo, onGua
             onClick={onCancelar}
             disabled={procesando}
             aria-label="Cerrar"
-            className="grid h-11 w-11 shrink-0 place-items-center rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors disabled:opacity-50 active:scale-[0.97] transition-transform"
+            className="grid h-11 w-11 shrink-0 place-items-center rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors disabled:opacity-50 active:scale-[0.90] transition-transform"
           >
             <X className="h-5 w-5" strokeWidth={2} />
           </button>
@@ -154,7 +154,7 @@ function RegistrarUsuarioModal({ abierto, procesando, error, erroresCampo, onGua
                 disabled={procesando}
                 aria-label={mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                 tabIndex={-1}
-                className="absolute right-1 top-1/2 -translate-y-1/2 grid h-9 w-9 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface disabled:opacity-50 active:scale-[0.97] transition-transform"
+                className="absolute right-1 top-1/2 -translate-y-1/2 grid h-9 w-9 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface disabled:opacity-50 active:scale-[0.90] transition-transform"
               >
                 {mostrarPassword ? (
                   <EyeOff className="h-4 w-4" strokeWidth={2} />
@@ -186,7 +186,7 @@ function RegistrarUsuarioModal({ abierto, procesando, error, erroresCampo, onGua
                 disabled={procesando}
                 aria-label={mostrarConfirmacion ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                 tabIndex={-1}
-                className="absolute right-1 top-1/2 -translate-y-1/2 grid h-9 w-9 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface disabled:opacity-50 active:scale-[0.97] transition-transform"
+                className="absolute right-1 top-1/2 -translate-y-1/2 grid h-9 w-9 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface disabled:opacity-50 active:scale-[0.90] transition-transform"
               >
                 {mostrarConfirmacion ? (
                   <EyeOff className="h-4 w-4" strokeWidth={2} />

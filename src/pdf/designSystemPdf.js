@@ -26,11 +26,11 @@ export const CSS_PAPEL_FISICO = `
 .lgx-pdf .vr{width:1px;height:42px;background:#BEBAAD;flex:none}
 .lgx-pdf .org{font-weight:700;font-size:14.5px;letter-spacing:.09em;text-transform:uppercase;color:#1A1A17;line-height:1.2;white-space:nowrap}
 .lgx-pdf .dept{font-size:10.5px;letter-spacing:.015em;color:#5A574F;margin-top:5px;line-height:1.4}
-.lgx-pdf .spec{display:flex;align-items:stretch}
-.lgx-pdf .spec > div{padding:0 10px;text-align:right;border-left:.8px solid #BEBAAD}
+.lgx-pdf .spec{display:flex;align-items:stretch;flex:none}
+.lgx-pdf .spec > div{padding:0 8px;text-align:right;border-left:.8px solid #BEBAAD;white-space:nowrap}
 .lgx-pdf .spec > div:first-child{border-left:none}
 .lgx-pdf .spec > div:last-child{padding-right:0}
-.lgx-pdf .spec .k{display:block;font-size:7.5px;font-weight:700;letter-spacing:.17em;text-transform:uppercase;color:#5A574F}
+.lgx-pdf .spec .k{display:block;font-size:7px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#5A574F;white-space:nowrap}
 .lgx-pdf .spec .v{display:block;font-size:11px;font-weight:700;color:#1A1A17;margin-top:5px;font-variant-numeric:tabular-nums;letter-spacing:.02em;white-space:nowrap}
 .lgx-pdf .rule2{margin-top:14px;border-top:1.6px solid #1A1A17;border-bottom:.9px solid #2C4A2E;height:4px}
 
@@ -61,6 +61,12 @@ export const CSS_PAPEL_FISICO = `
 .lgx-pdf tbody td.badge{font-family:Carlito,'Segoe UI',sans-serif;font-size:9.5px;text-transform:uppercase;letter-spacing:.06em;color:#5A574F}
 .lgx-pdf tbody tr:last-child td{border-bottom:1px solid #A9A598}
 .lgx-pdf .tabla-vacia{padding:16px 10px;font-size:12px;color:#8F8B7E;font-style:italic}
+
+/* EXTRAVÍO -- mismos colores de "error" que ya usa el resto del sistema
+   (tailwind.config.js: error #B3453B / error-container #F1DCD9), para un
+   equipo que en la devolución no regresó de verdad (pérdida/robo). */
+.lgx-pdf tbody tr.extravio td{background:#F1DCD9}
+.lgx-pdf tbody td.badge-extravio{font-family:Carlito,'Segoe UI',sans-serif;font-size:8.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#fff;background:#B3453B;padding:2px 7px;border-radius:999px;margin-left:6px}
 
 /* CLAUSULA */
 .lgx-pdf .clause{font-family:Georgia,'Bitstream Charter',Charter,serif;font-size:12px;line-height:1.65;color:#3B3934;background:#F0EDE1;padding:14px 20px;margin-top:14px;border-left:2.5px solid #2C4A2E}
@@ -99,7 +105,15 @@ export function esc(s) {
  * Vienen de VIGENCIA_DOCUMENTOS en config/formatos.js: un solo lugar para
  * actualizarlas cuando corresponda renovar la edición del formato.
  */
-export function mast({ codigo, emision, vigencia }) {
+/**
+ * `pagina`/`totalPaginas` (ambos 1-based) son opcionales: cuando se pasan,
+ * agregan un cuarto dato al membrete tipo "1-2" -- página actual y total de
+ * hojas del documento, tal como pidió el cliente. Los arma quien construye
+ * la plantilla (ej. plantillaEntrega.js), según cuántos bloques page() arma
+ * de verdad -- no depende de cómo se corte al exportar a PDF.
+ */
+export function mast({ codigo, emision, vigencia, pagina, totalPaginas }) {
+  const indice = pagina && totalPaginas ? `${pagina}-${totalPaginas}` : null
   return `
   <header class="mast">
     <div class="mast-id">
@@ -112,8 +126,9 @@ export function mast({ codigo, emision, vigencia }) {
     </div>
     <div class="spec">
       <div><span class="k">Código</span><span class="v">${esc(codigo)}</span></div>
-      <div><span class="k">Fecha Emisión</span><span class="v">${esc(emision || '—')}</span></div>
+      <div><span class="k">Emisión</span><span class="v">${esc(emision || '—')}</span></div>
       <div><span class="k">Vigencia</span><span class="v">${esc(vigencia || '—')}</span></div>
+      ${indice ? `<div><span class="k">Pág.</span><span class="v">${esc(indice)}</span></div>` : ''}
     </div>
   </header>
   <div class="rule2"></div>`

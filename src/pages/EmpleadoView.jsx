@@ -21,7 +21,7 @@ function EmpleadoView() {
         <div className="max-w-[800px] mx-auto flex flex-col gap-stack-md">
           <Link
             to="/catalogo/empleados"
-            className="inline-flex h-10 items-center gap-2 self-start rounded-lg border border-outline-variant bg-surface-container-high px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:border-outline hover:bg-surface-container-highest"
+            className="inline-flex h-10 items-center gap-2 self-start rounded-lg border border-outline-variant bg-surface-container-high px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:border-outline hover:bg-surface-container-highest active:scale-[0.97] transition-transform"
           >
             <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={2.5} />
             Empleados
@@ -39,7 +39,7 @@ function EmpleadoView() {
       <div className="max-w-[800px] mx-auto flex flex-col gap-stack-md">
         <Link
           to="/catalogo/empleados"
-          className="inline-flex h-10 items-center gap-2 self-start rounded-lg border border-outline-variant bg-surface-container-high px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:border-outline hover:bg-surface-container-highest"
+          className="inline-flex h-10 items-center gap-2 self-start rounded-lg border border-outline-variant bg-surface-container-high px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:border-outline hover:bg-surface-container-highest active:scale-[0.97] transition-transform"
         >
           <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={2.5} />
           Empleados

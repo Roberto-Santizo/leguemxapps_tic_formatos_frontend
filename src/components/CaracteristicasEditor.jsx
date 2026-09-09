@@ -96,7 +96,7 @@ export function FilasCaracteristicas({ filas, onChange, disabled }) {
                 disabled={disabled || filas.length === 1}
                 aria-label="Quitar característica"
                 title={filas.length === 1 ? 'Debe quedar al menos una fila' : 'Quitar'}
-                className="grid h-11 w-11 shrink-0 place-items-center self-end rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface disabled:cursor-not-allowed disabled:opacity-55 disabled:hover:bg-transparent sm:mt-[26px] sm:self-start active:scale-[0.97] transition-transform"
+                className="grid h-11 w-11 shrink-0 place-items-center self-end rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface disabled:cursor-not-allowed disabled:opacity-55 disabled:hover:bg-transparent sm:mt-[26px] sm:self-start active:scale-[0.90] transition-transform"
               >
                 <Trash2 className="h-4 w-4" strokeWidth={2} />
               </button>
@@ -297,7 +297,7 @@ export function CaracteristicasDeEquipo({
                         disabled={guardando || nuevas.length === 1}
                         aria-label="Quitar esta fila"
                         title={nuevas.length === 1 ? 'Debe quedar al menos una fila' : 'Quitar'}
-                        className="grid h-11 w-11 shrink-0 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface disabled:cursor-not-allowed disabled:opacity-55 disabled:hover:bg-transparent active:scale-[0.97] transition-transform"
+                        className="grid h-11 w-11 shrink-0 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface disabled:cursor-not-allowed disabled:opacity-55 disabled:hover:bg-transparent active:scale-[0.90] transition-transform"
                       >
                         <Trash2 className="h-4 w-4" strokeWidth={2} />
                       </button>

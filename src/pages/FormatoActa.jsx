@@ -183,6 +183,20 @@ function FormatoActa() {
       '—'
     : ''
 
+  // Un mismo equipo no puede repetirse en dos filas de esta misma acta (ya
+  // no puede estar "en posesión de otro" porque el catálogo viene de
+  // listarEquiposDisponibles, pero nada impedía elegirlo dos veces aquí
+  // mismo). Se descarta de las opciones lo ya elegido en OTRAS filas,
+  // dejando visible la propia selección de la fila actual.
+  function opcionesEquipoParaFila(filaId) {
+    const usadosEnOtrasFilas = new Set(
+      filasEntrega.filter((f) => f.id !== filaId && f.equipmentId).map((f) => String(f.equipmentId))
+    )
+    return equipos
+      .filter((e) => !usadosEnOtrasFilas.has(String(e.id)))
+      .map((e) => ({ id: e.id, name: e.brand ? `${e.name} — ${e.brand}` : e.name }))
+  }
+
   function agregarFilaEntrega() {
     setFilasEntrega((f) => [
       ...f,
@@ -342,7 +356,7 @@ function FormatoActa() {
         <div className="mx-auto max-w-4xl space-y-stack-lg pb-4">
           <Link
             to="/"
-            className="inline-flex h-10 items-center gap-2 self-start rounded-lg border border-outline-variant bg-surface-container-high px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:border-outline hover:bg-surface-container-highest active:bg-surface-dim"
+            className="inline-flex h-10 items-center gap-2 self-start rounded-lg border border-outline-variant bg-surface-container-high px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:border-outline hover:bg-surface-container-highest active:bg-surface-dim active:scale-[0.97] transition-transform"
           >
             <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={2.5} />
             Nueva Acta
@@ -423,7 +437,7 @@ function FormatoActa() {
                       type="button"
                       onClick={() => setModalidad(opcion.id)}
                       className={[
-                        'rounded px-3.5 py-1.5 font-label-bold text-label-bold transition-colors active:scale-[0.97] transition-transform',
+                        'rounded px-3.5 py-1.5 font-label-bold text-label-bold transition-colors active:scale-[0.90] transition-transform',
                         modalidad === opcion.id
                           ? 'bg-primary text-on-primary shadow-sm'
                           : 'text-on-surface-variant hover:text-on-surface',
@@ -612,7 +626,7 @@ function FormatoActa() {
                         type="button"
                         onClick={() => setTipoEntregaTel(opcion)}
                         className={[
-                          'rounded px-3.5 py-1.5 font-label-bold text-label-bold transition-colors active:scale-[0.97] transition-transform',
+                          'rounded px-3.5 py-1.5 font-label-bold text-label-bold transition-colors active:scale-[0.90] transition-transform',
                           tipoEntregaTel === opcion
                             ? 'bg-primary text-on-primary shadow-sm'
                             : 'text-on-surface-variant hover:text-on-surface',
@@ -700,7 +714,7 @@ function FormatoActa() {
                   <button
                     type="button"
                     onClick={agregarFilaEntrega}
-                    className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 font-label-bold text-label-bold text-on-primary transition-opacity hover:opacity-90 active:scale-[0.97] transition-transform"
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 font-label-bold text-label-bold text-on-primary transition-opacity hover:opacity-90 active:scale-[0.90] transition-transform"
                   >
                     <PlusCircle className="h-4 w-4" strokeWidth={2} />
                     Agregar fila
@@ -758,7 +772,7 @@ function FormatoActa() {
                             </td>
                             <td className="py-2 pr-3">
                               <SearchableSelect
-                                options={equipos.map((e) => ({ id: e.id, name: e.brand ? `${e.name} — ${e.brand}` : e.name }))}
+                                options={opcionesEquipoParaFila(fila.id)}
                                 value={fila.equipmentId}
                                 onChange={(id) => actualizarFilaEntrega(fila.id, 'equipmentId', id)}
                                 disabled={cargandoCatalogos}
@@ -781,7 +795,7 @@ function FormatoActa() {
                                 onClick={() => quitarFilaEntrega(fila.id)}
                                 aria-label="Quitar equipo"
                                 title="Quitar (por si te confundiste de equipo)"
-                                className="grid h-9 w-9 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-error-container hover:text-on-error-container active:scale-[0.97] transition-transform"
+                                className="grid h-9 w-9 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-error-container hover:text-on-error-container active:scale-[0.90] transition-transform"
                               >
                                 <X className="h-4 w-4" strokeWidth={2} />
                               </button>
@@ -813,7 +827,7 @@ function FormatoActa() {
                             onClick={() => quitarFilaEntrega(fila.id)}
                             aria-label="Quitar equipo"
                             title="Quitar (por si te confundiste de equipo)"
-                            className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-error-container hover:text-on-error-container active:scale-[0.97] transition-transform"
+                            className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-error-container hover:text-on-error-container active:scale-[0.90] transition-transform"
                           >
                             <X className="h-4 w-4" strokeWidth={2} />
                           </button>
@@ -822,7 +836,7 @@ function FormatoActa() {
                           <div className="flex flex-col gap-1.5">
                             <label className="font-label-bold text-label-bold text-on-surface">Equipo</label>
                             <SearchableSelect
-                              options={equipos.map((e) => ({ id: e.id, name: e.brand ? `${e.name} — ${e.brand}` : e.name }))}
+                              options={opcionesEquipoParaFila(fila.id)}
                               value={fila.equipmentId}
                               onChange={(id) => actualizarFilaEntrega(fila.id, 'equipmentId', id)}
                               disabled={cargandoCatalogos}
@@ -874,7 +888,7 @@ function FormatoActa() {
                       <button
                         type="button"
                         onClick={vaciarTabla}
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-outline-variant bg-surface-container-lowest px-3 py-1.5 font-label-bold text-label-bold text-on-surface-variant transition-colors hover:bg-error-container hover:text-on-error-container active:scale-[0.97] transition-transform"
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-outline-variant bg-surface-container-lowest px-3 py-1.5 font-label-bold text-label-bold text-on-surface-variant transition-colors hover:bg-error-container hover:text-on-error-container active:scale-[0.90] transition-transform"
                       >
                         <X className="h-4 w-4" strokeWidth={2} />
                         Vaciar tabla
@@ -884,7 +898,7 @@ function FormatoActa() {
                   <button
                     type="button"
                     onClick={agregarFila}
-                    className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 font-label-bold text-label-bold text-on-primary transition-opacity hover:opacity-90 active:scale-[0.97] transition-transform"
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 font-label-bold text-label-bold text-on-primary transition-opacity hover:opacity-90 active:scale-[0.90] transition-transform"
                   >
                     <PlusCircle className="h-4 w-4" strokeWidth={2} />
                     Agregar fila
@@ -905,7 +919,7 @@ function FormatoActa() {
                         type="button"
                         onClick={() => toggleAccesorio(accesorio)}
                         className={[
-                          'inline-flex items-center rounded-full border px-3 py-1.5 font-label-bold text-label-bold transition-colors active:scale-[0.97] transition-transform',
+                          'inline-flex items-center rounded-full border px-3 py-1.5 font-label-bold text-label-bold transition-colors active:scale-[0.90] transition-transform',
                           activo
                             ? 'border-primary bg-primary text-on-primary'
                             : 'border-outline-variant bg-surface-container-lowest text-on-surface hover:bg-surface-container-high',
@@ -1016,7 +1030,7 @@ function FormatoActa() {
                               type="button"
                               onClick={() => quitarFila(fila.id)}
                               aria-label="Quitar fila"
-                              className="grid h-9 w-9 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-error-container hover:text-on-error-container active:scale-[0.97] transition-transform"
+                              className="grid h-9 w-9 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-error-container hover:text-on-error-container active:scale-[0.90] transition-transform"
                             >
                               <X className="h-4 w-4" strokeWidth={2} />
                             </button>

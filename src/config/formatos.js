@@ -23,9 +23,6 @@ const ACC_RESP = ['Monitor', 'Mouse', 'Teclado', 'UPS', 'Laptop', 'Cargador', 'I
 const ACC_PRESTAMO = ['PC', 'Monitor', 'Mouse', 'Teclado', 'UPS', 'Laptop', 'Cargador', 'Celular', 'Disco Externo', 'Otros']
 const ACC_DESECHO = ['Monitor', 'Mouse', 'Teclado', 'UPS', 'Laptop', 'Cargador', 'Impresora', 'Disco Duro', 'Celular', 'Otro']
 
-const CL_ENTREGA =
-  'El usuario deberá responder por cualquier daño o pérdida parcial o total, será el único responsable en devolver los accesorios en buenas condiciones, el cual pertenece a la empresa AGROINDUSTRIA LEGUMEX S.A, esto para que pueda tener un mejor desarrollo de mis funciones, en el cual me comprometo a resguardarlo y darle un uso estrictamente laboral. Asimismo, hacemos de su conocimiento que no podrán sustituir ningún otro accesorio ni remplazarlos. En caso de daño o perjuicio a los equipos se estará notificando a RRHH y ellos tomaran las medidas necesarias.'
-
 const CL_PRESTAMO = [
   'El usuario deberá responder por cualquier daño o pérdida parcial o total, será el único responsable en devolver los accesorios en buenas condiciones, el cual pertenece a la empresa AGROINDUSTRIA LEGUMEX S.A, esto para que pueda tener un mejor desarrollo de mis funciones, en el cual me comprometo a resguardarlo y darle un uso estrictamente laboral. Asimismo, hacemos de su conocimiento que no podrán sustituir ningún otro accesorio ni remplazarlos.',
   'En caso de daño o perjuicio a los equipos se estará notificando a RRHH y ellos tomaran las medidas necesarias.',
@@ -69,8 +66,13 @@ export const FORMATOS = {
     tituloTablaCorta: 'Descripción de Equipo',
     tituloTablaLarga: 'Accesorios Devueltos',
     vacioTitulo: 'Todavía no hay accesorios en el acta',
+    // A diferencia de las demás hojas, este texto no es fijo: lleva el
+    // día/mes/año reales de la devolución, así que no vive aquí como array
+    // estático -- se arma con constanciaDevolucion() (utils/fecha.js) a
+    // partir de `return_date`, en RegistrarDevolucion.jsx,
+    // HistorialDevolucionView.jsx y plantillaDevolucion.js.
     clausulas: [],
-    tituloClausula: '',
+    tituloClausula: 'Constancia de Devolución',
     tieneConstanciaDevolucion: true,
     tituloFirmas: 'Constancia y Firmas',
     firmas: [
@@ -90,7 +92,7 @@ export const FORMATOS = {
     tituloCorto: 'Entrega de Equipo',
     descripcion: 'Entrega de PC, laptop, periféricos o celular a un colaborador, con tabla de artículos y firma de conformidad.',
     descripcionHistorial: 'Consulta, revisa y elimina las entregas de equipo ya registradas.',
-    meta: '1 página · Original IT, copia RRHH',
+    meta: '2 páginas · Original IT, copia RRHH',
     labelFecha: 'Fecha de Entrega',
     labelResponsable: 'Responsable que Recibe',
     tieneDepartamento: true,
@@ -103,7 +105,11 @@ export const FORMATOS = {
     colFinalTipo: 'select',
     tituloTablaCorta: 'Equipo / Accesorios',
     vacioTitulo: 'Todavía no hay artículos en el acta',
-    clausulas: [CL_ENTREGA],
+    // Antes llevaba una cláusula corta propia, pensada para 1 página. El
+    // cliente pidió reforzar la cláusula legal con el texto completo que ya
+    // usaba (sin activarse) la Hoja de Responsabilidad -- por eso ahora este
+    // formato pasa a 2 páginas en el PDF (ver plantillaEntrega.js).
+    clausulas: CL_RESP,
     tituloClausula: 'Cláusula de Responsabilidad',
     tituloFirmas: 'Constancia y Firmas',
     firmas: [

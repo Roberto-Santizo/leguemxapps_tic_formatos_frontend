@@ -96,7 +96,7 @@ function Login() {
                 onClick={() => setMostrarPassword((v) => !v)}
                 aria-label={mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                 tabIndex={-1}
-                className="absolute right-1.5 top-1/2 -translate-y-1/2 grid h-9 w-9 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface active:scale-[0.97] transition-transform"
+                className="absolute right-1.5 top-1/2 -translate-y-1/2 grid h-9 w-9 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface active:scale-[0.90] transition-transform"
               >
                 {mostrarPassword ? (
                   <EyeOff className="h-4.5 w-4.5" strokeWidth={2} />

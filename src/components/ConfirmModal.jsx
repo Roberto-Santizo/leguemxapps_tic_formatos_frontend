@@ -68,7 +68,7 @@ function ConfirmModal({
             type="button"
             onClick={onCancelar}
             disabled={procesando}
-            className="grid h-9 w-9 shrink-0 place-items-center rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors disabled:opacity-50 active:scale-[0.97] transition-transform"
+            className="grid h-9 w-9 shrink-0 place-items-center rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors disabled:opacity-50 active:scale-[0.90] transition-transform"
           >
             <X className="h-5 w-5" strokeWidth={2} />
           </button>

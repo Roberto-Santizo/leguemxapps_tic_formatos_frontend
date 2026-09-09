@@ -4,7 +4,8 @@ import { ArrowLeft, History, Pencil } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 import ConfirmDialog from '../components/ConfirmDialog.jsx'
 import { SkeletonDetalle } from '../components/Skeleton.jsx'
-import { obtenerEquipo, obtenerCaracteristicasDeEquipo, historialEquipo } from '../services/api.js'
+import { obtenerEquipo, obtenerCaracteristicasDeEquipo, historialEquipo, obtenerMarca } from '../services/api.js'
+import { formatearFecha } from '../utils/fecha.js'
 
 /**
  * Vista completa de un equipo -- destino del ojo en la lista. Antes el ojo
@@ -20,6 +21,7 @@ function EquipoView() {
   const navigate = useNavigate()
 
   const [equipo, setEquipo] = useState(null)
+  const [marca, setMarca] = useState(null)
   const [caracteristicas, setCaracteristicas] = useState([])
   const [historial, setHistorial] = useState([])
   const [cargando, setCargando] = useState(true)
@@ -29,14 +31,23 @@ function EquipoView() {
   useEffect(() => {
     let vivo = true
     setCargando(true)
-    Promise.all([
-      obtenerEquipo(token, Number(id)),
-      obtenerCaracteristicasDeEquipo(token, Number(id)),
-      historialEquipo(token, Number(id)),
-    ])
-      .then(([eq, caracts, hist]) => {
-        if (!vivo) return
+    // GET /equipments/{id} solo trae brand_id (no el nombre de la marca), así
+    // que hay que pedirlo aparte con obtenerMarca -- por eso primero se pide
+    // el equipo y luego, ya con el brand_id en mano, el resto en paralelo.
+    obtenerEquipo(token, Number(id))
+      .then((eq) => {
+        if (!vivo) return eq
         setEquipo(eq)
+        return Promise.all([
+          eq.brand_id ? obtenerMarca(token, eq.brand_id) : Promise.resolve(null),
+          obtenerCaracteristicasDeEquipo(token, Number(id)),
+          historialEquipo(token, Number(id)),
+        ])
+      })
+      .then((resto) => {
+        if (!vivo || !resto) return
+        const [marcaObtenida, caracts, hist] = resto
+        setMarca(marcaObtenida)
         setCaracteristicas(caracts)
         setHistorial(Array.isArray(hist) ? hist : [])
       })
@@ -59,7 +70,7 @@ function EquipoView() {
       <div className="max-w-[800px] mx-auto flex flex-col gap-stack-md">
         <Link
           to="/catalogo/equipos"
-          className="inline-flex h-10 items-center gap-2 self-start rounded-lg border border-outline-variant bg-surface-container-high px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:border-outline hover:bg-surface-container-highest"
+          className="inline-flex h-10 items-center gap-2 self-start rounded-lg border border-outline-variant bg-surface-container-high px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:border-outline hover:bg-surface-container-highest active:scale-[0.97] transition-transform"
         >
           <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={2.5} />
           Equipos
@@ -91,7 +102,7 @@ function EquipoView() {
             <section className="rounded-xl border border-outline-variant bg-surface-container-lowest p-5 shadow-sm">
               <h2 className="font-headline-md text-headline-md font-bold text-on-surface mb-4">Datos del equipo</h2>
               <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))' }}>
-                {campo('Marca', equipo.brand ?? '—')}
+                {campo('Marca', marca?.name ?? '—')}
                 {campo('Modelo', equipo.model ?? '—')}
                 {campo('Serie', equipo.serie ?? '—')}
                 {campo('Tipo', equipo.type ?? '—')}
@@ -134,11 +145,11 @@ function EquipoView() {
                       <div>
                         <p className="font-label-bold text-label-bold text-on-surface">{h.employee_name || '—'}</p>
                         <p className="font-body-md text-body-md text-on-surface-variant">
-                          {h.employee_department || '—'} · Entregado el {h.delivery_date || '—'}
+                          {h.employee_department || '—'} · Entregado el {formatearFecha(h.delivery_date)}
                         </p>
                         {h.returned && (
                           <p className="font-label-sm text-label-sm text-on-surface-variant">
-                            Devuelto el {h.return_date || '—'}
+                            Devuelto el {formatearFecha(h.return_date)}
                             {h.return_observations ? ` · ${h.return_observations}` : ''}
                           </p>
                         )}

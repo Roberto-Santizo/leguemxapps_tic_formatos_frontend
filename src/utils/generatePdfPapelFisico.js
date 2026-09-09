@@ -1,5 +1,5 @@
 import { CSS_PAPEL_FISICO } from '../pdf/designSystemPdf.js'
-import { generatePdfFromElement } from './generatePdf.js'
+import { generatePdfFromElements } from './generatePdf.js'
 
 let estiloInyectado = false
 
@@ -38,7 +38,12 @@ function esperarImagenes(contenedor) {
  * ya armado por una plantilla (construirHtmlEntrega / construirHtmlDevolucion).
  * No usa backend ni Puppeteer: monta el HTML fuera de pantalla, espera sus
  * imágenes (logo + firmas) y reutiliza exactamente la misma captura +
- * paginación que ya usaba el sistema (generatePdfFromElement).
+ * paginación que ya usaba el sistema (generatePdfFromElements).
+ *
+ * `htmlPagina` puede traer una sola `.page` (formato de 1 hoja) o varias
+ * concatenadas (formato de 2 hojas, ej. Entrega con membrete repetido) --
+ * cada `.page` se captura por separado y arranca en una página nueva del
+ * PDF, así el corte siempre cae entre hojas y nunca a la mitad de una tabla.
  */
 export async function generarPdfPapelFisico(htmlPagina, filename) {
   inyectarEstiloUnaVez()
@@ -50,8 +55,8 @@ export async function generarPdfPapelFisico(htmlPagina, filename) {
 
   try {
     await esperarImagenes(contenedor)
-    const hoja = contenedor.querySelector('.page')
-    await generatePdfFromElement(hoja, filename)
+    const hojas = Array.from(contenedor.querySelectorAll('.page'))
+    await generatePdfFromElements(hojas, filename)
   } finally {
     document.body.removeChild(contenedor)
   }
