@@ -50,6 +50,29 @@ export function formatearFecha(valor) {
 }
 
 /**
+ * Valor "aaaa-mm-dd" (hora de Guatemala) para precargar un
+ * `<input type="date">` a partir de un ISO -- usado por EditorFechaLocal
+ * (useFechaLocal.js) al abrir el editor con la fecha actual ya seleccionada.
+ * Devuelve '' si no hay valor válido, que es lo que un <input type="date">
+ * espera para quedar vacío.
+ */
+export function fechaInputValue(valor) {
+  if (!valor) return ''
+  const fecha = new Date(valor)
+  if (Number.isNaN(fecha.getTime())) return ''
+
+  const partes = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Guatemala',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  }).formatToParts(fecha)
+
+  const obtener = (tipo) => partes.find((p) => p.type === tipo)?.value ?? ''
+  return `${obtener('year')}-${obtener('month')}-${obtener('day')}`
+}
+
+/**
  * Arma la constancia de la Hoja de Devolución ("Por este medio se hace
  * constar que el día ___ del mes ___ del año ___, hago constar que entrego
  * todo el equipo descrito arriba.") con el día/mes/año reales tomados de

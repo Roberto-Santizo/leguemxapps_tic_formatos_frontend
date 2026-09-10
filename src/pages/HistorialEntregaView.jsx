@@ -19,6 +19,7 @@ import { useAuth } from '../context/AuthContext.jsx'
 import ConfirmDialog from '../components/ConfirmDialog.jsx'
 import EstadoVacio from '../components/EstadoVacio.jsx'
 import InlineEditableText from '../components/InlineEditableText.jsx'
+import EditorFechaLocal from '../components/EditorFechaLocal.jsx'
 import SearchableSelect from '../components/SearchableSelect.jsx'
 import { mostrarToast } from '../components/Toast.jsx'
 import { SkeletonDetalle } from '../components/Skeleton.jsx'
@@ -34,7 +35,7 @@ import {
   eliminarDetalleEntrega,
 } from '../services/api.js'
 import { generarPdfPapelFisico } from '../utils/generatePdfPapelFisico.js'
-import { formatearFecha } from '../utils/fecha.js'
+import useFechaLocal from '../hooks/useFechaLocal.js'
 import { construirHtmlEntrega } from '../pdf/plantillaEntrega.js'
 
 const formato = FORMATOS.entrega
@@ -85,7 +86,7 @@ function FirmaImagen({ url, alt }) {
  */
 function HistorialEntregaView() {
   const { id } = useParams()
-  const { token } = useAuth()
+  const { token, isAdmin } = useAuth()
   const navigate = useNavigate()
   const hojaRef = useRef(null)
 
@@ -98,6 +99,11 @@ function HistorialEntregaView() {
   const [errorBorrar, setErrorBorrar] = useState('')
 
   const [generandoPdf, setGenerandoPdf] = useState(false)
+
+  // Corrección local (solo este navegador) de la fecha de entrega -- ver
+  // useFechaLocal.js. No requiere isAdmin: al no tocar el servidor, es
+  // igual de segura para admin que para user.
+  const fechaEntrega = useFechaLocal('entrega', id, documento?.delivery_date)
 
   // --- Mantenimiento del equipo ya entregado: agregar uno que se quedó
   // fuera, corregir la observación de uno, o quitarlo (delivery_document_details) ---
@@ -190,14 +196,30 @@ function HistorialEntregaView() {
     }
   }
 
+  // TEMPORAL -- segunda prueba pedida: ahora con la ruta corta que documenta
+  // el swagger (en vez del link completo de S3), para confirmar que
+  // urlArchivoPublico() arma bien el link local (STORAGE_BASE_URL +
+  // /storage/ + ruta). Si estos dos archivos de ejemplo no existen de
+  // verdad en el servidor, la imagen no cargará (se verá "Sin firma") --
+  // eso sería normal, no un bug: son solo los nombres de ejemplo del
+  // swagger. Quitar este bloque y volver a usar
+  // urlArchivoPublico(documento.responsable_signature/administrador_signature)
+  // en cuanto se confirme que el mecanismo funciona con firmas reales.
+  const RUTA_PRUEBA_FIRMA_RESPONSABLE = 'signatures/9f8a1c2e-4b7d-4c1a-9d2e-3f5a6b7c8d90.png'
+  const RUTA_PRUEBA_FIRMA_ADMINISTRADOR = 'signatures/2b7d4e6f-1a3c-4e5b-8d9f-0a1b2c3d4e5f.png'
+
   async function handleDescargarPdf() {
     if (!documento) return
     setGenerandoPdf(true)
     try {
-      const html = construirHtmlEntrega(documento, formato, {
-        responsable: urlArchivoPublico(documento.responsable_signature),
-        it: urlArchivoPublico(documento.administrador_signature),
-      })
+      const html = construirHtmlEntrega(
+        { ...documento, delivery_date: fechaEntrega.valor },
+        formato,
+        {
+          responsable: urlArchivoPublico(RUTA_PRUEBA_FIRMA_RESPONSABLE),
+          it: urlArchivoPublico(RUTA_PRUEBA_FIRMA_ADMINISTRADOR),
+        },
+      )
       await generarPdfPapelFisico(html, `entrega-equipo-${id}.pdf`)
     } catch {
       // Antes fallaba en silencio: el usuario veía la rueda girar y detenerse
@@ -299,7 +321,15 @@ function HistorialEntregaView() {
               <SeccionCard icon={CircleUser} titulo="Datos del Usuario">
                 <div className="grid grid-cols-12 gap-x-column-gap gap-y-stack-md p-5">
                   <Campo label="Fecha de Entrega">
-                    <div className={valorClass}>{formatearFecha(documento.delivery_date)}</div>
+                    <div className={valorClass}>
+                      <EditorFechaLocal
+                        value={fechaEntrega.valor}
+                        corregida={fechaEntrega.corregida}
+                        onChange={fechaEntrega.corregir}
+                        onRestablecer={fechaEntrega.restablecer}
+                        title="Clic para corregir la fecha de entrega (solo en este navegador)"
+                      />
+                    </div>
                   </Campo>
                   <Campo label="Responsable que Recibe" span="col-span-12 sm:col-span-8">
                     <div className={valorClass}>{documento.employee_name || '—'}</div>
@@ -318,15 +348,17 @@ function HistorialEntregaView() {
                 icon={Rows3}
                 titulo={formato.tituloTablaCorta}
                 acciones={
-                  <button
-                    type="button"
-                    onClick={abrirAgregarEquipo}
-                    disabled={agregandoEquipo}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-outline-variant bg-surface-container-lowest px-3 py-1.5 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high disabled:opacity-50 active:scale-[0.90] transition-transform"
-                  >
-                    <PlusCircle className="h-4 w-4" strokeWidth={2} />
-                    Agregar equipo
-                  </button>
+                  isAdmin ? (
+                    <button
+                      type="button"
+                      onClick={abrirAgregarEquipo}
+                      disabled={agregandoEquipo}
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-outline-variant bg-surface-container-lowest px-3 py-1.5 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high disabled:opacity-50 active:scale-[0.90] transition-transform"
+                    >
+                      <PlusCircle className="h-4 w-4" strokeWidth={2} />
+                      Agregar equipo
+                    </button>
+                  ) : undefined
                 }
               >
                 {(!documento.items || documento.items.length === 0) && !agregandoEquipo ? (
@@ -377,7 +409,7 @@ function HistorialEntregaView() {
                             </td>
                             <td className="py-2 pr-3 text-on-surface-variant">{item.is_used || '—'}</td>
                             <td className="py-2 pr-3 text-on-surface-variant break-words">
-                              {item.returned ? (
+                              {item.returned || !isAdmin ? (
                                 item.observations || '—'
                               ) : (
                                 <InlineEditableText
@@ -388,7 +420,7 @@ function HistorialEntregaView() {
                               )}
                             </td>
                             <td className="py-2 pr-5">
-                              {!item.returned && (
+                              {!item.returned && isAdmin && (
                                 <button
                                   type="button"
                                   onClick={() => setQuitando(item)}
@@ -482,7 +514,7 @@ function HistorialEntregaView() {
                               </span>
                             )}
                           </div>
-                          {!item.returned && (
+                          {!item.returned && isAdmin && (
                             <button
                               type="button"
                               onClick={() => setQuitando(item)}
@@ -532,7 +564,7 @@ function HistorialEntregaView() {
                           <p className="font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider mb-0.5">
                             Observaciones
                           </p>
-                          {item.returned ? (
+                          {item.returned || !isAdmin ? (
                             <p className="font-body-md text-body-md text-on-surface break-words">
                               {item.observations || '—'}
                             </p>
@@ -660,7 +692,7 @@ function HistorialEntregaView() {
       {!cargando && !error && documento && (
         <div className="sticky bottom-0 z-30 border-t border-outline-variant bg-surface-container-lowest px-container-padding py-3 shadow-sm md:px-8">
           <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-end gap-3">
-            {documento.items?.some((it) => !it.returned) && (
+            {isAdmin && documento.items?.some((it) => !it.returned) && (
               <button
                 type="button"
                 onClick={() => navigate(`/historial/entrega/${id}/devolucion`)}
@@ -683,14 +715,16 @@ function HistorialEntregaView() {
               )}
               Descargar PDF
             </button>
-            <button
-              type="button"
-              onClick={() => setEliminando(true)}
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-error/30 bg-surface-container-lowest px-6 font-label-bold text-label-bold text-error transition-colors hover:bg-error-container active:scale-[0.97] transition-transform"
-            >
-              <Trash2 className="h-4 w-4" strokeWidth={2.25} />
-              Eliminar
-            </button>
+            {isAdmin && (
+              <button
+                type="button"
+                onClick={() => setEliminando(true)}
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-error/30 bg-surface-container-lowest px-6 font-label-bold text-label-bold text-error transition-colors hover:bg-error-container active:scale-[0.97] transition-transform"
+              >
+                <Trash2 className="h-4 w-4" strokeWidth={2.25} />
+                Eliminar
+              </button>
+            )}
           </div>
         </div>
       )}

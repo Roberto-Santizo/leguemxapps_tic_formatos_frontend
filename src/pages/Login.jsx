@@ -21,8 +21,12 @@ function Login() {
     setError('')
     setLoading(true)
     try {
-      await login(username, password)
-      navigate(redirectTo, { replace: true })
+      const usuario = await login(username, password)
+      // "user" queda restringido a Historial -- si no venía rebotado de una
+      // ruta puntual (redirectTo por defecto "/"), mandarlo directo ahí en
+      // vez de "/" (que ahora es admin-only y lo regresaría de todos modos).
+      const destino = redirectTo === '/' && usuario?.role !== 'admin' ? '/historial' : redirectTo
+      navigate(destino, { replace: true })
     } catch (err) {
       setError(err.message)
     } finally {

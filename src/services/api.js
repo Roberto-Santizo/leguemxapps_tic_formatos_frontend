@@ -221,20 +221,32 @@ export async function obtenerAuditoria(token) {
   return authRequest('/api/auditoria', token, { method: 'GET' })
 }
 
-// Gestión de usuarios (panel admin) -- Fase 2.
+// Gestión de usuarios (panel admin, jwt.auth + admin). Antes estas 3
+// funciones llamaban a /api/usuarios contra el backend viejo (authRequest ->
+// API_URL) que nunca se conectó a esta pantalla -- se corrigen para usar el
+// backend real (laravelRequest -> AUTH_API_URL), igual que registrarUsuario.
 export async function listarUsuarios(token) {
-  return authRequest('/api/usuarios', token, { method: 'GET' })
+  return laravelRequest('/users', { token, method: 'GET' })
+}
+
+export async function obtenerUsuario(token, id) {
+  return laravelRequest(`/users/${id}`, { token, method: 'GET' })
 }
 
 export async function crearUsuario(token, payload) {
-  return authRequest('/api/usuarios', token, {
+  return laravelRequest('/users', {
+    token,
     method: 'POST',
     body: JSON.stringify(payload),
   })
 }
 
+// `password` es opcional al editar: si se omite, el usuario conserva la
+// contraseña que ya tenía (así lo documenta la API) -- quien llama a esta
+// función decide si la incluye en `payload` o no.
 export async function editarUsuario(token, id, payload) {
-  return authRequest(`/api/usuarios/${id}`, token, {
+  return laravelRequest(`/users/${id}`, {
+    token,
     method: 'PUT',
     body: JSON.stringify(payload),
   })
@@ -568,7 +580,9 @@ export async function crearDocumentoDevolucion(token, formData) {
   return laravelRequestMultipart('/return_documents', { token, formData, method: 'POST' })
 }
 
-// Solo corrige observaciones generales de la devolución.
+// Solo corrige observaciones generales de la devolución (ObservationsRequest
+// confirmado en el swagger) -- return_date lo asigna el servidor y no hay
+// forma de corregirlo después.
 export async function actualizarDocumentoDevolucion(token, id, { observations }) {
   return laravelRequest(`/return_documents/${id}`, {
     token,
@@ -616,8 +630,14 @@ const STORAGE_BASE_URL = (
   import.meta.env.VITE_STORAGE_URL || AUTH_API_URL.replace(/\/api\/?$/, '')
 ).replace(/\/$/, '')
 
+// Si el backend ya manda un link completo (ej. un bucket de S3, como
+// "https://...amazonaws.com/signatures/....png"), se usa tal cual -- pegarle
+// STORAGE_BASE_URL por delante lo rompería. Solo se arma el link local
+// (STORAGE_BASE_URL + /storage/) cuando lo que llega es la ruta corta que
+// documenta el swagger (ej. "signatures/....png").
 export function urlArchivoPublico(path) {
   if (!path) return null
+  if (/^https?:\/\//i.test(path)) return path
   return `${STORAGE_BASE_URL}/storage/${path}`
 }
 
@@ -638,6 +658,7 @@ export default {
   exportarActasExcel,
   exportarAuditoriaExcel,
   listarUsuarios,
+  obtenerUsuario,
   crearUsuario,
   editarUsuario,
   eliminarUsuario,

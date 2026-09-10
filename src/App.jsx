@@ -25,6 +25,8 @@ import HistorialDevolucionView from './pages/HistorialDevolucionView.jsx'
 import BuscarDevolucion from './pages/BuscarDevolucion.jsx'
 import HistorialProximamente from './pages/HistorialProximamente.jsx'
 import Usuarios from './pages/Usuarios.jsx'
+import UsuarioForm from './pages/UsuarioForm.jsx'
+import UsuarioView from './pages/UsuarioView.jsx'
 import RequireAuth from './routes/RequireAuth.jsx'
 import RequireAdmin from './routes/RequireAdmin.jsx'
 import NotFound from './pages/NotFound.jsx'
@@ -43,31 +45,167 @@ function App() {
         }
       >
         {/* El inicio ya no es un formato concreto: es el selector de los
-            seis formatos físicos del Departamento de TIC. */}
-        <Route index element={<NuevaActa />} />
+            seis formatos físicos del Departamento de TIC. El rol "user"
+            queda restringido a Historial (solo ver + corregir fechas), así
+            que no puede crear actas nuevas. */}
+        <Route
+          index
+          element={
+            <RequireAdmin>
+              <NuevaActa />
+            </RequireAdmin>
+          }
+        />
 
         {/* Un solo motor de formularios para los seis formatos. */}
-        <Route path="actas/:tipo/nueva" element={<FormatoActa />} />
+        <Route
+          path="actas/:tipo/nueva"
+          element={
+            <RequireAdmin>
+              <FormatoActa />
+            </RequireAdmin>
+          }
+        />
 
-        {/* Catálogo: datos maestros. Sin RequireAdmin -- las rutas
-            /brands y /departments de Laravel solo exigen jwt.auth. */}
-        <Route path="catalogo" element={<Catalogo />} />
-        <Route path="catalogo/marcas" element={<MarcasList />} />
-        <Route path="catalogo/marcas/nuevo" element={<MarcasForm />} />
-        <Route path="catalogo/marcas/:id" element={<MarcasForm />} />
-        <Route path="catalogo/marcas/:id/ver" element={<MarcasView />} />
-        <Route path="catalogo/departamentos" element={<DepartamentosList />} />
-        <Route path="catalogo/departamentos/nuevo" element={<DepartamentosForm />} />
-        <Route path="catalogo/departamentos/:id" element={<DepartamentosForm />} />
-        <Route path="catalogo/departamentos/:id/ver" element={<DepartamentosView />} />
-        <Route path="catalogo/equipos" element={<EquiposList />} />
-        <Route path="catalogo/equipos/nuevo" element={<EquipoForm />} />
-        <Route path="catalogo/equipos/:id" element={<EquipoForm />} />
-        <Route path="catalogo/equipos/:id/ver" element={<EquipoView />} />
-        <Route path="catalogo/empleados" element={<EmpleadosList />} />
-        <Route path="catalogo/empleados/nuevo" element={<EmpleadoForm />} />
-        <Route path="catalogo/empleados/:id" element={<EmpleadoForm />} />
-        <Route path="catalogo/empleados/:id/ver" element={<EmpleadoView />} />
+        {/* Catálogo: datos maestros. Antes sin RequireAdmin (las rutas
+            /brands y /departments de Laravel solo exigen jwt.auth), pero
+            ahora "user" queda restringido a Historial únicamente. */}
+        <Route
+          path="catalogo"
+          element={
+            <RequireAdmin>
+              <Catalogo />
+            </RequireAdmin>
+          }
+        />
+        <Route
+          path="catalogo/marcas"
+          element={
+            <RequireAdmin>
+              <MarcasList />
+            </RequireAdmin>
+          }
+        />
+        <Route
+          path="catalogo/marcas/nuevo"
+          element={
+            <RequireAdmin>
+              <MarcasForm />
+            </RequireAdmin>
+          }
+        />
+        <Route
+          path="catalogo/marcas/:id"
+          element={
+            <RequireAdmin>
+              <MarcasForm />
+            </RequireAdmin>
+          }
+        />
+        <Route
+          path="catalogo/marcas/:id/ver"
+          element={
+            <RequireAdmin>
+              <MarcasView />
+            </RequireAdmin>
+          }
+        />
+        <Route
+          path="catalogo/departamentos"
+          element={
+            <RequireAdmin>
+              <DepartamentosList />
+            </RequireAdmin>
+          }
+        />
+        <Route
+          path="catalogo/departamentos/nuevo"
+          element={
+            <RequireAdmin>
+              <DepartamentosForm />
+            </RequireAdmin>
+          }
+        />
+        <Route
+          path="catalogo/departamentos/:id"
+          element={
+            <RequireAdmin>
+              <DepartamentosForm />
+            </RequireAdmin>
+          }
+        />
+        <Route
+          path="catalogo/departamentos/:id/ver"
+          element={
+            <RequireAdmin>
+              <DepartamentosView />
+            </RequireAdmin>
+          }
+        />
+        <Route
+          path="catalogo/equipos"
+          element={
+            <RequireAdmin>
+              <EquiposList />
+            </RequireAdmin>
+          }
+        />
+        <Route
+          path="catalogo/equipos/nuevo"
+          element={
+            <RequireAdmin>
+              <EquipoForm />
+            </RequireAdmin>
+          }
+        />
+        <Route
+          path="catalogo/equipos/:id"
+          element={
+            <RequireAdmin>
+              <EquipoForm />
+            </RequireAdmin>
+          }
+        />
+        <Route
+          path="catalogo/equipos/:id/ver"
+          element={
+            <RequireAdmin>
+              <EquipoView />
+            </RequireAdmin>
+          }
+        />
+        <Route
+          path="catalogo/empleados"
+          element={
+            <RequireAdmin>
+              <EmpleadosList />
+            </RequireAdmin>
+          }
+        />
+        <Route
+          path="catalogo/empleados/nuevo"
+          element={
+            <RequireAdmin>
+              <EmpleadoForm />
+            </RequireAdmin>
+          }
+        />
+        <Route
+          path="catalogo/empleados/:id"
+          element={
+            <RequireAdmin>
+              <EmpleadoForm />
+            </RequireAdmin>
+          }
+        />
+        <Route
+          path="catalogo/empleados/:id/ver"
+          element={
+            <RequireAdmin>
+              <EmpleadoView />
+            </RequireAdmin>
+          }
+        />
 
         {/* Historial: landing con las 6 hojas -- solo "Entrega de Equipo"
             está conectada a la API real (delivery_documents); las otras
@@ -76,12 +214,27 @@ function App() {
         <Route path="historial/entrega" element={<HistorialEntregaList />} />
         <Route path="historial/entrega/:id" element={<HistorialEntregaView />} />
         {/* Una devolución nace de una entrega puntual -- por eso cuelga de
-            su detalle en vez de vivir en "Nueva Acta". */}
-        <Route path="historial/entrega/:id/devolucion" element={<RegistrarDevolucion />} />
+            su detalle en vez de vivir en "Nueva Acta". Registrarla es una
+            acción de creación, así que "user" no entra aquí. */}
+        <Route
+          path="historial/entrega/:id/devolucion"
+          element={
+            <RequireAdmin>
+              <RegistrarDevolucion />
+            </RequireAdmin>
+          }
+        />
         {/* Devolución ya está conectada a la API real (return_documents);
             se saca de la lista genérica de "Próximamente". */}
         <Route path="historial/devolucion" element={<HistorialDevolucionList />} />
-        <Route path="historial/devolucion/nueva" element={<BuscarDevolucion />} />
+        <Route
+          path="historial/devolucion/nueva"
+          element={
+            <RequireAdmin>
+              <BuscarDevolucion />
+            </RequireAdmin>
+          }
+        />
         <Route path="historial/devolucion/:id" element={<HistorialDevolucionView />} />
         <Route path="historial/:tipo" element={<HistorialProximamente />} />
         <Route
@@ -89,6 +242,30 @@ function App() {
           element={
             <RequireAdmin>
               <Usuarios />
+            </RequireAdmin>
+          }
+        />
+        <Route
+          path="usuarios/nuevo"
+          element={
+            <RequireAdmin>
+              <UsuarioForm />
+            </RequireAdmin>
+          }
+        />
+        <Route
+          path="usuarios/:id"
+          element={
+            <RequireAdmin>
+              <UsuarioForm />
+            </RequireAdmin>
+          }
+        />
+        <Route
+          path="usuarios/:id/ver"
+          element={
+            <RequireAdmin>
+              <UsuarioView />
             </RequireAdmin>
           }
         />

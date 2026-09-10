@@ -2,13 +2,11 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import { FilePlus2, ClipboardList, BookOpen, Users, LogOut, X } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 
-// Etiqueta visible del rol. Antes aquí se resolvía con un ternario que dejaba
-// a "adminagricola" mostrándose como "Usuario", mientras la tabla de Usuarios
-// lo llama "Admin Agrícola": el mismo rol con dos nombres según la pantalla.
-// Esto es solo texto -- los permisos siguen saliendo de isAdmin, sin cambios.
+// Solo quedan dos roles: admin (todas las funciones) y user (restringido a
+// Historial: ver actas y corregir solo la fecha de encabezado y la fecha de
+// cada registro). "adminagricola" se retiró.
 const ETIQUETA_ROL = {
   admin: 'Administrador',
-  adminagricola: 'Admin Agrícola',
   user: 'Usuario',
 }
 
@@ -115,13 +113,11 @@ function Sidebar({ abierto, onCerrar }) {
             /actas/:tipo/nueva -- el usuario nunca pierde la referencia de
             dónde está en la navegación.
           */}
-          <NavItem to="/" icon={FilePlus2} label="Nueva Acta" onNavigate={onCerrar} />
+          {/* "user" queda restringido a Historial (ver + corregir fechas):
+              Nueva Acta, Catálogo y Usuarios son solo para admin. */}
+          {isAdmin && <NavItem to="/" icon={FilePlus2} label="Nueva Acta" onNavigate={onCerrar} />}
           <NavItem to="/historial" icon={ClipboardList} label="Historial de Actas" onNavigate={onCerrar} />
-          {/* Catálogo (marcas y departamentos): visible para cualquier
-              usuario autenticado -- la API no pide rol admin para /brands
-              ni /departments. Sin "end" para que siga activo dentro de
-              /catalogo/marcas y /catalogo/departamentos. */}
-          <NavItem to="/catalogo" icon={BookOpen} label="Catálogo" onNavigate={onCerrar} />
+          {isAdmin && <NavItem to="/catalogo" icon={BookOpen} label="Catálogo" onNavigate={onCerrar} />}
           {isAdmin && <NavItem to="/usuarios" icon={Users} label="Usuarios" onNavigate={onCerrar} />}
         </div>
 

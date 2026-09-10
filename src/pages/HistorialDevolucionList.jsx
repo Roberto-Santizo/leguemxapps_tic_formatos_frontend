@@ -23,7 +23,7 @@ function nombreEstado(status) {
  * no ofrece DELETE para return_documents.
  */
 function HistorialDevolucionList() {
-  const { token } = useAuth()
+  const { token, isAdmin } = useAuth()
   const navigate = useNavigate()
 
   const [documentos, setDocumentos] = useState([])
@@ -90,11 +90,15 @@ function HistorialDevolucionList() {
     <EstadoVacio
       icon={FORMATOS.devolucion.icon}
       titulo="Todavía no hay devoluciones registradas"
-      descripcion="Busca al responsable que está devolviendo equipo para registrar la primera."
+      descripcion={
+        isAdmin ? 'Busca al responsable que está devolviendo equipo para registrar la primera.' : 'Todavía no hay devoluciones para consultar.'
+      }
       accion={
-        <Link to="/historial/devolucion/nueva" className={botonSecundario}>
-          Registrar devolución
-        </Link>
+        isAdmin ? (
+          <Link to="/historial/devolucion/nueva" className={botonSecundario}>
+            Registrar devolución
+          </Link>
+        ) : undefined
       }
     />
   )
@@ -126,13 +130,15 @@ function HistorialDevolucionList() {
               Devoluciones registradas, parciales o completas, con la entrega de la que provienen.
             </p>
           </div>
-          <Link
-            to="/historial/devolucion/nueva"
-            className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-primary px-4 font-label-bold text-label-bold text-on-primary shadow-sm transition-all hover:brightness-110 active:brightness-95"
-          >
-            <Plus className="h-4.5 w-4.5" strokeWidth={2} />
-            Registrar devolución
-          </Link>
+          {isAdmin && (
+            <Link
+              to="/historial/devolucion/nueva"
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-primary px-4 font-label-bold text-label-bold text-on-primary shadow-sm transition-all hover:brightness-110 active:brightness-95"
+            >
+              <Plus className="h-4.5 w-4.5" strokeWidth={2} />
+              Registrar devolución
+            </Link>
+          )}
         </div>
 
         <Buscador value={busqueda} onChange={setBusqueda} placeholder="Buscar por colaborador o departamento..." />

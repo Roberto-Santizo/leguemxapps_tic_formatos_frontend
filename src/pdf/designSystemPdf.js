@@ -14,7 +14,7 @@ export const CSS_PAPEL_FISICO = `
 .lgx-pdf, .lgx-pdf *{box-sizing:border-box;margin:0;padding:0}
 .lgx-pdf{background:#FCFBF7}
 .lgx-pdf.page{
-  width:816px;background:#FCFBF7;color:#3B3934;
+  width:816px;min-height:1154px;background:#FCFBF7;color:#3B3934;
   padding:56px 91px 56px 96px;font-family:Carlito,'Segoe UI',sans-serif;
   -webkit-font-smoothing:antialiased;
 }
@@ -167,7 +167,7 @@ export function signs(firmantes) {
   const bloques = firmantes
     .map(
       (f) => `<div class="sign">
-        <div class="pad">${f.url ? `<img src="${esc(f.url)}" alt="Firma de ${esc(f.titulo)}">` : '<span class="sinfirma">Sin firma</span>'}</div>
+        <div class="pad">${f.url ? `<img src="${esc(f.url)}" alt="Firma de ${esc(f.titulo)}" crossorigin="anonymous">` : '<span class="sinfirma">Sin firma</span>'}</div>
         <small>${esc(f.titulo)}</small>
         ${f.subtitulo ? `<span class="sub">${esc(f.subtitulo)}</span>` : ''}
       </div>`,

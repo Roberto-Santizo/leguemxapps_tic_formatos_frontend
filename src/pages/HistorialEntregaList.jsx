@@ -23,7 +23,7 @@ function nombrePlanta(location) {
  * detalle, donde también está la opción de eliminar.
  */
 function HistorialEntregaList() {
-  const { token } = useAuth()
+  const { token, isAdmin } = useAuth()
   const navigate = useNavigate()
 
   const [documentos, setDocumentos] = useState([])
@@ -113,11 +113,15 @@ function HistorialEntregaList() {
     <EstadoVacio
       icon={FORMATOS.entrega.icon}
       titulo="Todavía no hay entregas registradas"
-      descripcion='Registra una desde "Nueva Acta" → "Entrega de Equipo".'
+      descripcion={
+        isAdmin ? 'Registra una desde "Nueva Acta" → "Entrega de Equipo".' : 'Todavía no hay entregas para consultar.'
+      }
       accion={
-        <Link to="/actas/entrega/nueva" className={botonSecundario}>
-          Registrar una entrega
-        </Link>
+        isAdmin ? (
+          <Link to="/actas/entrega/nueva" className={botonSecundario}>
+            Registrar una entrega
+          </Link>
+        ) : undefined
       }
     />
   )
@@ -149,13 +153,15 @@ function HistorialEntregaList() {
               Documentos de entrega registrados, con el equipo incluido en cada uno.
             </p>
           </div>
-          <Link
-            to="/actas/entrega/nueva"
-            className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-primary px-4 font-label-bold text-label-bold text-on-primary shadow-sm transition-all hover:brightness-110 active:brightness-95 active:scale-[0.97]"
-          >
-            <Plus className="h-4.5 w-4.5" strokeWidth={2} />
-            Registrar entrega
-          </Link>
+          {isAdmin && (
+            <Link
+              to="/actas/entrega/nueva"
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-primary px-4 font-label-bold text-label-bold text-on-primary shadow-sm transition-all hover:brightness-110 active:brightness-95 active:scale-[0.97]"
+            >
+              <Plus className="h-4.5 w-4.5" strokeWidth={2} />
+              Registrar entrega
+            </Link>
+          )}
         </div>
 
         <Buscador value={busqueda} onChange={setBusqueda} placeholder="Buscar por colaborador, departamento o planta..." />
@@ -219,15 +225,17 @@ function HistorialEntregaList() {
                         >
                           <Eye className="h-4 w-4" strokeWidth={2} />
                         </button>
-                        <button
-                          type="button"
-                          onClick={() => setEliminando(documento)}
-                          aria-label={`Eliminar entrega de ${documento.employee_name}`}
-                          title="Eliminar"
-                          className={iconoActivo}
-                        >
-                          <Trash2 className="h-4 w-4" strokeWidth={2} />
-                        </button>
+                        {isAdmin && (
+                          <button
+                            type="button"
+                            onClick={() => setEliminando(documento)}
+                            aria-label={`Eliminar entrega de ${documento.employee_name}`}
+                            title="Eliminar"
+                            className={iconoActivo}
+                          >
+                            <Trash2 className="h-4 w-4" strokeWidth={2} />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

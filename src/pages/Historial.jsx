@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom'
-import { ChevronRight } from 'lucide-react'
-import { LISTA_FORMATOS } from '../config/formatos.js'
+import { ChevronRight, CalendarClock } from 'lucide-react'
+import { LISTA_FORMATOS, VIGENCIA_DOCUMENTOS, VIGENCIA_DOCUMENTOS_STORAGE_KEY } from '../config/formatos.js'
+import InlineEditableText from '../components/InlineEditableText.jsx'
+import useLocalStorageState from '../hooks/useLocalStorageState.js'
 
 /**
  * Landing de Historial de Actas: una tarjeta por cada uno de los seis
@@ -10,6 +12,15 @@ import { LISTA_FORMATOS } from '../config/formatos.js'
  * el backend exponga sus endpoints.
  */
 function Historial() {
+  // Vigencia editorial de los formatos (Emisión/Vigencia del membrete) --
+  // el mismo campo que ya es editable en FormatoActa.jsx (Nueva Acta), pero
+  // el rol "user" no entra ahí (queda restringido a Historial), así que
+  // también se puede corregir desde aquí. Mismo storage, mismo valor.
+  const [vigenciaDocumentos, setVigenciaDocumentos] = useLocalStorageState(
+    VIGENCIA_DOCUMENTOS_STORAGE_KEY,
+    VIGENCIA_DOCUMENTOS,
+  )
+
   return (
     <div className="flex-1 animate-view-in p-container-padding md:p-stack-lg bg-background">
       <div className="max-w-[1200px] mx-auto flex flex-col gap-stack-lg">
@@ -20,6 +31,31 @@ function Historial() {
           <p className="font-body-md text-body-md text-on-surface-variant">
             Elige el formato para ver, buscar y eliminar las actas ya registradas.
           </p>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 rounded-xl border border-outline-variant bg-surface-container-lowest px-5 py-3.5 shadow-sm">
+          <div className="flex items-center gap-2 text-on-surface-variant">
+            <CalendarClock className="h-4 w-4 shrink-0" strokeWidth={2} />
+            <span className="font-label-bold text-label-bold uppercase tracking-wide">Vigencia de los formatos</span>
+          </div>
+          <div className="flex items-center gap-1.5 font-body-md text-body-md text-on-surface">
+            <span className="text-on-surface-variant">Emisión:</span>
+            <InlineEditableText
+              value={vigenciaDocumentos.emision}
+              onChange={(valor) => setVigenciaDocumentos((v) => ({ ...v, emision: valor }))}
+              title="Clic para corregir la fecha de emisión"
+              className="font-medium"
+            />
+          </div>
+          <div className="flex items-center gap-1.5 font-body-md text-body-md text-on-surface">
+            <span className="text-on-surface-variant">Vigencia:</span>
+            <InlineEditableText
+              value={vigenciaDocumentos.vigencia}
+              onChange={(valor) => setVigenciaDocumentos((v) => ({ ...v, vigencia: valor }))}
+              title="Clic para corregir la fecha de vigencia"
+              className="font-medium"
+            />
+          </div>
         </div>
 
         {/* Solo 2 formatos activos hoy -- una grilla fluida en vez de un tope

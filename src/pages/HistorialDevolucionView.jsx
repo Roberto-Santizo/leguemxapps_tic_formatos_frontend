@@ -17,6 +17,7 @@ import {
 import { useAuth } from '../context/AuthContext.jsx'
 import EstadoVacio from '../components/EstadoVacio.jsx'
 import InlineEditableText from '../components/InlineEditableText.jsx'
+import EditorFechaLocal from '../components/EditorFechaLocal.jsx'
 import SearchableSelect from '../components/SearchableSelect.jsx'
 import { mostrarToast } from '../components/Toast.jsx'
 import { SkeletonDetalle } from '../components/Skeleton.jsx'
@@ -31,7 +32,8 @@ import {
   urlArchivoPublico,
 } from '../services/api.js'
 import { generarPdfPapelFisico } from '../utils/generatePdfPapelFisico.js'
-import { formatearFecha, constanciaDevolucion } from '../utils/fecha.js'
+import { constanciaDevolucion } from '../utils/fecha.js'
+import useFechaLocal from '../hooks/useFechaLocal.js'
 import { esExtravio, textoSinPrefijoExtravio, marcarExtravio } from '../utils/extravio.js'
 import { construirHtmlDevolucion } from '../pdf/plantillaDevolucion.js'
 
@@ -70,13 +72,17 @@ function FirmaImagen({ url, alt }) {
  */
 function HistorialDevolucionView() {
   const { id } = useParams()
-  const { token } = useAuth()
+  const { token, isAdmin } = useAuth()
   const hojaRef = useRef(null)
 
   const [documento, setDocumento] = useState(null)
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState('')
   const [generandoPdf, setGenerandoPdf] = useState(false)
+
+  // Corrección local (solo este navegador) de la fecha de devolución -- ver
+  // useFechaLocal.js.
+  const fechaDevolucion = useFechaLocal('devolucion', id, documento?.return_date)
 
   // --- Completar una devolución ya firmada: agregar un equipo pendiente de
   // la misma entrega que se quedó fuera (POST /return_document_details) ---
@@ -166,10 +172,14 @@ function HistorialDevolucionView() {
     if (!documento) return
     setGenerandoPdf(true)
     try {
-      const html = construirHtmlDevolucion(documento, formato, {
-        entrega: urlArchivoPublico(documento.responsable_signature),
-        recibe: urlArchivoPublico(documento.administrador_signature),
-      })
+      const html = construirHtmlDevolucion(
+        { ...documento, return_date: fechaDevolucion.valor },
+        formato,
+        {
+          entrega: urlArchivoPublico(documento.responsable_signature),
+          recibe: urlArchivoPublico(documento.administrador_signature),
+        },
+      )
       await generarPdfPapelFisico(html, `devolucion-equipo-${id}.pdf`)
     } catch {
       mostrarToast('No se pudo generar el PDF', { tipo: 'error' })
@@ -251,7 +261,15 @@ function HistorialDevolucionView() {
               <SeccionCard icon={CircleUser} titulo="Datos del Usuario">
                 <div className="grid grid-cols-12 gap-x-column-gap gap-y-stack-md p-5">
                   <Campo label="Fecha de Devolución">
-                    <div className={valorClass}>{formatearFecha(documento.return_date)}</div>
+                    <div className={valorClass}>
+                      <EditorFechaLocal
+                        value={fechaDevolucion.valor}
+                        corregida={fechaDevolucion.corregida}
+                        onChange={fechaDevolucion.corregir}
+                        onRestablecer={fechaDevolucion.restablecer}
+                        title="Clic para corregir la fecha de devolución (solo en este navegador)"
+                      />
+                    </div>
                   </Campo>
                   <Campo label="Colaborador" span="col-span-12 sm:col-span-8">
                     <div className={valorClass}>{documento.employee_name || '—'}</div>
@@ -279,15 +297,17 @@ function HistorialDevolucionView() {
                 icon={Rows3}
                 titulo="Equipo Devuelto"
                 acciones={
-                  <button
-                    type="button"
-                    onClick={abrirAgregarEquipo}
-                    disabled={agregandoEquipo}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-outline-variant bg-surface-container-lowest px-3 py-1.5 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high disabled:opacity-50 active:scale-[0.90] transition-transform"
-                  >
-                    <PlusCircle className="h-4 w-4" strokeWidth={2} />
-                    Agregar equipo
-                  </button>
+                  isAdmin ? (
+                    <button
+                      type="button"
+                      onClick={abrirAgregarEquipo}
+                      disabled={agregandoEquipo}
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-outline-variant bg-surface-container-lowest px-3 py-1.5 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high disabled:opacity-50 active:scale-[0.90] transition-transform"
+                    >
+                      <PlusCircle className="h-4 w-4" strokeWidth={2} />
+                      Agregar equipo
+                    </button>
+                  ) : undefined
                 }
               >
                 {(!documento.items || documento.items.length === 0) && !agregandoEquipo ? (
@@ -336,11 +356,15 @@ function HistorialDevolucionView() {
                               {item.equipment_serie || '—'}
                             </td>
                             <td className="py-2 pr-5 text-on-surface-variant break-words">
-                              <InlineEditableText
-                                value={extravio ? textoSinPrefijoExtravio(item.observations) : item.observations || 'Sin observaciones'}
-                                onChange={(valor) => corregirObservacionItem(item.id, extravio ? marcarExtravio(valor) : valor)}
-                                title="Corregir observación"
-                              />
+                              {isAdmin ? (
+                                <InlineEditableText
+                                  value={extravio ? textoSinPrefijoExtravio(item.observations) : item.observations || 'Sin observaciones'}
+                                  onChange={(valor) => corregirObservacionItem(item.id, extravio ? marcarExtravio(valor) : valor)}
+                                  title="Corregir observación"
+                                />
+                              ) : (
+                                (extravio ? textoSinPrefijoExtravio(item.observations) : item.observations) || 'Sin observaciones'
+                              )}
                             </td>
                           </tr>
                           )
@@ -462,11 +486,17 @@ function HistorialDevolucionView() {
                           <p className="font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider mb-0.5">
                             Observaciones
                           </p>
-                          <InlineEditableText
-                            value={extravio ? textoSinPrefijoExtravio(item.observations) : item.observations || 'Sin observaciones'}
-                            onChange={(valor) => corregirObservacionItem(item.id, extravio ? marcarExtravio(valor) : valor)}
-                            title="Corregir observación"
-                          />
+                          {isAdmin ? (
+                            <InlineEditableText
+                              value={extravio ? textoSinPrefijoExtravio(item.observations) : item.observations || 'Sin observaciones'}
+                              onChange={(valor) => corregirObservacionItem(item.id, extravio ? marcarExtravio(valor) : valor)}
+                              title="Corregir observación"
+                            />
+                          ) : (
+                            <p className="font-body-md text-body-md text-on-surface break-words">
+                              {(extravio ? textoSinPrefijoExtravio(item.observations) : item.observations) || 'Sin observaciones'}
+                            </p>
+                          )}
                         </div>
                       </div>
                       )
@@ -538,7 +568,7 @@ function HistorialDevolucionView() {
               <SeccionCard icon={Lock} titulo={formato.tituloClausula} nota="Texto fijo del formato">
                 <div className="p-5">
                   <p className="border-l-2 border-outline-variant pl-4 font-body-md text-body-md leading-relaxed text-pretty text-on-surface">
-                    {constanciaDevolucion(documento.return_date)}
+                    {constanciaDevolucion(fechaDevolucion.valor)}
                   </p>
                 </div>
               </SeccionCard>
@@ -547,12 +577,18 @@ function HistorialDevolucionView() {
                   permite corregir sobre una devolución ya firmada. */}
               <SeccionCard icon={MessageSquareText} titulo="Observaciones Generales">
                 <div className="p-5">
-                  <InlineEditableText
-                    value={documento.observations || 'Sin observaciones'}
-                    onChange={corregirObservacionGeneral}
-                    title="Corregir observación"
-                    className="font-body-md text-body-md text-on-surface-variant"
-                  />
+                  {isAdmin ? (
+                    <InlineEditableText
+                      value={documento.observations || 'Sin observaciones'}
+                      onChange={corregirObservacionGeneral}
+                      title="Corregir observación"
+                      className="font-body-md text-body-md text-on-surface-variant"
+                    />
+                  ) : (
+                    <p className="font-body-md text-body-md text-on-surface-variant">
+                      {documento.observations || 'Sin observaciones'}
+                    </p>
+                  )}
                 </div>
               </SeccionCard>
 
