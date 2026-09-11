@@ -4,6 +4,7 @@ import { ArrowLeft, Pencil } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 import ConfirmDialog from '../components/ConfirmDialog.jsx'
 import { SkeletonDetalle } from '../components/Skeleton.jsx'
+import EstadoVacio from '../components/EstadoVacio.jsx'
 import { obtenerUsuario } from '../services/api.js'
 
 // Mismos roles que ya usa Usuarios.jsx (lista) y UsuarioForm.jsx (select).
@@ -28,6 +29,8 @@ function UsuarioView() {
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState('')
   const [confirmando, setConfirmando] = useState(false)
+  // Sube con "Reintentar" para volver a pedir el usuario tras un error.
+  const [intento, setIntento] = useState(0)
 
   useEffect(() => {
     let vivo = true
@@ -40,7 +43,7 @@ function UsuarioView() {
     return () => {
       vivo = false
     }
-  }, [id, token])
+  }, [id, token, intento])
 
   const rolInfo = usuario
     ? ROL_INFO[usuario.role] || { label: usuario.role, classes: 'bg-surface-container-high text-on-surface' }
@@ -48,7 +51,9 @@ function UsuarioView() {
 
   return (
     <div className="animate-view-in flex-1 p-container-padding md:p-stack-lg bg-background">
-      <div className="max-w-[800px] mx-auto flex flex-col gap-stack-md">
+      {/* Mismo ancho que su formulario (UsuarioForm, 600px): ver y editar de
+          una misma entidad no deben cambiar de ancho al pasar de una a otra. */}
+      <div className="max-w-[600px] mx-auto flex flex-col gap-stack-md">
         <Link
           to="/usuarios"
           className="inline-flex h-10 items-center gap-2 self-start rounded-lg border border-outline-variant bg-surface-container-high px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:border-outline hover:bg-surface-container-highest active:scale-[0.97] transition-transform"
@@ -60,9 +65,24 @@ function UsuarioView() {
         {cargando ? (
           <SkeletonDetalle secciones={1} camposPorSeccion={3} />
         ) : error ? (
-          <p className="font-label-sm text-label-sm text-error rounded-lg border border-error/30 bg-error-container/40 px-3 py-2">
-            {error}
-          </p>
+          // Mismo estado de error que las listas (EstadoVacio con
+          // "Reintentar"), en vez de una línea roja suelta sin ninguna salida.
+          <div className="rounded-xl border border-outline-variant bg-surface-container-lowest shadow-sm">
+            <EstadoVacio
+              variante="error"
+              titulo="No se pudo cargar el usuario"
+              descripcion={error}
+              accion={
+                <button
+                  type="button"
+                  onClick={() => setIntento((n) => n + 1)}
+                  className="inline-flex h-10 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high active:scale-[0.97] transition-transform"
+                >
+                  Reintentar
+                </button>
+              }
+            />
+          </div>
         ) : (
           <>
             <div className="flex justify-between items-start gap-4 flex-wrap">

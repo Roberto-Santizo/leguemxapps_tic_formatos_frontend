@@ -20,7 +20,7 @@ function NotFound() {
         </p>
         <Link
           to="/"
-          className="mt-2 inline-flex h-11 items-center justify-center rounded-lg bg-primary px-6 font-label-bold text-label-bold text-on-primary shadow-sm transition-all hover:brightness-110 active:brightness-95"
+          className="mt-2 inline-flex h-11 items-center justify-center rounded-lg bg-primary px-6 font-label-bold text-label-bold text-on-primary shadow-sm transition-all hover:brightness-110 active:brightness-95 active:scale-[0.97]"
         >
           Volver al inicio
         </Link>

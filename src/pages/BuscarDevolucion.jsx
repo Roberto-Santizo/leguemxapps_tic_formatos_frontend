@@ -1,16 +1,33 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { ArrowLeft, ChevronRight, Loader2 } from 'lucide-react'
+import { ArrowLeft, ChevronRight } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 import EstadoVacio from '../components/EstadoVacio.jsx'
+import { SkeletonFormulario } from '../components/Skeleton.jsx'
 import SearchableSelect from '../components/SearchableSelect.jsx'
 import { FORMATOS } from '../config/formatos.js'
-import { listarDocumentosEntrega, listarDetallesEntrega } from '../services/api.js'
+import { listarDocumentosEntrega } from '../services/api.js'
 import { formatearFecha } from '../utils/fecha.js'
 
 function nombrePlanta(location) {
   if (location === 'Planta Tejar' || location === 'Planta Parramos') return location
   return Number(location) === 1 ? 'Planta Tejar' : 'Planta Parramos'
+}
+
+/**
+ * Cuántos equipos le quedan por devolver a una entrega. El listado ya trae
+ * `pending_items_count` y `status` calculados por el backend, así que no hace
+ * falta consultar los detalles de cada entrega: antes esta pantalla hacía una
+ * llamada POR ENTREGA del colaborador solo para saber esto.
+ *
+ * Si esos campos no vinieran (backend más viejo), se asume que le queda equipo
+ * pendiente: es preferible dejar entrar y que la hoja lo diga, a bloquear una
+ * devolución que sí se puede hacer.
+ */
+function pendientesDe(entrega) {
+  if (typeof entrega.pending_items_count === 'number') return entrega.pending_items_count
+  if (entrega.status) return entrega.status === 'devuelto' ? 0 : 1
+  return 1
 }
 
 const formato = FORMATOS.devolucion
@@ -60,41 +77,18 @@ function BuscarDevolucion() {
     [entregas, empleado],
   )
 
-  // Cuando hay varias entregas para elegir, se consulta por cada una si le
-  // queda equipo pendiente de devolver (mismo endpoint que ya usa
-  // RegistrarDevolucion.jsx: listarDetallesEntrega con pending:true) -- así
-  // se puede avisar cuál ya está completamente devuelta antes de entrar,
-  // en vez de que el usuario la abra y se encuentre con "nada pendiente".
-  // Estado por entrega: 'cargando' | 'activa' (le queda equipo) | 'devuelta'.
-  const [estadoEntregas, setEstadoEntregas] = useState({})
+  // Con una sola entrega no hace falta preguntar cuál: se salta directo a la
+  // hoja de devolución -- salvo que ya esté devuelta por completo, en cuyo
+  // caso se queda aquí y se explica por qué (antes se saltaba igual y el
+  // usuario caía en una hoja que decía "ya no hay equipo pendiente").
+  const unicaEntrega = entregasDelEmpleado.length === 1 ? entregasDelEmpleado[0] : null
+  const unicaYaDevuelta = Boolean(unicaEntrega) && pendientesDe(unicaEntrega) === 0
 
   useEffect(() => {
-    if (entregasDelEmpleado.length <= 1) return
-    let vivo = true
-    entregasDelEmpleado.forEach((entrega) => {
-      setEstadoEntregas((prev) => (prev[entrega.id] ? prev : { ...prev, [entrega.id]: 'cargando' }))
-      listarDetallesEntrega(token, { deliveryDocumentId: entrega.id, pending: true })
-        .then((data) => {
-          if (!vivo) return
-          const pendientes = Array.isArray(data) ? data.length : 0
-          setEstadoEntregas((prev) => ({ ...prev, [entrega.id]: pendientes > 0 ? 'activa' : 'devuelta' }))
-        })
-        // Si falla la consulta de una entrega puntual, se deja como "activa"
-        // (no bloquear el clic) en vez de asumir que ya está devuelta.
-        .catch(() => vivo && setEstadoEntregas((prev) => ({ ...prev, [entrega.id]: 'activa' })))
-    })
-    return () => {
-      vivo = false
+    if (unicaEntrega && pendientesDe(unicaEntrega) > 0) {
+      navigate(`/historial/entrega/${unicaEntrega.id}/devolucion`)
     }
-  }, [entregasDelEmpleado, token])
-
-  // Con una sola entrega no hace falta preguntar cuál: se salta directo a
-  // la hoja de devolución de esa entrega.
-  useEffect(() => {
-    if (entregasDelEmpleado.length === 1) {
-      navigate(`/historial/entrega/${entregasDelEmpleado[0].id}/devolucion`)
-    }
-  }, [entregasDelEmpleado, navigate])
+  }, [unicaEntrega, navigate])
 
   return (
     <div className="flex-1 animate-view-in p-container-padding md:p-8">
@@ -118,10 +112,9 @@ function BuscarDevolucion() {
         </div>
 
         {cargando ? (
-          <div className="flex items-center gap-2.5 rounded-xl border border-outline-variant bg-surface-container-lowest px-5 py-14 justify-center">
-            <Loader2 className="h-5 w-5 animate-spin text-outline" strokeWidth={2} />
-            <span className="font-body-md text-body-md text-on-surface-variant">Cargando entregas...</span>
-          </div>
+          // Misma forma que la tarjeta con el buscador de responsable que
+          // aparece al terminar de cargar, en vez de una rueda girando.
+          <SkeletonFormulario campos={1} />
         ) : error ? (
           <div className="rounded-xl border border-outline-variant bg-surface-container-lowest shadow-sm">
             <EstadoVacio variante="error" titulo="No se pudieron cargar las entregas" descripcion={error} />
@@ -135,7 +128,7 @@ function BuscarDevolucion() {
               accion={
                 <Link
                   to="/actas/entrega/nueva"
-                  className="inline-flex h-10 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high"
+                  className="inline-flex h-10 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high active:scale-[0.97] transition-transform"
                 >
                   Registrar una entrega
                 </Link>
@@ -156,50 +149,53 @@ function BuscarDevolucion() {
             </div>
 
             {/* Más de una entrega: no se puede adivinar cuál se está
-                devolviendo -- se deja elegir. */}
-            {entregasDelEmpleado.length > 1 && (
+                devolviendo -- se deja elegir. Una sola entrega que ya está
+                devuelta también se muestra aquí (con "Ya devuelta" y sin poder
+                abrirse), para que se entienda por qué no avanza. */}
+            {(entregasDelEmpleado.length > 1 || unicaYaDevuelta) && (
               <div className="mt-stack-lg flex flex-col gap-stack-sm">
                 <p className="font-label-bold text-label-bold text-on-surface">
-                  {empleado} tiene {entregasDelEmpleado.length} entregas registradas -- elige cuál se está
-                  devolviendo
+                  {unicaEntrega
+                    ? `La única entrega de ${empleado} ya fue devuelta por completo -- no le queda equipo pendiente`
+                    : `${empleado} tiene ${entregasDelEmpleado.length} entregas registradas -- elige cuál se está devolviendo`}
                 </p>
                 {entregasDelEmpleado.map((entrega) => {
-                  const estado = estadoEntregas[entrega.id]
-                  const yaDevuelta = estado === 'devuelta'
+                  const pendientes = pendientesDe(entrega)
+                  const yaDevuelta = pendientes === 0
                   return (
-                  <button
-                    key={entrega.id}
-                    type="button"
-                    disabled={yaDevuelta}
-                    onClick={() => navigate(`/historial/entrega/${entrega.id}/devolucion`)}
-                    className={`flex items-center justify-between gap-3 rounded-xl border border-outline-variant bg-surface-container-low px-4 py-3.5 text-left transition-colors ${
-                      yaDevuelta
-                        ? 'cursor-not-allowed opacity-60'
-                        : 'hover:bg-surface-container-high active:scale-[0.97] transition-transform'
-                    }`}
-                  >
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <p className="font-body-md text-body-md font-medium text-on-surface">
-                          {formatearFecha(entrega.delivery_date)} · {nombrePlanta(entrega.location)}
+                    <button
+                      key={entrega.id}
+                      type="button"
+                      disabled={yaDevuelta}
+                      onClick={() => navigate(`/historial/entrega/${entrega.id}/devolucion`)}
+                      className={`flex items-center justify-between gap-3 rounded-xl border border-outline-variant bg-surface-container-low px-4 py-3.5 text-left transition-colors ${
+                        yaDevuelta
+                          ? 'cursor-not-allowed opacity-60'
+                          : 'hover:bg-surface-container-high active:scale-[0.97] transition-transform'
+                      }`}
+                    >
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="font-body-md text-body-md font-medium text-on-surface">
+                            {formatearFecha(entrega.delivery_date)} · {nombrePlanta(entrega.location)}
+                          </p>
+                          {yaDevuelta ? (
+                            <span className="rounded-full bg-surface-container-high px-2 py-0.5 font-label-sm text-label-sm font-bold uppercase tracking-wide text-on-surface-variant">
+                              Ya devuelta
+                            </span>
+                          ) : (
+                            <span className="rounded-full bg-primary/10 px-2 py-0.5 font-label-sm text-label-sm font-bold uppercase tracking-wide text-primary">
+                              {pendientes} pendiente{pendientes === 1 ? '' : 's'}
+                            </span>
+                          )}
+                        </div>
+                        <p className="font-label-sm text-label-sm text-on-surface-variant tabular-nums">
+                          {entrega.items_count ?? (Array.isArray(entrega.items) ? entrega.items.length : 0)} equipo(s) en
+                          esta entrega
                         </p>
-                        {estado === 'activa' && (
-                          <span className="rounded-full bg-primary/10 px-2 py-0.5 font-label-sm text-label-sm font-bold uppercase tracking-wide text-primary">
-                            Activa
-                          </span>
-                        )}
-                        {yaDevuelta && (
-                          <span className="rounded-full bg-surface-container-high px-2 py-0.5 font-label-sm text-label-sm font-bold uppercase tracking-wide text-on-surface-variant">
-                            Ya devuelta
-                          </span>
-                        )}
                       </div>
-                      <p className="font-label-sm text-label-sm text-on-surface-variant tabular-nums">
-                        {Array.isArray(entrega.items) ? entrega.items.length : 0} equipo(s) en esta entrega
-                      </p>
-                    </div>
-                    <ChevronRight className="h-4 w-4 shrink-0 text-outline" strokeWidth={2} />
-                  </button>
+                      <ChevronRight className="h-4 w-4 shrink-0 text-outline" strokeWidth={2} />
+                    </button>
                   )
                 })}
               </div>

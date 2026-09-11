@@ -70,9 +70,16 @@ nunca escribir un componente de página nuevo para eso.
 
 - Paleta monocromática tipo "ink" corporativa (Material 3, solo modo claro), con nombres de
   token M3 (`primary`, `surface`, `on-surface-variant`, `outline`, etc.) definidos en
-  `tailwind.config.js`. El negro/gris es el color principal; el rojo (`error`,
-  `error-container`) está reservado exclusivamente para eliminar y errores -- no se usa
-  para nada más.
+  `tailwind.config.js`. El negro/gris es el color principal. Los únicos colores son:
+  - **Rojo** (`error`, `error-container`): eliminar, errores y marcar un equipo como
+    **extravío** en la devolución (fila, badge y botón en rojo -- pedido explícito del
+    cliente, no un descuido).
+  - **Verde salvia y ocre** (`available*` / `assigned*`): solo el badge de estado
+    "Disponible" / "En posesión" de Catálogo → Equipos. Van apagados al mismo nivel de
+    saturación que el rojo: fondo claro + texto oscuro + punto intermedio.
+
+  Nada más lleva color, y ningún color se escribe suelto (`bg-green-100`, hex en línea): si
+  hace falta uno nuevo, se registra como token en `tailwind.config.js`.
 - Tipografía y tamaños también van por clases con nombre semántico (`font-label-bold
   text-label-bold`, `font-body-md text-body-md`, `font-headline-lg text-headline-lg`,
   etc.), no tamaños sueltos de Tailwind.
@@ -82,12 +89,16 @@ nunca escribir un componente de página nuevo para eso.
   fixed` (como el buscador con lista de opciones), porque lo deja atrapado dentro de esa
   caja en vez de cubrir toda la pantalla -- ya pasó una vez y se corrigió quitándola de ahí.
 - **Animación de "presión" en botones/tarjetas clicables**: todo `<button>` y todo `<Link>`
-  clicable del sistema (102 elementos en 29 archivos, ya aplicado en todo el proyecto)
-  lleva `active:scale-[0.97] transition-transform` (botones normales) o
-  `active:scale-[0.99]` (tarjetas grandes tipo Catálogo/Nueva Acta/Historial). Si un botón
-  ya tenía otro efecto `active:` (como `active:brightness-95`), se combinan, no se
-  reemplazan. Cualquier botón o tarjeta clicable nueva que se agregue debe llevar esta
-  misma clase para no romper la consistencia.
+  clicable del sistema lleva `active:scale-[0.97] transition-transform` (botones
+  normales), `active:scale-[0.90]` (botones chicos de solo ícono: ver, editar, cerrar,
+  quitar) o `active:scale-[0.99]` (tarjetas grandes tipo Catálogo/Nueva Acta/Historial).
+  Si un botón ya tenía otro efecto `active:` (como `active:brightness-95`), se combinan,
+  no se reemplazan; si ya usa `transition-all`, basta con `active:scale-[...]`. La
+  auditoría del 2026-09-11 encontró 17 clicables sin ella (justo los botones principales
+  de las listas, los "Cancelar", los "Volver al historial" y el menú lateral) y se
+  completaron. Cualquier botón o tarjeta clicable nueva debe llevarla para no romper la
+  consistencia. (Excepción: los enlaces de texto subrayado dentro de un párrafo, como
+  "Regístrala en Marcas", no la llevan -- un elemento en línea no se escala.)
 - **Grillas de tarjetas fluidas**: en vez de un tope fijo de columnas (`sm:grid-cols-2
   xl:grid-cols-3`) con un `max-w` angosto, las pantallas de selección de tarjetas
   (`Catalogo.jsx`, `Historial.jsx`, `NuevaActa.jsx`) usan un `style` inline
@@ -96,6 +107,14 @@ nunca escribir un componente de página nuevo para eso.
   vea igual en todas). Esto evita huecos vacíos cuando el número de tarjetas no llena las
   columnas fijas, y hace que las tarjetas crezcan para ocupar el ancho disponible. Patrón
   ya usado antes en `SkeletonDetalle` (`Skeleton.jsx`), reutilizado en vez de inventado.
+  Las tres comparten además todo lo demás, con `Catalogo.jsx` como referencia: márgenes
+  `md:p-stack-lg`, separación `gap-stack-lg`, `minmax(280px, 1fr)`, tarjeta
+  `rounded-2xl p-6`, ícono en caja de `h-14 w-14` y título de tarjeta `headline-md` (el
+  título de la pantalla es `headline-lg`). Hasta el 2026-09-11 cada una tenía los suyos.
+- **Ancho de "ver" y "editar"**: la vista de detalle y el formulario de una misma entidad
+  usan el mismo ancho, para que el contenido no salte al pasar de una a otra: 600px en
+  Marcas, Departamentos, Empleados y Usuarios (una columna), 900px en Equipos (formulario
+  a dos columnas y tablas de características e historial). Las listas van a 1200px.
 - Patrón repetido en TODO el sistema para listas: **escritorio** = tabla con íconos de
   acción (ojo=ver, lápiz=editar, basura=eliminar); **móvil** = tarjetas apiladas, sin
   botones visibles, tocar la tarjeta entera navega al detalle. El punto de quiebre entre
@@ -113,7 +132,10 @@ nunca escribir un componente de página nuevo para eso.
   membrete de Nueva Acta): el ícono de lápiz que indica que el texto es editable queda
   siempre visible a baja opacidad (`opacity-40`), no solo con `group-hover`, porque en
   móvil/táctil el hover nunca se dispara -- sube de opacidad al pasar el mouse en
-  escritorio, pero en táctil el affordance debe verse siempre.
+  escritorio, pero en táctil el affordance debe verse siempre. Por defecto no deja
+  guardar el texto vacío (vuelve el valor anterior); las observaciones del historial usan
+  `permitirVacio` + `placeholder="Sin observaciones"` para poder dejarlas en blanco (se
+  guardan como `null`).
 - Botón de "registrar nuevo" en las listas de historial: siempre visible en el encabezado
   de la pantalla (junto al título), no solo cuando la lista está vacía -- patrón consistente
   entre `HistorialEntregaList.jsx` y `HistorialDevolucionList.jsx`.
@@ -121,7 +143,9 @@ nunca escribir un componente de página nuevo para eso.
 ## Sección de Auditoría -- eliminada (2026-09-08)
 
 La sección de Auditoría (`src/pages/Auditoria.jsx`, la ruta `/auditoria`, y su ítem en
-`Sidebar.jsx`) se eliminó por completo del sistema, por instrucción explícita del usuario,
+`Sidebar.jsx`) se eliminó por completo del sistema, por instrucción explícita del usuario
+(el archivo `Auditoria.jsx` había quedado en `src/pages/` sin ruta; se borró el
+2026-09-11),
 después de confirmarse contra el swagger completo del backend que **no existe ningún
 endpoint de auditoría/logs del sistema** (se revisaron todos los tags documentados: Auth,
 Usuarios, Marcas, Departamentos, Equipos, Características, Empleados, Documentos de
@@ -137,13 +161,47 @@ reales: `GET /equipments/{id}/history` y los listados de `/delivery_documents` /
 al catálogo (crear/editar/eliminar Marcas, Departamentos, Equipos, Empleados no deja
 ningún rastro en la API actual).
 
+## Limpieza de código muerto (2026-09-11)
+
+Tras una auditoría del proyecto se borraron, por no tener ningún uso (sin import, sin ruta,
+sin referencia): `Header.jsx`, `ConfirmModal.jsx` (duplicaba a `ConfirmDialog`),
+`BotonExcel.jsx`, `Loading.jsx`, `ErrorMessage.jsx` (tenía la sintaxis corrupta),
+`pages/Devolucion.jsx`, `pages/Auditoria.jsx`, `pages/CatalogoRegistroView.jsx` (el vivo
+es el de `components/`) y los tres `api.*.js`. De `api.js` salieron el bloque de "actas"
+del sistema pre-Laravel, `eliminarUsuario` (apuntaba a una ruta que nunca existió),
+`checkApiHealth` y `exportarActasExcel`. Si se busca alguno de estos, no es que se haya
+perdido: está en el historial de git.
+
+## Dar de baja equipos -- implementado y retirado el mismo día (2026-09-11)
+
+`DELETE /api/equipments/{id}` existe y está documentado como baja lógica: *"la tabla
+`equipments` usa soft deletes, así que el registro conserva su historial y deja de aparecer
+en los listados"*. Se implementó (basura en Catálogo → Equipos y botón "Dar de baja" en el
+detalle) y **se retiró el mismo día**, porque en la práctica el backend no cumple esa
+promesa: al dar de baja un equipo, `GET /delivery_documents` **y** `GET /return_documents`
+empiezan a responder 500 con *"Attempt to read property 'name' on null"* -- leen el nombre
+del equipo desde su registro (`equipments.name`) y no incluyen los que están dados de baja.
+Resultado: los dos historiales quedan caídos para todos los usuarios, no solo las actas que
+tenían ese equipo.
+
+Para volver a agregarlo hacen falta dos cosas del lado del backend: incluir los equipos
+retirados al leer entregas y devoluciones (en Laravel, `withTrashed()` en esa relación), y
+restaurar el equipo que ya se dio de baja (`deleted_at = NULL`) para levantar el historial.
+Mientras eso no esté, no hay forma de retirar equipo del inventario desde el sistema.
+
+Los filtros del listado de entregas (`status`, `employeeId`, `location`) tampoco se usan por
+el mismo tipo de problema: `?location=1` responde con el mismo error de PHP. Ver el
+comentario en `listarDocumentosEntrega` (`src/services/api.js`).
+
 ## Reglas de código del proyecto
 
 - **Un solo archivo de API**: todas las funciones que llaman al backend viven en
   `src/services/api.js`. Nunca se crean archivos de API separados por sección (ya se
   intentó antes y causó un bug de importaciones cruzadas -- quedó documentado como lección
-  aprendida). (Hay `api.additions.js`, `api.empleados.js`, `api.equipos.js` como
-  excepciones ya existentes de antes de esta regla -- no se agregan más archivos así.)
+  aprendida). (Existían `api.additions.js`, `api.empleados.js` y `api.equipos.js`, que
+  parecían excepciones, pero eran borradores "para pegar al final de api.js" que ya se
+  habían pegado: nunca se importaban y ni siquiera funcionaban solos. Se borraron el
+  2026-09-11; hoy `api.js` es el único archivo de API.)
 - **Motor único de formularios**: ver sección arriba -- todo cambio a un formato físico va
   en `src/config/formatos.js`, no como página nueva.
 - Vistas de "ver" siempre cargan el registro por ID contra la API (no por estado de

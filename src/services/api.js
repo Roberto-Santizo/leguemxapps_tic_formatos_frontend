@@ -1,8 +1,9 @@
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
-// Backend nuevo (Laravel) -- de momento solo se usa para el login. El resto
-// de endpoints (actas, auditoria, usuarios, etc.) siguen apuntando a API_URL
-// hasta que se migren uno por uno.
+// Backend real y actual (Laravel). API_URL (arriba) es el backend viejo de
+// Node/Express, que ya no existe: solo lo siguen usando obtenerAuditoria y
+// exportarAuditoriaExcel, restos de la sección de Auditoría que se dejaron a
+// propósito (ver CONTEXTO_SISTEMA_DISENO_REGLAS.md).
 const AUTH_API_URL = import.meta.env.VITE_AUTH_API_URL || 'http://192.168.10.209:8000/api'
 
 async function request(path, options = {}) {
@@ -36,10 +37,6 @@ async function request(path, options = {}) {
   return data
 }
 
-export async function checkApiHealth() {
-  return request('/api/health', { method: 'GET' })
-}
-
 // Llama con el token guardado en el header Authorization: Bearer <token>
 function authRequest(path, token, options = {}) {
   return request(path, {
@@ -49,6 +46,20 @@ function authRequest(path, token, options = {}) {
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
   })
+}
+
+// Nombre del evento que se dispara cuando el backend contesta 401 con un
+// token que ya teníamos: el JWT venció (JWT_TTL, 60 min por defecto) o dejó de
+// ser válido. AuthContext lo escucha y cierra la sesión, para que RequireAuth
+// mande a /login en vez de dejar al usuario con "Unauthenticated." en cada
+// pantalla y un menú que lo sigue mostrando logueado.
+export const EVENTO_SESION_EXPIRADA = 'legumex:sesion-expirada'
+
+// El 401 de /login NO es sesión vencida: es usuario o contraseña incorrectos,
+// y ahí la pantalla de Login ya muestra su propio mensaje.
+function avisarSiSesionExpiro(path, status, token) {
+  if (status !== 401 || !token || path === '/login') return
+  window.dispatchEvent(new CustomEvent(EVENTO_SESION_EXPIRADA))
 }
 
 // Pega contra el backend Laravel (Legumex TIC Formatos API), desenvolviendo
@@ -73,6 +84,7 @@ export async function laravelRequest(path, { token, ...options } = {}) {
   }
 
   if (!response.ok || !body) {
+    avisarSiSesionExpiro(path, response.status, token)
     const message = (body && body.message) || `Error ${response.status}`
     const error = new Error(message)
     error.status = response.status
@@ -107,6 +119,7 @@ async function laravelRequestMultipart(path, { token, formData, method = 'POST' 
   }
 
   if (!response.ok || !body) {
+    avisarSiSesionExpiro(path, response.status, token)
     const message = (body && body.message) || `Error ${response.status}`
     const error = new Error(message)
     error.status = response.status
@@ -155,68 +168,13 @@ export async function registrarUsuario(token, { name, username, password, passwo
   })
 }
 
-export async function crearActa(token, payload) {
-  return authRequest('/api/actas', token, {
-    method: 'POST',
-    body: JSON.stringify(payload),
-  })
-}
-
-export async function guardarFirma(token, actaId, tipo, imagenBase64) {
-  return authRequest(`/api/actas/${actaId}/firma`, token, {
-    method: 'POST',
-    body: JSON.stringify({ tipo, imagen_base64: imagenBase64 }),
-  })
-}
-
-export async function reiniciarFirma(token, actaId, tipo, password) {
-  return authRequest(`/api/actas/${actaId}/firma`, token, {
-    method: 'DELETE',
-    body: JSON.stringify({ tipo, password }),
-  })
-}
-
-export async function listarActas(token) {
-  return authRequest('/api/actas', token, { method: 'GET' })
-}
-
-export async function obtenerActa(token, id) {
-  return authRequest(`/api/actas/${id}`, token, { method: 'GET' })
-}
-
-export async function editarActa(token, id, payload) {
-  return authRequest(`/api/actas/${id}`, token, {
-    method: 'PUT',
-    body: JSON.stringify(payload),
-  })
-}
-
-export async function eliminarActa(token, id, password) {
-  return authRequest(`/api/actas/${id}`, token, {
-    method: 'DELETE',
-    body: JSON.stringify({ password }),
-  })
-}
-
-// El PDF requiere el header Authorization, así que no se puede abrir con un
-// simple <a href>; hay que pedirlo con fetch y convertir la respuesta a blob.
-export async function descargarPdfActa(token, id) {
-  const response = await fetch(`${API_URL}/api/actas/${id}/pdf`, {
-    headers: { Authorization: `Bearer ${token}` },
-  })
-  if (!response.ok) {
-    let message = `Error ${response.status}`
-    try {
-      const data = await response.json()
-      message = data.message || message
-    } catch (_) {
-      // el error no vino en JSON
-    }
-    throw new Error(message)
-  }
-  return response.blob()
-}
-
+// Resto de la sección de Auditoría (eliminada): el backend real no tiene
+// endpoint de auditoría, así que apunta al backend viejo y no funciona. Se deja
+// a propósito, igual que exportarAuditoriaExcel -- ver
+// CONTEXTO_SISTEMA_DISENO_REGLAS.md. Aquí antes también estaban las funciones
+// de "actas" del sistema pre-Laravel (crearActa, listarActas, descargarPdfActa,
+// etc.), reemplazadas por /delivery_documents y /return_documents y sin ningún
+// uso: se borraron.
 export async function obtenerAuditoria(token) {
   return authRequest('/api/auditoria', token, { method: 'GET' })
 }
@@ -252,13 +210,10 @@ export async function editarUsuario(token, id, payload) {
   })
 }
 
-export async function eliminarUsuario(token, id) {
-  return authRequest(`/api/usuarios/${id}`, token, { method: 'DELETE' })
-}
-
-// Descargas de Excel (Fase 8): igual que el PDF, requieren el header
-// Authorization, así que se piden con fetch y se convierten a blob. Además
-// van con POST + contraseña en el body (ConfirmModal), nunca en la URL.
+// Descarga de Excel de la Auditoría (resto de una sección eliminada, ver
+// obtenerAuditoria): requiere el header Authorization, así que se pide con
+// fetch y se convierte a blob. Va con POST + contraseña en el body, nunca en
+// la URL.
 async function descargarExcel(path, token, password) {
   const response = await fetch(`${API_URL}${path}`, {
     method: 'POST',
@@ -279,10 +234,6 @@ async function descargarExcel(path, token, password) {
     throw new Error(message)
   }
   return response.blob()
-}
-
-export async function exportarActasExcel(token, password) {
-  return descargarExcel('/api/actas/exportar/excel', token, password)
 }
 
 export async function exportarAuditoriaExcel(token, password) {
@@ -400,6 +351,14 @@ export async function actualizarEquipo(token, id, payload) {
   })
 }
 
+// NO hay función para DELETE /equipments/{id} (dar de baja) a propósito.
+// Se implementó el 2026-09-11 y se retiró el mismo día: al dar de baja un
+// equipo, los listados de entregas Y de devoluciones empiezan a responder 500
+// ("Attempt to read property 'name' on null"), porque leen el nombre desde el
+// registro del equipo y no incluyen los que están dados de baja. Los dos
+// historiales quedan caídos para todos. Volver a agregarla solo cuando el
+// backend incluya los equipos retirados al leer entregas y devoluciones.
+
 // Listado reducido de características. Sin `equipmentId` trae todas: se usa
 // una sola vez al cargar la pantalla para saber qué equipos tienen o no
 // características (Estado A / Estado B) sin pedir un detalle por fila.
@@ -474,6 +433,14 @@ export async function actualizarEmpleado(token, id, { code, name, department_id 
   })
 }
 
+// Equipos que el empleado tiene AHORA: los detalles de sus entregas que
+// todavía no tienen devolución (el backend los saca de esta lista en cuanto se
+// registra la devolución). Cada uno trae delivery_document_id, así que se
+// puede enlazar con el acta de la que salió.
+export async function equiposDeEmpleado(token, id) {
+  return laravelRequest(`/employees/${id}/equipments`, { token, method: 'GET' })
+}
+
 // ---------------------------------------------------------------------------
 // Documentos de Entrega (Laravel): GET/POST /delivery_documents,
 // GET/DELETE /delivery_documents/{id}. Mismo candado que el resto: jwt.auth,
@@ -489,6 +456,12 @@ export async function actualizarEmpleado(token, id, { code, name, department_id 
 // pedir obtenerDocumentoEntrega con el listado recargado.
 // ---------------------------------------------------------------------------
 
+// CUIDADO (2026-09-11): el swagger documenta filtros opcionales para este
+// listado (`status`, `employeeId`, `location`), pero al probarlos el servidor
+// respondió con un error de PHP -- `GET /delivery_documents?location=1` →
+// "Attempt to read property 'name' on null". Por eso NO se usan: se pide el
+// listado completo, como siempre. Antes de volver a intentarlo, probarlos
+// contra el backend real.
 export async function listarDocumentosEntrega(token) {
   return laravelRequest('/delivery_documents', { token, method: 'GET' })
 }
@@ -642,26 +615,15 @@ export function urlArchivoPublico(path) {
 }
 
 export default {
-  checkApiHealth,
   login,
   checkStatus,
   registrarUsuario,
-  crearActa,
-  guardarFirma,
-  reiniciarFirma,
-  listarActas,
-  obtenerActa,
-  editarActa,
-  eliminarActa,
-  descargarPdfActa,
   obtenerAuditoria,
-  exportarActasExcel,
   exportarAuditoriaExcel,
   listarUsuarios,
   obtenerUsuario,
   crearUsuario,
   editarUsuario,
-  eliminarUsuario,
   listarMarcas,
   crearMarca,
   obtenerMarca,
@@ -685,6 +647,7 @@ export default {
   obtenerEmpleado,
   crearEmpleado,
   actualizarEmpleado,
+  equiposDeEmpleado,
   listarDocumentosEntrega,
   obtenerDocumentoEntrega,
   crearDocumentoEntrega,

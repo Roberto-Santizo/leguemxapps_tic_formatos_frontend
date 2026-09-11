@@ -60,6 +60,17 @@ function UsuarioForm() {
     ? !password.trim() || (password.length >= 8 && password === passwordConfirmation)
     : password.length >= 8 && password === passwordConfirmation
 
+  // Avisos en vivo: antes "Crear usuario" solo se quedaba gris, sin decir si
+  // faltaban caracteres o si la confirmación no coincidía.
+  const faltanCaracteres = password && password.length < 8 ? 8 - password.length : 0
+  // Mientras se escribe la confirmación no se reta a nadie: solo se avisa
+  // cuando ya no puede terminar coincidiendo, o cuando está completa y es
+  // distinta.
+  const noCoinciden =
+    passwordConfirmation !== '' &&
+    passwordConfirmation !== password &&
+    !(password.startsWith(passwordConfirmation) && passwordConfirmation.length < password.length)
+
   const completo = name.trim() && username.trim() && role && passwordCompleta
 
   async function handleSubmit(e) {
@@ -188,6 +199,11 @@ function UsuarioForm() {
                     {mostrarPassword ? <EyeOff className="h-4 w-4" strokeWidth={2} /> : <Eye className="h-4 w-4" strokeWidth={2} />}
                   </button>
                 </div>
+                {faltanCaracteres > 0 && (
+                  <p className="font-label-sm text-label-sm text-on-surface-variant">
+                    {faltanCaracteres === 1 ? 'Falta 1 carácter' : `Faltan ${faltanCaracteres} caracteres`} (mínimo 8).
+                  </p>
+                )}
                 {erroresCampo?.password?.[0] && (
                   <p className="font-label-sm text-label-sm text-error">{erroresCampo.password[0]}</p>
                 )}
@@ -221,6 +237,9 @@ function UsuarioForm() {
                       )}
                     </button>
                   </div>
+                  {noCoinciden && (
+                    <p className="font-label-sm text-label-sm text-error">Las contraseñas no coinciden.</p>
+                  )}
                 </div>
               )}
             </section>
@@ -234,7 +253,7 @@ function UsuarioForm() {
             <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
               <Link
                 to="/usuarios"
-                className="inline-flex h-11 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high"
+                className="inline-flex h-11 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high active:scale-[0.97] transition-transform"
               >
                 Cancelar
               </Link>

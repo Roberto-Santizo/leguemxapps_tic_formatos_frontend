@@ -461,9 +461,20 @@ function FormatoActa() {
               <Campo label={formato.labelFecha}>
                 {esEntrega ? (
                   <>
-                    <input type="date" disabled className={`${inputClass} opacity-60`} />
+                    {/* Mismo recuadro con candado que Departamento y "Recibí
+                        de": es un dato que pone el sistema, no un campo. Antes
+                        era un <input type="date"> gris, vacío y bloqueado (con
+                        el "dd/mm/aaaa" del navegador), que se leía como un
+                        campo roto. No se adelanta la fecha de hoy porque la
+                        decide el servidor al guardar. */}
+                    <div className="flex h-11 items-center gap-2 border-b border-outline-variant">
+                      <Lock className="h-4 w-4 shrink-0 text-on-surface-variant" strokeWidth={2} />
+                      <span className="font-body-md text-body-md text-on-surface-variant">
+                        Se asigna al guardar
+                      </span>
+                    </div>
                     <p className="font-label-sm text-label-sm text-on-surface-variant">
-                      La fecha la asigna el sistema al guardar
+                      La pone el sistema, con la fecha del día en que se guarda
                     </p>
                   </>
                 ) : (
@@ -1195,7 +1206,11 @@ function FormatoActa() {
           mensaje="¿Confirmas que los datos y las firmas son correctos? Se guardará como una entrega registrada."
           textoConfirmar="Sí, finalizar"
           permitirNoPreguntar
-          onCancelar={() => setConfirmandoFinalizar(false)}
+          procesando={guardando}
+          onCancelar={() => {
+            if (guardando) return
+            setConfirmandoFinalizar(false)
+          }}
           onConfirmar={handleConfirmarFinalizarEntrega}
         />
       )}

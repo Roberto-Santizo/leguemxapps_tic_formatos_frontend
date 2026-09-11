@@ -40,7 +40,43 @@ import {
 const inputClasses =
   'h-11 w-full rounded-lg border border-outline-variant bg-surface px-3.5 font-body-md text-body-md text-on-surface transition-colors hover:border-outline focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25 disabled:opacity-60'
 
-const TIPOS = ['laptop', 'desktop', 'monitor', 'impresora', 'teléfono', 'accesorio', 'otro']
+/**
+ * Tipos de equipo que acepta el backend: es el enum App\Enums\EquipmentType,
+ * copiado tal cual (mismos valores y mismo orden) para poder cotejarlo de un
+ * vistazo. El `id` es lo que viaja a la API -- en inglés, no se traduce -- y
+ * el `name` es solo lo que ve la persona.
+ *
+ * Antes aquí había una lista escrita a ojo, con las etiquetas en español
+ * mandadas como valor ("impresora", "teléfono") y hasta un "accesorio" que no
+ * existe en el enum: de las 7 opciones que se sugerían, 4 hacían que el
+ * servidor rechazara el alta con "El tipo de equipo seleccionado no es
+ * válido". Si el backend agrega o quita un tipo, se actualiza esta lista.
+ */
+export const TIPOS_EQUIPO = [
+  { id: 'mouse', name: 'Mouse' },
+  { id: 'keyboard', name: 'Teclado' },
+  { id: 'charger', name: 'Cargador' },
+  { id: 'headset', name: 'Diadema' },
+  { id: 'webcam', name: 'Cámara web' },
+  { id: 'monitor', name: 'Monitor' },
+  { id: 'laptop', name: 'Laptop' },
+  { id: 'desktop', name: 'PC de escritorio' },
+  { id: 'printer', name: 'Impresora' },
+  { id: 'phone', name: 'Teléfono' },
+  { id: 'cable', name: 'Cable' },
+  { id: 'adapter', name: 'Adaptador' },
+  { id: 'other', name: 'Otro' },
+]
+
+/**
+ * Etiqueta en español de un tipo guardado. Si llega un valor que no está en el
+ * enum (un registro viejo, o un tipo nuevo del backend que todavía no está
+ * arriba) se muestra tal cual en vez de dejar el campo vacío.
+ */
+export function etiquetaTipoEquipo(valor) {
+  if (!valor) return '—'
+  return TIPOS_EQUIPO.find((t) => t.id === valor)?.name ?? valor
+}
 
 const VACIO = {
   name: '',
@@ -174,6 +210,16 @@ function EquipoForm() {
 
   const completo =
     form.name.trim() && form.model.trim() && form.brand_id && form.serie.trim() && form.type.trim()
+
+  // Cuando Laravel rechaza por validación (422) manda el primer error de campo
+  // también en `message`, y ese mismo texto ya se pinta debajo del campo que
+  // corresponde -- así que la caja roja del final lo repetía palabra por
+  // palabra. Solo se muestra si el mensaje NO es uno de los que ya están
+  // visibles bajo un campo (un error de red o del servidor sigue apareciendo).
+  const erroresVisiblesEnCampos = ['name', 'model', 'brand_id', 'serie', 'type']
+    .map((campo) => erroresCampo?.[campo]?.[0])
+    .filter(Boolean)
+  const errorGeneral = error && !erroresVisiblesEnCampos.includes(error) ? error : ''
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -323,21 +369,18 @@ function EquipoForm() {
 
                 <div className="flex flex-col gap-1.5">
                   <label className="font-label-bold text-label-bold text-on-surface">Tipo</label>
-                  <input
-                    className={inputClasses}
+                  {/* Lista cerrada, no texto libre: el backend valida contra un
+                      enum y cualquier otra cosa se rechaza al guardar. Mismo
+                      componente que ya usan Marca, Empleado y Equipo en el
+                      resto del sistema -- desplegable con buscador en
+                      escritorio, hoja completa en móvil. */}
+                  <SearchableSelect
+                    options={TIPOS_EQUIPO}
                     value={form.type}
+                    onChange={(valor) => set('type', valor)}
                     disabled={guardando}
-                    maxLength={255}
-                    list="tipos-equipo"
-                    onChange={(e) => set('type', e.target.value)}
-                    placeholder="Ej. laptop"
-                    required
+                    placeholder="Selecciona el tipo de equipo"
                   />
-                  <datalist id="tipos-equipo">
-                    {TIPOS.map((t) => (
-                      <option key={t} value={t} />
-                    ))}
-                  </datalist>
                   {erroresCampo?.type?.[0] && (
                     <p className="font-label-sm text-label-sm text-error">{erroresCampo.type[0]}</p>
                   )}
@@ -396,16 +439,16 @@ function EquipoForm() {
               )}
             </section>
 
-            {error && (
+            {errorGeneral && (
               <p className="font-label-sm text-label-sm text-error rounded-lg border border-error/30 bg-error-container/40 px-3 py-2">
-                {error}
+                {errorGeneral}
               </p>
             )}
 
             <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
               <Link
                 to="/catalogo/equipos"
-                className="inline-flex h-11 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high"
+                className="inline-flex h-11 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high active:scale-[0.97] transition-transform"
               >
                 Cancelar
               </Link>

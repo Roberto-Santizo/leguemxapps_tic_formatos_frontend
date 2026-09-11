@@ -167,7 +167,11 @@ function HistorialEntregaView() {
     }
   }
 
-  async function corregirObservacion(itemId, observations) {
+  // Vacío = "sin observaciones": se manda null en vez de un texto en blanco
+  // (el campo es nullable en la API) y la tabla vuelve a mostrar el "Sin
+  // observaciones" de siempre.
+  async function corregirObservacion(itemId, texto) {
+    const observations = texto || null
     try {
       await actualizarDetalleEntrega(token, itemId, { observations })
       setDocumento((doc) => ({
@@ -271,7 +275,7 @@ function HistorialEntregaView() {
                 accion={
                   <Link
                     to="/historial/entrega"
-                    className="inline-flex h-10 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high"
+                    className="inline-flex h-10 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high active:scale-[0.97] transition-transform"
                   >
                     Volver al historial
                   </Link>
@@ -413,7 +417,7 @@ function HistorialEntregaView() {
                                 item.observations || '—'
                               ) : (
                                 <InlineEditableText
-                                  value={item.observations || 'Sin observaciones'}
+                                  value={item.observations || ''} placeholder="Sin observaciones" permitirVacio
                                   onChange={(valor) => corregirObservacion(item.id, valor)}
                                   title="Corregir observación"
                                 />
@@ -570,7 +574,7 @@ function HistorialEntregaView() {
                             </p>
                           ) : (
                             <InlineEditableText
-                              value={item.observations || 'Sin observaciones'}
+                              value={item.observations || ''} placeholder="Sin observaciones" permitirVacio
                               onChange={(valor) => corregirObservacion(item.id, valor)}
                               title="Corregir observación"
                             />
@@ -733,8 +737,10 @@ function HistorialEntregaView() {
         abierto={eliminando}
         variante="peligro"
         titulo="Eliminar documento de entrega"
-        mensaje={`¿Desea eliminar esta entrega? Esta acción no se puede deshacer.${errorBorrar ? ` ${errorBorrar}` : ''}`}
-        textoConfirmar={borrando ? 'Eliminando...' : 'Sí, eliminar'}
+        mensaje="¿Desea eliminar esta entrega? Esta acción no se puede deshacer."
+        error={errorBorrar}
+        procesando={borrando}
+        textoConfirmar="Sí, eliminar"
         onCancelar={() => {
           if (borrando) return
           setEliminando(false)
@@ -749,12 +755,12 @@ function HistorialEntregaView() {
         titulo="Quitar equipo de la entrega"
         mensaje={
           quitando
-            ? `¿Desea quitar "${quitando.equipment_name}" de esta entrega? Esta acción no se puede deshacer.${
-                errorQuitar ? ` ${errorQuitar}` : ''
-              }`
+            ? `¿Desea quitar "${quitando.equipment_name}" de esta entrega? Esta acción no se puede deshacer.`
             : ''
         }
-        textoConfirmar={quitandoEnCurso ? 'Quitando...' : 'Sí, quitar'}
+        error={errorQuitar}
+        procesando={quitandoEnCurso}
+        textoConfirmar="Sí, quitar"
         onCancelar={() => {
           if (quitandoEnCurso) return
           setQuitando(null)

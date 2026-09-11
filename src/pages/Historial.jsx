@@ -62,22 +62,25 @@ function Historial() {
             fijo de columnas evita que quede una tercera columna vacía (como
             pasaba antes con 3 tarjetas en xl:grid-cols-3) y las tarjetas se
             ven más grandes al tener todo el ancho disponible para repartirse
-            entre solo dos. */}
-        <div className="grid gap-column-gap" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))' }}>
+            entre solo dos. Separación, mínimo por tarjeta, radio, relleno,
+            ícono y título son los mismos de Catalogo.jsx (la pantalla de
+            referencia): antes cada una de las tres pantallas hermanas tenía
+            los suyos y se notaba que eran de momentos distintos. */}
+        <div className="grid gap-stack-lg" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))' }}>
           {LISTA_FORMATOS.map((formato) => {
             const Icon = formato.icon
             return (
               <Link
                 key={formato.id}
                 to={`/historial/${formato.id}`}
-                className="group flex flex-col gap-stack-md rounded-2xl border border-outline-variant bg-surface-container-lowest p-7 shadow-sm transition-all duration-150 hover:border-outline hover:shadow-md active:scale-[0.99]"
+                className="group flex flex-col gap-stack-md rounded-2xl border border-outline-variant bg-surface-container-lowest p-6 shadow-sm transition-all duration-150 hover:border-outline hover:shadow-md active:scale-[0.99]"
               >
-                <div className="grid h-16 w-16 shrink-0 place-items-center rounded-xl border border-outline-variant bg-surface-container-lowest text-primary transition-colors group-hover:border-outline">
-                  <Icon className="h-7 w-7" strokeWidth={2} />
+                <div className="grid h-14 w-14 shrink-0 place-items-center rounded-xl border border-outline-variant bg-surface-container-lowest text-primary transition-colors group-hover:border-outline">
+                  <Icon className="h-6 w-6" strokeWidth={2} />
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  <h2 className="font-headline-lg text-headline-lg font-bold text-on-surface">
+                  <h2 className="font-headline-md text-headline-md font-bold text-on-surface">
                     {formato.tituloCorto}
                   </h2>
                   <p className="font-body-md text-body-md text-on-surface-variant">

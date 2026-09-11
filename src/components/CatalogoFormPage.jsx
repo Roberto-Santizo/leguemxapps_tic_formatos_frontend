@@ -116,7 +116,7 @@ function CatalogoFormPage({ textos, onObtener, onCrear, onActualizar, rutaBase }
             <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
               <Link
                 to={rutaBase}
-                className="inline-flex h-11 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high"
+                className="inline-flex h-11 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high active:scale-[0.97] transition-transform"
               >
                 Cancelar
               </Link>

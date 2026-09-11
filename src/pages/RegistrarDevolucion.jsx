@@ -4,6 +4,7 @@ import { ArrowLeft, CircleUser, Loader2, Lock, MessageSquareText, PenLine, Rows3
 import { useAuth } from '../context/AuthContext.jsx'
 import FirmaPad from '../components/FirmaPad.jsx'
 import EstadoVacio from '../components/EstadoVacio.jsx'
+import { SkeletonDetalle } from '../components/Skeleton.jsx'
 import ConfirmDialog from '../components/ConfirmDialog.jsx'
 import { mostrarToast } from '../components/Toast.jsx'
 import { SeccionCard, Campo } from './FormatoActa.jsx'
@@ -98,11 +99,19 @@ function RegistrarDevolucion() {
     }
   }, [id, token])
 
+  // Un equipo desmarcado no se envía, así que tampoco puede quedar marcado
+  // como extravío: antes la fila seguía roja y con el botón "Extravío"
+  // encendido aunque ese equipo ya no iba a registrarse. (El sentido inverso
+  // -- activar el extravío fuerza marcado -- está en toggleExtravio.)
   function toggleItem(detailId) {
-    setSeleccion((prev) => ({
-      ...prev,
-      [detailId]: { ...prev[detailId], marcado: !prev[detailId]?.marcado },
-    }))
+    setSeleccion((prev) => {
+      const actual = prev[detailId] || {}
+      const marcado = !actual.marcado
+      return {
+        ...prev,
+        [detailId]: { ...actual, marcado, extravio: marcado ? actual.extravio : false },
+      }
+    })
   }
 
   function actualizarObsItem(detailId, valor) {
@@ -193,10 +202,9 @@ function RegistrarDevolucion() {
           </Link>
 
           {cargando ? (
-            <div className="flex items-center gap-2.5 rounded-xl border border-outline-variant bg-surface-container-lowest px-5 py-14 justify-center">
-              <Loader2 className="h-5 w-5 animate-spin text-outline" strokeWidth={2} />
-              <span className="font-body-md text-body-md text-on-surface-variant">Cargando entrega...</span>
-            </div>
+            // Misma forma que la hoja que aparece al terminar de cargar (igual
+            // que HistorialEntregaView), en vez de una rueda girando.
+            <SkeletonDetalle secciones={3} camposPorSeccion={3} />
           ) : error || !entrega ? (
             <div className="rounded-xl border border-outline-variant bg-surface-container-lowest shadow-sm">
               <EstadoVacio
@@ -206,7 +214,7 @@ function RegistrarDevolucion() {
                 accion={
                   <Link
                     to="/historial/entrega"
-                    className="inline-flex h-10 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high"
+                    className="inline-flex h-10 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high active:scale-[0.97] transition-transform"
                   >
                     Volver al historial
                   </Link>
@@ -393,11 +401,19 @@ function RegistrarDevolucion() {
                             onClick={() => toggleItem(item.id)}
                             className="flex w-full items-start gap-3 text-left active:scale-[0.99] transition-transform"
                           >
+                            {/* Decorativo a propósito: quien maneja el toque es
+                                el <button> que envuelve toda la tarjeta. Antes
+                                este input tenía su propio onChange y, al tocar
+                                justo la casilla, se disparaban los dos
+                                manejadores: el estado se invertía dos veces y
+                                el equipo NO quedaba marcado. */}
                             <input
                               type="checkbox"
                               checked={marcado}
-                              onChange={() => toggleItem(item.id)}
-                              className="mt-0.5 h-4.5 w-4.5 shrink-0 rounded border-outline-variant text-primary focus:ring-primary/25"
+                              readOnly
+                              tabIndex={-1}
+                              aria-hidden="true"
+                              className="pointer-events-none mt-0.5 h-4.5 w-4.5 shrink-0 rounded border-outline-variant text-primary focus:ring-primary/25"
                             />
                             <div className="min-w-0 flex-1">
                               <p className="font-label-bold text-label-bold text-on-surface break-words">
@@ -520,7 +536,7 @@ function RegistrarDevolucion() {
             <div className="flex items-center gap-3">
               <Link
                 to={`/historial/entrega/${id}`}
-                className="inline-flex h-11 items-center justify-center rounded-lg border border-outline-variant bg-surface-container-lowest px-6 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high"
+                className="inline-flex h-11 items-center justify-center rounded-lg border border-outline-variant bg-surface-container-lowest px-6 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high active:scale-[0.97] transition-transform"
               >
                 Cancelar
               </Link>
@@ -544,7 +560,11 @@ function RegistrarDevolucion() {
         mensaje="¿Confirmas que los datos y las firmas son correctos? Se guardará como una devolución registrada."
         textoConfirmar="Sí, finalizar"
         permitirNoPreguntar
-        onCancelar={() => setConfirmandoFinalizar(false)}
+        procesando={guardando}
+        onCancelar={() => {
+          if (guardando) return
+          setConfirmandoFinalizar(false)
+        }}
         onConfirmar={handleConfirmarFinalizarDevolucion}
       />
     </div>

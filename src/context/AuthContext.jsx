@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react'
-import { login as loginRequest } from '../services/api.js'
+import { login as loginRequest, EVENTO_SESION_EXPIRADA } from '../services/api.js'
 
 const AuthContext = createContext(null)
 const STORAGE_KEY = 'legumex_session'
@@ -33,6 +33,20 @@ export function AuthProvider({ children }) {
       // almacenamiento no disponible, se ignora silenciosamente
     }
   }, [session])
+
+  // El backend contestó 401 con un token que ya teníamos: el JWT venció (dura
+  // 60 min por defecto). Se cierra la sesión aquí mismo para que RequireAuth
+  // mande a /login; antes de esto la sesión quedaba viva en localStorage, cada
+  // pantalla mostraba "Unauthenticated." como error de carga, "Reintentar"
+  // fallaba siempre y la única salida era cerrar sesión a mano.
+  useEffect(() => {
+    function alExpirar() {
+      setSession(null)
+      setOmitirConfirmacion({})
+    }
+    window.addEventListener(EVENTO_SESION_EXPIRADA, alExpirar)
+    return () => window.removeEventListener(EVENTO_SESION_EXPIRADA, alExpirar)
+  }, [])
 
   async function login(username, password) {
     const result = await loginRequest(username, password)

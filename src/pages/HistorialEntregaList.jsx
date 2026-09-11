@@ -128,6 +128,12 @@ function HistorialEntregaList() {
 
   const iconoActivo =
     'inline-grid h-9 w-9 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface active:scale-[0.90] transition-transform'
+  // La basura es la única acción irreversible de la tabla: gris en reposo
+  // (como el ojo) pero roja al pasar el mouse, igual que "quitar equipo" en
+  // HistorialEntregaView -- rojo = borrar, la regla de la paleta. Antes usaba
+  // iconoActivo y se veía igual de inofensiva que "ver".
+  const iconoPeligro =
+    'inline-grid h-9 w-9 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-error-container hover:text-on-error-container active:scale-[0.90] transition-transform'
 
   function verDocumento(documento) {
     navigate(`/historial/entrega/${documento.id}`)
@@ -167,13 +173,13 @@ function HistorialEntregaList() {
         <Buscador value={busqueda} onChange={setBusqueda} placeholder="Buscar por colaborador, departamento o planta..." />
 
         {/* ---- Escritorio y tablet: tabla, ojo (ver) + basura (eliminar con confirmación) ---- */}
-        <div className="hidden md:block bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm">
+        <div className="hidden md:block bg-surface-container-lowest border border-outline-variant rounded-xl overflow-x-auto shadow-sm">
           {cargando ? (
-            <SkeletonTabla columnas={5} filas={5} />
+            <SkeletonTabla columnas={6} filas={5} />
           ) : sinContenido ? (
             estado
           ) : (
-            <table className="w-full text-left border-collapse text-sm">
+            <table className="w-full min-w-[720px] text-left border-collapse text-sm">
               <thead>
                 <tr className="bg-surface-container-low border-b border-outline-variant">
                   <th className="px-5 py-3.5 font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider whitespace-nowrap">
@@ -231,7 +237,7 @@ function HistorialEntregaList() {
                             onClick={() => setEliminando(documento)}
                             aria-label={`Eliminar entrega de ${documento.employee_name}`}
                             title="Eliminar"
-                            className={iconoActivo}
+                            className={iconoPeligro}
                           >
                             <Trash2 className="h-4 w-4" strokeWidth={2} />
                           </button>
@@ -287,12 +293,12 @@ function HistorialEntregaList() {
         titulo="Eliminar documento de entrega"
         mensaje={
           eliminando
-            ? `¿Desea eliminar la entrega de "${eliminando.employee_name}"? Esta acción no se puede deshacer.${
-                errorBorrar ? ` ${errorBorrar}` : ''
-              }`
+            ? `¿Desea eliminar la entrega de "${eliminando.employee_name}"? Esta acción no se puede deshacer.`
             : ''
         }
-        textoConfirmar={borrando ? 'Eliminando...' : 'Sí, eliminar'}
+        error={errorBorrar}
+        procesando={borrando}
+        textoConfirmar="Sí, eliminar"
         onCancelar={() => {
           if (borrando) return
           setEliminando(null)

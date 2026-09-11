@@ -18,7 +18,7 @@ function NavItem({ to, icon: Icon, label, end, onNavigate }) {
       onClick={onNavigate}
       className={({ isActive }) =>
         [
-          'group flex items-center gap-3 min-h-11 px-3 py-2.5 rounded-lg font-body-md transition-colors duration-150',
+          'group flex items-center gap-3 min-h-11 px-3 py-2.5 rounded-lg font-body-md transition-colors duration-150 active:scale-[0.97] transition-transform',
           isActive
             ? 'bg-primary-container text-on-primary-container font-bold'
             : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface',

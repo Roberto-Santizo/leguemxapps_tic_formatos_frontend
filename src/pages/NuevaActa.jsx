@@ -20,11 +20,11 @@ function rutaDeFormato(formato) {
  */
 function NuevaActa() {
   return (
-    <div className="flex-1 p-container-padding md:p-8 animate-view-in">
-      <div className="mx-auto max-w-[1200px] space-y-stack-lg">
+    <div className="flex-1 animate-view-in p-container-padding md:p-stack-lg bg-background">
+      <div className="max-w-[1200px] mx-auto flex flex-col gap-stack-lg">
         <div>
-          <h1 className="font-headline-lg text-headline-lg text-on-surface">Nueva Acta</h1>
-          <p className="mt-1 font-body-md text-body-md text-on-surface-variant">
+          <h1 className="font-headline-lg text-headline-lg font-bold text-on-surface mb-1">Nueva Acta</h1>
+          <p className="font-body-md text-body-md text-on-surface-variant">
             Selecciona el formato que vas a levantar. Cada uno reproduce la hoja física del
             Departamento de Tecnologías de la Información.
           </p>
@@ -33,15 +33,17 @@ function NuevaActa() {
         {/* Solo 2 formatos activos hoy -- grilla fluida en vez de un tope fijo
             de columnas, mismo motivo que Historial.jsx: con solo 2 tarjetas,
             xl:grid-cols-3 dejaba una tercera columna vacía y las tarjetas se
-            veían chicas y descuadradas. */}
-        <div className="grid gap-column-gap" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))' }}>
+            veían chicas y descuadradas. Márgenes, separación, radio, título y
+            encabezado son los mismos de Catalogo.jsx (la pantalla de
+            referencia): antes esta pantalla tenía los suyos propios. */}
+        <div className="grid gap-stack-lg" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))' }}>
           {LISTA_FORMATOS.map((formato) => {
             const Icon = formato.icon
             return (
               <Link
                 key={formato.id}
                 to={rutaDeFormato(formato)}
-                className="group flex flex-col gap-stack-md rounded-xl border border-outline-variant bg-surface-container-lowest p-6 shadow-sm transition-all duration-150 hover:border-outline hover:shadow-md active:scale-[0.99]"
+                className="group flex flex-col gap-stack-md rounded-2xl border border-outline-variant bg-surface-container-lowest p-6 shadow-sm transition-all duration-150 hover:border-outline hover:shadow-md active:scale-[0.99]"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="grid h-14 w-14 shrink-0 place-items-center rounded-xl border border-outline-variant bg-surface-container-lowest text-primary transition-colors group-hover:border-outline">
@@ -52,11 +54,11 @@ function NuevaActa() {
                   </span>
                 </div>
 
-                <div>
-                  <h2 className="font-headline-lg text-headline-lg text-on-surface">
+                <div className="flex flex-col gap-1.5">
+                  <h2 className="font-headline-md text-headline-md font-bold text-on-surface">
                     {formato.tituloCorto}
                   </h2>
-                  <p className="mt-1 font-body-md text-body-md text-pretty text-on-surface-variant">
+                  <p className="font-body-md text-body-md text-pretty text-on-surface-variant">
                     {formato.descripcion}
                   </p>
                 </div>

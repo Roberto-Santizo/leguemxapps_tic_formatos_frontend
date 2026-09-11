@@ -65,6 +65,21 @@ export default {
         'on-background': '#2a2c34',
         'on-primary': '#ffffff',
         'on-error-container': '#7a2f27',
+        /*
+          Estado de un equipo en Catálogo → Equipos (badge de EquiposList.jsx):
+          Disponible (verde) / En posesión (ámbar). Son los únicos acentos
+          además del rojo `error`, y siguen su misma receta para no desentonar
+          con los grises: fondo muy claro, texto oscuro y un punto intermedio,
+          todo con la saturación apagada del ladrillo #b3453b -- verde salvia
+          y ocre, no el verde/ámbar de fábrica de Tailwind. Texto sobre fondo
+          con contraste >= 4.5:1 (AA) en ambos.
+        */
+        available: '#5b8a6b',
+        'available-container': '#e3ede5',
+        'on-available-container': '#3f6b4f',
+        assigned: '#b58a3e',
+        'assigned-container': '#f3ead6',
+        'on-assigned-container': '#7a5a1e',
       },
       borderRadius: {
         DEFAULT: '0.625rem',

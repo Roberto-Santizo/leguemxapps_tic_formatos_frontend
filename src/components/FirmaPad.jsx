@@ -131,6 +131,10 @@ function FirmaPad({ titulo, subtitulo, firmaUrl, onConfirmar, onReiniciar }) {
           onClick={() => {
             setModo('dibujar')
             setPreviewSubida(null)
+            // El lienzo se monta de nuevo en blanco: sin esto, si antes se
+            // había subido una imagen, "Confirmar firma" quedaba activo con el
+            // lienzo vacío y al pulsarlo no hacía nada ni decía por qué.
+            setVacio(true)
           }}
           className={`px-3 py-1 rounded font-label-sm text-label-sm transition-colors active:scale-[0.97] transition-transform ${
             modo === 'dibujar' ? 'bg-primary text-on-primary shadow-sm' : 'text-on-surface-variant hover:text-on-surface'

@@ -145,7 +145,11 @@ function HistorialDevolucionView() {
     }
   }
 
-  async function corregirObservacionGeneral(observations) {
+  // Vacío = "sin observaciones": se manda null en vez de un texto en blanco
+  // (el campo es nullable en la API). En un extravío nunca llega vacío:
+  // marcarExtravio() siempre deja el prefijo y un texto por defecto.
+  async function corregirObservacionGeneral(texto) {
+    const observations = texto || null
     try {
       await actualizarDocumentoDevolucion(token, id, { observations })
       setDocumento((doc) => ({ ...doc, observations }))
@@ -155,7 +159,8 @@ function HistorialDevolucionView() {
     }
   }
 
-  async function corregirObservacionItem(itemId, observations) {
+  async function corregirObservacionItem(itemId, texto) {
+    const observations = texto || null
     try {
       await actualizarDetalleDevolucion(token, itemId, { observations })
       setDocumento((doc) => ({
@@ -211,7 +216,7 @@ function HistorialDevolucionView() {
                 accion={
                   <Link
                     to="/historial/devolucion"
-                    className="inline-flex h-10 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high"
+                    className="inline-flex h-10 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high active:scale-[0.97] transition-transform"
                   >
                     Volver al historial
                   </Link>
@@ -283,7 +288,7 @@ function HistorialDevolucionView() {
                   <Campo label="Entrega de origen" span="col-span-12 sm:col-span-4">
                     <Link
                       to={`/historial/entrega/${documento.delivery_document_id}`}
-                      className="flex h-11 items-center justify-between gap-2 rounded-lg border border-outline-variant bg-surface-container-low px-3.5 font-body-md text-body-md text-on-surface transition-colors hover:bg-surface-container-high"
+                      className="flex h-11 items-center justify-between gap-2 rounded-lg border border-outline-variant bg-surface-container-low px-3.5 font-body-md text-body-md text-on-surface transition-colors hover:bg-surface-container-high active:scale-[0.97] transition-transform"
                     >
                       Ver entrega #{documento.delivery_document_id}
                       <ExternalLink className="h-4 w-4 shrink-0 text-on-surface-variant" strokeWidth={2} />
@@ -358,7 +363,7 @@ function HistorialDevolucionView() {
                             <td className="py-2 pr-5 text-on-surface-variant break-words">
                               {isAdmin ? (
                                 <InlineEditableText
-                                  value={extravio ? textoSinPrefijoExtravio(item.observations) : item.observations || 'Sin observaciones'}
+                                  value={extravio ? textoSinPrefijoExtravio(item.observations) : item.observations || ''} placeholder="Sin observaciones" permitirVacio
                                   onChange={(valor) => corregirObservacionItem(item.id, extravio ? marcarExtravio(valor) : valor)}
                                   title="Corregir observación"
                                 />
@@ -373,7 +378,12 @@ function HistorialDevolucionView() {
                         {agregandoEquipo && (
                           <tr className="border-b border-outline-variant bg-surface-container-low/40">
                             <td className="py-2 pl-5 pr-3" />
-                            <td className="py-2 pr-3" colSpan={3}>
+                            {/* La tabla tiene 6 columnas (No., Equipo, Marca,
+                                Modelo, No. Serie, Observaciones): 1 + 2 + 2 + 1.
+                                Antes este colSpan era 3 y la fila sumaba 7,
+                                así que al abrir "Agregar equipo" la tabla ganaba
+                                una columna fantasma y se desalineaba del encabezado. */}
+                            <td className="py-2 pr-3" colSpan={2}>
                               <SearchableSelect
                                 options={pendientes.map((it) => ({
                                   id: it.id,
@@ -488,7 +498,7 @@ function HistorialDevolucionView() {
                           </p>
                           {isAdmin ? (
                             <InlineEditableText
-                              value={extravio ? textoSinPrefijoExtravio(item.observations) : item.observations || 'Sin observaciones'}
+                              value={extravio ? textoSinPrefijoExtravio(item.observations) : item.observations || ''} placeholder="Sin observaciones" permitirVacio
                               onChange={(valor) => corregirObservacionItem(item.id, extravio ? marcarExtravio(valor) : valor)}
                               title="Corregir observación"
                             />
@@ -579,7 +589,7 @@ function HistorialDevolucionView() {
                 <div className="p-5">
                   {isAdmin ? (
                     <InlineEditableText
-                      value={documento.observations || 'Sin observaciones'}
+                      value={documento.observations || ''} placeholder="Sin observaciones" permitirVacio
                       onChange={corregirObservacionGeneral}
                       title="Corregir observación"
                       className="font-body-md text-body-md text-on-surface-variant"

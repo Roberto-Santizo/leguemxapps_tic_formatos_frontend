@@ -203,6 +203,11 @@ function EquiposList() {
   // Badge de estado por fila/tarjeta. `libre` es undefined mientras no se
   // sabe (disponibles === null, ej. falló la llamada) -- en ese caso no se
   // pinta nada en vez de arriesgar un estado incorrecto.
+  //
+  // Colores: tokens `available` / `assigned` de tailwind.config.js, apagados
+  // al mismo nivel que el rojo `error` del sistema. Antes eran el verde y
+  // ámbar de fábrica de Tailwind (mucho más saturados que el resto de la
+  // paleta) y traían variantes `dark:` en un sistema que es solo modo claro.
   function EstadoEquipo({ equipoId }) {
     if (!disponibles) return null
     const libre = disponibles.has(equipoId)
@@ -211,12 +216,12 @@ function EquiposList() {
         className={[
           'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 font-label-sm text-label-sm font-medium whitespace-nowrap',
           libre
-            ? 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300'
-            : 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300',
+            ? 'bg-available-container text-on-available-container'
+            : 'bg-assigned-container text-on-assigned-container',
         ].join(' ')}
       >
         <span
-          className={['h-1.5 w-1.5 rounded-full', libre ? 'bg-green-600' : 'bg-amber-600'].join(' ')}
+          className={['h-1.5 w-1.5 rounded-full', libre ? 'bg-available' : 'bg-assigned'].join(' ')}
           aria-hidden="true"
         />
         {libre ? 'Disponible' : 'En posesión'}
@@ -224,8 +229,6 @@ function EquiposList() {
     )
   }
 
-  const iconoInactivo =
-    'inline-grid h-9 w-9 place-items-center rounded-lg text-on-surface-variant opacity-55 cursor-not-allowed'
   const iconoActivo =
     'inline-grid h-9 w-9 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface active:scale-[0.90] transition-transform'
 
@@ -250,7 +253,7 @@ function EquiposList() {
 
           <Link
             to="/catalogo/equipos/nuevo"
-            className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-primary px-4 font-label-bold text-label-bold text-on-primary shadow-sm transition-all hover:brightness-110 active:brightness-95"
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-primary px-4 font-label-bold text-label-bold text-on-primary shadow-sm transition-all hover:brightness-110 active:brightness-95 active:scale-[0.97]"
           >
             <Plus className="h-4.5 w-4.5" strokeWidth={2} />
             Nuevo equipo
@@ -260,13 +263,17 @@ function EquiposList() {
         <Buscador value={busqueda} onChange={setBusqueda} placeholder="Buscar equipo o marca..." />
 
         {/* ---- Escritorio y tablet: tabla ---- */}
-        <div className="hidden md:block bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm">
+        {/* overflow-x-auto (antes overflow-hidden): a 768px el área útil no
+            alcanza para las columnas de esta tabla y la de acciones quedaba
+            cortada e inalcanzable, sin forma de desplazarse. Mismo patrón que
+            ya usaban las tablas de actas. */}
+        <div className="hidden md:block bg-surface-container-lowest border border-outline-variant rounded-xl overflow-x-auto shadow-sm">
           {cargando ? (
             <SkeletonTabla columnas={6} filas={5} />
           ) : sinContenido ? (
             estado
           ) : (
-            <table className="w-full text-left border-collapse text-sm">
+            <table className="w-full min-w-[760px] text-left border-collapse text-sm">
               <thead>
                 <tr className="bg-surface-container-low border-b border-outline-variant">
                   <th className="w-20 px-5 py-3.5 font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider whitespace-nowrap">
@@ -321,53 +328,40 @@ function EquiposList() {
                           <EstadoEquipo equipoId={equipo.id} />
                         </td>
                         <td className="px-5 py-4">
+                          {/* Ver y editar son del EQUIPO, no de sus
+                              características: antes se deshabilitaban cuando el
+                              equipo no tenía ninguna, y entonces no había forma
+                              de abrir ni corregir su nombre, marca, modelo o
+                              serie desde esta lista. El "+" sigue apareciendo
+                              solo cuando falta la primera característica. */}
                           <div className="flex items-center justify-end gap-1">
-                            {tiene ? (
-                              <>
-                                <Link
-                                  to={`/catalogo/equipos/${equipo.id}/ver`}
-                                  aria-label={`Ver información de ${equipo.name}`}
-                                  title="Ver"
-                                  className={iconoActivo}
-                                >
-                                  <Eye className="h-4 w-4" strokeWidth={2} />
-                                </Link>
-                                <button
-                                  type="button"
-                                  onClick={() => setConfirmando(equipo)}
-                                  aria-label={`Editar ${equipo.name}`}
-                                  title="Editar equipo y características"
-                                  className={iconoActivo}
-                                >
-                                  <Pencil className="h-4 w-4" strokeWidth={2} />
-                                </button>
-                              </>
-                            ) : (
-                              <>
-                                <span
-                                  aria-hidden="true"
-                                  title="Sin características que ver"
-                                  className={iconoInactivo}
-                                >
-                                  <Eye className="h-4 w-4" strokeWidth={2} />
-                                </span>
-                                <span
-                                  aria-hidden="true"
-                                  title="Sin características que editar"
-                                  className={iconoInactivo}
-                                >
-                                  <Pencil className="h-4 w-4" strokeWidth={2} />
-                                </span>
-                                <button
-                                  type="button"
-                                  onClick={() => alternar(equipo.id, 'agregar')}
-                                  aria-label={`Agregar característica a ${equipo.name}`}
-                                  title="Agregar característica"
-                                  className="ml-1 inline-grid h-9 w-9 place-items-center rounded-lg border border-outline-variant bg-surface text-on-surface transition-colors hover:border-outline hover:bg-surface-container-high active:scale-[0.90] transition-transform"
-                                >
-                                  <Plus className="h-4 w-4" strokeWidth={2.25} />
-                                </button>
-                              </>
+                            <Link
+                              to={`/catalogo/equipos/${equipo.id}/ver`}
+                              aria-label={`Ver información de ${equipo.name}`}
+                              title="Ver"
+                              className={iconoActivo}
+                            >
+                              <Eye className="h-4 w-4" strokeWidth={2} />
+                            </Link>
+                            <button
+                              type="button"
+                              onClick={() => setConfirmando(equipo)}
+                              aria-label={`Editar ${equipo.name}`}
+                              title="Editar equipo y características"
+                              className={iconoActivo}
+                            >
+                              <Pencil className="h-4 w-4" strokeWidth={2} />
+                            </button>
+                            {!tiene && (
+                              <button
+                                type="button"
+                                onClick={() => alternar(equipo.id, 'agregar')}
+                                aria-label={`Agregar característica a ${equipo.name}`}
+                                title="Agregar característica"
+                                className="ml-1 inline-grid h-9 w-9 place-items-center rounded-lg border border-outline-variant bg-surface text-on-surface transition-colors hover:border-outline hover:bg-surface-container-high active:scale-[0.90] transition-transform"
+                              >
+                                <Plus className="h-4 w-4" strokeWidth={2.25} />
+                              </button>
                             )}
                           </div>
                         </td>
@@ -415,7 +409,7 @@ function EquiposList() {
                 >
                   <button
                     type="button"
-                    onClick={() => (tiene ? navigate(`/catalogo/equipos/${equipo.id}/ver`) : alternar(equipo.id, 'agregar'))}
+                    onClick={() => navigate(`/catalogo/equipos/${equipo.id}/ver`)}
                     className="flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left transition-all hover:bg-surface-container-low active:bg-surface-container-low active:scale-[0.99]"
                   >
                     <div className="min-w-0">

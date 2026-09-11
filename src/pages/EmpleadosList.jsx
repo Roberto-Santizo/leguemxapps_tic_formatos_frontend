@@ -132,7 +132,7 @@ function EmpleadosList() {
           </div>
           <Link
             to="/catalogo/empleados/nuevo"
-            className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-primary px-4 font-label-bold text-label-bold text-on-primary shadow-sm transition-all hover:brightness-110 active:brightness-95"
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-primary px-4 font-label-bold text-label-bold text-on-primary shadow-sm transition-all hover:brightness-110 active:brightness-95 active:scale-[0.97]"
           >
             <Plus className="h-4.5 w-4.5" strokeWidth={2} />
             Nuevo empleado
@@ -142,13 +142,13 @@ function EmpleadosList() {
         <Buscador value={busqueda} onChange={setBusqueda} placeholder="Buscar por código, nombre o departamento..." />
 
         {/* ---- Escritorio: tabla, ojo (ver) + lápiz (editar con confirmación) ---- */}
-        <div className="hidden md:block bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm">
+        <div className="hidden md:block bg-surface-container-lowest border border-outline-variant rounded-xl overflow-x-auto shadow-sm">
           {cargando ? (
             <SkeletonTabla columnas={4} filas={5} />
           ) : sinContenido ? (
             estado
           ) : (
-            <table className="w-full text-left border-collapse text-sm">
+            <table className="w-full min-w-[640px] text-left border-collapse text-sm">
               <thead>
                 <tr className="bg-surface-container-low border-b border-outline-variant">
                   <th className="w-32 px-5 py-3.5 font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider whitespace-nowrap">Código</th>

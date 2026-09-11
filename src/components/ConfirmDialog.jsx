@@ -5,9 +5,10 @@ import { AlertTriangle } from 'lucide-react'
 /**
  * Único diálogo de confirmación del sistema -- antes existían dos
  * (ConfirmDialog y ConfirmModal) con distinto radio, z-index, animación y
- * política de Escape. ConfirmModal ya no existe: su único uso real (pedir
- * contraseña antes de exportar a Excel, en BotonExcel.jsx) se cubre aquí con
- * `requierePassword`.
+ * política de Escape. ConfirmModal ya se borró. `requierePassword` quedó de
+ * cuando cubría la exportación a Excel (BotonExcel.jsx, también borrado por
+ * no tener ningún uso): hoy nadie lo pasa, pero se deja por si vuelve a hacer
+ * falta pedir contraseña antes de una acción.
  *
  * Variantes:
  *   - 'normal'  (por defecto) → botón de confirmar en bg-primary.

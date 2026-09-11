@@ -108,9 +108,15 @@ export function esc(s) {
 /**
  * `pagina`/`totalPaginas` (ambos 1-based) son opcionales: cuando se pasan,
  * agregan un cuarto dato al membrete tipo "1-2" -- página actual y total de
- * hojas del documento, tal como pidió el cliente. Los arma quien construye
- * la plantilla (ej. plantillaEntrega.js), según cuántos bloques page() arma
- * de verdad -- no depende de cómo se corte al exportar a PDF.
+ * hojas del documento, tal como pidió el cliente.
+ *
+ * Lo que pasa aquí es solo el valor INICIAL, el que arma la plantilla según
+ * cuántos bloques page() escribe. Si un bloque resulta más alto que una hoja
+ * física (ej. una entrega con muchos equipos), generatePdfPapelFisico.js lo
+ * reparte en hojas completas -- clonando este membrete en cada una -- y
+ * después reescribe todos los `.pagina-indice` con la paginación real antes
+ * de capturar. La clase es el punto de enganche de esa corrección: si se
+ * cambia, hay que cambiarla también allá.
  */
 export function mast({ codigo, emision, vigencia, pagina, totalPaginas }) {
   const indice = pagina && totalPaginas ? `${pagina}-${totalPaginas}` : null
@@ -128,7 +134,7 @@ export function mast({ codigo, emision, vigencia, pagina, totalPaginas }) {
       <div><span class="k">Código</span><span class="v">${esc(codigo)}</span></div>
       <div><span class="k">Emisión</span><span class="v">${esc(emision || '—')}</span></div>
       <div><span class="k">Vigencia</span><span class="v">${esc(vigencia || '—')}</span></div>
-      ${indice ? `<div><span class="k">Pág.</span><span class="v">${esc(indice)}</span></div>` : ''}
+      ${indice ? `<div><span class="k">Pág.</span><span class="v pagina-indice">${esc(indice)}</span></div>` : ''}
     </div>
   </header>
   <div class="rule2"></div>`

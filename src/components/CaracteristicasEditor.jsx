@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Plus, Trash2, Loader2, Check, X } from 'lucide-react'
 import InlineEditableText from './InlineEditableText.jsx'
 import { mostrarToast } from './Toast.jsx'
+import { SkeletonTabla } from './Skeleton.jsx'
 
 /**
  * Características de un equipo, en sus dos situaciones:
@@ -35,7 +36,11 @@ export function hayNombreRepetido(nombre, nombresExistentes, ignorar = '') {
 // Borrador: filas repetibles antes de que el equipo exista
 // --------------------------------------------------------------------------
 
-export function FilasCaracteristicas({ filas, onChange, disabled }) {
+// `nombresExistentes`: características ya guardadas del equipo, para que el
+// aviso de nombre repetido también las cuente (en el alta del equipo todavía
+// no hay ninguna). `autoFocusPrimera`: pone el cursor en la primera fila al
+// abrirse, como al agregar características a un equipo que ya existe.
+export function FilasCaracteristicas({ filas, onChange, disabled, nombresExistentes = [], autoFocusPrimera = false }) {
   function actualizar(indice, campo, valor) {
     onChange(filas.map((f, i) => (i === indice ? { ...f, [campo]: valor } : f)))
   }
@@ -53,7 +58,7 @@ export function FilasCaracteristicas({ filas, onChange, disabled }) {
       {filas.map((fila, indice) => {
         const repetida = hayNombreRepetido(
           fila.name,
-          filas.filter((_, i) => i !== indice).map((f) => f.name),
+          nombresExistentes.concat(filas.filter((_, i) => i !== indice).map((f) => f.name)),
         )
         return (
           <div
@@ -68,6 +73,7 @@ export function FilasCaracteristicas({ filas, onChange, disabled }) {
                   value={fila.name}
                   disabled={disabled}
                   maxLength={255}
+                  autoFocus={autoFocusPrimera && indice === 0}
                   onChange={(e) => actualizar(indice, 'name', e.target.value)}
                   placeholder="Ej. Memoria RAM"
                 />
@@ -140,16 +146,6 @@ export function CaracteristicasDeEquipo({
 
   const nombres = caracteristicas.map((c) => c.name)
 
-  function actualizarNueva(indice, campo, valor) {
-    setError('')
-    setNuevas((filas) => filas.map((f, i) => (i === indice ? { ...f, [campo]: valor } : f)))
-  }
-
-  function quitarNueva(indice) {
-    setError('')
-    setNuevas((filas) => (filas.length === 1 ? filas : filas.filter((_, i) => i !== indice)))
-  }
-
   function cerrarAlta() {
     setAgregando(false)
     setNuevas([{ name: '', description: '' }])
@@ -212,15 +208,11 @@ export function CaracteristicasDeEquipo({
     }
   }
 
+  // Filas fantasma con la forma de la lista de características (nombre y
+  // descripción), en vez de una rueda girando -- mismo criterio que el resto
+  // del sistema, para que el contenido no salte al llegar los datos.
   if (cargando) {
-    return (
-      <div className="flex items-center gap-2.5 px-1 py-3">
-        <Loader2 className="h-4 w-4 animate-spin text-outline" strokeWidth={2} />
-        <span className="font-body-md text-body-md text-on-surface-variant">
-          Cargando características...
-        </span>
-      </div>
-    )
+    return <SkeletonTabla columnas={2} filas={2} />
   }
 
   return (
@@ -266,60 +258,22 @@ export function CaracteristicasDeEquipo({
         <>
           {agregando ? (
             <div className="animate-view-in flex flex-col gap-stack-sm rounded-xl border border-outline-variant bg-surface-container-low p-3.5">
-              {nuevas.map((fila, indice) => {
-                const repetida = hayNombreRepetido(
-                  fila.name,
-                  nombres.concat(nuevas.filter((_, i) => i !== indice).map((f) => f.name)),
-                )
-                return (
-                  <div key={indice} className="animate-view-in flex flex-col gap-1.5">
-                    <div className="flex flex-col gap-stack-sm sm:flex-row sm:items-center">
-                      <input
-                        className={inputClasses}
-                        value={fila.name}
-                        disabled={guardando}
-                        maxLength={255}
-                        autoFocus={indice === 0}
-                        onChange={(e) => actualizarNueva(indice, 'name', e.target.value)}
-                        placeholder="Característica (ej. Memoria RAM)"
-                      />
-                      <input
-                        className={inputClasses}
-                        value={fila.description}
-                        disabled={guardando}
-                        maxLength={255}
-                        onChange={(e) => actualizarNueva(indice, 'description', e.target.value)}
-                        placeholder="Descripción (ej. 16 GB DDR5)"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => quitarNueva(indice)}
-                        disabled={guardando || nuevas.length === 1}
-                        aria-label="Quitar esta fila"
-                        title={nuevas.length === 1 ? 'Debe quedar al menos una fila' : 'Quitar'}
-                        className="grid h-11 w-11 shrink-0 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface disabled:cursor-not-allowed disabled:opacity-55 disabled:hover:bg-transparent active:scale-[0.90] transition-transform"
-                      >
-                        <Trash2 className="h-4 w-4" strokeWidth={2} />
-                      </button>
-                    </div>
-                    {repetida && (
-                      <p className="font-label-sm text-label-sm text-error">
-                        Ya hay una característica con ese nombre en este equipo.
-                      </p>
-                    )}
-                  </div>
-                )
-              })}
-
-              <button
-                type="button"
-                onClick={() => setNuevas((filas) => [...filas, { name: '', description: '' }])}
+              {/* Misma tarjeta con títulos ("Característica" / "Descripción")
+                  que en el alta del equipo. Antes aquí eran dos cajas sin
+                  título, con la guía solo como texto gris adentro -- que
+                  desaparece al escribir --, y en móvil (una caja encima de la
+                  otra) ya no se sabía cuál era cuál. Ahora hay una sola forma
+                  de cargar características en todo el sistema. */}
+              <FilasCaracteristicas
+                filas={nuevas}
+                onChange={(filas) => {
+                  setError('')
+                  setNuevas(filas)
+                }}
                 disabled={guardando}
-                className="inline-flex h-10 items-center justify-center gap-2 self-start rounded-lg border border-dashed border-outline px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high disabled:opacity-60 active:scale-[0.97] transition-transform"
-              >
-                <Plus className="h-4 w-4" strokeWidth={2.25} />
-                Agregar otra
-              </button>
+                nombresExistentes={nombres}
+                autoFocusPrimera
+              />
 
               <div className="flex items-center gap-2.5">
                 <button
