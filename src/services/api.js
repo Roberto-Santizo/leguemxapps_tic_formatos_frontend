@@ -1,10 +1,15 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+// En Docker las variables llegan en runtime vía window.__ENV__ (ver
+// docker/entrypoint.sh); en dev local se usa .env como siempre.
+const runtimeEnv = (typeof window !== 'undefined' && window.__ENV__) || {}
+const env = (key) => runtimeEnv[key] || import.meta.env[key]
+
+const API_URL = env('VITE_API_URL') || 'http://localhost:3000'
 
 // Backend real y actual (Laravel). API_URL (arriba) es el backend viejo de
 // Node/Express, que ya no existe: solo lo siguen usando obtenerAuditoria y
 // exportarAuditoriaExcel, restos de la sección de Auditoría que se dejaron a
 // propósito (ver CONTEXTO_SISTEMA_DISENO_REGLAS.md).
-const AUTH_API_URL = import.meta.env.VITE_AUTH_API_URL || 'http://192.168.10.209:8000/api'
+const AUTH_API_URL = env('VITE_AUTH_API_URL') || 'http://192.168.10.209:8000/api'
 
 async function request(path, options = {}) {
   const url = `${API_URL}${path}`
@@ -600,7 +605,7 @@ export async function actualizarDetalleDevolucion(token, id, { observations }) {
 // otro dominio, se puede fijar VITE_STORAGE_URL en .env sin tocar este
 // archivo.
 const STORAGE_BASE_URL = (
-  import.meta.env.VITE_STORAGE_URL || AUTH_API_URL.replace(/\/api\/?$/, '')
+  env('VITE_STORAGE_URL') || AUTH_API_URL.replace(/\/api\/?$/, '')
 ).replace(/\/$/, '')
 
 // Si el backend ya manda un link completo (ej. un bucket de S3, como
