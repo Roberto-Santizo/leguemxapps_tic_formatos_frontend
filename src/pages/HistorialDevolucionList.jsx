@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Eye, Plus } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
+import { useListaPaginada } from '../hooks/usePaginacion.js'
 import Buscador from '../components/Buscador.jsx'
 import EstadoVacio from '../components/EstadoVacio.jsx'
+import Paginador from '../components/Paginador.jsx'
 import { SkeletonTabla, SkeletonTarjetas } from '../components/Skeleton.jsx'
 import { FORMATOS } from '../config/formatos.js'
 import { listarDocumentosDevolucion } from '../services/api.js'
@@ -21,42 +22,40 @@ function nombreEstado(status) {
  * que HistorialEntregaList.jsx: escritorio con tabla + ojo (ver), móvil con
  * tarjetas sin botones que llevan directo al detalle. Sin eliminar -- la API
  * no ofrece DELETE para return_documents.
+ *
+ * Paginación y búsqueda en la URL (`?page=2&q=juan`) vía useListaPaginada:
+ * /return_documents se pide por página; la búsqueda trae todo una vez y
+ * filtra en el cliente.
  */
+function filtrarDevolucion(d, filtro) {
+  return (
+    (d.employee_name || '').toLowerCase().includes(filtro) ||
+    (d.employee_department || '').toLowerCase().includes(filtro)
+  )
+}
+
 function HistorialDevolucionList() {
   const { token, isAdmin } = useAuth()
   const navigate = useNavigate()
 
-  const [documentos, setDocumentos] = useState([])
-  const [cargando, setCargando] = useState(true)
-  const [errorCarga, setErrorCarga] = useState('')
-  const [busqueda, setBusqueda] = useState('')
-
-  const cargar = useCallback(async () => {
-    setCargando(true)
-    setErrorCarga('')
-    try {
-      const data = await listarDocumentosDevolucion(token)
-      setDocumentos(Array.isArray(data) ? data : [])
-    } catch (err) {
-      setErrorCarga(err.message || 'No se pudo obtener la lista de devoluciones')
-    } finally {
-      setCargando(false)
-    }
-  }, [token])
-
-  useEffect(() => {
-    cargar()
-  }, [cargar])
-
-  const visibles = useMemo(() => {
-    const filtro = busqueda.trim().toLowerCase()
-    if (!filtro) return documentos
-    return documentos.filter(
-      (d) =>
-        (d.employee_name || '').toLowerCase().includes(filtro) ||
-        (d.employee_department || '').toLowerCase().includes(filtro),
-    )
-  }, [documentos, busqueda])
+  const {
+    registros: visibles,
+    total,
+    pagina,
+    ultimaPagina,
+    busqueda,
+    setBusqueda,
+    limpiarBusqueda,
+    irAPagina,
+    cargando,
+    error: errorCarga,
+    recargar: cargar,
+  } = useListaPaginada({
+    token,
+    listar: listarDocumentosDevolucion,
+    filtrar: filtrarDevolucion,
+    mensajeError: 'No se pudo obtener la lista de devoluciones',
+  })
 
   const hayRegistros = visibles.length > 0
   const sinContenido = !cargando && (Boolean(errorCarga) || !hayRegistros)
@@ -81,7 +80,7 @@ function HistorialDevolucionList() {
       titulo="No se encontraron resultados"
       descripcion={`Ninguna coincidencia para “${busqueda}”.`}
       accion={
-        <button type="button" onClick={() => setBusqueda('')} className={botonSecundario}>
+        <button type="button" onClick={limpiarBusqueda} className={botonSecundario}>
           Limpiar búsqueda
         </button>
       }
@@ -242,11 +241,13 @@ function HistorialDevolucionList() {
         </div>
 
         {!cargando && !sinContenido && (
-          <p className="font-label-sm text-label-sm text-on-surface-variant tabular-nums">
-            {visibles.length === documentos.length
-              ? `${documentos.length} devoluciones`
-              : `${visibles.length} de ${documentos.length} devoluciones`}
-          </p>
+          <Paginador
+            pagina={pagina}
+            ultimaPagina={ultimaPagina}
+            total={total}
+            plural="devoluciones"
+            onCambiar={irAPagina}
+          />
         )}
       </div>
     </div>

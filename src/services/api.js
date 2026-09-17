@@ -71,7 +71,12 @@ function avisarSiSesionExpiro(path, status, token) {
 // su formato de respuesta { statusCode, message, data }. En error (4xx/5xx)
 // lanza un Error con .status y, si Laravel mandó validación 422, .errors =
 // { campo: ['mensaje', ...] }.
-export async function laravelRequest(path, { token, ...options } = {}) {
+//
+// `conMeta: true` devuelve { data, total, currentPage, lastPage } en vez de
+// solo `data` -- es para los listados paginados (ver paginacion.md): cuando
+// se manda `limit`, el backend aplana esos tres metadatos al mismo nivel que
+// `data`, y sin `conMeta` se perderían al desenvolver.
+export async function laravelRequest(path, { token, conMeta = false, ...options } = {}) {
   const response = await fetch(`${AUTH_API_URL}${path}`, {
     ...options,
     headers: {
@@ -97,7 +102,35 @@ export async function laravelRequest(path, { token, ...options } = {}) {
     throw error
   }
 
+  if (conMeta) {
+    return { data: body.data, total: body.total, currentPage: body.currentPage, lastPage: body.lastPage }
+  }
   return body.data
+}
+
+// Listado GET con paginación opcional (paginacion.md). Regla del backend:
+// si la petición trae `limit`, pagina con ese tamaño y agrega total /
+// currentPage / lastPage; si no lo trae, devuelve TODOS los registros.
+//
+// Por eso las funciones listar* aceptan un segundo argumento opcional
+// { limit, page }:
+//   - sin él (selectores, combos, conteos) regresan el arreglo completo,
+//     exactamente como antes;
+//   - con `limit` regresan { data, total, currentPage, lastPage }.
+// `extra` son los filtros propios del recurso (employeeId, etc.), que se
+// combinan en la misma query string.
+async function listarPaginado(path, token, { limit, page } = {}, extra = {}) {
+  const params = new URLSearchParams()
+  for (const [clave, valor] of Object.entries(extra)) {
+    if (valor != null && valor !== '') params.set(clave, valor)
+  }
+  const paginado = limit != null
+  if (paginado) {
+    params.set('limit', limit)
+    if (page != null) params.set('page', page)
+  }
+  const query = params.toString()
+  return laravelRequest(`${path}${query ? `?${query}` : ''}`, { token, method: 'GET', conMeta: paginado })
 }
 
 // Variante de laravelRequest para envíos multipart/form-data (archivos +
@@ -253,8 +286,8 @@ export async function exportarAuditoriaExcel(token, password) {
 // backend nuevo, no en API_URL.
 // ---------------------------------------------------------------------------
 
-export async function listarMarcas(token) {
-  return laravelRequest('/brands', { token, method: 'GET' })
+export async function listarMarcas(token, paginacion) {
+  return listarPaginado('/brands', token, paginacion)
 }
 
 export async function crearMarca(token, { name }) {
@@ -277,8 +310,8 @@ export async function actualizarMarca(token, id, { name }) {
   })
 }
 
-export async function listarDepartamentos(token) {
-  return laravelRequest('/departments', { token, method: 'GET' })
+export async function listarDepartamentos(token, paginacion) {
+  return listarPaginado('/departments', token, paginacion)
 }
 
 export async function crearDepartamento(token, { name }) {
@@ -314,8 +347,8 @@ export async function actualizarDepartamento(token, id, { name }) {
 //     detalle de cada una. Eso hace `obtenerCaracteristicasDeEquipo`.
 // ---------------------------------------------------------------------------
 
-export async function listarEquipos(token) {
-  return laravelRequest('/equipments', { token, method: 'GET' })
+export async function listarEquipos(token, paginacion) {
+  return listarPaginado('/equipments', token, paginacion)
 }
 
 // Equipo sin entrega activa (nunca entregado, o su última entrega ya se
@@ -414,8 +447,8 @@ export async function obtenerCaracteristicasDeEquipo(token, equipmentId) {
 //    precargado.
 // ---------------------------------------------------------------------------
 
-export async function listarEmpleados(token) {
-  return laravelRequest('/employees', { token, method: 'GET' })
+export async function listarEmpleados(token, paginacion) {
+  return listarPaginado('/employees', token, paginacion)
 }
 
 export async function obtenerEmpleado(token, id) {
@@ -466,9 +499,10 @@ export async function equiposDeEmpleado(token, id) {
 // respondió con un error de PHP -- `GET /delivery_documents?location=1` →
 // "Attempt to read property 'name' on null". Por eso NO se usan: se pide el
 // listado completo, como siempre. Antes de volver a intentarlo, probarlos
-// contra el backend real.
-export async function listarDocumentosEntrega(token) {
-  return laravelRequest('/delivery_documents', { token, method: 'GET' })
+// contra el backend real. (`limit`/`page` sí se usan: son de la paginación
+// general, no filtros del recurso.)
+export async function listarDocumentosEntrega(token, paginacion) {
+  return listarPaginado('/delivery_documents', token, paginacion)
 }
 
 export async function obtenerDocumentoEntrega(token, id) {
@@ -542,12 +576,8 @@ export async function eliminarDetalleEntrega(token, id) {
 // pedir obtenerDocumentoDevolucion aparte.
 // ---------------------------------------------------------------------------
 
-export async function listarDocumentosDevolucion(token, { deliveryDocumentId, employeeId } = {}) {
-  const params = new URLSearchParams()
-  if (deliveryDocumentId != null) params.set('deliveryDocumentId', deliveryDocumentId)
-  if (employeeId != null) params.set('employeeId', employeeId)
-  const query = params.toString()
-  return laravelRequest(`/return_documents${query ? `?${query}` : ''}`, { token, method: 'GET' })
+export async function listarDocumentosDevolucion(token, { deliveryDocumentId, employeeId, limit, page } = {}) {
+  return listarPaginado('/return_documents', token, { limit, page }, { deliveryDocumentId, employeeId })
 }
 
 export async function obtenerDocumentoDevolucion(token, id) {

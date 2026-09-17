@@ -1,10 +1,12 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Eye, Plus, Trash2 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
+import { useListaPaginada } from '../hooks/usePaginacion.js'
 import Buscador from '../components/Buscador.jsx'
 import ConfirmDialog from '../components/ConfirmDialog.jsx'
 import EstadoVacio from '../components/EstadoVacio.jsx'
+import Paginador from '../components/Paginador.jsx'
 import { SkeletonTabla, SkeletonTarjetas } from '../components/Skeleton.jsx'
 import { mostrarToast } from '../components/Toast.jsx'
 import { FORMATOS } from '../config/formatos.js'
@@ -21,47 +23,45 @@ function nombrePlanta(location) {
  * el resto del catálogo: escritorio con ojo (ver) + basura (eliminar, con
  * confirmación); móvil con tarjetas sin botones que llevan directo al
  * detalle, donde también está la opción de eliminar.
+ *
+ * Paginación y búsqueda en la URL (`?page=2&q=juan`) vía useListaPaginada:
+ * /delivery_documents se pide por página; la búsqueda trae todo una vez y
+ * filtra en el cliente.
  */
+function filtrarEntrega(d, filtro) {
+  return (
+    (d.employee_name || '').toLowerCase().includes(filtro) ||
+    (d.employee_department || '').toLowerCase().includes(filtro) ||
+    nombrePlanta(d.location).toLowerCase().includes(filtro)
+  )
+}
+
 function HistorialEntregaList() {
   const { token, isAdmin } = useAuth()
   const navigate = useNavigate()
 
-  const [documentos, setDocumentos] = useState([])
-  const [cargando, setCargando] = useState(true)
-  const [errorCarga, setErrorCarga] = useState('')
-  const [busqueda, setBusqueda] = useState('')
+  const {
+    registros: visibles,
+    total,
+    pagina,
+    ultimaPagina,
+    busqueda,
+    setBusqueda,
+    limpiarBusqueda,
+    irAPagina,
+    cargando,
+    error: errorCarga,
+    recargar: cargar,
+  } = useListaPaginada({
+    token,
+    listar: listarDocumentosEntrega,
+    filtrar: filtrarEntrega,
+    mensajeError: 'No se pudo obtener la lista de entregas',
+  })
 
   const [eliminando, setEliminando] = useState(null) // documento o null
   const [borrando, setBorrando] = useState(false)
   const [errorBorrar, setErrorBorrar] = useState('')
-
-  const cargar = useCallback(async () => {
-    setCargando(true)
-    setErrorCarga('')
-    try {
-      const data = await listarDocumentosEntrega(token)
-      setDocumentos(Array.isArray(data) ? data : [])
-    } catch (err) {
-      setErrorCarga(err.message || 'No se pudo obtener la lista de entregas')
-    } finally {
-      setCargando(false)
-    }
-  }, [token])
-
-  useEffect(() => {
-    cargar()
-  }, [cargar])
-
-  const visibles = useMemo(() => {
-    const filtro = busqueda.trim().toLowerCase()
-    if (!filtro) return documentos
-    return documentos.filter(
-      (d) =>
-        (d.employee_name || '').toLowerCase().includes(filtro) ||
-        (d.employee_department || '').toLowerCase().includes(filtro) ||
-        nombrePlanta(d.location).toLowerCase().includes(filtro),
-    )
-  }, [documentos, busqueda])
 
   async function confirmarEliminar() {
     const documento = eliminando
@@ -69,7 +69,10 @@ function HistorialEntregaList() {
     setErrorBorrar('')
     try {
       await eliminarDocumentoEntrega(token, documento.id)
-      setDocumentos((lista) => lista.filter((d) => d.id !== documento.id))
+      // Se vuelve a pedir la página actual (paginacion.md §5) en vez de
+      // quitar la fila a mano: así entra el registro que corría de la
+      // página siguiente y, si esta quedó vacía, el hook retrocede una.
+      cargar()
       setEliminando(null)
       mostrarToast('Entrega eliminada')
     } catch (err) {
@@ -104,7 +107,7 @@ function HistorialEntregaList() {
       titulo="No se encontraron resultados"
       descripcion={`Ninguna coincidencia para “${busqueda}”.`}
       accion={
-        <button type="button" onClick={() => setBusqueda('')} className={botonSecundario}>
+        <button type="button" onClick={limpiarBusqueda} className={botonSecundario}>
           Limpiar búsqueda
         </button>
       }
@@ -279,11 +282,13 @@ function HistorialEntregaList() {
         </div>
 
         {!cargando && !sinContenido && (
-          <p className="font-label-sm text-label-sm text-on-surface-variant tabular-nums">
-            {visibles.length === documentos.length
-              ? `${documentos.length} entregas`
-              : `${visibles.length} de ${documentos.length} entregas`}
-          </p>
+          <Paginador
+            pagina={pagina}
+            ultimaPagina={ultimaPagina}
+            total={total}
+            plural="entregas"
+            onCambiar={irAPagina}
+          />
         )}
       </div>
 

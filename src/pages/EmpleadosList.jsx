@@ -1,10 +1,12 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Eye, Pencil, Plus, Users } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
+import { useListaPaginada } from '../hooks/usePaginacion.js'
 import Buscador from '../components/Buscador.jsx'
 import ConfirmDialog from '../components/ConfirmDialog.jsx'
 import EstadoVacio from '../components/EstadoVacio.jsx'
+import Paginador from '../components/Paginador.jsx'
 import { SkeletonTabla, SkeletonTarjetas } from '../components/Skeleton.jsx'
 import { listarEmpleados, listarDepartamentos } from '../services/api.js'
 
@@ -13,52 +15,71 @@ import { listarEmpleados, listarDepartamentos } from '../services/api.js'
  * escritorio con ojo (ver, sin confirmar) y lápiz (editar, con
  * confirmación); móvil con tarjetas sin botones que llevan directo al
  * detalle, y el "Editar" de esa página pidiendo la misma confirmación.
+ *
+ * Paginación y búsqueda en la URL (`?page=2&q=juan`) vía useListaPaginada:
+ * /employees se pide por página; la búsqueda trae todo una vez y filtra en
+ * el cliente. Departamentos se pide completo (es apoyo para el nombre).
  */
 function EmpleadosList() {
   const { token } = useAuth()
   const navigate = useNavigate()
 
-  const [empleados, setEmpleados] = useState([])
   const [departamentos, setDepartamentos] = useState([])
-  const [cargando, setCargando] = useState(true)
-  const [errorCarga, setErrorCarga] = useState('')
-  const [busqueda, setBusqueda] = useState('')
-
   const [confirmando, setConfirmando] = useState(null) // empleado o null
-
-  const cargar = useCallback(async () => {
-    setCargando(true)
-    setErrorCarga('')
-    try {
-      const [emp, dep] = await Promise.all([listarEmpleados(token), listarDepartamentos(token)])
-      setEmpleados(Array.isArray(emp) ? emp : [])
-      setDepartamentos(Array.isArray(dep) ? dep : [])
-    } catch (err) {
-      setErrorCarga(err.message || 'No se pudo obtener la lista de empleados')
-    } finally {
-      setCargando(false)
-    }
-  }, [token])
-
-  useEffect(() => {
-    cargar()
-  }, [cargar])
 
   const nombreDepartamento = useCallback(
     (emp) => emp.department || departamentos.find((d) => d.id === emp.department_id)?.name || '—',
     [departamentos],
   )
 
-  const visibles = useMemo(() => {
-    const filtro = busqueda.trim().toLowerCase()
-    if (!filtro) return empleados
-    return empleados.filter(
-      (e) =>
-        (e.name || '').toLowerCase().includes(filtro) ||
-        (e.code || '').toLowerCase().includes(filtro) ||
-        nombreDepartamento(e).toLowerCase().includes(filtro),
-    )
-  }, [empleados, busqueda, nombreDepartamento])
+  const filtrarEmpleado = useCallback(
+    (e, filtro) =>
+      (e.name || '').toLowerCase().includes(filtro) ||
+      (e.code || '').toLowerCase().includes(filtro) ||
+      nombreDepartamento(e).toLowerCase().includes(filtro),
+    [nombreDepartamento],
+  )
+
+  const {
+    registros: visibles,
+    total,
+    pagina,
+    ultimaPagina,
+    busqueda,
+    setBusqueda,
+    limpiarBusqueda,
+    irAPagina,
+    cargando,
+    error: errorCarga,
+    recargar,
+  } = useListaPaginada({
+    token,
+    listar: listarEmpleados,
+    filtrar: filtrarEmpleado,
+    mensajeError: 'No se pudo obtener la lista de empleados',
+  })
+
+  // Departamentos completos (sin `limit`): solo sirven para traducir
+  // department_id a nombre cuando el empleado no trae `department`; si falla
+  // se muestra "—" en vez de tumbar la lista.
+  const cargarDepartamentos = useCallback(async () => {
+    try {
+      const dep = await listarDepartamentos(token)
+      setDepartamentos(Array.isArray(dep) ? dep : [])
+    } catch {
+      setDepartamentos([])
+    }
+  }, [token])
+
+  useEffect(() => {
+    cargarDepartamentos()
+  }, [cargarDepartamentos])
+
+  // "Reintentar": vuelve a pedir la página y los departamentos.
+  const cargar = useCallback(() => {
+    recargar()
+    cargarDepartamentos()
+  }, [recargar, cargarDepartamentos])
 
   const hayRegistros = visibles.length > 0
   // La carga tiene sus propios esqueletos, con la forma de la tabla y de las
@@ -85,7 +106,7 @@ function EmpleadosList() {
       titulo="No se encontraron resultados"
       descripcion={`Ninguna coincidencia para “${busqueda}”.`}
       accion={
-        <button type="button" onClick={() => setBusqueda('')} className={botonSecundario}>
+        <button type="button" onClick={limpiarBusqueda} className={botonSecundario}>
           Limpiar búsqueda
         </button>
       }
@@ -206,9 +227,13 @@ function EmpleadosList() {
         </div>
 
         {!cargando && !sinContenido && (
-          <p className="font-label-sm text-label-sm text-on-surface-variant tabular-nums">
-            {visibles.length === empleados.length ? `${empleados.length} empleados` : `${visibles.length} de ${empleados.length} empleados`}
-          </p>
+          <Paginador
+            pagina={pagina}
+            ultimaPagina={ultimaPagina}
+            total={total}
+            plural="empleados"
+            onCambiar={irAPagina}
+          />
         )}
       </div>
 

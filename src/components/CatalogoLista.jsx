@@ -1,10 +1,12 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Eye, Pencil, Plus, FileText, Download } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
+import { useListaPaginada } from '../hooks/usePaginacion.js'
 import Buscador from './Buscador.jsx'
 import ConfirmDialog from './ConfirmDialog.jsx'
 import EstadoVacio from './EstadoVacio.jsx'
+import Paginador from './Paginador.jsx'
 import { SkeletonTabla, SkeletonTarjetas } from './Skeleton.jsx'
 
 /**
@@ -20,6 +22,11 @@ import { SkeletonTabla, SkeletonTarjetas } from './Skeleton.jsx'
  *
  * MarcasList.jsx y DepartamentosList.jsx son envolturas de este componente,
  * así que la lógica de cargar / buscar existe UNA sola vez.
+ *
+ * Paginación y búsqueda viven en la URL (`?page=2&q=dell`) vía
+ * useListaPaginada: sin texto se pide al servidor solo la página actual; con
+ * texto se trae todo una vez y se filtra/pagina en el cliente (el backend no
+ * tiene filtro de texto en /brands ni /departments).
  */
 
 const botonSecundario =
@@ -68,40 +75,35 @@ function EstadoLista({ error, hayRegistros, busqueda, textos, onReintentar, onLi
   return <EstadoVacio icon={textos.icono} titulo={textos.vacioTitulo} descripcion={textos.vacioTexto} />
 }
 
+function filtrarPorNombre(registro, filtro) {
+  return (registro.name || '').toLowerCase().includes(filtro)
+}
+
 function CatalogoLista({ textos, onListar, rutaBase }) {
   const { token } = useAuth()
   const navigate = useNavigate()
 
-  const [registros, setRegistros] = useState([])
-  const [cargando, setCargando] = useState(true)
-  const [errorCarga, setErrorCarga] = useState('')
-  const [busqueda, setBusqueda] = useState('')
+  const {
+    registros: visibles,
+    total,
+    pagina,
+    ultimaPagina,
+    busqueda,
+    setBusqueda,
+    limpiarBusqueda,
+    irAPagina,
+    cargando,
+    error: errorCarga,
+    recargar: cargar,
+  } = useListaPaginada({
+    token,
+    listar: onListar,
+    filtrar: filtrarPorNombre,
+    mensajeError: 'No se pudo obtener la lista',
+  })
 
   // Confirmación antes de editar (escritorio: lápiz de la fila).
   const [confirmando, setConfirmando] = useState(null)
-
-  const cargar = useCallback(async () => {
-    setCargando(true)
-    setErrorCarga('')
-    try {
-      const data = await onListar(token)
-      setRegistros(Array.isArray(data) ? data : [])
-    } catch (err) {
-      setErrorCarga(err.message || 'No se pudo obtener la lista')
-    } finally {
-      setCargando(false)
-    }
-  }, [onListar, token])
-
-  useEffect(() => {
-    cargar()
-  }, [cargar])
-
-  const visibles = useMemo(() => {
-    const filtro = busqueda.trim().toLowerCase()
-    if (!filtro) return registros
-    return registros.filter((r) => (r.name || '').toLowerCase().includes(filtro))
-  }, [registros, busqueda])
 
   function verRegistro(registro) {
     navigate(`${rutaBase}/${registro.id}/ver`)
@@ -117,7 +119,7 @@ function CatalogoLista({ textos, onListar, rutaBase }) {
       busqueda={busqueda}
       textos={textos}
       onReintentar={cargar}
-      onLimpiar={() => setBusqueda('')}
+      onLimpiar={limpiarBusqueda}
     />
   )
 
@@ -264,11 +266,13 @@ function CatalogoLista({ textos, onListar, rutaBase }) {
           </div>
 
           {!cargando && !sinContenido && (
-            <p className="font-label-sm text-label-sm text-on-surface-variant tabular-nums">
-              {visibles.length === registros.length
-                ? `${registros.length} ${textos.plural}`
-                : `${visibles.length} de ${registros.length} ${textos.plural}`}
-            </p>
+            <Paginador
+              pagina={pagina}
+              ultimaPagina={ultimaPagina}
+              total={total}
+              plural={textos.plural}
+              onCambiar={irAPagina}
+            />
           )}
         </div>
       </div>

@@ -140,6 +140,41 @@ nunca escribir un componente de página nuevo para eso.
   de la pantalla (junto al título), no solo cuando la lista está vacía -- patrón consistente
   entre `HistorialEntregaList.jsx` y `HistorialDevolucionList.jsx`.
 
+## Paginación de listados (2026-09-14)
+
+Las cinco listas con tabla (Marcas y Departamentos vía `CatalogoLista.jsx`, `EquiposList`,
+`EmpleadosList`, `HistorialEntregaList`, `HistorialDevolucionList`) se paginan contra el
+backend (`paginacion.md`: `limit` + `page` → `{ data, total, currentPage, lastPage }`).
+Sin librería externa: el estado vive en la URL con `useSearchParams` de React Router.
+
+- `?page=N&q=texto`. `page=1` se omite; cambiar de página agrega entrada al historial,
+  escribir en el buscador reemplaza (y vuelve a página 1). Refrescar, "atrás" y enlaces
+  directos conservan página y búsqueda.
+- `hooks/usePaginacion.js`: `TAMANO_PAGINA = 20` (constante: cambiar `limit` invalida
+  `lastPage`), `usePaginaUrl()` (solo URL) y `useListaPaginada({ token, listar, filtrar,
+  mensajeError })`, que hace la carga y expone `registros`, `total`, `pagina`,
+  `ultimaPagina`, `busqueda`, `setBusqueda`, `limpiarBusqueda`, `irAPagina`, `cargando`,
+  `error`, `recargar`.
+- **Búsqueda híbrida**, porque el backend no tiene filtro de texto en estos listados: sin
+  texto se pide al servidor solo la página actual; con texto se pide UNA vez el listado
+  completo (sin `limit`), se filtra en el cliente como antes y se pagina en el cliente con
+  el mismo tamaño. Cuando el backend exponga `search`, se cambia en el hook, no en las
+  pantallas.
+- Página fuera de rango (`data: []` con `page > lastPage`, p. ej. al borrar el último
+  registro de la última página) → el hook sustituye en la URL por la última página válida.
+  Tras eliminar (HistorialEntrega) se vuelve a pedir la página actual (`recargar`), no se
+  quita la fila a mano.
+- `components/Paginador.jsx` (autorizado explícitamente): "Mostrando 1–20 de 57 marcas" +
+  Anterior / números con "…" / Siguiente; con una sola página solo muestra el conteo. En
+  móvil los números se sustituyen por "Página 2 de 5". Sustituye al párrafo de conteo que
+  tenían las listas, en el mismo lugar.
+- Las funciones `listar*` de `api.js` aceptan `{ limit, page }` opcional (helper interno
+  `listarPaginado`, y `laravelRequest(..., { conMeta: true })` para no perder los
+  metadatos al desenvolver). Sin ese argumento siguen devolviendo el arreglo completo, que
+  es lo que usan selectores, combos y listados de apoyo (`listarDepartamentos` en
+  formularios, `listarCaracteristicas` para el conteo de Equipos, `listarDocumentosEntrega`
+  en BuscarDevolucion, etc.). Detalles de entrega/devolución y `/users` no se paginan.
+
 ## Sección de Auditoría -- eliminada (2026-09-08)
 
 La sección de Auditoría (`src/pages/Auditoria.jsx`, la ruta `/auditoria`, y su ítem en
@@ -232,7 +267,7 @@ Reglas relacionadas que se han repetido en las peticiones de trabajo:
   mismo `max-w-[1200px]` y el mismo patrón de grilla fluida que ya usan Catálogo, Nueva
   Acta e Historial, no un ancho distinto "a ojo".
 - Reusar componentes y patrones ya existentes (`ConfirmDialog`, `Toast`, `EstadoVacio`,
-  `SearchableSelect`, `InlineEditableText`, `Buscador`, `Skeleton*`, `BotonExcel`, etc.) en
+  `SearchableSelect`, `InlineEditableText`, `Buscador`, `Skeleton*`, `Paginador`, etc.) en
   vez de crear uno nuevo con el mismo propósito.
 - No crear componentes compartidos nuevos sin autorización explícita.
 - Tocar solo los archivos estrictamente necesarios para el cambio pedido.

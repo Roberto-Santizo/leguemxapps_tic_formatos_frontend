@@ -1,10 +1,12 @@
-import { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
+import { Fragment, useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Eye, Pencil, Plus, ChevronDown, HardDrive } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
+import { useListaPaginada } from '../hooks/usePaginacion.js'
 import Buscador from '../components/Buscador.jsx'
 import ConfirmDialog from '../components/ConfirmDialog.jsx'
 import EstadoVacio from '../components/EstadoVacio.jsx'
+import Paginador from '../components/Paginador.jsx'
 import { SkeletonTabla, SkeletonTarjetas } from '../components/Skeleton.jsx'
 import { CaracteristicasDeEquipo } from '../components/CaracteristicasEditor.jsx'
 import {
@@ -34,22 +36,51 @@ import {
  * Responsive, igual que CatalogoLista: tabla en md: y superior, tarjetas
  * apiladas debajo de md. En móvil no hay dos íconos -- se toca la tarjeta
  * completa y se despliega ahí mismo la lista (o el formulario de alta).
+ *
+ * Paginación y búsqueda en la URL (`?page=2&q=dell`) vía useListaPaginada:
+ * /equipments se pide por página; la búsqueda trae todo una vez y filtra en
+ * el cliente. Características y disponibles se piden aparte, completos (son
+ * listados de apoyo, no los que se paginan).
  */
+
+function filtrarEquipo(e, filtro) {
+  return (e.name || '').toLowerCase().includes(filtro) || (e.brand || '').toLowerCase().includes(filtro)
+}
 
 function EquiposList() {
   const { token } = useAuth()
   const navigate = useNavigate()
 
-  const [equipos, setEquipos] = useState([])
-  const [conteos, setConteos] = useState({}) // equipmentId -> nº de características
+  const {
+    registros: visibles,
+    total: totalEquipos,
+    pagina,
+    ultimaPagina,
+    busqueda,
+    setBusqueda,
+    limpiarBusqueda,
+    irAPagina,
+    cargando,
+    error: errorCarga,
+    recargar,
+  } = useListaPaginada({
+    token,
+    listar: listarEquipos,
+    filtrar: filtrarEquipo,
+    mensajeError: 'No se pudo obtener la lista de equipos',
+  })
+
+  // Conteo de características por NOMBRE de equipo (el listado reducido de
+  // /caracteristics trae el nombre, no el id -- así está documentado); se
+  // traduce a id al pintar cada fila. Conteos ajustados a mano (tras crear
+  // una característica desde la fila) van en `conteosPorId`, que manda.
+  const [conteosPorNombre, setConteosPorNombre] = useState({})
+  const [conteosPorId, setConteosPorId] = useState({})
   // Ids que SÍ aparecen en /equipments/available -- esos están libres. El
   // resto del inventario (los que no están en este set) está en posesión de
   // alguien. No hay un campo de estado en el equipo: se deriva cruzando con
   // este listado.
   const [disponibles, setDisponibles] = useState(null) // null = todavía no se sabe
-  const [cargando, setCargando] = useState(true)
-  const [errorCarga, setErrorCarga] = useState('')
-  const [busqueda, setBusqueda] = useState('')
 
   // Fila desplegada: solo para el alta ("+"); el ojo ahora navega a
   // /catalogo/equipos/:id/ver, la vista completa del equipo.
@@ -62,41 +93,37 @@ function EquiposList() {
   // directo, sin preguntar.
   const [confirmando, setConfirmando] = useState(null) // equipo o null
 
-  const cargar = useCallback(async () => {
-    setCargando(true)
-    setErrorCarga('')
-    try {
-      const [lista, caracts, libres] = await Promise.all([
-        listarEquipos(token),
-        listarCaracteristicas(token).catch(() => []),
-        // Si falla, se deja "disponibles" en null y el badge de estado no
-        // se muestra -- mejor omitirlo que mostrar un estado equivocado.
-        listarEquiposDisponibles(token).catch(() => null),
-      ])
-      const equiposLista = Array.isArray(lista) ? lista : []
-      setEquipos(equiposLista)
-      setDisponibles(Array.isArray(libres) ? new Set(libres.map((e) => e.id)) : null)
-
-      // El listado de características trae el NOMBRE del equipo, no su id
-      // (así está documentado), así que el conteo se arma por nombre y se
-      // traduce a id con la lista de equipos.
-      const porNombre = {}
-      for (const c of Array.isArray(caracts) ? caracts : []) {
-        porNombre[c.equipment] = (porNombre[c.equipment] || 0) + 1
-      }
-      const porId = {}
-      for (const e of equiposLista) porId[e.id] = porNombre[e.name] || 0
-      setConteos(porId)
-    } catch (err) {
-      setErrorCarga(err.message || 'No se pudo obtener la lista de equipos')
-    } finally {
-      setCargando(false)
+  // Listados de apoyo, completos (sin `limit`): si alguno falla se omite su
+  // dato en vez de tumbar la lista. Sin "disponibles" el badge de estado no
+  // se muestra -- mejor omitirlo que mostrar un estado equivocado.
+  const cargarApoyo = useCallback(async () => {
+    const [caracts, libres] = await Promise.all([
+      listarCaracteristicas(token).catch(() => []),
+      listarEquiposDisponibles(token).catch(() => null),
+    ])
+    const porNombre = {}
+    for (const c of Array.isArray(caracts) ? caracts : []) {
+      porNombre[c.equipment] = (porNombre[c.equipment] || 0) + 1
     }
+    setConteosPorNombre(porNombre)
+    setConteosPorId({})
+    setDisponibles(Array.isArray(libres) ? new Set(libres.map((e) => e.id)) : null)
   }, [token])
 
   useEffect(() => {
-    cargar()
-  }, [cargar])
+    cargarApoyo()
+  }, [cargarApoyo])
+
+  // "Reintentar": vuelve a pedir la página y los listados de apoyo.
+  const cargar = useCallback(() => {
+    recargar()
+    cargarApoyo()
+  }, [recargar, cargarApoyo])
+
+  const conteoDe = useCallback(
+    (equipo) => conteosPorId[equipo.id] ?? conteosPorNombre[equipo.name] ?? 0,
+    [conteosPorId, conteosPorNombre],
+  )
 
   const cargarDetalle = useCallback(
     async (equipoId) => {
@@ -104,7 +131,7 @@ function EquiposList() {
       try {
         const data = await obtenerCaracteristicasDeEquipo(token, equipoId)
         setDetalle(data)
-        setConteos((c) => ({ ...c, [equipoId]: data.length }))
+        setConteosPorId((c) => ({ ...c, [equipoId]: data.length }))
       } catch {
         setDetalle([])
       } finally {
@@ -123,16 +150,6 @@ function EquiposList() {
     setDetalle([])
     cargarDetalle(equipoId)
   }
-
-  const visibles = useMemo(() => {
-    const filtro = busqueda.trim().toLowerCase()
-    if (!filtro) return equipos
-    return equipos.filter(
-      (e) =>
-        (e.name || '').toLowerCase().includes(filtro) ||
-        (e.brand || '').toLowerCase().includes(filtro),
-    )
-  }, [equipos, busqueda])
 
   const hayRegistros = visibles.length > 0
   // La carga tiene sus propios esqueletos (misma forma que la tabla y las
@@ -159,7 +176,7 @@ function EquiposList() {
       titulo="No se encontraron resultados"
       descripcion={`Ninguna coincidencia para “${busqueda}”.`}
       accion={
-        <button type="button" onClick={() => setBusqueda('')} className={botonSecundario}>
+        <button type="button" onClick={limpiarBusqueda} className={botonSecundario}>
           Limpiar búsqueda
         </button>
       }
@@ -298,7 +315,7 @@ function EquiposList() {
               </thead>
               <tbody className="font-body-md text-on-surface divide-y divide-outline-variant">
                 {visibles.map((equipo) => {
-                  const total = conteos[equipo.id] || 0
+                  const total = conteoDe(equipo)
                   const tiene = total > 0
                   const desplegada = abierta?.id === equipo.id
                   return (
@@ -399,7 +416,7 @@ function EquiposList() {
             </div>
           ) : (
             visibles.map((equipo) => {
-              const total = conteos[equipo.id] || 0
+              const total = conteoDe(equipo)
               const tiene = total > 0
               const desplegada = abierta?.id === equipo.id
               return (
@@ -443,11 +460,13 @@ function EquiposList() {
         </div>
 
         {!cargando && !sinContenido && (
-          <p className="font-label-sm text-label-sm text-on-surface-variant tabular-nums">
-            {visibles.length === equipos.length
-              ? `${equipos.length} equipos`
-              : `${visibles.length} de ${equipos.length} equipos`}
-          </p>
+          <Paginador
+            pagina={pagina}
+            ultimaPagina={ultimaPagina}
+            total={totalEquipos}
+            plural="equipos"
+            onCambiar={irAPagina}
+          />
         )}
       </div>
 
