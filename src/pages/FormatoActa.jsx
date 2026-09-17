@@ -195,9 +195,17 @@ function FormatoActa() {
     const usadosEnOtrasFilas = new Set(
       filasEntrega.filter((f) => f.id !== filaId && f.equipmentId).map((f) => String(f.equipmentId))
     )
+    // La etiqueta lleva también la serie (en mayúsculas, como en la tabla del
+    // acta) porque es lo que se confronta contra la etiqueta física del
+    // equipo: así el buscador del SearchableSelect (que filtra sobre `name`)
+    // encuentra el equipo tecleando el número de serie directamente.
     return equipos
       .filter((e) => !usadosEnOtrasFilas.has(String(e.id)))
-      .map((e) => ({ id: e.id, name: e.brand ? `${e.name} — ${e.brand}` : e.name }))
+      .map((e) => {
+        const partes = [e.brand ? `${e.name} — ${e.brand}` : e.name]
+        if (e.serie) partes.push(String(e.serie).toUpperCase())
+        return { id: e.id, name: partes.join(' · ') }
+      })
   }
 
   function agregarFilaEntrega() {
