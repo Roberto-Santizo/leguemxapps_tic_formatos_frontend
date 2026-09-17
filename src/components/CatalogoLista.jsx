@@ -23,7 +23,7 @@ import { SkeletonTabla, SkeletonTarjetas } from './Skeleton.jsx'
  * MarcasList.jsx y DepartamentosList.jsx son envolturas de este componente,
  * así que la lógica de cargar / buscar existe UNA sola vez.
  *
- * Paginación y búsqueda viven en la URL (`?page=2&q=dell`) vía
+ * Paginación y búsqueda viven en la URL (`?page=2&limit=20&q=dell`) vía
  * useListaPaginada: sin texto se pide al servidor solo la página actual; con
  * texto se trae todo una vez y se filtra/pagina en el cliente (el backend no
  * tiene filtro de texto en /brands ni /departments).
@@ -87,6 +87,7 @@ function CatalogoLista({ textos, onListar, rutaBase }) {
     registros: visibles,
     total,
     pagina,
+    limite,
     ultimaPagina,
     busqueda,
     setBusqueda,
@@ -265,10 +266,11 @@ function CatalogoLista({ textos, onListar, rutaBase }) {
             )}
           </div>
 
-          {!cargando && !sinContenido && (
+          {!cargando && !errorCarga && (
             <Paginador
               pagina={pagina}
               ultimaPagina={ultimaPagina}
+              tamano={limite}
               total={total}
               plural={textos.plural}
               onCambiar={irAPagina}

@@ -21,6 +21,7 @@ import useLocalStorageState from '../hooks/useLocalStorageState.js'
 import { getFormato, VIGENCIA_DOCUMENTOS, VIGENCIA_DOCUMENTOS_STORAGE_KEY } from '../config/formatos.js'
 import EnConstruccion from '../components/EnConstruccion.jsx'
 import ConfirmDialog from '../components/ConfirmDialog.jsx'
+import EquipoDetalleModal from '../components/EquipoDetalleModal.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
 import { listarEmpleados, listarDepartamentos, listarEquiposDisponibles, crearDocumentoEntrega } from '../services/api.js'
 
@@ -154,6 +155,8 @@ function FormatoActa() {
   // propio "no volver a preguntar en esta sesión" (ver AuthContext), útil
   // cuando se están llenando varias entregas seguidas.
   const [confirmandoFinalizar, setConfirmandoFinalizar] = useState(false)
+  // Equipo cuya ficha está abierta (ojo del buscador de equipo); '' = ninguna.
+  const [equipoDetalleId, setEquipoDetalleId] = useState('')
 
   useEffect(() => {
     if (!esEntrega) return
@@ -786,6 +789,7 @@ function FormatoActa() {
                                 options={opcionesEquipoParaFila(fila.id)}
                                 value={fila.equipmentId}
                                 onChange={(id) => actualizarFilaEntrega(fila.id, 'equipmentId', id)}
+                                onVerDetalle={setEquipoDetalleId}
                                 disabled={cargandoCatalogos}
                                 placeholder="Selecciona un equipo"
                                 emptyOptionsText="No hay equipos registrados en el catálogo todavía."
@@ -850,6 +854,7 @@ function FormatoActa() {
                               options={opcionesEquipoParaFila(fila.id)}
                               value={fila.equipmentId}
                               onChange={(id) => actualizarFilaEntrega(fila.id, 'equipmentId', id)}
+                              onVerDetalle={setEquipoDetalleId}
                               disabled={cargandoCatalogos}
                               placeholder="Selecciona un equipo"
                               emptyOptionsText="No hay equipos registrados en el catálogo todavía."
@@ -1214,6 +1219,8 @@ function FormatoActa() {
           onConfirmar={handleConfirmarFinalizarEntrega}
         />
       )}
+
+      {esEntrega && <EquipoDetalleModal equipoId={equipoDetalleId} onCerrar={() => setEquipoDetalleId('')} />}
     </div>
   )
 }

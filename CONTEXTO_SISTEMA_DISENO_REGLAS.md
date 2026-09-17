@@ -128,6 +128,14 @@ nunca escribir un componente de página nuevo para eso.
   (buscador con lista filtrable), porque esas listas pueden crecer. En escritorio es un
   desplegable bajo el campo; en móvil se abre como hoja completa (fondo oscuro + buscador
   arriba + lista), igual que una alerta de confirmación.
+- **Ficha del equipo desde el acta** (`EquipoDetalleModal.jsx`, 2026-09-17): en Entrega de
+  Equipo, el buscador de equipo muestra un ojo dentro del campo (prop `onVerDetalle` de
+  `SearchableSelect`, solo cuando ya hay equipo elegido) que abre una ventana emergente de
+  solo lectura con marca, modelo, serie, tipo, original/usado y características. Carga por
+  ID (`obtenerEquipo` + `obtenerMarca` + `obtenerCaracteristicasDeEquipo`, igual que
+  `EquipoView`), no del renglón del listado. No sustituye a Catálogo → Equipos → Ver ni
+  lleva historial de asignaciones. Solo vive en `FormatoActa`; la devolución queda fuera a
+  propósito (no elige equipo de un catálogo).
 - **Texto editable inline** (`InlineEditableText.jsx`, usado p. ej. en la vigencia del
   membrete de Nueva Acta): el ícono de lápiz que indica que el texto es editable queda
   siempre visible a baja opacidad (`opacity-40`), no solo con `group-hover`, porque en
@@ -147,14 +155,23 @@ Las cinco listas con tabla (Marcas y Departamentos vía `CatalogoLista.jsx`, `Eq
 backend (`paginacion.md`: `limit` + `page` → `{ data, total, currentPage, lastPage }`).
 Sin librería externa: el estado vive en la URL con `useSearchParams` de React Router.
 
-- `?page=N&q=texto`. `page=1` se omite; cambiar de página agrega entrada al historial,
-  escribir en el buscador reemplaza (y vuelve a página 1). Refrescar, "atrás" y enlaces
-  directos conservan página y búsqueda.
-- `hooks/usePaginacion.js`: `TAMANO_PAGINA = 20` (constante: cambiar `limit` invalida
-  `lastPage`), `usePaginaUrl()` (solo URL) y `useListaPaginada({ token, listar, filtrar,
-  mensajeError })`, que hace la carga y expone `registros`, `total`, `pagina`,
-  `ultimaPagina`, `busqueda`, `setBusqueda`, `limpiarBusqueda`, `irAPagina`, `cargando`,
-  `error`, `recargar`.
+- `?page=N&limit=M&q=texto`. **La URL siempre lleva `page` y `limit` explícitos** (los
+  mismos que van al backend): al entrar a la vista sin ellos, o con valores inválidos, el
+  hook la completa de inmediato con `replace` (`/catalogo/marcas` →
+  `/catalogo/marcas?page=1&limit=20`) (2026-09-17). Cambiar de página agrega entrada al
+  historial, escribir en el buscador reemplaza (y vuelve a página 1). Refrescar, "atrás" y
+  enlaces directos conservan página, tamaño y búsqueda.
+- `hooks/usePaginacion.js`: `TAMANO_PAGINA = 20` es el `limit` por defecto que se escribe
+  en la URL; el que se usa realmente es el `limit` de la URL (`limite`), y se mantiene
+  constante al navegar (cambiarlo invalida `lastPage`). `usePaginaUrl()` (solo URL) y
+  `useListaPaginada({ token, listar, filtrar, mensajeError })`, que hace la carga y expone
+  `registros`, `total`, `pagina`, `limite`, `ultimaPagina`, `busqueda`, `setBusqueda`,
+  `limpiarBusqueda`, `irAPagina`, `cargando`, `error`, `recargar`.
+- El texto del buscador vive en estado local del hook y la URL lo sigue (no al revés):
+  React Router v7 aplica cada navegación como transición de baja prioridad, y un `<input>`
+  controlado directamente por `q` perdía letras al escribir a velocidad normal (bug
+  corregido 2026-09-17). Un cambio externo de `q` (enlace del menú a la misma lista) sí se
+  adopta.
 - **Búsqueda híbrida**, porque el backend no tiene filtro de texto en estos listados: sin
   texto se pide al servidor solo la página actual; con texto se pide UNA vez el listado
   completo (sin `limit`), se filtra en el cliente como antes y se pagina en el cliente con
@@ -164,10 +181,13 @@ Sin librería externa: el estado vive en la URL con `useSearchParams` de React R
   registro de la última página) → el hook sustituye en la URL por la última página válida.
   Tras eliminar (HistorialEntrega) se vuelve a pedir la página actual (`recargar`), no se
   quita la fila a mano.
-- `components/Paginador.jsx` (autorizado explícitamente): "Mostrando 1–20 de 57 marcas" +
-  Anterior / números con "…" / Siguiente; con una sola página solo muestra el conteo. En
-  móvil los números se sustituyen por "Página 2 de 5". Sustituye al párrafo de conteo que
-  tenían las listas, en el mismo lugar.
+- `components/Paginador.jsx` (autorizado explícitamente): "Mostrando 1–20 de 57 marcas ·
+  Página 1 de 3" + Anterior / números con "…" / Siguiente. **Se muestra SIEMPRE** debajo de
+  la tabla / tarjetas -- también con una sola página o con 0 registros ("0 marcas · Página
+  1 de 1", flechas deshabilitadas) -- para que se sepa en qué página se está y cuántas hay
+  (regla del 2026-09-17). Solo se oculta mientras carga (esqueleto) o si hubo error. En
+  móvil los números se sustituyen por "Página 2 de 5". Recibe `tamano={limite}` para
+  calcular el rango. Es el único componente de paginación: toda lista nueva lo reutiliza.
 - Las funciones `listar*` de `api.js` aceptan `{ limit, page }` opcional (helper interno
   `listarPaginado`, y `laravelRequest(..., { conMeta: true })` para no perder los
   metadatos al desenvolver). Sin ese argumento siguen devolviendo el arreglo completo, que
@@ -267,7 +287,8 @@ Reglas relacionadas que se han repetido en las peticiones de trabajo:
   mismo `max-w-[1200px]` y el mismo patrón de grilla fluida que ya usan Catálogo, Nueva
   Acta e Historial, no un ancho distinto "a ojo".
 - Reusar componentes y patrones ya existentes (`ConfirmDialog`, `Toast`, `EstadoVacio`,
-  `SearchableSelect`, `InlineEditableText`, `Buscador`, `Skeleton*`, `Paginador`, etc.) en
+  `SearchableSelect`, `InlineEditableText`, `Buscador`, `Skeleton*`, `Paginador`,
+  `EquipoDetalleModal`, etc.) en
   vez de crear uno nuevo con el mismo propósito.
 - No crear componentes compartidos nuevos sin autorización explícita.
 - Tocar solo los archivos estrictamente necesarios para el cambio pedido.

@@ -9,7 +9,7 @@ const API_URL = env('VITE_API_URL') || 'http://localhost:3000'
 // Node/Express, que ya no existe: solo lo siguen usando obtenerAuditoria y
 // exportarAuditoriaExcel, restos de la sección de Auditoría que se dejaron a
 // propósito (ver CONTEXTO_SISTEMA_DISENO_REGLAS.md).
-const AUTH_API_URL = env('VITE_AUTH_API_URL') || 'http://192.168.10.209:8000/api'
+const AUTH_API_URL = env('VITE_AUTH_API_URL') || 'http://localhost:8000/api'
 
 async function request(path, options = {}) {
   const url = `${API_URL}${path}`
@@ -534,7 +534,9 @@ export async function listarDetallesEntrega(token, { deliveryDocumentId, equipme
   const params = new URLSearchParams()
   if (deliveryDocumentId != null) params.set('deliveryDocumentId', deliveryDocumentId)
   if (equipmentId != null) params.set('equipmentId', equipmentId)
-  if (pending) params.set('pending', 'true')
+  // Laravel valida `pending` con la regla `boolean`, que en query string solo
+  // acepta 1/0 (no la cadena "true") -- ver paginacion.md §4 (`pending=1`).
+  if (pending) params.set('pending', '1')
   const query = params.toString()
   return laravelRequest(`/delivery_document_details${query ? `?${query}` : ''}`, { token, method: 'GET' })
 }

@@ -24,7 +24,7 @@ function nombrePlanta(location) {
  * confirmación); móvil con tarjetas sin botones que llevan directo al
  * detalle, donde también está la opción de eliminar.
  *
- * Paginación y búsqueda en la URL (`?page=2&q=juan`) vía useListaPaginada:
+ * Paginación y búsqueda en la URL (`?page=2&limit=20&q=juan`) vía useListaPaginada:
  * /delivery_documents se pide por página; la búsqueda trae todo una vez y
  * filtra en el cliente.
  */
@@ -44,6 +44,7 @@ function HistorialEntregaList() {
     registros: visibles,
     total,
     pagina,
+    limite,
     ultimaPagina,
     busqueda,
     setBusqueda,
@@ -281,10 +282,11 @@ function HistorialEntregaList() {
           )}
         </div>
 
-        {!cargando && !sinContenido && (
+        {!cargando && !errorCarga && (
           <Paginador
             pagina={pagina}
             ultimaPagina={ultimaPagina}
+            tamano={limite}
             total={total}
             plural="entregas"
             onCambiar={irAPagina}

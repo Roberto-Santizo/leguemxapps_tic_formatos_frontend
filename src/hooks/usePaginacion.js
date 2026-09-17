@@ -1,21 +1,28 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 
-// Tamaño de página de todas las listas (paginacion.md §5: mantener `limit`
-// constante mientras se navega; cambiarlo invalida `lastPage`).
+// Tamaño de página por defecto de todas las listas (paginacion.md §5:
+// mantener `limit` constante mientras se navega; cambiarlo invalida
+// `lastPage`). Es el valor que se escribe en la URL cuando no trae `limit`.
 export const TAMANO_PAGINA = 20
 
-function leerPagina(valor) {
+function leerEntero(valor, porDefecto) {
   const n = Number.parseInt(valor, 10)
-  return Number.isInteger(n) && n >= 1 ? n : 1
+  return Number.isInteger(n) && n >= 1 ? n : porDefecto
 }
 
 /**
- * Estado de paginación y búsqueda en la URL (`?page=2&q=dell`), para que
- * refrescar, el botón atrás y un enlace directo conserven dónde estaba el
- * usuario. No hay estado local duplicado: la URL es la única fuente.
+ * Estado de paginación y búsqueda en la URL (`?page=2&limit=20&q=dell`),
+ * para que refrescar, el botón atrás y un enlace directo conserven dónde
+ * estaba el usuario. No hay estado local duplicado: la URL es la única
+ * fuente.
  *
- *  - `pagina` inválida o ausente → 1. En la URL, page=1 se omite.
+ *  - La URL SIEMPRE lleva `page` y `limit` explícitos (son los mismos que
+ *    se mandan al backend). Al entrar a la vista sin ellos, o con valores
+ *    inválidos, se completan de inmediato reemplazando la entrada del
+ *    historial: `/catalogo/marcas` → `/catalogo/marcas?page=1&limit=20`.
+ *  - `pagina` inválida o ausente → 1; `limite` inválido o ausente →
+ *    TAMANO_PAGINA.
  *  - `irAPagina(n)` agrega entrada al historial (atrás vuelve a la anterior);
  *    con { replace: true } la sustituye (corrección de página fuera de rango).
  *  - `setBusqueda` reemplaza (cada tecla no debe ensuciar el historial) y
@@ -23,16 +30,23 @@ function leerPagina(valor) {
  */
 export function usePaginaUrl() {
   const [searchParams, setSearchParams] = useSearchParams()
-  const pagina = leerPagina(searchParams.get('page'))
+  const pagina = leerEntero(searchParams.get('page'), 1)
+  const limite = leerEntero(searchParams.get('limit'), TAMANO_PAGINA)
   const busqueda = searchParams.get('q') || ''
 
-  const irAPagina = useCallback(
-    (n, { replace = false } = {}) => {
+  // Escribe page/limit en la URL conservando el resto (`q`). Se usa tanto
+  // para navegar como para completar la URL inicial.
+  const escribir = useCallback(
+    (n, { replace = false, texto } = {}) => {
       setSearchParams(
         (prev) => {
           const sig = new URLSearchParams(prev)
-          if (n > 1) sig.set('page', String(n))
-          else sig.delete('page')
+          sig.set('page', String(n))
+          sig.set('limit', String(leerEntero(prev.get('limit'), TAMANO_PAGINA)))
+          if (texto !== undefined) {
+            if (texto) sig.set('q', texto)
+            else sig.delete('q')
+          }
           return sig
         },
         { replace },
@@ -41,23 +55,18 @@ export function usePaginaUrl() {
     [setSearchParams],
   )
 
-  const setBusqueda = useCallback(
-    (texto) => {
-      setSearchParams(
-        (prev) => {
-          const sig = new URLSearchParams(prev)
-          if (texto) sig.set('q', texto)
-          else sig.delete('q')
-          sig.delete('page')
-          return sig
-        },
-        { replace: true },
-      )
-    },
-    [setSearchParams],
-  )
+  // URL inicial (o editada a mano) sin page/limit válidos → se completa.
+  const urlCompleta =
+    searchParams.get('page') === String(pagina) && searchParams.get('limit') === String(limite)
+  useEffect(() => {
+    if (!urlCompleta) escribir(pagina, { replace: true })
+  }, [urlCompleta, pagina, escribir])
 
-  return { pagina, busqueda, irAPagina, setBusqueda }
+  const irAPagina = useCallback((n, opciones) => escribir(n, opciones), [escribir])
+
+  const setBusqueda = useCallback((texto) => escribir(1, { replace: true, texto }), [escribir])
+
+  return { pagina, limite, busqueda, irAPagina, setBusqueda }
 }
 
 /**
@@ -65,10 +74,11 @@ export function usePaginaUrl() {
  * no tiene filtro de texto en estos listados -- ver paginacion.md §4):
  *
  *  - Sin texto de búsqueda: se pide al servidor solo la página actual
- *    (`limit` + `page`) y se usan `total` / `lastPage` de la respuesta.
+ *    (`limit` + `page`, los mismos de la URL) y se usan `total` /
+ *    `lastPage` de la respuesta.
  *  - Con texto: se pide UNA vez el listado completo (sin `limit`), se
  *    filtra en el cliente con `filtrar(registro, filtroEnMinusculas)` y se
- *    pagina también en el cliente con el mismo tamaño. El listado completo
+ *    pagina también en el cliente con el mismo `limit`. El listado completo
  *    se conserva mientras el usuario siga escribiendo; se descarta al
  *    limpiar la búsqueda o al `recargar`.
  *
@@ -82,13 +92,41 @@ export function usePaginaUrl() {
  * arreglo completo.
  */
 export function useListaPaginada({ token, listar, filtrar, mensajeError }) {
-  const { pagina, busqueda, irAPagina, setBusqueda } = usePaginaUrl()
-  const filtro = busqueda.trim().toLowerCase()
+  const { pagina, limite, busqueda: busquedaUrl, irAPagina, setBusqueda } = usePaginaUrl()
+  const filtro = busquedaUrl.trim().toLowerCase()
   const modo = filtro ? 'todos' : 'pagina'
 
-  // Resultado de la última página pedida al servidor. `pagina` guarda cuál se
-  // pidió, para no corregir la URL con datos de una petición anterior.
-  const [respuesta, setRespuesta] = useState(null) // { pagina, data, total, lastPage }
+  // Texto del buscador. El <input> NO puede ir controlado directamente por
+  // `q` de la URL: React Router aplica cada navegación como transición de
+  // baja prioridad y el valor llega tarde, así que al escribir rápido se
+  // pierden letras. Por eso el texto vive aquí (inmediato) y la URL lo sigue;
+  // la URL sigue siendo la fuente para filtrar y cargar datos. `escritos`
+  // recuerda lo que este hook mandó a la URL, para distinguir el eco de sus
+  // propias escrituras (se ignora) de un cambio externo, p. ej. el enlace
+  // del menú a la misma lista sin `q` (se adopta).
+  const [busqueda, setTexto] = useState(busquedaUrl)
+  const escritos = useRef(new Set())
+  useEffect(() => {
+    if (escritos.current.has(busquedaUrl)) {
+      if (busquedaUrl === busqueda) escritos.current.clear()
+      return
+    }
+    setTexto(busquedaUrl)
+  }, [busquedaUrl]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const cambiarBusqueda = useCallback(
+    (texto) => {
+      escritos.current.add(texto)
+      setTexto(texto)
+      setBusqueda(texto)
+    },
+    [setBusqueda],
+  )
+
+  // Resultado de la última página pedida al servidor. `pagina` / `limite`
+  // guardan qué se pidió, para no mostrar ni corregir la URL con datos de
+  // una petición anterior.
+  const [respuesta, setRespuesta] = useState(null) // { pagina, limite, data, total, lastPage }
   const [todos, setTodos] = useState(null) // listado completo (modo búsqueda) o null
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState('')
@@ -103,10 +141,11 @@ export function useListaPaginada({ token, listar, filtrar, mensajeError }) {
     ;(async () => {
       try {
         if (modo === 'pagina') {
-          const r = await listar(token, { limit: TAMANO_PAGINA, page: pagina })
+          const r = await listar(token, { limit: limite, page: pagina })
           if (!vivo) return
           setRespuesta({
             pagina,
+            limite,
             data: Array.isArray(r?.data) ? r.data : [],
             total: Number(r?.total) || 0,
             lastPage: Math.max(1, Number(r?.lastPage) || 1),
@@ -127,7 +166,7 @@ export function useListaPaginada({ token, listar, filtrar, mensajeError }) {
     }
     // `todos` entra en las dependencias solo para que, al llenarse, el efecto
     // vuelva a correr y salga por el `return` de arriba (sin repetir la carga).
-  }, [token, listar, modo, pagina, todos, version])
+  }, [token, listar, modo, pagina, limite, todos, version])
 
   const filtrados = useMemo(() => {
     if (modo !== 'todos' || !todos) return []
@@ -139,9 +178,9 @@ export function useListaPaginada({ token, listar, filtrar, mensajeError }) {
   let ultimaPagina = 1
   if (modo === 'todos') {
     total = filtrados.length
-    ultimaPagina = Math.max(1, Math.ceil(total / TAMANO_PAGINA))
-    registros = filtrados.slice((pagina - 1) * TAMANO_PAGINA, pagina * TAMANO_PAGINA)
-  } else if (respuesta && respuesta.pagina === pagina) {
+    ultimaPagina = Math.max(1, Math.ceil(total / limite))
+    registros = filtrados.slice((pagina - 1) * limite, pagina * limite)
+  } else if (respuesta && respuesta.pagina === pagina && respuesta.limite === limite) {
     registros = respuesta.data
     total = respuesta.total
     ultimaPagina = respuesta.lastPage
@@ -153,7 +192,7 @@ export function useListaPaginada({ token, listar, filtrar, mensajeError }) {
     !cargando &&
     !error &&
     pagina > ultimaPagina &&
-    (modo === 'todos' ? todos !== null : Boolean(respuesta && respuesta.pagina === pagina))
+    (modo === 'todos' ? todos !== null : Boolean(respuesta && respuesta.pagina === pagina && respuesta.limite === limite))
   useEffect(() => {
     if (fueraDeRango) irAPagina(ultimaPagina, { replace: true })
   }, [fueraDeRango, ultimaPagina, irAPagina])
@@ -165,16 +204,17 @@ export function useListaPaginada({ token, listar, filtrar, mensajeError }) {
 
   const limpiarBusqueda = useCallback(() => {
     setTodos(null)
-    setBusqueda('')
-  }, [setBusqueda])
+    cambiarBusqueda('')
+  }, [cambiarBusqueda])
 
   return {
     registros,
     total,
     pagina,
+    limite,
     ultimaPagina,
     busqueda,
-    setBusqueda,
+    setBusqueda: cambiarBusqueda,
     limpiarBusqueda,
     irAPagina,
     // Mientras se corrige una página fuera de rango se sigue mostrando el

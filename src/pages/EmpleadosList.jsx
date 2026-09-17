@@ -16,7 +16,7 @@ import { listarEmpleados, listarDepartamentos } from '../services/api.js'
  * confirmación); móvil con tarjetas sin botones que llevan directo al
  * detalle, y el "Editar" de esa página pidiendo la misma confirmación.
  *
- * Paginación y búsqueda en la URL (`?page=2&q=juan`) vía useListaPaginada:
+ * Paginación y búsqueda en la URL (`?page=2&limit=20&q=juan`) vía useListaPaginada:
  * /employees se pide por página; la búsqueda trae todo una vez y filtra en
  * el cliente. Departamentos se pide completo (es apoyo para el nombre).
  */
@@ -44,6 +44,7 @@ function EmpleadosList() {
     registros: visibles,
     total,
     pagina,
+    limite,
     ultimaPagina,
     busqueda,
     setBusqueda,
@@ -226,10 +227,11 @@ function EmpleadosList() {
           )}
         </div>
 
-        {!cargando && !sinContenido && (
+        {!cargando && !errorCarga && (
           <Paginador
             pagina={pagina}
             ultimaPagina={ultimaPagina}
+            tamano={limite}
             total={total}
             plural="empleados"
             onCambiar={irAPagina}

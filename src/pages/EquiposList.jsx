@@ -37,7 +37,7 @@ import {
  * apiladas debajo de md. En móvil no hay dos íconos -- se toca la tarjeta
  * completa y se despliega ahí mismo la lista (o el formulario de alta).
  *
- * Paginación y búsqueda en la URL (`?page=2&q=dell`) vía useListaPaginada:
+ * Paginación y búsqueda en la URL (`?page=2&limit=20&q=dell`) vía useListaPaginada:
  * /equipments se pide por página; la búsqueda trae todo una vez y filtra en
  * el cliente. Características y disponibles se piden aparte, completos (son
  * listados de apoyo, no los que se paginan).
@@ -55,6 +55,7 @@ function EquiposList() {
     registros: visibles,
     total: totalEquipos,
     pagina,
+    limite,
     ultimaPagina,
     busqueda,
     setBusqueda,
@@ -459,10 +460,11 @@ function EquiposList() {
           )}
         </div>
 
-        {!cargando && !sinContenido && (
+        {!cargando && !errorCarga && (
           <Paginador
             pagina={pagina}
             ultimaPagina={ultimaPagina}
+            tamano={limite}
             total={totalEquipos}
             plural="equipos"
             onCambiar={irAPagina}

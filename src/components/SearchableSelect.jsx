@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { Search, ChevronDown, X, Check } from 'lucide-react'
+import { Search, ChevronDown, X, Check, Eye } from 'lucide-react'
 
 /**
  * Selector con búsqueda (combobox) para cualquier campo que jale opciones de
@@ -32,6 +32,15 @@ function SearchableSelect({
   // de equipo en Entrega de Equipo (ver FormatoActa.jsx), el resto del
   // sistema sigue exactamente igual que antes.
   mobileSheetBreakpoint = 'sm',
+  // Opcional. Si viene, cada opción de la lista lleva un ojo a la derecha
+  // que llama `onVerDetalle(id)` SIN elegirla ni cerrar la lista: sirve para
+  // revisar el equipo mientras se navega, antes de decidirse. Además, con una
+  // opción ya elegida, el mismo ojo aparece dentro del campo (a la izquierda
+  // de la flecha) para volver a verla sin abrir la lista. Hoy solo lo usa el
+  // buscador de equipo en Entrega de Equipo (EquipoDetalleModal). En ambos
+  // sitios el ojo es un hermano del botón, no un hijo: un <button> no puede
+  // ir dentro de otro <button>.
+  onVerDetalle,
 }) {
   const usarMd = mobileSheetBreakpoint === 'md'
   const [abierto, setAbierto] = useState(false)
@@ -49,16 +58,24 @@ function SearchableSelect({
   const inputBusqueda = useRef(null)
 
   const seleccionado = options.find((o) => String(o.id) === String(value))
+  const mostrarOjo = Boolean(onVerDetalle && seleccionado && !disabled)
 
   useEffect(() => {
     if (!abierto) return
+    // Si hay una ventana modal encima (la ficha del equipo que abre el ojo
+    // de una opción), los clics y el Escape son para ella: la lista se queda
+    // abierta para seguir navegando al cerrarla.
+    function hayModalEncima() {
+      return Boolean(document.querySelector('[role="dialog"][aria-modal="true"]'))
+    }
     function onClick(e) {
       if (raiz.current && raiz.current.contains(e.target)) return
       if (panel.current && panel.current.contains(e.target)) return
+      if (hayModalEncima()) return
       setAbierto(false)
     }
     function onKey(e) {
-      if (e.key === 'Escape') setAbierto(false)
+      if (e.key === 'Escape' && !hayModalEncima()) setAbierto(false)
     }
     document.addEventListener('mousedown', onClick)
     document.addEventListener('keydown', onKey)
@@ -172,18 +189,33 @@ function SearchableSelect({
         ) : (
           filtradas.map((opcion) => {
             const activo = String(opcion.id) === String(value)
-            return (
+            const fila = (
               <button
                 key={opcion.id}
                 type="button"
                 onClick={() => elegir(opcion)}
-                className={`flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2.5 text-left font-body-md text-body-md transition-colors active:scale-[0.97] transition-transform ${
+                className={`flex w-full min-w-0 flex-1 items-center justify-between gap-2 rounded-lg px-3 py-2.5 text-left font-body-md text-body-md transition-colors active:scale-[0.97] transition-transform ${
                   activo ? 'bg-secondary-container text-on-secondary-container' : 'text-on-surface'
                 }`}
               >
                 <span className="truncate">{opcion.name}</span>
                 {activo && <Check className="h-4 w-4 shrink-0" strokeWidth={2.25} />}
               </button>
+            )
+            if (!onVerDetalle) return fila
+            return (
+              <div key={opcion.id} className="flex items-center gap-1">
+                {fila}
+                <button
+                  type="button"
+                  onClick={() => onVerDetalle(String(opcion.id))}
+                  aria-label={`Ver detalle de ${opcion.name}`}
+                  title="Ver detalle del equipo"
+                  className="grid h-9 w-9 shrink-0 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/25 active:scale-[0.90] transition-transform"
+                >
+                  <Eye className="h-4 w-4" strokeWidth={2} />
+                </button>
+              </div>
             )
           })
         )}
@@ -198,15 +230,39 @@ function SearchableSelect({
         type="button"
         disabled={disabled}
         onClick={() => setAbierto((v) => !v)}
-        className={`flex h-11 w-full items-center justify-between gap-2 rounded-lg border bg-surface px-3.5 font-body-md text-body-md text-on-surface transition-colors hover:border-outline focus:outline-none disabled:opacity-60 active:scale-[0.97] transition-transform ${
+        className={`flex h-11 w-full items-center justify-between gap-2 rounded-lg border bg-surface pl-3.5 font-body-md text-body-md text-on-surface transition-colors hover:border-outline focus:outline-none disabled:opacity-60 active:scale-[0.97] transition-transform ${
+          mostrarOjo ? 'pr-[4.25rem]' : 'pr-3.5'
+        } ${
           abierto ? 'border-primary ring-2 ring-primary/25' : 'border-outline-variant focus:border-primary focus:ring-2 focus:ring-primary/25'
         }`}
       >
         <span className={seleccionado ? 'truncate text-on-surface' : 'truncate text-on-surface-variant'}>
           {seleccionado ? seleccionado.name : placeholder}
         </span>
-        <ChevronDown className="h-4 w-4 shrink-0 text-on-surface-variant" strokeWidth={2} />
+        {!mostrarOjo && <ChevronDown className="h-4 w-4 shrink-0 text-on-surface-variant" strokeWidth={2} />}
       </button>
+
+      {/* Ojo + flecha superpuestos al campo (position absolute sobre la caja
+          relative de arriba, con alto fijo h-11 para no depender del helpText
+          de abajo). La flecha se vuelve a pintar aquí para que quede a la
+          derecha del ojo y con la misma separación que tenía sola. */}
+      {mostrarOjo && (
+        <div className="pointer-events-none absolute right-0 top-0 flex h-11 items-center gap-1 pr-3.5">
+          <button
+            type="button"
+            onClick={() => {
+              setAbierto(false)
+              onVerDetalle(String(seleccionado.id))
+            }}
+            aria-label={`Ver detalle de ${seleccionado.name}`}
+            title="Ver detalle del equipo"
+            className="pointer-events-auto grid h-8 w-8 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/25 active:scale-[0.90] transition-transform"
+          >
+            <Eye className="h-4 w-4" strokeWidth={2} />
+          </button>
+          <ChevronDown className="h-4 w-4 shrink-0 text-on-surface-variant" strokeWidth={2} />
+        </div>
+      )}
 
       {helpText && <p className="mt-1.5 font-label-sm text-label-sm text-on-surface-variant">{helpText}</p>}
 

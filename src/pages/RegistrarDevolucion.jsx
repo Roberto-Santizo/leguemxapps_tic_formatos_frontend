@@ -53,7 +53,7 @@ const celdaInputClass =
  * nuevos, y es la que de verdad los conecta al backend.
  *
  * Puede ser parcial: se listan solo los equipos de esa entrega que
- * todavía no se han devuelto (GET /delivery_document_details?pending=true)
+ * todavía no se han devuelto (GET /delivery_document_details?pending=1)
  * y se eligen cuáles regresan.
  */
 function RegistrarDevolucion() {

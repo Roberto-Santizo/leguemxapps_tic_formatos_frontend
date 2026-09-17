@@ -23,7 +23,7 @@ function nombreEstado(status) {
  * tarjetas sin botones que llevan directo al detalle. Sin eliminar -- la API
  * no ofrece DELETE para return_documents.
  *
- * Paginación y búsqueda en la URL (`?page=2&q=juan`) vía useListaPaginada:
+ * Paginación y búsqueda en la URL (`?page=2&limit=20&q=juan`) vía useListaPaginada:
  * /return_documents se pide por página; la búsqueda trae todo una vez y
  * filtra en el cliente.
  */
@@ -42,6 +42,7 @@ function HistorialDevolucionList() {
     registros: visibles,
     total,
     pagina,
+    limite,
     ultimaPagina,
     busqueda,
     setBusqueda,
@@ -240,10 +241,11 @@ function HistorialDevolucionList() {
           )}
         </div>
 
-        {!cargando && !sinContenido && (
+        {!cargando && !errorCarga && (
           <Paginador
             pagina={pagina}
             ultimaPagina={ultimaPagina}
+            tamano={limite}
             total={total}
             plural="devoluciones"
             onCambiar={irAPagina}
