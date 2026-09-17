@@ -173,7 +173,22 @@ function HistorialDevolucionView() {
     }
   }
 
+
+
+
+//aca empieza el log
+console.log("Estado documento:", documento);
+console.log("Cargando:", cargando, "Error:", error);
+//aca acaba
+
+
+
+
+
   async function handleDescargarPdf() {
+    //log
+    console.log("Iniciando descarga de PDF con datos:", documento);
+    //logg
     if (!documento) return
     setGenerandoPdf(true)
     try {

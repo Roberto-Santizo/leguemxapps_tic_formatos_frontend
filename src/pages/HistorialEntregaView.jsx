@@ -216,13 +216,14 @@ function HistorialEntregaView() {
     if (!documento) return
     setGenerandoPdf(true)
     try {
-      const html = construirHtmlEntrega(
+      const html = await construirHtmlEntrega(
         { ...documento, delivery_date: fechaEntrega.valor },
         formato,
         {
           responsable: urlArchivoPublico(RUTA_PRUEBA_FIRMA_RESPONSABLE),
           it: urlArchivoPublico(RUTA_PRUEBA_FIRMA_ADMINISTRADOR),
         },
+        token,
       )
       await generarPdfPapelFisico(html, `entrega-equipo-${id}.pdf`)
     } catch {

@@ -1,8 +1,33 @@
 // Las fechas de entrega/devolución (`delivery_date`, `return_date`) las pone
-// el servidor en UTC (ISO 8601, ej. "2026-09-09T23:05:00.000000Z"). Todo el
-// sistema es de uso interno en Guatemala, así que siempre se muestran
-// convertidas a hora de Guatemala (America/Guatemala, UTC-6 fijo, sin
-// horario de verano), nunca la hora UTC cruda del backend.
+// el servidor en UTC (ISO 8601, ej. "2026-09-09T23:05:00.000000Z") o, según
+// la versión del backend, en formato legible "dd-mm-aaaa hh:mm:ss AM/PM"
+// (ej. "14-09-2026 05:09:56 PM") -- que `new Date()` no reconoce y devuelve
+// Invalid Date. Todo el sistema es de uso interno en Guatemala, así que
+// siempre se muestran convertidas a hora de Guatemala (America/Guatemala,
+// UTC-6 fijo, sin horario de verano), nunca la hora UTC cruda del backend.
+
+// Interpreta cualquiera de los dos formatos anteriores y devuelve un Date
+// válido (o uno inválido si no se reconoce nada, igual que antes). Las
+// fechas guardadas por useFechaLocal.js siguen siendo ISO, así que pasan
+// directo por la rama de abajo sin cambios.
+function parsearFecha(valor) {
+  if (typeof valor === 'string') {
+    const coincidencia = valor
+      .trim()
+      .match(/^(\d{2})-(\d{2})-(\d{4})(?:\s+(\d{1,2}):(\d{2}):(\d{2})\s*(AM|PM)?)?$/i)
+    if (coincidencia) {
+      const [, dia, mes, anio, horaStr, minStr, segStr, ampm] = coincidencia
+      let hora = horaStr ? Number(horaStr) : 0
+      if (ampm) {
+        const esPM = ampm.toUpperCase() === 'PM'
+        if (esPM && hora !== 12) hora += 12
+        if (!esPM && hora === 12) hora = 0
+      }
+      return new Date(Number(anio), Number(mes) - 1, Number(dia), hora, Number(minStr) || 0, Number(segStr) || 0)
+    }
+  }
+  return new Date(valor)
+}
 
 /**
  * Formatea un string de fecha/hora ISO del backend a "dd/mm/aaaa HH:mm" en
@@ -10,7 +35,7 @@
  */
 export function formatearFechaHora(valor) {
   if (!valor) return '—'
-  const fecha = new Date(valor)
+  const fecha = parsearFecha(valor)
   if (Number.isNaN(fecha.getTime())) return '—'
 
   const partes = new Intl.DateTimeFormat('es-GT', {
@@ -35,7 +60,7 @@ export function formatearFechaHora(valor) {
  */
 export function formatearFecha(valor) {
   if (!valor) return '—'
-  const fecha = new Date(valor)
+  const fecha = parsearFecha(valor)
   if (Number.isNaN(fecha.getTime())) return '—'
 
   const partes = new Intl.DateTimeFormat('es-GT', {
@@ -58,7 +83,7 @@ export function formatearFecha(valor) {
  */
 export function fechaInputValue(valor) {
   if (!valor) return ''
-  const fecha = new Date(valor)
+  const fecha = parsearFecha(valor)
   if (Number.isNaN(fecha.getTime())) return ''
 
   const partes = new Intl.DateTimeFormat('en-CA', {
@@ -83,7 +108,7 @@ export function constanciaDevolucion(valor) {
   if (!valor) {
     return 'Por este medio se hace constar que hago constar que entrego todo el equipo descrito arriba.'
   }
-  const fecha = new Date(valor)
+  const fecha = parsearFecha(valor)
   if (Number.isNaN(fecha.getTime())) {
     return 'Por este medio se hace constar que hago constar que entrego todo el equipo descrito arriba.'
   }

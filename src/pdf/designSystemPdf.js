@@ -62,6 +62,19 @@ export const CSS_PAPEL_FISICO = `
 .lgx-pdf tbody tr:last-child td{border-bottom:1px solid #A9A598}
 .lgx-pdf .tabla-vacia{padding:16px 10px;font-size:12px;color:#8F8B7E;font-style:italic}
 
+/* CARACTERÍSTICAS -- sub-línea bajo cada equipo con sus características de
+   Catálogo (Procesador, RAM, etc.), igual que en la hoja física de
+   Responsabilidad. tr.equipo/tr.caract van siempre en pareja: la fila del
+   equipo pierde el borde inferior para que la sub-línea se lea pegada a él,
+   y el borde real queda en tr.caract (o en la última fila de la tabla). */
+.lgx-pdf tbody tr.equipo td{border-bottom:none;padding-bottom:3px}
+.lgx-pdf tbody tr.caract td{padding-top:0;padding-bottom:10px}
+.lgx-pdf tbody tr.caract:last-child td{border-bottom:1px solid #A9A598}
+.lgx-pdf .caract-lista{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:2px;padding:8px 10px 2px 20px;border-left:1.5px solid #D5D1C4}
+.lgx-pdf .caract-item{font-family:Carlito,'Segoe UI',sans-serif;font-size:10px;color:#5A574F;white-space:nowrap}
+.lgx-pdf .caract-item b{color:#1A1A17;font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:8.5px;margin-right:5px}
+.lgx-pdf .caract-vacio{font-family:Carlito,'Segoe UI',sans-serif;font-size:9.5px;font-style:italic;color:#8F8B7E;padding:2px 10px 2px 20px;border-left:1.5px solid #D5D1C4}
+
 /* EXTRAVÍO -- mismos colores de "error" que ya usa el resto del sistema
    (tailwind.config.js: error #B3453B / error-container #F1DCD9), para un
    equipo que en la devolución no regresó de verdad (pérdida/robo). */
