@@ -15,8 +15,30 @@ import { Search, ChevronDown, X, Check, Eye } from 'lucide-react'
  * - Sin resultados: mensaje "No se encontraron coincidencias" en vez de
  *   dejar la lista vacía sin explicación.
  *
- * options: [{ id, name }]  ·  value: id seleccionado (o '')  ·  onChange(id)
+ * options: [{ id, name, codigo? }]  ·  value: id seleccionado (o '')  ·  onChange(id)
+ *
+ * `codigo` es opcional y sirve para listas donde varias opciones comparten el
+ * mismo nombre y solo las distingue un identificador (la serie de un equipo:
+ * diez "Dell Latitude" iguales en el catálogo). Cuando viene:
+ * - La fila de la lista va a dos líneas: nombre arriba, código en mono abajo,
+ *   sin truncar, para leerlo contra la etiqueta física.
+ * - En el campo con opción elegida el código queda siempre completo a la
+ *   derecha (shrink-0); lo que se trunca es el nombre.
+ * - El buscador también filtra por código, ignorando mayúsculas, espacios,
+ *   guiones y puntos (teclear los últimos 4-5 caracteres del sticker basta).
+ * - Enter con una sola coincidencia la elige (ahorra el clic final; sirve
+ *   también con un lector de código de barras, que teclea + Enter).
+ * Sin `codigo` todo se pinta y se busca exactamente igual que siempre (salvo
+ * que la búsqueda ahora ignora espacios/guiones, mejora inofensiva).
  */
+
+// Minúsculas y sin espacios, guiones, puntos ni guiones bajos: así la serie
+// "ABC-123 45" y la búsqueda "abc12345" coinciden.
+function normalizar(texto) {
+  return String(texto ?? '')
+    .toLowerCase()
+    .replace(/[\s\-_.]/g, '')
+}
 function SearchableSelect({
   options,
   value,
@@ -142,9 +164,9 @@ function SearchableSelect({
   }, [abierto])
 
   const filtradas = useMemo(() => {
-    const q = busqueda.trim().toLowerCase()
+    const q = normalizar(busqueda)
     if (!q) return options
-    return options.filter((o) => o.name.toLowerCase().includes(q))
+    return options.filter((o) => normalizar(o.name).includes(q) || normalizar(o.codigo).includes(q))
   }, [options, busqueda])
 
   function elegir(opcion) {
@@ -163,6 +185,12 @@ function SearchableSelect({
             ref={inputBusqueda}
             value={busqueda}
             onChange={(e) => setBusqueda(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && filtradas.length === 1) {
+                e.preventDefault()
+                elegir(filtradas[0])
+              }
+            }}
             placeholder="Buscar..."
             className="h-10 w-full rounded-lg border border-outline-variant bg-surface pl-9 pr-3 font-body-md text-body-md text-on-surface focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25"
           />
@@ -198,7 +226,14 @@ function SearchableSelect({
                   activo ? 'bg-secondary-container text-on-secondary-container' : 'text-on-surface'
                 }`}
               >
-                <span className="truncate">{opcion.name}</span>
+                {opcion.codigo ? (
+                  <span className="flex min-w-0 flex-col">
+                    <span className="truncate">{opcion.name}</span>
+                    <span className="break-all font-mono text-label-sm uppercase tracking-wide">{opcion.codigo}</span>
+                  </span>
+                ) : (
+                  <span className="truncate">{opcion.name}</span>
+                )}
                 {activo && <Check className="h-4 w-4 shrink-0" strokeWidth={2.25} />}
               </button>
             )
@@ -209,7 +244,7 @@ function SearchableSelect({
                 <button
                   type="button"
                   onClick={() => onVerDetalle(String(opcion.id))}
-                  aria-label={`Ver detalle de ${opcion.name}`}
+                  aria-label={`Ver detalle de ${[opcion.name, opcion.codigo].filter(Boolean).join(' ')}`}
                   title="Ver detalle del equipo"
                   className="grid h-9 w-9 shrink-0 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/25 active:scale-[0.90] transition-transform"
                 >
@@ -239,6 +274,11 @@ function SearchableSelect({
         <span className={seleccionado ? 'truncate text-on-surface' : 'truncate text-on-surface-variant'}>
           {seleccionado ? seleccionado.name : placeholder}
         </span>
+        {seleccionado?.codigo && (
+          <span className="ml-auto shrink-0 font-mono text-label-sm uppercase tracking-wide text-on-surface">
+            {seleccionado.codigo}
+          </span>
+        )}
         {!mostrarOjo && <ChevronDown className="h-4 w-4 shrink-0 text-on-surface-variant" strokeWidth={2} />}
       </button>
 
@@ -254,7 +294,7 @@ function SearchableSelect({
               setAbierto(false)
               onVerDetalle(String(seleccionado.id))
             }}
-            aria-label={`Ver detalle de ${seleccionado.name}`}
+            aria-label={`Ver detalle de ${[seleccionado.name, seleccionado.codigo].filter(Boolean).join(' ')}`}
             title="Ver detalle del equipo"
             className="pointer-events-auto grid h-8 w-8 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/25 active:scale-[0.90] transition-transform"
           >

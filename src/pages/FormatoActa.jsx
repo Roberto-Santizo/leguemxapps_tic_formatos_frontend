@@ -195,17 +195,21 @@ function FormatoActa() {
     const usadosEnOtrasFilas = new Set(
       filasEntrega.filter((f) => f.id !== filaId && f.equipmentId).map((f) => String(f.equipmentId))
     )
-    // La etiqueta lleva también la serie (en mayúsculas, como en la tabla del
-    // acta) porque es lo que se confronta contra la etiqueta física del
-    // equipo: así el buscador del SearchableSelect (que filtra sobre `name`)
-    // encuentra el equipo tecleando el número de serie directamente.
+    // La serie va aparte, en `codigo` (en mayúsculas, como en la tabla del
+    // acta): es lo único que distingue diez "Dell Latitude" iguales y lo que
+    // se confronta contra la etiqueta física. SearchableSelect la pinta en
+    // mono en su propia línea, la deja siempre visible en el campo y la
+    // busca ignorando espacios/guiones. Antes iba pegada al final de `name`
+    // y se truncaba en pantallas angostas. Orden por nombre y luego serie
+    // para que los equipos iguales queden juntos.
     return equipos
       .filter((e) => !usadosEnOtrasFilas.has(String(e.id)))
-      .map((e) => {
-        const partes = [e.brand ? `${e.name} — ${e.brand}` : e.name]
-        if (e.serie) partes.push(String(e.serie).toUpperCase())
-        return { id: e.id, name: partes.join(' · ') }
-      })
+      .map((e) => ({
+        id: e.id,
+        name: e.brand ? `${e.name} — ${e.brand}` : e.name,
+        codigo: e.serie ? String(e.serie).toUpperCase() : '',
+      }))
+      .sort((a, b) => a.name.localeCompare(b.name, 'es') || a.codigo.localeCompare(b.codigo, 'es'))
   }
 
   function agregarFilaEntrega() {

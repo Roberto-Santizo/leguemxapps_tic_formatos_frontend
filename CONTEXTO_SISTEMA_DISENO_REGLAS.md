@@ -128,6 +128,16 @@ nunca escribir un componente de página nuevo para eso.
   (buscador con lista filtrable), porque esas listas pueden crecer. En escritorio es un
   desplegable bajo el campo; en móvil se abre como hoja completa (fondo oscuro + buscador
   arriba + lista), igual que una alerta de confirmación.
+- **Serie como eje del selector de equipo** (`SearchableSelect` con `codigo`, 2026-09-17):
+  las opciones aceptan `{ id, name, codigo? }`. Con `codigo` la fila va a dos líneas (nombre
+  arriba, código en mono abajo, sin truncar), el código queda siempre completo a la derecha
+  del campo cuando hay opción elegida (lo que se trunca es el nombre), la búsqueda también
+  filtra por código ignorando mayúsculas/espacios/guiones/puntos (teclear los últimos 4-5
+  caracteres del sticker basta) y Enter elige la única coincidencia. Hoy solo lo usa el
+  equipo en Entrega de Equipo (`FormatoActa.opcionesEquipoParaFila`, `codigo` = serie,
+  ordenado por nombre y luego serie). Marca/Departamento/Empleado siguen pasando
+  `{ id, name }` y se ven igual. Motivo: diez "Dell Latitude" iguales solo se distinguen
+  por la serie, y antes iba pegada al final del nombre y se cortaba.
 - **Ficha del equipo desde el acta** (`EquipoDetalleModal.jsx`, 2026-09-17): en Entrega de
   Equipo, el buscador de equipo muestra un ojo dentro del campo (prop `onVerDetalle` de
   `SearchableSelect`, solo cuando ya hay equipo elegido) que abre una ventana emergente de
