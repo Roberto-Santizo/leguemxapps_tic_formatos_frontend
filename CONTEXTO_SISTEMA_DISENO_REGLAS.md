@@ -118,7 +118,12 @@ nunca escribir un componente de página nuevo para eso.
 - Patrón repetido en TODO el sistema para listas: **escritorio** = tabla con íconos de
   acción (ojo=ver, lápiz=editar, basura=eliminar); **móvil** = tarjetas apiladas, sin
   botones visibles, tocar la tarjeta entera navega al detalle. El punto de quiebre entre
-  "móvil" y "escritorio" en el layout general es **768px** (`md:` de Tailwind).
+  "móvil" y "escritorio" en el layout general es **1024px**, con `md:` de Tailwind
+  redefinido en `tailwind.config.js` (vale 1024, no los 768 de fábrica). El motivo: una
+  tablet mide entre 768 y 1024, así que con el valor original caía del lado de escritorio y
+  se le mostraba la tabla, que no le entra. Las tablets quedan a propósito en un punto
+  intermedio: tarjetas y menú en cajón como en móvil, pero formularios y firmas a dos
+  columnas, porque eso lo decide `sm:` (640px), que no se tocó.
 - Patrón repetido para filas repetibles de un formulario (características de un equipo,
   equipos de una entrega, etc.): en escritorio pueden ir en tabla; en móvil siempre van
   como tarjetas apiladas con cada campo etiquetado arriba, más un botón punteado "Agregar

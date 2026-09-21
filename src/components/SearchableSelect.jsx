@@ -25,13 +25,14 @@ function SearchableSelect({
   disabled = false,
   emptyOptionsText = 'No hay opciones registradas todavía.',
   helpText,
-  // Punto en el que el panel deja de ser hoja completa (móvil) y pasa a
-  // desplegable bajo el campo (escritorio). Por defecto 'sm' (640px), igual
-  // que siempre. Un caller puede pedir 'md' (768px) para que coincida con su
-  // propio punto de quiebre móvil/escritorio -- hoy solo lo usa el buscador
-  // de equipo en Entrega de Equipo (ver FormatoActa.jsx), el resto del
-  // sistema sigue exactamente igual que antes.
-  mobileSheetBreakpoint = 'sm',
+  // Punto en el que el panel deja de ser ventana centrada (móvil) y pasa a
+  // desplegable bajo el campo (escritorio). Por defecto 'md', que desde que
+  // `md` vale 1024px (ver tailwind.config.js) incluye a las tablets: con el
+  // valor anterior ('sm', 640px) una tablet abría el desplegable chico bajo el
+  // campo, incómodo para el dedo. Los celulares no cambian -- ya estaban por
+  // debajo de 640 y abrían la ventana igual. Un caller puede pedir 'sm' para
+  // volver al comportamiento anterior en un campo puntual.
+  mobileSheetBreakpoint = 'md',
 }) {
   const usarMd = mobileSheetBreakpoint === 'md'
   const [abierto, setAbierto] = useState(false)

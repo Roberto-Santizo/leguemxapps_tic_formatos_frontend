@@ -4,6 +4,23 @@ export default {
   darkMode: 'class',
   theme: {
     extend: {
+      /*
+        `md` vale 1024px, NO los 768 de fábrica.
+
+        Motivo: una tablet mide entre 768 y 1024, así que con el valor original
+        caía del lado de "escritorio" y se le mostraba la tabla, que no le entra.
+        Redefiniéndolo acá se mueven juntas las tres cosas que dependen de este
+        corte -- tabla ↔ tarjetas, menú lateral fijo ↔ en cajón, y los márgenes
+        de página -- sin tocar ni una pantalla.
+
+        Los demás cortes quedan como siempre (sm 640, lg 1024, xl 1280) y los
+        celulares no se ven afectados: están por debajo de 768 en ambos casos.
+        `lg` también vale 1024, pero no se usa en el proyecto, así que no hay
+        conflicto.
+      */
+      screens: {
+        md: '1024px',
+      },
       colors: {
         /*
           ==========================================================================
