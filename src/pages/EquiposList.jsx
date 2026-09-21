@@ -1,8 +1,9 @@
-import { Fragment, useCallback, useEffect, useState } from 'react'
+import { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Eye, Pencil, Plus, ChevronDown, HardDrive } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
-import { useListaPaginada } from '../hooks/usePaginacion.js'
+import { useListaPaginada, usePaginaUrl } from '../hooks/usePaginacion.js'
+import { normalizarBusqueda } from '../utils/texto.js'
 import Buscador from '../components/Buscador.jsx'
 import ConfirmDialog from '../components/ConfirmDialog.jsx'
 import EstadoVacio from '../components/EstadoVacio.jsx'
@@ -37,19 +38,86 @@ import {
  * apiladas debajo de md. En móvil no hay dos íconos -- se toca la tarjeta
  * completa y se despliega ahí mismo la lista (o el formulario de alta).
  *
- * Paginación y búsqueda en la URL (`?page=2&limit=20&q=dell`) vía useListaPaginada:
- * /equipments se pide por página; la búsqueda trae todo una vez y filtra en
- * el cliente. Características y disponibles se piden aparte, completos (son
- * listados de apoyo, no los que se paginan).
+ * Paginación, búsqueda y filtro de estado en la URL
+ * (`?page=2&limit=20&q=dell&estado=disponible`) vía useListaPaginada:
+ * /equipments se pide por página; con búsqueda o filtro se trae todo una vez y
+ * se filtra en el cliente. Características y disponibles se piden aparte,
+ * completos (son listados de apoyo, no los que se paginan).
  */
 
+// La búsqueda encuentra por nombre, marca y SERIE. La serie va por
+// `normalizarBusqueda` (y no por un `includes` a secas como los otros dos)
+// porque en la etiqueta física viene con separadores que nadie teclea igual:
+// así "ABC-123 45" aparece escribiendo "abc12345", y con los últimos caracteres
+// del sticker basta. Es la misma regla que usa el selector de equipo de Entrega
+// de Equipo, para que los dos buscadores encuentren lo mismo.
 function filtrarEquipo(e, filtro) {
-  return (e.name || '').toLowerCase().includes(filtro) || (e.brand || '').toLowerCase().includes(filtro)
+  // Normalizada, una búsqueda de puros separadores ("-", ".") queda vacía, y
+  // una cadena vacía la contienen todas las series: sin este guarda, teclear
+  // un guion mostraría el inventario entero como si fuera un resultado.
+  const serie = normalizarBusqueda(filtro)
+  return (
+    (e.name || '').toLowerCase().includes(filtro) ||
+    (e.brand || '').toLowerCase().includes(filtro) ||
+    (serie !== '' && normalizarBusqueda(e.serie).includes(serie))
+  )
 }
+
+// Filtro por estado. El estado NO es un campo del equipo: se deduce cruzando
+// con /equipments/available (ver `disponibles` más abajo), así que estos tres
+// botones no se pueden traducir a un parámetro del backend -- filtran en el
+// cliente, sobre el inventario completo.
+const FILTROS_ESTADO = [
+  { valor: '', etiqueta: 'Todos', activo: 'bg-secondary-container text-on-secondary-container' },
+  {
+    valor: 'disponible',
+    etiqueta: 'Disponible',
+    punto: 'bg-available',
+    activo: 'bg-available-container text-on-available-container',
+  },
+  {
+    valor: 'en-posesion',
+    etiqueta: 'En posesión',
+    punto: 'bg-assigned',
+    activo: 'bg-assigned-container text-on-assigned-container',
+  },
+]
 
 function EquiposList() {
   const { token } = useAuth()
   const navigate = useNavigate()
+
+  // Conteo de características por NOMBRE de equipo (el listado reducido de
+  // /caracteristics trae el nombre, no el id -- así está documentado); se
+  // traduce a id al pintar cada fila. Conteos ajustados a mano (tras crear
+  // una característica desde la fila) van en `conteosPorId`, que manda.
+  const [conteosPorNombre, setConteosPorNombre] = useState({})
+  const [conteosPorId, setConteosPorId] = useState({})
+  // Ids que SÍ aparecen en /equipments/available -- esos están libres. El
+  // resto del inventario (los que no están en este set) está en posesión de
+  // alguien. No hay un campo de estado en el equipo: se deriva cruzando con
+  // este listado.
+  const [disponibles, setDisponibles] = useState(null) // null = todavía no se sabe
+  // `disponibles` vale null en dos casos muy distintos: todavía no llegó la
+  // respuesta, o la llamada falló. Este flag los separa, que es lo que permite
+  // esperar en un caso y rendirse en el otro.
+  const [apoyoListo, setApoyoListo] = useState(false)
+
+  // El estado elegido vive en la URL, igual que la página y la búsqueda, para
+  // que refrescar o compartir el enlace conserve lo que se está viendo. Un
+  // valor inventado a mano en la barra de direcciones se ignora.
+  const { parametro, setParametro } = usePaginaUrl()
+  const estadoUrl = parametro('estado')
+  const estadoFiltro = FILTROS_ESTADO.some((f) => f.valor === estadoUrl) ? estadoUrl : ''
+
+  // Null mientras no haya filtro o no se sepa quién está libre; en cuanto es
+  // una función, useListaPaginada deja de pedir la lista por páginas y pasa a
+  // traerla completa para poder filtrarla entera.
+  const filtroEstado = useMemo(() => {
+    if (!estadoFiltro || !disponibles) return null
+    return (equipo) =>
+      estadoFiltro === 'disponible' ? disponibles.has(equipo.id) : !disponibles.has(equipo.id)
+  }, [estadoFiltro, disponibles])
 
   const {
     registros: visibles,
@@ -69,19 +137,8 @@ function EquiposList() {
     listar: listarEquipos,
     filtrar: filtrarEquipo,
     mensajeError: 'No se pudo obtener la lista de equipos',
+    filtroExtra: filtroEstado,
   })
-
-  // Conteo de características por NOMBRE de equipo (el listado reducido de
-  // /caracteristics trae el nombre, no el id -- así está documentado); se
-  // traduce a id al pintar cada fila. Conteos ajustados a mano (tras crear
-  // una característica desde la fila) van en `conteosPorId`, que manda.
-  const [conteosPorNombre, setConteosPorNombre] = useState({})
-  const [conteosPorId, setConteosPorId] = useState({})
-  // Ids que SÍ aparecen en /equipments/available -- esos están libres. El
-  // resto del inventario (los que no están en este set) está en posesión de
-  // alguien. No hay un campo de estado en el equipo: se deriva cruzando con
-  // este listado.
-  const [disponibles, setDisponibles] = useState(null) // null = todavía no se sabe
 
   // Fila desplegada: solo para el alta ("+"); el ojo ahora navega a
   // /catalogo/equipos/:id/ver, la vista completa del equipo.
@@ -98,6 +155,7 @@ function EquiposList() {
   // dato en vez de tumbar la lista. Sin "disponibles" el badge de estado no
   // se muestra -- mejor omitirlo que mostrar un estado equivocado.
   const cargarApoyo = useCallback(async () => {
+    setApoyoListo(false)
     const [caracts, libres] = await Promise.all([
       listarCaracteristicas(token).catch(() => []),
       listarEquiposDisponibles(token).catch(() => null),
@@ -109,11 +167,20 @@ function EquiposList() {
     setConteosPorNombre(porNombre)
     setConteosPorId({})
     setDisponibles(Array.isArray(libres) ? new Set(libres.map((e) => e.id)) : null)
+    setApoyoListo(true)
   }, [token])
 
   useEffect(() => {
     cargarApoyo()
   }, [cargarApoyo])
+
+  // Si /equipments/available falló no hay de dónde sacar el estado, así que el
+  // filtro se quita de la URL en vez de quedarse puesto sin hacer nada (los
+  // botones tampoco se muestran en ese caso, y una URL con un filtro invisible
+  // se ve como un error del sistema).
+  useEffect(() => {
+    if (estadoFiltro && apoyoListo && !disponibles) setParametro('estado', '')
+  }, [estadoFiltro, apoyoListo, disponibles, setParametro])
 
   // "Reintentar": vuelve a pedir la página y los listados de apoyo.
   const cargar = useCallback(() => {
@@ -153,9 +220,13 @@ function EquiposList() {
   }
 
   const hayRegistros = visibles.length > 0
+  // Con un filtro de estado puesto no se puede pintar nada hasta saber quién
+  // está libre: si no, se vería un instante el inventario completo sin filtrar
+  // y luego daría un salto. Se sigue mostrando el esqueleto hasta entonces.
+  const cargandoLista = cargando || (Boolean(estadoFiltro) && !apoyoListo)
   // La carga tiene sus propios esqueletos (misma forma que la tabla y las
   // tarjetas), así que se separa de los estados "sin contenido".
-  const sinContenido = !cargando && (Boolean(errorCarga) || !hayRegistros)
+  const sinContenido = !cargandoLista && (Boolean(errorCarga) || !hayRegistros)
 
   const botonSecundario =
     'inline-flex h-10 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high active:scale-[0.97] transition-transform'
@@ -175,10 +246,37 @@ function EquiposList() {
     <EstadoVacio
       variante="busqueda"
       titulo="No se encontraron resultados"
-      descripcion={`Ninguna coincidencia para “${busqueda}”.`}
+      descripcion={
+        estadoFiltro
+          ? `Ninguna coincidencia para “${busqueda}” entre los equipos ${
+              estadoFiltro === 'disponible' ? 'disponibles' : 'en posesión'
+            }.`
+          : `Ninguna coincidencia para “${busqueda}”.`
+      }
       accion={
         <button type="button" onClick={limpiarBusqueda} className={botonSecundario}>
           Limpiar búsqueda
+        </button>
+      }
+    />
+  ) : estadoFiltro ? (
+    <EstadoVacio
+      icon={HardDrive}
+      titulo={
+        estadoFiltro === 'disponible' ? 'No hay equipos disponibles' : 'No hay equipos en posesión'
+      }
+      descripcion={
+        estadoFiltro === 'disponible'
+          ? 'Todo el inventario está entregado en este momento.'
+          : 'Ningún equipo está entregado en este momento.'
+      }
+      accion={
+        <button
+          type="button"
+          onClick={() => setParametro('estado', '')}
+          className={botonSecundario}
+        >
+          Ver todos
         </button>
       }
     />
@@ -278,7 +376,49 @@ function EquiposList() {
           </Link>
         </div>
 
-        <Buscador value={busqueda} onChange={setBusqueda} placeholder="Buscar equipo o marca..." />
+        <div className="flex flex-col gap-stack-sm">
+          <Buscador
+            value={busqueda}
+            onChange={setBusqueda}
+            placeholder="Buscar equipo, marca o serie..."
+          />
+
+          {/* Filtro por estado. Tres botones y no un desplegable: son pocas
+              opciones y conviene ver de un golpe cuál está puesta. Se ocultan
+              mientras no se sepa quién está libre, igual que el badge de cada
+              fila -- es preferible no ofrecer el filtro que ofrecer uno que
+              devolvería un resultado equivocado. */}
+          {disponibles && (
+            <div
+              className="flex flex-wrap items-center gap-2"
+              role="group"
+              aria-label="Filtrar por estado"
+            >
+              {FILTROS_ESTADO.map(({ valor, etiqueta, punto, activo }) => {
+                const puesto = estadoFiltro === valor
+                return (
+                  <button
+                    key={valor || 'todos'}
+                    type="button"
+                    onClick={() => setParametro('estado', valor)}
+                    aria-pressed={puesto}
+                    className={[
+                      'inline-flex h-9 items-center gap-1.5 rounded-full border px-3.5 font-label-bold text-label-bold transition-colors active:scale-[0.97] transition-transform',
+                      puesto
+                        ? `border-transparent ${activo}`
+                        : 'border-outline-variant bg-surface text-on-surface-variant hover:border-outline hover:bg-surface-container-high',
+                    ].join(' ')}
+                  >
+                    {punto && (
+                      <span className={`h-1.5 w-1.5 rounded-full ${punto}`} aria-hidden="true" />
+                    )}
+                    {etiqueta}
+                  </button>
+                )
+              })}
+            </div>
+          )}
+        </div>
 
         {/* ---- Escritorio y tablet: tabla ---- */}
         {/* overflow-x-auto (antes overflow-hidden): a 768px el área útil no
@@ -286,7 +426,7 @@ function EquiposList() {
             cortada e inalcanzable, sin forma de desplazarse. Mismo patrón que
             ya usaban las tablas de actas. */}
         <div className="hidden md:block bg-surface-container-lowest border border-outline-variant rounded-xl overflow-x-auto shadow-sm">
-          {cargando ? (
+          {cargandoLista ? (
             <SkeletonTabla columnas={6} filas={5} />
           ) : sinContenido ? (
             estado
@@ -325,8 +465,19 @@ function EquiposList() {
                         <td className="px-5 py-4 font-mono text-on-surface-variant tabular-nums">
                           {equipo.id}
                         </td>
+                        {/* La serie va debajo del nombre y no en columna
+                            aparte: la tabla ya se desborda a 768px y una
+                            séptima columna la empujaría más. Se muestra porque
+                            el buscador ahora encuentra por serie, y un
+                            resultado que no la enseña no se puede contrastar
+                            contra la etiqueta del equipo. */}
                         <td className="px-5 py-4 font-medium text-on-surface break-words">
                           {equipo.name}
+                          {equipo.serie && (
+                            <span className="block break-all font-mono text-label-sm font-normal uppercase tracking-wide text-on-surface-variant">
+                              {equipo.serie}
+                            </span>
+                          )}
                         </td>
                         <td className="px-5 py-4 text-on-surface-variant break-words">
                           {equipo.brand || '—'}
@@ -409,7 +560,7 @@ function EquiposList() {
 
         {/* ---- Móvil: tarjetas apiladas; se toca la tarjeta completa ---- */}
         <div className="md:hidden flex flex-col gap-stack-sm">
-          {cargando ? (
+          {cargandoLista ? (
             <SkeletonTarjetas filas={4} />
           ) : sinContenido ? (
             <div className="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-sm">
@@ -437,6 +588,11 @@ function EquiposList() {
                       <p className="font-label-sm text-label-sm text-on-surface-variant break-words">
                         {equipo.brand || '—'} · {tiene ? `${total} caract.` : 'Sin características'}
                       </p>
+                      {equipo.serie && (
+                        <p className="break-all font-mono text-label-sm uppercase tracking-wide text-on-surface-variant">
+                          {equipo.serie}
+                        </p>
+                      )}
                       <div className="mt-1.5">
                         <EstadoEquipo equipoId={equipo.id} />
                       </div>
@@ -460,7 +616,7 @@ function EquiposList() {
           )}
         </div>
 
-        {!cargando && !errorCarga && (
+        {!cargandoLista && !errorCarga && (
           <Paginador
             pagina={pagina}
             ultimaPagina={ultimaPagina}

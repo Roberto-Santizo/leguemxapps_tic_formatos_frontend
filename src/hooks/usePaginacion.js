@@ -27,6 +27,10 @@ function leerEntero(valor, porDefecto) {
  *    con { replace: true } la sustituye (corrección de página fuera de rango).
  *  - `setBusqueda` reemplaza (cada tecla no debe ensuciar el historial) y
  *    vuelve a la página 1, porque el conjunto de resultados cambió.
+ *  - `setParametro(nombre, valor)` es lo mismo para los filtros propios de
+ *    cada lista (p. ej. `estado` en Equipos): se guarda en la URL junto a los
+ *    demás y vuelve a la página 1 por la misma razón. Valor vacío lo borra,
+ *    para no dejar `?estado=` colgando.
  */
 export function usePaginaUrl() {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -34,10 +38,11 @@ export function usePaginaUrl() {
   const limite = leerEntero(searchParams.get('limit'), TAMANO_PAGINA)
   const busqueda = searchParams.get('q') || ''
 
-  // Escribe page/limit en la URL conservando el resto (`q`). Se usa tanto
-  // para navegar como para completar la URL inicial.
+  // Escribe page/limit en la URL conservando el resto (`q` y los filtros
+  // propios de cada lista). Se usa tanto para navegar como para completar la
+  // URL inicial.
   const escribir = useCallback(
-    (n, { replace = false, texto } = {}) => {
+    (n, { replace = false, texto, extras } = {}) => {
       setSearchParams(
         (prev) => {
           const sig = new URLSearchParams(prev)
@@ -46,6 +51,10 @@ export function usePaginaUrl() {
           if (texto !== undefined) {
             if (texto) sig.set('q', texto)
             else sig.delete('q')
+          }
+          for (const [clave, valor] of Object.entries(extras || {})) {
+            if (valor) sig.set(clave, valor)
+            else sig.delete(clave)
           }
           return sig
         },
@@ -66,7 +75,14 @@ export function usePaginaUrl() {
 
   const setBusqueda = useCallback((texto) => escribir(1, { replace: true, texto }), [escribir])
 
-  return { pagina, limite, busqueda, irAPagina, setBusqueda }
+  const parametro = useCallback((nombre) => searchParams.get(nombre) || '', [searchParams])
+
+  const setParametro = useCallback(
+    (nombre, valor) => escribir(1, { replace: true, extras: { [nombre]: valor } }),
+    [escribir],
+  )
+
+  return { pagina, limite, busqueda, irAPagina, setBusqueda, parametro, setParametro }
 }
 
 /**
@@ -82,6 +98,14 @@ export function usePaginaUrl() {
  *    se conserva mientras el usuario siga escribiendo; se descarta al
  *    limpiar la búsqueda o al `recargar`.
  *
+ * `filtroExtra` es un filtro adicional opcional de la vista -- una función
+ * `(registro) => boolean`, o null cuando no hay ninguno activo. Cuando viene,
+ * obliga al mismo modo "todos" que la búsqueda, y por el mismo motivo: un
+ * filtro que solo mirara la página actual mostraría 4 de 20 filas mientras el
+ * paginador sigue diciendo 57, y las demás coincidencias quedarían escondidas
+ * en páginas que el usuario no tiene forma de saber que debe abrir. Hoy lo usa
+ * el filtro por estado de la lista de Equipos.
+ *
  * Si la página pedida queda fuera de rango (p. ej. se borró el último
  * registro de la última página, o alguien editó la URL), se sustituye en la
  * URL por la última página válida -- el backend responde 200 con data: []
@@ -91,10 +115,10 @@ export function usePaginaUrl() {
  * api.js: con paginación regresa { data, total, lastPage }; sin ella, el
  * arreglo completo.
  */
-export function useListaPaginada({ token, listar, filtrar, mensajeError }) {
+export function useListaPaginada({ token, listar, filtrar, mensajeError, filtroExtra = null }) {
   const { pagina, limite, busqueda: busquedaUrl, irAPagina, setBusqueda } = usePaginaUrl()
   const filtro = busquedaUrl.trim().toLowerCase()
-  const modo = filtro ? 'todos' : 'pagina'
+  const modo = filtro || filtroExtra ? 'todos' : 'pagina'
 
   // Texto del buscador. El <input> NO puede ir controlado directamente por
   // `q` de la URL: React Router aplica cada navegación como transición de
@@ -168,10 +192,12 @@ export function useListaPaginada({ token, listar, filtrar, mensajeError }) {
     // vuelva a correr y salga por el `return` de arriba (sin repetir la carga).
   }, [token, listar, modo, pagina, limite, todos, version])
 
+  // Los dos filtros se acumulan: buscar "dell" con el chip "Disponible" puesto
+  // deja solo los Dell que además están libres.
   const filtrados = useMemo(() => {
     if (modo !== 'todos' || !todos) return []
-    return todos.filter((r) => filtrar(r, filtro))
-  }, [modo, todos, filtro, filtrar])
+    return todos.filter((r) => (!filtro || filtrar(r, filtro)) && (!filtroExtra || filtroExtra(r)))
+  }, [modo, todos, filtro, filtrar, filtroExtra])
 
   let registros = []
   let total = 0

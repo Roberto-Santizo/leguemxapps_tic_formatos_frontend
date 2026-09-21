@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Search, ChevronDown, X, Check, Eye } from 'lucide-react'
+import { normalizarBusqueda as normalizar } from '../utils/texto.js'
 
 /**
  * Selector con búsqueda (combobox) para cualquier campo que jale opciones de
@@ -32,13 +33,10 @@ import { Search, ChevronDown, X, Check, Eye } from 'lucide-react'
  * que la búsqueda ahora ignora espacios/guiones, mejora inofensiva).
  */
 
-// Minúsculas y sin espacios, guiones, puntos ni guiones bajos: así la serie
-// "ABC-123 45" y la búsqueda "abc12345" coinciden.
-function normalizar(texto) {
-  return String(texto ?? '')
-    .toLowerCase()
-    .replace(/[\s\-_.]/g, '')
-}
+// `normalizar` (utils/texto.js) deja el texto en minúsculas y sin espacios,
+// guiones, puntos ni guiones bajos: así la serie "ABC-123 45" y la búsqueda
+// "abc12345" coinciden. Está compartido con el buscador de la lista de Equipos
+// para que los dos encuentren exactamente las mismas series.
 function SearchableSelect({
   options,
   value,

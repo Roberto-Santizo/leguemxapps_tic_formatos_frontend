@@ -138,6 +138,24 @@ nunca escribir un componente de página nuevo para eso.
   ordenado por nombre y luego serie). Marca/Departamento/Empleado siguen pasando
   `{ id, name }` y se ven igual. Motivo: diez "Dell Latitude" iguales solo se distinguen
   por la serie, y antes iba pegada al final del nombre y se cortaba.
+- **Búsqueda por serie y filtro de estado en Catálogo → Equipos** (`EquiposList.jsx`,
+  2026-09-21): el buscador encuentra por nombre, marca y **serie**, y la serie se muestra
+  bajo el nombre (mono, mayúsculas) en la fila y en la tarjeta -- un resultado que no la
+  enseña no se puede contrastar contra la etiqueta del equipo. No hay columna aparte: la
+  tabla ya se desborda a 768px. La regla de comparación de series es `normalizarBusqueda`
+  (`utils/texto.js`), compartida con `SearchableSelect` para que los dos buscadores
+  encuentren exactamente lo mismo; ignora mayúsculas, espacios, guiones, puntos y guiones
+  bajos, y no matchea cuando la búsqueda normalizada queda vacía (teclear "-" no puede
+  devolver el inventario entero). Arriba de la lista, tres botones **Todos / Disponible /
+  En posesión** con los mismos tokens de color que el badge de cada fila. El estado NO es
+  un campo del equipo: se deriva cruzando con `/equipments/available`, así que el filtro no
+  se puede delegar al backend y **obliga a traer el inventario completo** -- entra por el
+  mismo `modo: 'todos'` de `useListaPaginada` que ya usaba la búsqueda (prop `filtroExtra`),
+  porque filtrar solo la página visible mostraría 4 de 20 filas mientras el paginador sigue
+  diciendo 57. Los botones se ocultan si `/equipments/available` falla (y el filtro se borra
+  de la URL), igual que el badge, para no ofrecer un filtro que daría un resultado
+  equivocado. El estado elegido vive en la URL (`?estado=disponible`) junto a `page`,
+  `limit` y `q`.
 - **Ficha del equipo desde el acta** (`EquipoDetalleModal.jsx`, 2026-09-17): en Entrega de
   Equipo, el buscador de equipo muestra un ojo dentro del campo (prop `onVerDetalle` de
   `SearchableSelect`, solo cuando ya hay equipo elegido) que abre una ventana emergente de
