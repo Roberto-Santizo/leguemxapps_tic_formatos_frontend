@@ -450,7 +450,7 @@ function EquiposList() {
                   <th className={`w-36 ${celdaEncabezado}`}>Marca</th>
                   <th className={`w-48 ${celdaEncabezado}`}>Características</th>
                   <th className={`w-32 ${celdaEncabezado}`}>Estado</th>
-                  <th className={`w-[148px] ${celdaEncabezado}`}>Acciones</th>
+                  <th className={`w-[148px] text-right ${celdaEncabezado}`}>Acciones</th>
                 </tr>
               </thead>
               <tbody className="font-body-md text-body-md text-on-surface">
@@ -489,7 +489,7 @@ function EquiposList() {
                               {total} {total === 1 ? 'característica' : 'características'}
                             </span>
                           ) : (
-                            <span className="text-on-surface-subtle">
+                            <span className="whitespace-nowrap text-on-surface-subtle">
                               No contiene características
                             </span>
                           )}
@@ -504,11 +504,13 @@ function EquiposList() {
                               de abrir ni corregir su nombre, marca, modelo o
                               serie desde esta lista. El "+" sigue apareciendo
                               solo cuando falta la primera característica. */}
-                          {/* Tres ranuras fijas de 36px (la columna mide
-                              justo eso): ojo y lápiz caen siempre en la misma
-                              x, bajo el encabezado, y el "+" ocupa la tercera
-                              solo cuando aplica, sin desalinear las filas. */}
-                          <div className="grid grid-cols-[repeat(3,2.25rem)] items-center gap-1">
+                          {/* Tres ranuras fijas de 36px pegadas a la
+                              derecha: ojo y lápiz caen siempre en la misma x
+                              y el "+" ocupa la tercera solo cuando aplica, sin
+                              desalinear las filas. Es la única tabla con un
+                              tercer botón, por eso su columna mide 148px y
+                              no w-28 como las demás. */}
+                          <div className="grid grid-cols-[repeat(3,2.25rem)] items-center justify-end gap-1">
                             <Link
                               to={`/catalogo/equipos/${equipo.id}/ver`}
                               aria-label={`Ver información de ${equipo.name}`}

@@ -39,7 +39,7 @@ import {
 
 // Recetas visuales "Sierra" (BRIEF, ola 2), repetidas a propósito.
 const inputClasses =
-  'h-11 w-full rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-lg text-on-surface placeholder:text-on-surface-subtle transition duration-fast ease-standard hover:[&:not(:focus)]:border-outline disabled:opacity-60 md:text-body-md'
+  'h-11 w-full rounded-boton border border-outline-variant bg-white px-3 font-body-md text-input-movil text-on-surface placeholder:text-on-surface-subtle transition duration-fast ease-standard hover:[&:not(:focus)]:border-outline disabled:opacity-60 md:text-body-md'
 const labelClasses = 'text-meta font-semibold leading-4 text-on-surface'
 const ayudaClasses = 'text-meta leading-4 text-on-surface-subtle'
 const enlaceAyuda = 'font-medium text-foco underline-offset-2 hover:text-foco-hover hover:underline'

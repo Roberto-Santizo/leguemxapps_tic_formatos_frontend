@@ -17,7 +17,7 @@ import { obtenerUsuario, crearUsuario, editarUsuario } from '../services/api.js'
  */
 
 const inputClasses =
-  'h-11 w-full rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-lg md:text-body-md text-on-surface placeholder:text-on-surface-subtle transition duration-fast ease-standard hover:[&:not(:focus)]:border-outline disabled:opacity-60'
+  'h-11 w-full rounded-boton border border-outline-variant bg-white px-3 font-body-md text-input-movil md:text-body-md text-on-surface placeholder:text-on-surface-subtle transition duration-fast ease-standard hover:[&:not(:focus)]:border-outline disabled:opacity-60'
 
 // Etiqueta de campo del mockup (12px, semibold).
 const labelClasses = 'text-meta font-semibold leading-4 text-on-surface'

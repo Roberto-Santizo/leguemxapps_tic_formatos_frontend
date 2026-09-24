@@ -187,7 +187,7 @@ function EmpleadosList() {
                   <th className={`w-32 ${celdaEncabezado}`}>Código</th>
                   <th className={celdaEncabezado}>Nombre</th>
                   <th className={celdaEncabezado}>Departamento</th>
-                  <th className={`w-24 text-right ${celdaEncabezado}`}>Acciones</th>
+                  <th className={`w-28 text-right ${celdaEncabezado}`}>Acciones</th>
                 </tr>
               </thead>
               <tbody className="font-body-md text-body-md text-on-surface">

@@ -8,7 +8,7 @@ import { SkeletonFormulario } from './Skeleton.jsx'
 // Recetas visuales "Sierra" (BRIEF, ola 2), repetidas a propósito en cada
 // pantalla en vez de un componente de botón/campo genérico.
 const inputClasses =
-  'h-11 w-full rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-lg text-on-surface placeholder:text-on-surface-subtle transition duration-fast ease-standard hover:[&:not(:focus)]:border-outline disabled:opacity-60 md:text-body-md'
+  'h-11 w-full rounded-boton border border-outline-variant bg-white px-3 font-body-md text-input-movil text-on-surface placeholder:text-on-surface-subtle transition duration-fast ease-standard hover:[&:not(:focus)]:border-outline disabled:opacity-60 md:text-body-md'
 const labelClasses = 'text-meta font-semibold leading-4 text-on-surface'
 const botonVolver =
   'inline-flex h-9 items-center gap-2 self-start rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]'
