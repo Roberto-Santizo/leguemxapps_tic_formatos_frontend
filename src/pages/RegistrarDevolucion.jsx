@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, CircleUser, Loader2, Lock, MessageSquareText, PenLine, Rows3 } from 'lucide-react'
+import { ArrowLeft, CircleUser, Lock, MessageSquareText, PenLine, Rows3 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 import FirmaPad from '../components/FirmaPad.jsx'
 import EstadoVacio from '../components/EstadoVacio.jsx'
@@ -13,6 +13,9 @@ import { obtenerDocumentoEntrega, listarDetallesEntrega, crearDocumentoDevolucio
 import { formatearFecha, constanciaDevolucion } from '../utils/fecha.js'
 import { marcarExtravio } from '../utils/extravio.js'
 
+import IsotipoCarga from '../components/IsotipoCarga.jsx'
+import EsperaLogo from '../components/EsperaLogo.jsx'
+import ActaRegistrada from '../components/ActaRegistrada.jsx'
 const formato = FORMATOS.devolucion
 
 function nombrePlanta(location) {
@@ -70,6 +73,11 @@ function RegistrarDevolucion() {
   const [observacionesGenerales, setObservacionesGenerales] = useState('')
   const [firmas, setFirmas] = useState({})
   const [guardando, setGuardando] = useState(false)
+  // Solo presentación: el momento de "devolución registrada" que se ve un
+  // instante antes de volver a la entrega (mockup Sierra). El guardado no cambia.
+  const [devolucionLista, setDevolucionLista] = useState(false)
+  const temporizadorLista = useRef(null)
+  useEffect(() => () => clearTimeout(temporizadorLista.current), [])
   const [errorGuardar, setErrorGuardar] = useState('')
   // Igual que en FormatoActa.jsx: confirmación antes de guardar, con su
   // propio "no volver a preguntar en esta sesión".
@@ -180,8 +188,12 @@ function RegistrarDevolucion() {
         if (obs) formData.append(`items[${indice}][observations]`, obs)
       })
       await crearDocumentoDevolucion(token, formData)
-      mostrarToast('Devolución registrada')
-      navigate(`/historial/entrega/${id}`)
+      setDevolucionLista(true)
+      const reducido = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+      temporizadorLista.current = setTimeout(() => {
+        mostrarToast('Devolución registrada')
+        navigate(`/historial/entrega/${id}`)
+      }, reducido ? 500 : 1500)
     } catch (err) {
       setErrorGuardar(err.message || 'No se pudo guardar la devolución')
     } finally {
@@ -556,7 +568,7 @@ function RegistrarDevolucion() {
                 disabled={guardando || pendientes.length === 0}
                 className="inline-flex flex-1 sm:flex-none h-10 items-center justify-center gap-2 rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {guardando && <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} />}
+                {guardando && <IsotipoCarga className="h-3 max-sm:!hidden" />}
                 {formato.textoAccion}
               </button>
             </div>
@@ -577,6 +589,15 @@ function RegistrarDevolucion() {
         }}
         onConfirmar={handleConfirmarFinalizarDevolucion}
       />
+
+      {guardando && <EsperaLogo mensaje="Guardando devolución…" />}
+      {devolucionLista && (
+        <ActaRegistrada
+          codigo="DEV-EQ-01 · REGISTRADA"
+          titulo="Devolución registrada"
+          detalle={entrega?.employee_name}
+        />
+      )}
     </div>
   )
 }

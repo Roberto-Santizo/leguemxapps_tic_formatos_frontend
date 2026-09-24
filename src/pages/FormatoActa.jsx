@@ -4,7 +4,6 @@ import {
   ArrowLeft,
   CircleUser,
   Laptop,
-  Loader2,
   Lock,
   MessageSquareText,
   PenLine,
@@ -25,6 +24,9 @@ import EquipoDetalleModal from '../components/EquipoDetalleModal.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
 import { listarEmpleados, listarDepartamentos, listarEquiposDisponibles, crearDocumentoEntrega } from '../services/api.js'
 
+import IsotipoCarga from '../components/IsotipoCarga.jsx'
+import EsperaLogo from '../components/EsperaLogo.jsx'
+import ActaRegistrada from '../components/ActaRegistrada.jsx'
 // Convierte el dataURL (base64) que entrega FirmaPad a un Blob, para poder
 // mandarlo como archivo dentro del FormData de POST /delivery_documents.
 function dataUrlToBlob(dataUrl) {
@@ -149,6 +151,11 @@ function FormatoActa() {
   const [empleadoId, setEmpleadoId] = useState('')
   const [filasEntrega, setFilasEntrega] = useState([])
   const [guardando, setGuardando] = useState(false)
+  // Solo presentación: el momento de "entrega registrada" que se ve un
+  // instante antes de ir al historial (mockup Sierra). El guardado no cambia.
+  const [entregaLista, setEntregaLista] = useState(false)
+  const temporizadorLista = useRef(null)
+  useEffect(() => () => clearTimeout(temporizadorLista.current), [])
   const [errorGuardar, setErrorGuardar] = useState('')
   // Pide confirmación antes de guardar la entrega -- antes "Finalizar
   // Entrega" guardaba directo con un solo clic, sin preguntar. Trae su
@@ -284,8 +291,12 @@ function FormatoActa() {
       await crearDocumentoEntrega(token, formData)
       // Confirmación explícita: antes el único indicio de que se había
       // guardado era el cambio de pantalla.
-      mostrarToast('Entrega registrada')
-      navigate('/historial/entrega')
+      setEntregaLista(true)
+      const reducido = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+      temporizadorLista.current = setTimeout(() => {
+        mostrarToast('Entrega registrada')
+        navigate('/historial/entrega')
+      }, reducido ? 500 : 1500)
     } catch (err) {
       setErrorGuardar(err.message || 'No se pudo guardar la entrega')
     } finally {
@@ -1222,7 +1233,7 @@ function FormatoActa() {
               disabled={esEntrega && (guardando || cargandoCatalogos)}
               className="inline-flex flex-1 sm:flex-none h-10 items-center justify-center gap-2 rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {esEntrega && guardando && <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} />}
+              {esEntrega && guardando && <IsotipoCarga className="h-3 max-sm:!hidden" />}
               {formato.textoAccion}
             </button>
           </div>
@@ -1246,6 +1257,15 @@ function FormatoActa() {
       )}
 
       {esEntrega && <EquipoDetalleModal equipoId={equipoDetalleId} onCerrar={() => setEquipoDetalleId('')} />}
+
+      {esEntrega && guardando && <EsperaLogo mensaje="Guardando entrega…" />}
+      {entregaLista && (
+        <ActaRegistrada
+          codigo={`${formato.codigo || 'E-EQUIPO'} · REGISTRADA`}
+          titulo="Entrega registrada"
+          detalle={empleadoSeleccionado?.name}
+        />
+      )}
     </div>
   )
 }

@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, Eye, EyeOff, Loader2, Save } from 'lucide-react'
+import { ArrowLeft, Eye, EyeOff, Save } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 import { mostrarToast } from '../components/Toast.jsx'
 import { SkeletonFormulario } from '../components/Skeleton.jsx'
 import { obtenerUsuario, crearUsuario, editarUsuario } from '../services/api.js'
 
+import IsotipoCarga from '../components/IsotipoCarga.jsx'
 /**
  * Alta y edición de un usuario (POST /users, PUT /users/{id}), mismo patrón
  * que EmpleadoForm.jsx: un solo formulario para ambos casos, según si hay
@@ -280,7 +281,7 @@ function UsuarioForm() {
                 disabled={guardando || !completo}
                 className="inline-flex h-10 items-center justify-center gap-2 rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97] disabled:opacity-50 disabled:hover:bg-tinta disabled:active:scale-100"
               >
-                {guardando ? <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} /> : <Save className="h-4 w-4" strokeWidth={1.75} />}
+                {guardando ? <IsotipoCarga className="h-3" /> : <Save className="h-4 w-4" strokeWidth={1.75} />}
                 {esEdicion ? 'Guardar cambios' : 'Crear usuario'}
               </button>
             </div>

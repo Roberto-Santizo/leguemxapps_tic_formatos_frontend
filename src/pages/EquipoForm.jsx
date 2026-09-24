@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, Loader2, Save } from 'lucide-react'
+import { ArrowLeft, Save } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 import { mostrarToast } from '../components/Toast.jsx'
 import SearchableSelect from '../components/SearchableSelect.jsx'
@@ -20,6 +20,7 @@ import {
   hayNombreRepetido,
 } from '../components/CaracteristicasEditor.jsx'
 
+import IsotipoCarga from '../components/IsotipoCarga.jsx'
 /**
  * Alta y edición de un equipo (POST /equipments, PUT /equipments/{id}).
  *
@@ -472,7 +473,7 @@ function EquipoForm() {
                 className={botonPrimario}
               >
                 {guardando ? (
-                  <Loader2 className="h-4 w-4 animate-spin" strokeWidth={1.75} />
+                  <IsotipoCarga className="h-3" />
                 ) : (
                   <Save className="h-4 w-4" strokeWidth={1.75} />
                 )}

@@ -5,7 +5,6 @@ import {
   Check,
   CircleUser,
   Download,
-  Loader2,
   Lock,
   MessageSquareText,
   PenLine,
@@ -38,6 +37,8 @@ import { generarPdfPapelFisico } from '../utils/generatePdfPapelFisico.js'
 import useFechaLocal from '../hooks/useFechaLocal.js'
 import { construirHtmlEntrega } from '../pdf/plantillaEntrega.js'
 
+import IsotipoCarga from '../components/IsotipoCarga.jsx'
+import EsperaLogo from '../components/EsperaLogo.jsx'
 const formato = FORMATOS.entrega
 
 function nombrePlanta(location) {
@@ -479,7 +480,7 @@ function HistorialEntregaView() {
                                   className="grid h-8 w-8 place-items-center rounded-lg text-primary transition-colors hover:bg-primary/10 disabled:opacity-40 active:scale-[0.90] transition-transform"
                                 >
                                   {guardandoEquipo ? (
-                                    <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} />
+                                    <IsotipoCarga tono="tinta" className="h-2.5" />
                                   ) : (
                                     <Check className="h-4 w-4" strokeWidth={2.5} />
                                   )}
@@ -623,7 +624,7 @@ function HistorialEntregaView() {
                               className="inline-flex h-10 flex-1 items-center justify-center gap-2 rounded-lg bg-primary px-4 font-label-bold text-label-bold text-on-primary shadow-sm transition-all hover:brightness-110 active:scale-[0.97] disabled:opacity-50"
                             >
                               {guardandoEquipo ? (
-                                <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} />
+                                <IsotipoCarga className="h-3" />
                               ) : (
                                 <Check className="h-4 w-4" strokeWidth={2.5} />
                               )}
@@ -719,7 +720,7 @@ function HistorialEntregaView() {
               className="inline-flex h-10 w-full items-center justify-center gap-2 whitespace-nowrap rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover disabled:opacity-50 active:scale-[0.97] only:col-span-2 md:w-auto"
             >
               {generandoPdf ? (
-                <Loader2 className="h-4 w-4 animate-spin" strokeWidth={1.75} />
+                <IsotipoCarga className="h-3" />
               ) : (
                 <Download className="h-4 w-4" strokeWidth={1.75} />
               )}
@@ -774,6 +775,8 @@ function HistorialEntregaView() {
         }}
         onConfirmar={confirmarQuitarEquipo}
       />
+
+      {generandoPdf && <EsperaLogo mensaje="Generando PDF…" />}
     </div>
   )
 }

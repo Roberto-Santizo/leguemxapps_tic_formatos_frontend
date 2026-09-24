@@ -274,6 +274,20 @@ nunca escribir un componente de página nuevo para eso.
   (400 ms con movimiento reducido) al mismo destino de siempre: se cobra en cada inicio de
   sesión, por eso es corto. Si falla, aviso y sacudida del formulario. La lógica de
   `login()` / destino / `replace` no cambió.
+- **Cargas con el logo y "acta registrada"** (2026-09-24, estilos al final de `index.css`):
+  - `IsotipoCarga.jsx`: isotipo que se llena de izquierda a derecha. Reemplaza al círculo
+    que gira (`Loader2`, ya no se usa) en todo botón que guarda o genera algo. `tono="claro"`
+    sobre botón negro, `tono="tinta"` sobre fondo claro; alto `h-3` en botones y `h-2.5` en
+    botones de solo ícono. En las barras de las hojas se oculta bajo `sm` (`max-sm:!hidden`)
+    porque partía el texto del botón; ahí la espera con logo ya da la señal.
+  - `EsperaLogo.jsx`: espera de pantalla completa (logo que se llena de abajo arriba, mensaje
+    mono y barra) mientras se guarda una entrega o devolución y mientras se genera el PDF.
+    Se monta con el estado que la página ya tenía (`guardando`, `generandoPdf`); aparece a
+    los 250ms para no parpadear en respuestas rápidas, pero bloquea los clics desde el inicio.
+  - `ActaRegistrada.jsx`: al guardar una entrega o devolución, tarjeta con check que se
+    dibuja, dos anillos y chispas (1,5 s; 0,5 s con movimiento reducido). Después se muestra
+    el Toast y se navega igual que antes (mismo destino); el temporizador se limpia si la
+    página se desmonta. Es el único cambio de tiempo en esos flujos, pedido por el cliente.
 - **Movimiento**: `animate-view-in` (entrada de pantalla: 8px, 280 ms, curva estándar),
   `animate-pop-in` (filas/tarjetas nuevas), `animate-drop-in` (desplegables),
   `animate-badge-pop` (contadores), `animate-card-rise` (tarjeta del 404), `shimmer`

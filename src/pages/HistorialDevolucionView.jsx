@@ -6,7 +6,6 @@ import {
   CircleUser,
   Download,
   ExternalLink,
-  Loader2,
   Lock,
   MessageSquareText,
   PenLine,
@@ -37,6 +36,8 @@ import useFechaLocal from '../hooks/useFechaLocal.js'
 import { esExtravio, textoSinPrefijoExtravio, marcarExtravio } from '../utils/extravio.js'
 import { construirHtmlDevolucion } from '../pdf/plantillaDevolucion.js'
 
+import IsotipoCarga from '../components/IsotipoCarga.jsx'
+import EsperaLogo from '../components/EsperaLogo.jsx'
 const formato = FORMATOS.devolucion
 
 function nombrePlanta(location) {
@@ -423,7 +424,7 @@ function HistorialDevolucionView() {
                                   className="grid h-8 w-8 place-items-center rounded-lg text-primary transition-colors hover:bg-primary/10 disabled:opacity-40 active:scale-[0.90] transition-transform"
                                 >
                                   {guardandoEquipo ? (
-                                    <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} />
+                                    <IsotipoCarga tono="tinta" className="h-2.5" />
                                   ) : (
                                     <Check className="h-4 w-4" strokeWidth={2.5} />
                                   )}
@@ -555,7 +556,7 @@ function HistorialDevolucionView() {
                               className="inline-flex h-10 flex-1 items-center justify-center gap-2 rounded-lg bg-primary px-4 font-label-bold text-label-bold text-on-primary shadow-sm transition-all hover:brightness-110 active:scale-[0.97] disabled:opacity-50"
                             >
                               {guardandoEquipo ? (
-                                <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} />
+                                <IsotipoCarga className="h-3" />
                               ) : (
                                 <Check className="h-4 w-4" strokeWidth={2.5} />
                               )}
@@ -646,7 +647,7 @@ function HistorialDevolucionView() {
               className="inline-flex h-10 items-center justify-center gap-2 rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover disabled:opacity-50 active:scale-[0.97]"
             >
               {generandoPdf ? (
-                <Loader2 className="h-4 w-4 animate-spin" strokeWidth={1.75} />
+                <IsotipoCarga className="h-3" />
               ) : (
                 <Download className="h-4 w-4" strokeWidth={1.75} />
               )}
@@ -655,6 +656,8 @@ function HistorialDevolucionView() {
           </div>
         </div>
       )}
+
+      {generandoPdf && <EsperaLogo mensaje="Generando PDF…" />}
     </div>
   )
 }

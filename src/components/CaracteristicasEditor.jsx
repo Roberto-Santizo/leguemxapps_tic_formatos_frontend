@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { Plus, Trash2, Loader2, Check, X } from 'lucide-react'
+import { Plus, Trash2, Check, X } from 'lucide-react'
 import InlineEditableText from './InlineEditableText.jsx'
 import { mostrarToast } from './Toast.jsx'
 import { SkeletonTabla } from './Skeleton.jsx'
 
+import IsotipoCarga from './IsotipoCarga.jsx'
 /**
  * Características de un equipo, en sus dos situaciones:
  *
@@ -283,7 +284,7 @@ export function CaracteristicasDeEquipo({
                   className="inline-flex h-10 items-center justify-center gap-2 rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97] disabled:opacity-50"
                 >
                   {guardando ? (
-                    <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} />
+                    <IsotipoCarga className="h-3" />
                   ) : (
                     <Check className="h-4 w-4" strokeWidth={1.75} />
                   )}

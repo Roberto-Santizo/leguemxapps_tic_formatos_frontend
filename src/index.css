@@ -763,3 +763,181 @@ main[data-sheet] > .bg-background {
   .lg-nubes { animation: none !important; }
   .lg-isotipo img + img { animation: none !important; clip-path: inset(0 0 0 0); }
 }
+
+/* ── Carga con el isotipo, espera con logo y "acta registrada" ─────────
+   Mismo lenguaje del mockup Sierra. Ver IsotipoCarga.jsx, EsperaLogo.jsx y
+   ActaRegistrada.jsx. Con movimiento reducido la regla global de arriba deja
+   todo quieto (los bucles corren una sola vez). */
+
+/* Isotipo que se llena de izquierda a derecha (botones y cargas cortas). */
+.isotipo-carga {
+  position: relative;
+  display: inline-block;
+  flex-shrink: 0;
+  line-height: 0;
+}
+.isotipo-carga img {
+  height: 100%;
+  width: auto;
+  display: block;
+}
+.isotipo-carga img:first-child { opacity: 0.28; }
+.isotipo-carga img + img {
+  position: absolute;
+  left: 0;
+  top: 0;
+  animation: isoLlenado 1100ms cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+.isotipo-carga--claro img { filter: brightness(0) invert(1); }
+.isotipo-carga--tinta img { filter: brightness(0); }
+@keyframes isoLlenado {
+  0% { clip-path: inset(0 100% 0 0); }
+  55% { clip-path: inset(0 0 0 0); }
+  80% { clip-path: inset(0 0 0 0); opacity: 1; }
+  100% { clip-path: inset(0 0 0 0); opacity: 0; }
+}
+
+/* Espera de pantalla completa: aparece a los 250ms para que una operación
+   rápida no parpadee; mientras tanto ya bloquea los clics. */
+.espera-logo {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  background: rgba(255, 255, 255, 0.86);
+  animation: esperaEntra 200ms cubic-bezier(0.4, 0, 0.2, 1) 250ms both;
+}
+.espera-logo__logo {
+  position: relative;
+  display: block;
+  height: 34px;
+}
+.espera-logo__logo img {
+  height: 34px;
+  width: auto;
+  display: block;
+}
+.espera-logo__logo img:first-child { filter: grayscale(1); opacity: 0.25; }
+.espera-logo__logo img + img {
+  position: absolute;
+  inset: 0;
+  animation: esperaLlenado 900ms linear infinite;
+}
+.espera-logo__barra {
+  width: 132px;
+  height: 2px;
+  border-radius: 9999px;
+  background: #e5e5e5;
+  overflow: hidden;
+}
+.espera-logo__barra span {
+  display: block;
+  height: 100%;
+  width: 40%;
+  background: #0b2a1e;
+  animation: esperaBarra 1100ms cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+@keyframes esperaEntra { from { opacity: 0; } to { opacity: 1; } }
+@keyframes esperaLlenado {
+  0% { clip-path: inset(100% 0 0 0); }
+  55% { clip-path: inset(0 0 0 0); }
+  85% { clip-path: inset(0 0 0 0); }
+  100% { clip-path: inset(0 0 100% 0); }
+}
+@keyframes esperaBarra {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(250%); }
+}
+
+/* "Acta registrada": check que se dibuja, dos anillos y chispas. */
+.acta-lista {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(10, 10, 10, 0.4);
+  animation: esperaEntra 200ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+.acta-lista__tarjeta {
+  width: 100%;
+  max-width: 420px;
+  border-radius: 16px;
+  background: #ffffff;
+  padding: 32px;
+  text-align: center;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  animation: actaTarjeta 420ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.acta-lista__sello {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  margin: 0 auto 20px;
+}
+.acta-lista__anillo {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  border: 1px solid #15803d;
+  animation: actaAnillo 900ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+.acta-lista__circulo {
+  position: absolute;
+  inset: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: #dcfce7;
+  animation: actaSello 480ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.acta-lista__circulo path {
+  stroke-dasharray: 26;
+  animation: actaCheck 520ms cubic-bezier(0.4, 0, 0.2, 1) 240ms both;
+}
+.acta-lista__chispa {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+}
+.acta-lista__chispa span {
+  position: absolute;
+  left: -3px;
+  top: -3px;
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  animation: actaChispa 820ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+@keyframes actaTarjeta {
+  from { opacity: 0; transform: scale(0.88) translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes actaAnillo {
+  0% { transform: scale(0.55); opacity: 0.55; }
+  100% { transform: scale(1.35); opacity: 0; }
+}
+@keyframes actaSello {
+  0% { transform: scale(0.4); opacity: 0; }
+  60% { transform: scale(1.08); opacity: 1; }
+  100% { transform: none; opacity: 1; }
+}
+@keyframes actaCheck {
+  from { stroke-dashoffset: 26; }
+  to { stroke-dashoffset: 0; }
+}
+@keyframes actaChispa {
+  0% { transform: translateY(0) scale(0.6); opacity: 0; }
+  30% { opacity: 1; }
+  100% { transform: translateY(-46px) scale(0.4); opacity: 0; }
+}
