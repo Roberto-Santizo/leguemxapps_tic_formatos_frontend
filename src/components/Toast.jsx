@@ -105,6 +105,10 @@ export function Toaster() {
     // Sin ResizeObserver (navegador muy viejo) el aviso queda en su lugar por defecto.
     if (!hayAvisos || !caja || typeof ResizeObserver === 'undefined') return undefined
     let barra = null
+    // Al pasar de una hoja a otra (p. ej. registrar devolución → vista de la
+    // entrega) la barra se desmonta y vuelve a montarse: se espera un momento
+    // antes de soltar la posición, para que el aviso no salte arriba y vuelva.
+    let soltar = null
     const medir = () => {
       if (!barra) return
       const botones = barra.firstElementChild || barra
@@ -117,12 +121,13 @@ export function Toaster() {
       if (actual === barra) return
       if (barra) observador.unobserve(barra)
       barra = actual
+      clearTimeout(soltar)
       if (barra) {
         observador.observe(barra)
         caja.setAttribute('data-sobre-barra', '')
         medir()
       } else {
-        caja.removeAttribute('data-sobre-barra')
+        soltar = setTimeout(() => caja.removeAttribute('data-sobre-barra'), 600)
       }
     }
     seguir()
@@ -130,6 +135,7 @@ export function Toaster() {
     vigia.observe(document.body, { childList: true, subtree: true })
     window.addEventListener('resize', medir)
     return () => {
+      clearTimeout(soltar)
       observador.disconnect()
       vigia.disconnect()
       window.removeEventListener('resize', medir)
