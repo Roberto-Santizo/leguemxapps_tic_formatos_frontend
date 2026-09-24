@@ -55,8 +55,16 @@ function Paginador({ pagina, ultimaPagina, total, plural, tamano = TAMANO_PAGINA
   const numero =
     'inline-grid h-8 min-w-8 place-items-center rounded-boton px-2 font-mono text-[12px] tabular-nums transition duration-fast ease-standard active:scale-[0.97]'
 
+  // Si una pantalla ya lo mete en el pie gris de su tabla (padre con
+  // bg-surface-container), en escritorio se quita su propia tarjeta para no
+  // dibujar una caja dentro de otra.
+  const dentroDePie =
+    'md:[[class*=bg-surface-container]>&]:rounded-none md:[[class*=bg-surface-container]>&]:bg-transparent md:[[class*=bg-surface-container]>&]:p-0 md:[[class*=bg-surface-container]>&]:shadow-none'
+
   return (
-    <div className="flex flex-col gap-3 rounded-tarjeta bg-surface-container px-4 py-3 shadow-tarjeta sm:flex-row sm:items-center sm:justify-between">
+    <div
+      className={`flex flex-col gap-3 rounded-tarjeta bg-surface-container px-4 py-3 shadow-tarjeta sm:flex-row sm:items-center sm:justify-between ${dentroDePie}`}
+    >
       <p className="font-mono text-[11px] uppercase leading-4 tracking-[0.1em] text-on-surface-variant tabular-nums">
         {conteo}
         <span className="hidden sm:inline">

@@ -127,7 +127,7 @@ function FirmaPad({ titulo, subtitulo, firmaUrl, onConfirmar, onReiniciar }) {
 
       {/* Selector segmentado como el del mockup: la opción activa es una
           pastilla blanca sobre el gris. */}
-      <div className="mb-3 flex flex-wrap justify-center gap-1 rounded-boton bg-surface-container p-1">
+      <div className="mb-3 flex justify-center gap-1 rounded-boton bg-surface-container p-1">
         <button
           type="button"
           onClick={() => {
@@ -138,7 +138,7 @@ function FirmaPad({ titulo, subtitulo, firmaUrl, onConfirmar, onReiniciar }) {
             // lienzo vacío y al pulsarlo no hacía nada ni decía por qué.
             setVacio(true)
           }}
-          className={`flex-1 whitespace-nowrap rounded-md px-3 py-1.5 text-[12px] font-medium leading-4 transition duration-fast ease-standard active:scale-[0.97] ${
+          className={`min-w-0 flex-1 rounded-md px-2 py-1.5 text-center text-[12px] [text-wrap:balance] font-medium leading-4 transition duration-fast ease-standard active:scale-[0.97] ${
             modo === 'dibujar' ? 'bg-white text-on-surface shadow-tarjeta' : 'text-on-surface-variant hover:text-on-surface'
           }`}
         >
@@ -150,7 +150,7 @@ function FirmaPad({ titulo, subtitulo, firmaUrl, onConfirmar, onReiniciar }) {
             setModo('subir')
             limpiarLienzo()
           }}
-          className={`flex-1 whitespace-nowrap rounded-md px-3 py-1.5 text-[12px] font-medium leading-4 transition duration-fast ease-standard active:scale-[0.97] ${
+          className={`min-w-0 flex-1 rounded-md px-2 py-1.5 text-center text-[12px] [text-wrap:balance] font-medium leading-4 transition duration-fast ease-standard active:scale-[0.97] ${
             modo === 'subir' ? 'bg-white text-on-surface shadow-tarjeta' : 'text-on-surface-variant hover:text-on-surface'
           }`}
         >
@@ -163,7 +163,7 @@ function FirmaPad({ titulo, subtitulo, firmaUrl, onConfirmar, onReiniciar }) {
             limpiarLienzo()
             setPreviewSubida(null)
           }}
-          className={`flex-1 whitespace-nowrap rounded-md px-3 py-1.5 text-[12px] font-medium leading-4 transition duration-fast ease-standard active:scale-[0.97] ${
+          className={`min-w-0 flex-1 rounded-md px-2 py-1.5 text-center text-[12px] [text-wrap:balance] font-medium leading-4 transition duration-fast ease-standard active:scale-[0.97] ${
             modo === 'historico' ? 'bg-white text-on-surface shadow-tarjeta' : 'text-on-surface-variant hover:text-on-surface'
           }`}
         >
