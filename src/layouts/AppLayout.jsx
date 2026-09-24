@@ -40,7 +40,7 @@ function AppLayout() {
 
         <main
           data-sheet
-          className="flex h-full min-w-0 flex-1 flex-col overflow-y-auto overscroll-contain pt-barra-movil md:pt-0 md:[scrollbar-gutter:stable]"
+          className="flex h-full min-w-0 flex-1 flex-col overflow-y-auto overscroll-contain scroll-pb-36 pt-barra-movil md:pt-0 md:[scrollbar-gutter:stable]"
         >
           <Outlet />
           <Footer />
