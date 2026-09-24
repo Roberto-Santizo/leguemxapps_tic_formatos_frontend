@@ -186,7 +186,7 @@ nunca escribir un componente de página nuevo para eso.
   ningún tamaño** sobre la cordillera: la sierra deriva sin fin y un `backdrop-filter`
   encima la re-muestrea y desenfoca en cada cuadro (costo de GPU constante en las PC de
   planta), y en móvil daba tirones al hacer scroll. Barras inferiores, pie y cabeceras van
-  en `bg-papel` (móvil) y `bg-papel-velo` / `bg-papel/95` (escritorio), sin blur.
+  en `bg-papel` opaco, sin blur (al 95% se leía a través el texto que pasa por debajo).
 - **Shell** (`layouts/AppLayout.jsx`): menú lateral de 240px (`w-drawer-width`) transparente
   sobre el papel (ítem activo = tarjeta blanca), tarjeta de perfil al pie ("Cerrar Sesión"
   con `active:scale-[0.97]`, ícono sin rojo); `<main data-sheet>` scrollea por dentro, es
@@ -201,7 +201,7 @@ nunca escribir un componente de página nuevo para eso.
     bottom-0 md:left-drawer-width z-30` con el atributo **`data-barra-inferior`** (lo usa el
     Toast en `index.css`), de borde a borde del área de contenido y por encima del canal del
     scroll (una barra sticky dentro del `<main>` quedaba 8px corta y, al final del scroll,
-    suelta sobre la montaña). Fondo `bg-papel md:bg-papel/95` + `shadow-barra-inferior`,
+    suelta sobre la montaña). Fondo `bg-papel` opaco + `shadow-barra-inferior`,
     sin blur. En escritorio lleva `md:overflow-hidden md:[scrollbar-gutter:stable]`: reserva
     el mismo canal de 8px que el `<main>`, así su contenido (`mx-auto max-w-4xl`) queda
     alineado con la hoja. Costo aceptado: tapa los últimos ~64px del riel de scroll del

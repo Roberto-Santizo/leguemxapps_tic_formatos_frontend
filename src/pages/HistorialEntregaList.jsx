@@ -191,16 +191,16 @@ function HistorialEntregaList() {
             ) : sinContenido ? (
               estado
             ) : (
-              <table className="w-full min-w-[720px] text-left border-collapse">
+              <table className="w-full min-w-[700px] text-left border-collapse">
                 <thead>
                   <tr className="bg-surface-container">
                     <th className="h-11 px-4 font-mono text-micro font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap">
                       Fecha
                     </th>
-                    <th className="min-w-[200px] h-11 px-4 font-mono text-micro font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap">
+                    <th className="min-w-[160px] h-11 px-4 font-mono text-micro font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap">
                       Colaborador
                     </th>
-                    <th className="min-w-[160px] h-11 px-4 font-mono text-micro font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap">
+                    <th className="min-w-[150px] h-11 px-4 font-mono text-micro font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap">
                       Departamento
                     </th>
                     <th className="h-11 px-4 font-mono text-micro font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap">
@@ -226,7 +226,7 @@ function HistorialEntregaList() {
                       <td className="px-4 py-4 text-on-surface-variant break-words">
                         {documento.employee_department || '—'}
                       </td>
-                      <td className="px-4 py-4 text-on-surface-variant whitespace-nowrap">
+                      <td className="px-4 py-4 text-on-surface-variant">
                         {nombrePlanta(documento.location)}
                       </td>
                       <td className="px-4 py-4 font-mono text-meta text-on-surface-variant tabular-nums whitespace-nowrap">

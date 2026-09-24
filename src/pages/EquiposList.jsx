@@ -450,7 +450,9 @@ function EquiposList() {
                   <th className={`w-36 ${celdaEncabezado}`}>Marca</th>
                   <th className={`w-48 ${celdaEncabezado}`}>Características</th>
                   <th className={`w-32 ${celdaEncabezado}`}>Estado</th>
-                  <th className={`w-[148px] text-right ${celdaEncabezado}`}>Acciones</th>
+                  {/* Acciones fija a la derecha: por debajo de ~1210px la tabla se desplaza en
+                      horizontal y así ver/editar siguen a la vista (con filete que la separa). */}
+                  <th className={`sticky right-0 w-[148px] bg-surface-container text-right before:absolute before:inset-y-0 before:left-0 before:w-px before:bg-outline-variant xl:before:hidden ${celdaEncabezado}`}>Acciones</th>
                 </tr>
               </thead>
               <tbody className="font-body-md text-body-md text-on-surface">
@@ -461,7 +463,7 @@ function EquiposList() {
                   return (
                     <Fragment key={equipo.id}>
                       <tr
-                        className="border-t border-outline-variant transition-colors duration-fast ease-standard hover:bg-surface-container"
+                        className="group border-t border-outline-variant transition-colors duration-fast ease-standard hover:bg-surface-container"
                       >
                         <td className="h-[72px] px-4 py-4 font-mono text-meta text-on-surface-variant tabular-nums">
                           {equipo.id}
@@ -497,7 +499,7 @@ function EquiposList() {
                         <td className="px-4 py-4">
                           <EstadoEquipo equipoId={equipo.id} />
                         </td>
-                        <td className="px-4 py-4">
+                        <td className="sticky right-0 bg-white px-4 py-4 transition-colors duration-fast before:absolute before:inset-y-0 before:left-0 before:w-px before:bg-outline-variant xl:before:hidden ease-standard group-hover:bg-surface-container">
                           {/* Ver y editar son del EQUIPO, no de sus
                               características: antes se deshabilitaban cuando el
                               equipo no tenía ninguna, y entonces no había forma
