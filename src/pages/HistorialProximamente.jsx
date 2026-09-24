@@ -17,6 +17,9 @@ function HistorialProximamente() {
     <EnConstruccion
       icon={formato?.icon ?? ClipboardList}
       titulo={formato ? formato.tituloCorto : 'Historial de Actas'}
+      // Solo el eyebrow: "Historial / Préstamo" (sin el "de Equipo" que
+      // repiten casi todos los formatos, igual que "Historial / Entrega").
+      migas={formato ? `Historial / ${formato.tituloCorto.replace(/ de Equipo$/, '')}` : 'Historial'}
       descripcion={
         formato
           ? `El historial y la búsqueda de "${formato.tituloCorto}" estarán disponibles aquí en cuanto el backend en Laravel exponga sus endpoints.`

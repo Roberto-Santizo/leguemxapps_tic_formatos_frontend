@@ -218,7 +218,7 @@ function HistorialDevolucionList() {
                           title="Ver"
                           className={iconoActivo}
                         >
-                          <Eye className="h-4 w-4" strokeWidth={2} />
+                          <Eye className="h-4 w-4" strokeWidth={1.75} />
                         </button>
                       </td>
                     </tr>

@@ -314,6 +314,7 @@ function FormatoActa() {
       <EnConstruccion
         icon={Rows3}
         titulo="Formato no encontrado"
+        migas="Actas / Nueva"
         descripcion="El formato solicitado no existe. Vuelve al menú de Nueva Acta y elige uno de los formatos disponibles."
       />
     )

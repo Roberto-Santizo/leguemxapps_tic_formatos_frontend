@@ -68,26 +68,137 @@ nunca escribir un componente de página nuevo para eso.
 
 ## Diseño visual
 
-- Paleta monocromática tipo "ink" corporativa (Material 3, solo modo claro), con nombres de
-  token M3 (`primary`, `surface`, `on-surface-variant`, `outline`, etc.) definidos en
-  `tailwind.config.js`. El negro/gris es el color principal. Los únicos colores son:
-  - **Rojo** (`error`, `error-container`): eliminar, errores y marcar un equipo como
-    **extravío** en la devolución (fila, badge y botón en rojo -- pedido explícito del
-    cliente, no un descuido).
-  - **Verde salvia y ocre** (`available*` / `assigned*`): solo el badge de estado
-    "Disponible" / "En posesión" de Catálogo → Equipos. Van apagados al mismo nivel de
-    saturación que el rojo: fondo claro + texto oscuro + punto intermedio.
-
-  Nada más lleva color, y ningún color se escribe suelto (`bg-green-100`, hex en línea): si
-  hace falta uno nuevo, se registra como token en `tailwind.config.js`.
-- Tipografía y tamaños también van por clases con nombre semántico (`font-label-bold
-  text-label-bold`, `font-body-md text-body-md`, `font-headline-lg text-headline-lg`,
-  etc.), no tamaños sueltos de Tailwind.
-- Transición de entrada consistente: clase `animate-view-in` (fade + leve desplazamiento)
-  al entrar a una vista o al agregar una fila/tarjeta nueva. Ojo: por ser una animación con
-  `transform`, no debe ponerse en un elemento que contenga dentro un panel con `position:
-  fixed` (como el buscador con lista de opciones), porque lo deja atrapado dentro de esa
-  caja en vez de cubrir toda la pantalla -- ya pasó una vez y se corrigió quitándola de ahí.
+- **Sistema visual "Sierra"** (2026-09-24, rama `rediseno-ui`; referencia: mockup "Mesa TIC —
+  Propuesta sierra"). Solo modo claro. Se conservaron los nombres de token Material 3
+  (`primary`, `surface`, `on-surface-variant`, `outline`, etc.) y cambiaron sus valores, así
+  que el rediseño llegó a todo el sistema sin reescribir cada className:
+  - **Papel** `#f4f5f1` de fondo (`background` = `papel`); superficies **blancas** encima;
+    paneles de solo lectura / activos suaves `#ebede7` (`surface-container-high`); gris de
+    tabla/pie `#f5f5f5` (`surface-container`).
+  - **Tinta**: títulos `#171717` (`on-surface`), secundario `#525252` / `#737373`
+    (`on-surface-variant` / `on-surface-subtle`), bordes `#e5e5e5` (`outline-variant`),
+    filete `#a3a3a3` (`outline`). CTA negro `bg-tinta` (`#0a0a0a`, hover `tinta-hover`).
+  - **Foco y enlaces**: azul `foco` (`#2563eb`).
+  - **Verde de marca** (`bosque #0b2a1e`, `brote`, `linea`, `exito`): SOLO en marca, login y
+    cordillera de fondo. En la app no hay verde en superficies ni textos.
+  - **Rojo** (`error*`): eliminar, errores y marcar un equipo como **extravío** en la
+    devolución (fila, badge y botón en rojo -- pedido explícito del cliente).
+  - **Verde salvia y ocre** (`available*` / `assigned*`): el badge "Disponible" / "En
+    posesión" de Catálogo → Equipos y, desde la ronda 2 del rediseño, el **punto** de color
+    del chip de estado de Historial → Devolución (chip neutro blanco con borde
+    `outline-variant`; solo el punto lleva `bg-available` / `bg-assigned`). Apagados, al
+    mismo nivel de saturación que el rojo.
+  - Nada se escribe suelto (`bg-green-100`, hex o `rgba(...)` en JSX): colores, radios
+    (`rounded-boton` 8px, `rounded-tarjeta` 16px, `rounded-menu` 10px, `rounded-aviso` 22px),
+    sombras (`shadow-tarjeta` = sombra corta + filete de 1px en vez de `border`;
+    `shadow-tarjeta-hover`, `shadow-tarjeta-foco`, `shadow-flotante`, `shadow-cajon`,
+    `shadow-barra-inferior`) y tiempos (`duration-fast|base|page`, `ease-standard|salida|rebote`)
+    están en `tailwind.config.js`. Si hace falta uno nuevo, se registra ahí.
+- **Tipografía**: Inter (400–800) para todo y **JetBrains Mono** (`font-mono` / `font-eyebrow`)
+  para eyebrows, códigos, series, contadores y encabezados de tabla (mayúsculas, tracking
+  .1–.12em). Manrope se retiró. Tamaños siempre por token, nunca `text-[Npx]`:
+  - `text-display-lg` (32/800/−0.04em): título de pantalla en escritorio; en móvil
+    `text-titulo-movil` (26px/30px/800/−0.04em) → `text-titulo-movil md:text-display-lg`.
+  - `text-headline-lg` (24/700), `text-headline-md` (18/700, título de sección/tarjeta),
+    `text-body-lg` (16), `text-body-md` (14).
+  - `text-meta` (12px/16px): labels de formulario (`text-meta font-semibold`), metadatos y
+    códigos en tabla (`font-mono text-meta`).
+  - `text-micro` (11px/14px): etiquetas mono de tabla, paginador y chips; el tracking va
+    aparte: `font-mono text-micro uppercase tracking-[0.1em]`.
+  - `text-eyebrow` (11px, .12em) y `text-input-movil` (16px, inputs en móvil: evita el zoom
+    de iOS al enfocar).
+  - Cada pantalla abre con **eyebrow de migas** (filete de 28px + ruta en mayúsculas) sobre
+    el `h1`: `SECCIÓN / SUBSECCIÓN[ / ACCIÓN]`. Primer nivel: `ACTAS / NUEVA`, `HISTORIAL`,
+    `CATÁLOGO`, `USUARIOS`; subpantallas p. ej. `CATÁLOGO / MARCAS / DETALLE`,
+    `HISTORIAL / PRÉSTAMO` (`EnConstruccion` recibe la ruta en la prop de texto `migas`).
+    Nada de "LEGUMEX / X".
+- **Recetas repetidas a propósito** (sin `<Button>` genérico; al crear una pantalla nueva,
+  copiar las clases de la más parecida):
+  - Botón primario negro `h-10 rounded-boton bg-tinta text-white hover:bg-tinta-hover`;
+    secundario blanco con `border-outline-variant`; peligro = secundario con `text-error`.
+    Botones de cabecera con `whitespace-nowrap shrink-0`.
+  - Botón volver `h-9` con flecha; separación volver → eyebrow `mt-6` (móvil `mt-5`).
+  - **Botón ícono de tabla** (ver/editar/eliminar; se conservan los íconos, no el botón
+    "Editar" con texto del mockup): `h-9 w-9 inline-flex items-center justify-center
+    rounded-boton text-on-surface-variant hover:bg-surface-container hover:text-on-surface
+    active:scale-[0.90] transition`; eliminar con `hover:bg-error-container/60
+    hover:text-error`. Columna de acciones alineada a la derecha y de ancho fijo.
+  - Tarjeta `bg-white rounded-tarjeta shadow-tarjeta` (sin `border` extra). Tabla con
+    `thead` gris (`bg-surface-container`), `th` mono `text-micro`, filas de 72px y el pie
+    gris con el `Paginador` dentro (ver Paginación). Chip de estado con punto.
+  - **Alturas**: inputs, selects y `SearchableSelect` de formulario `h-11` (44px); botones
+    de formulario y de cabecera `h-10`; volver `h-9`; botones ícono `h-9 w-9`; `Buscador`
+    `h-11`.
+  - **Márgenes**: todas las pantallas (listas, formularios, vistas, hojas, búsqueda) usan el
+    mismo contenedor `px-4 pt-6 pb-10 md:px-8 md:pt-10` con su `max-w` de siempre.
+    Formularios y vistas "ver" alinean su tarjeta a la IZQUIERDA (sin `mx-auto`), para que
+    su borde coincida con el de las listas. Solo el papel de las hojas va centrado.
+  - Orden de botones: el de siempre (Cancelar a la izquierda, primario a la derecha,
+    alineados a la derecha en escritorio); el rediseño no mueve ni cambia de tipo ningún
+    botón. La hamburguesa del `MobileHeader` va a la izquierda, del lado del que entra el
+    cajón.
+- **Foco (un solo indicador por elemento)**, definido en `index.css`; las pantallas no ponen
+  clases de foco propias en sus inputs:
+  - Botones, enlaces, tarjetas clicables: anillo azul `foco` de 2px con 2px de separación en
+    `:focus-visible`. Sigue el radio propio del elemento (no se fuerza `border-radius`).
+  - Inputs, selects y textareas: sin anillo azul (el navegador los marca `:focus-visible`
+    también con el mouse); el borde pasa a tinta y un filete de 1px en la sombra lo engrosa
+    a 2px. Reemplaza el borde + anillo azules de `@tailwindcss/forms`. El disparador de
+    `SearchableSelect` (un botón que se ve como campo) imita lo mismo con
+    `focus:border-on-surface focus:ring-1 focus:ring-on-surface`; el `Buscador` (sin borde)
+    con `focus:shadow-tarjeta-foco`.
+  - La hoja de papel conserva sus clases de foco propias (ganan por ser utilidades).
+- **Cordillera de fondo** (`components/SierraFondo.jsx`, componente decorativo autorizado):
+  tres capas SVG de montaña en `bosque` fijas al pie (`clamp(240px,42vh,420px)`, opacidades
+  8/22/42%) con deriva lenta (120s / 80s en contrasentido / 52s). Quieta en móvil, sin
+  animación con movimiento reducido, oculta al imprimir. La montan `AppLayout` (detrás del
+  shell, z-0) y `NotFound`. **Regla de contraste**: ningún texto a nivel de pantalla va
+  directo sobre la montaña; va en tarjeta blanca o sobre papel. `backdrop-blur` **solo
+  desde `md:`** (`bg-papel md:bg-papel-velo md:backdrop-blur-md`): en móvil el desenfoque
+  sobre contenido que se desplaza da tirones en los Android de planta, así que ahí el velo
+  es opaco (`bg-papel` o `bg-papel/95`).
+- **Shell** (`layouts/AppLayout.jsx`): menú lateral de 240px (`w-drawer-width`) transparente
+  sobre el papel (ítem activo = tarjeta blanca), tarjeta de perfil al pie ("Cerrar Sesión"
+  con `active:scale-[0.97]`, ícono sin rojo); `<main data-sheet>` scrollea por dentro, es
+  transparente y reserva el canal de la barra de scroll (`md:[scrollbar-gutter:stable]`)
+  para que el contenido no salte. El shell es `relative` sin z-index a propósito: no crea
+  contexto de apilamiento y el cajón (z-50), la barra móvil (z-30), las barras de acciones
+  (z-30), el Toast (z-70) y los portales (diálogos, SearchableSelect) compiten en el
+  contexto raíz. Móvil: barra superior de 56px en `bg-papel/95` sin blur, hamburguesa a la
+  izquierda, y cajón desde la izquierda (`invisible` cerrado, para que no reciba foco).
+  - **Barras de acciones de las hojas** (entrega, devolución y sus vistas): `fixed inset-x-0
+    bottom-0 md:left-[240px] z-30`, de borde a borde del área de contenido y por encima del
+    canal del scroll (una barra sticky dentro del `<main>` quedaba 8px corta y, al final del
+    scroll, suelta sobre la montaña). `bg-papel md:bg-papel-velo md:backdrop-blur-md
+    shadow-barra-inferior`; el contenido lleva padding inferior para no quedar tapado, y
+    `animate-view-in` va en el contenedor interior, nunca en un ancestro de la barra.
+  - **Toast**: abajo en móvil (`bottom-[calc(16px+env(safe-area-inset-bottom))]`, a lo
+    ancho con 12px de margen, entra subiendo) y arriba a la derecha desde `sm:`. Arriba en
+    móvil tapaba el botón "volver" justo después de guardar: el toque solo cerraba el aviso.
+- **Login** (`pages/Login.jsx`, estilos con prefijo `lg-` en `index.css`): telón verde con el
+  logo que baja con borde de cordillera (solo la primera vez por sesión del navegador,
+  `sessionStorage`); **mientras cubre, la tarjeta queda `inert`** (no se puede escribir a
+  ciegas) y al terminar se enfoca el usuario. Sol, nubes, cuatro capas de montaña con
+  parallax al mouse (una escritura por cuadro con `requestAnimationFrame`; apagado en
+  pantallas táctiles y con movimiento reducido), titular línea por línea y tarjeta que
+  sube. "Verificando…" con isotipo que se llena; si es correcto, saludo en verde letra por
+  letra y check dibujado (anunciado a lectores de pantalla por una región `aria-live`
+  montada desde el inicio; las letras van `aria-hidden`), y se navega **650 ms después**
+  (400 ms con movimiento reducido) al mismo destino de siempre: se cobra en cada inicio de
+  sesión, por eso es corto. Si falla, aviso y sacudida del formulario. La lógica de
+  `login()` / destino / `replace` no cambió.
+- **Movimiento**: `animate-view-in` (entrada de pantalla: 8px, 280 ms, curva estándar),
+  `animate-pop-in` (filas/tarjetas nuevas), `animate-drop-in` (desplegables),
+  `animate-badge-pop` (contadores), `animate-card-rise` (tarjeta del 404), `shimmer`
+  (esqueletos), `data-reveal` (revelado al hacer scroll con `animation-timeline: view()`,
+  solo donde el navegador lo soporta, solo escritorio y **solo en tarjetas**: en filas `<tr>`
+  no funciona porque la línea de tiempo se ata al contenedor con overflow de la tabla).
+  **Toda animación de entrada termina en `transform: none` / `translate: none`**: un
+  transform residual convierte al elemento en contenedor de sus hijos `position: fixed`
+  (el buscador con lista de opciones quedó atrapado así una vez). Por lo mismo, ninguna
+  animación con transform va en un elemento que contenga un panel `fixed`.
+  `prefers-reduced-motion` se respeta globalmente en `index.css` (todo se resuelve al
+  instante; sierra, parallax y revelado apagados).
 - **Animación de "presión" en botones/tarjetas clicables**: todo `<button>` y todo `<Link>`
   clicable del sistema lleva `active:scale-[0.97] transition-transform` (botones
   normales), `active:scale-[0.90]` (botones chicos de solo ícono: ver, editar, cerrar,
@@ -108,13 +219,15 @@ nunca escribir un componente de página nuevo para eso.
   columnas fijas, y hace que las tarjetas crezcan para ocupar el ancho disponible. Patrón
   ya usado antes en `SkeletonDetalle` (`Skeleton.jsx`), reutilizado en vez de inventado.
   Las tres comparten además todo lo demás, con `Catalogo.jsx` como referencia: márgenes
-  `md:p-stack-lg`, separación `gap-stack-lg`, `minmax(280px, 1fr)`, tarjeta
-  `rounded-2xl p-6`, ícono en caja de `h-14 w-14` y título de tarjeta `headline-md` (el
-  título de la pantalla es `headline-lg`). Hasta el 2026-09-11 cada una tenía los suyos.
+  del contenedor común (ver Recetas), separación `gap-stack-lg`, `minmax(280px, 1fr)`,
+  tarjeta `rounded-tarjeta shadow-tarjeta p-6`, ícono en caja `h-14 w-14` y título de
+  tarjeta `headline-md` (el título de la pantalla es `display-lg`). Hasta el 2026-09-11
+  cada una tenía los suyos.
 - **Ancho de "ver" y "editar"**: la vista de detalle y el formulario de una misma entidad
   usan el mismo ancho, para que el contenido no salte al pasar de una a otra: 600px en
   Marcas, Departamentos, Empleados y Usuarios (una columna), 900px en Equipos (formulario
   a dos columnas y tablas de características e historial). Las listas van a 1200px.
+  Desde el rediseño Sierra esas tarjetas van alineadas a la izquierda (sin `mx-auto`).
 - Patrón repetido en TODO el sistema para listas: **escritorio** = tabla con íconos de
   acción (ojo=ver, lápiz=editar, basura=eliminar); **móvil** = tarjetas apiladas, sin
   botones visibles, tocar la tarjeta entera navega al detalle. El punto de quiebre entre
@@ -216,6 +329,12 @@ Sin librería externa: el estado vive en la URL con `useSearchParams` de React R
   (regla del 2026-09-17). Solo se oculta mientras carga (esqueleto) o si hubo error. En
   móvil los números se sustituyen por "Página 2 de 5". Recibe `tamano={limite}` para
   calcular el rango. Es el único componente de paginación: toda lista nueva lo reutiliza.
+  Por sí solo se dibuja como una franja gris con el conteo en mono ("MOSTRANDO 1–20 DE 57
+  MARCAS"). Las listas con tabla lo meten **dentro de la tarjeta de la tabla**, en el pie
+  gris, y le pasan la prop de solo estilo `enPie`: en escritorio pierde su propia tarjeta
+  para no dibujar una caja dentro de otra; en móvil (tarjetas) sigue siendo una tarjeta
+  suelta debajo. (Antes lo detectaba con un selector sobre la clase del padre; se cambió
+  por la prop explícita, que se puede encontrar con grep.)
 - Las funciones `listar*` de `api.js` aceptan `{ limit, page }` opcional (helper interno
   `listarPaginado`, y `laravelRequest(..., { conMeta: true })` para no perder los
   metadatos al desenvolver). Sin ese argumento siguen devolviendo el arreglo completo, que

@@ -442,15 +442,15 @@ function EquiposList() {
           ) : sinContenido ? (
             estado
           ) : (
-            <table className="w-full min-w-[760px] text-left border-collapse">
+            <table className="w-full min-w-[900px] text-left border-collapse">
               <thead>
                 <tr className="bg-surface-container">
                   <th className={`w-20 ${celdaEncabezado}`}>ID</th>
                   <th className={celdaEncabezado}>Equipo</th>
-                  <th className={`w-40 ${celdaEncabezado}`}>Marca</th>
-                  <th className={`w-56 ${celdaEncabezado}`}>Características</th>
+                  <th className={`w-36 ${celdaEncabezado}`}>Marca</th>
+                  <th className={`w-48 ${celdaEncabezado}`}>Características</th>
                   <th className={`w-32 ${celdaEncabezado}`}>Estado</th>
-                  <th className={`w-40 text-right ${celdaEncabezado}`}>Acciones</th>
+                  <th className={`w-[148px] ${celdaEncabezado}`}>Acciones</th>
                 </tr>
               </thead>
               <tbody className="font-body-md text-body-md text-on-surface">
@@ -504,11 +504,11 @@ function EquiposList() {
                               de abrir ni corregir su nombre, marca, modelo o
                               serie desde esta lista. El "+" sigue apareciendo
                               solo cuando falta la primera característica. */}
-                          {/* Tres ranuras fijas de 36px alineadas a la
-                              derecha: ojo y lápiz caen siempre en la misma x
-                              y el "+" ocupa la tercera solo cuando aplica, sin
-                              desalinear las filas (D10). */}
-                          <div className="grid grid-cols-[repeat(3,2.25rem)] items-center justify-end gap-1">
+                          {/* Tres ranuras fijas de 36px (la columna mide
+                              justo eso): ojo y lápiz caen siempre en la misma
+                              x, bajo el encabezado, y el "+" ocupa la tercera
+                              solo cuando aplica, sin desalinear las filas. */}
+                          <div className="grid grid-cols-[repeat(3,2.25rem)] items-center gap-1">
                             <Link
                               to={`/catalogo/equipos/${equipo.id}/ver`}
                               aria-label={`Ver información de ${equipo.name}`}

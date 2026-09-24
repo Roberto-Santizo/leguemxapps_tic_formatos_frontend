@@ -148,7 +148,10 @@ function CatalogoLista({ textos, onListar, rutaBase }) {
           </Link>
 
           {/* Header */}
-          <div className="-mt-1 md:mt-0 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+          {/* Entre md y lg el sidebar deja ~450px: ahí la cabecera vuelve a
+              apilarse para que las tres acciones queden en una fila bajo el
+              título en vez de partirse en columna a su lado. */}
+          <div className="-mt-1 md:mt-0 flex flex-col sm:flex-row md:flex-col lg:flex-row justify-between items-start sm:items-end md:items-start lg:items-end gap-4">
             <div className="min-w-0">
               <div className="flex items-center gap-3 font-eyebrow text-eyebrow uppercase text-on-surface-variant">
                 <span aria-hidden="true" className="h-px w-7 bg-outline" />

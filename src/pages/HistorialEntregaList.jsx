@@ -241,7 +241,7 @@ function HistorialEntregaList() {
                             title="Ver"
                             className={iconoActivo}
                           >
-                            <Eye className="h-4 w-4" strokeWidth={2} />
+                            <Eye className="h-4 w-4" strokeWidth={1.75} />
                           </button>
                           {isAdmin && (
                             <button
@@ -251,7 +251,7 @@ function HistorialEntregaList() {
                               title="Eliminar"
                               className={iconoPeligro}
                             >
-                              <Trash2 className="h-4 w-4" strokeWidth={2} />
+                              <Trash2 className="h-4 w-4" strokeWidth={1.75} />
                             </button>
                           )}
                         </div>

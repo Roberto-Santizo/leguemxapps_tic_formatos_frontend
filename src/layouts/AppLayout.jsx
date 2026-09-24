@@ -18,6 +18,13 @@ import { Toaster } from '../components/Toast.jsx'
   barras de acciones sticky (z-30) siguen compitiendo en el contexto raíz
   igual que antes. Los diálogos y el panel de SearchableSelect van por portal
   a document.body, así que no los afecta nada de esto.
+
+  Canal de la barra de scroll: `md:[scrollbar-gutter:stable]` reserva siempre
+  sus 8px para que el contenido no salte al pasar de una pantalla corta a una
+  larga. Por eso las barras de acciones de las hojas NO van sticky dentro del
+  <main> (quedaban 8px más cortas, con una franja de montaña): van `fixed`
+  al pie del viewport, de `md:left-[240px]` (= w-drawer-width del menú) hasta
+  el borde derecho, por encima del canal.
 */
 function AppLayout() {
   const [menuAbierto, setMenuAbierto] = useState(false)

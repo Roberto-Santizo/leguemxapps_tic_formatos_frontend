@@ -42,13 +42,14 @@ function saludoSegunHora() {
   return 'Buenas noches'
 }
 
-// Parte un texto en letras que saltan en ola (una tras otra cada 28 ms).
+// Parte un texto en letras que saltan en ola (una tras otra cada 12 ms, para
+// que la ola completa quepa en la espera de éxito de 650 ms).
 function LetrasEnOla({ texto, inicio }) {
   return Array.from(texto).map((letra, i) => (
     <span
       key={i}
       className="lg-letra"
-      style={{ animationDelay: `${inicio + i * 28}ms` }}
+      style={{ animationDelay: `${inicio + i * 12}ms` }}
     >
       {letra === ' ' ? '\u00a0' : letra}
     </span>
