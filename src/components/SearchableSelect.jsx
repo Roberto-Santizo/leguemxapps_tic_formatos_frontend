@@ -178,7 +178,7 @@ function SearchableSelect({
     <>
       <div className={`flex items-center gap-2 border-b border-outline-variant p-2.5 ${usarMd ? 'md:p-2' : 'sm:p-2'}`}>
         <div className="relative flex-1">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-on-surface-variant" strokeWidth={2} />
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-on-surface-subtle" strokeWidth={1.75} />
           <input
             ref={inputBusqueda}
             value={busqueda}
@@ -190,26 +190,26 @@ function SearchableSelect({
               }
             }}
             placeholder="Buscar..."
-            className="h-10 w-full rounded-lg border border-outline-variant bg-surface pl-9 pr-3 font-body-md text-body-md text-on-surface focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25"
+            className={`h-10 w-full rounded-boton border border-outline-variant bg-white pl-9 pr-3 font-body-md text-[16px] text-on-surface placeholder:text-on-surface-subtle transition-colors duration-fast ease-standard focus:border-on-surface focus:outline-none focus:ring-0 ${usarMd ? 'md:h-9 md:text-body-md' : 'sm:h-9 sm:text-body-md'}`}
           />
         </div>
         <button
           type="button"
           onClick={() => setAbierto(false)}
-          className={`grid h-10 w-10 shrink-0 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high active:scale-[0.90] transition-transform ${usarMd ? 'md:hidden' : 'sm:hidden'}`}
+          className={`grid h-10 w-10 shrink-0 place-items-center rounded-boton text-on-surface-variant transition duration-fast ease-standard hover:bg-surface-container hover:text-on-surface active:scale-[0.90] ${usarMd ? 'md:hidden' : 'sm:hidden'}`}
           aria-label="Cerrar"
         >
-          <X className="h-4 w-4" strokeWidth={2} />
+          <X className="h-4 w-4" strokeWidth={1.75} />
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-1.5">
+      <div className="flex-1 overflow-y-auto p-1.5 [scrollbar-width:thin]">
         {options.length === 0 ? (
-          <p className="px-3 py-6 text-center font-body-md text-body-md text-on-surface-variant">
+          <p className="px-3 py-6 text-center font-body-md text-body-md text-on-surface-subtle">
             {emptyOptionsText}
           </p>
         ) : filtradas.length === 0 ? (
-          <p className="px-3 py-6 text-center font-body-md text-body-md text-on-surface-variant">
+          <p className="px-3 py-6 text-center font-body-md text-body-md text-on-surface-subtle">
             No se encontraron coincidencias.
           </p>
         ) : (
@@ -220,19 +220,19 @@ function SearchableSelect({
                 key={opcion.id}
                 type="button"
                 onClick={() => elegir(opcion)}
-                className={`flex w-full min-w-0 flex-1 items-center justify-between gap-2 rounded-lg px-3 py-2.5 text-left font-body-md text-body-md transition-colors active:scale-[0.97] transition-transform ${
-                  activo ? 'bg-secondary-container text-on-secondary-container' : 'text-on-surface'
+                className={`flex w-full min-w-0 flex-1 items-center justify-between gap-2 rounded-boton px-3 py-2 text-left font-body-md text-body-md transition duration-fast ease-standard active:scale-[0.98] ${
+                  activo ? 'bg-surface-container-high font-medium text-on-surface' : 'text-on-surface hover:bg-surface-container'
                 }`}
               >
                 {opcion.codigo ? (
                   <span className="flex min-w-0 flex-col">
                     <span className="truncate">{opcion.name}</span>
-                    <span className="break-all font-mono text-label-sm uppercase tracking-wide">{opcion.codigo}</span>
+                    <span className="break-all font-mono text-[11px] uppercase leading-4 tracking-[0.06em] text-on-surface-variant">{opcion.codigo}</span>
                   </span>
                 ) : (
                   <span className="truncate">{opcion.name}</span>
                 )}
-                {activo && <Check className="h-4 w-4 shrink-0" strokeWidth={2.25} />}
+                {activo && <Check className="h-4 w-4 shrink-0 animate-badge-pop" strokeWidth={2} />}
               </button>
             )
             if (!onVerDetalle) return fila
@@ -244,9 +244,9 @@ function SearchableSelect({
                   onClick={() => onVerDetalle(String(opcion.id))}
                   aria-label={`Ver detalle de ${[opcion.name, opcion.codigo].filter(Boolean).join(' ')}`}
                   title="Ver detalle del equipo"
-                  className="grid h-9 w-9 shrink-0 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/25 active:scale-[0.90] transition-transform"
+                  className="grid h-9 w-9 shrink-0 place-items-center rounded-boton text-on-surface-variant transition duration-fast ease-standard hover:bg-surface-container hover:text-on-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-foco focus-visible:ring-offset-2 active:scale-[0.90]"
                 >
-                  <Eye className="h-4 w-4" strokeWidth={2} />
+                  <Eye className="h-4 w-4" strokeWidth={1.75} />
                 </button>
               </div>
             )
@@ -263,21 +263,26 @@ function SearchableSelect({
         type="button"
         disabled={disabled}
         onClick={() => setAbierto((v) => !v)}
-        className={`flex h-11 w-full items-center justify-between gap-2 rounded-lg border bg-surface pl-3.5 font-body-md text-body-md text-on-surface transition-colors hover:border-outline focus:outline-none disabled:opacity-60 active:scale-[0.97] transition-transform ${
-          mostrarOjo ? 'pr-[4.25rem]' : 'pr-3.5'
+        className={`flex h-11 w-full items-center justify-between gap-2 rounded-boton border bg-white pl-3 font-body-md text-body-md text-on-surface transition duration-fast ease-standard hover:border-outline focus:outline-none disabled:opacity-60 active:scale-[0.99] ${
+          mostrarOjo ? 'pr-[4.25rem]' : 'pr-3'
         } ${
-          abierto ? 'border-primary ring-2 ring-primary/25' : 'border-outline-variant focus:border-primary focus:ring-2 focus:ring-primary/25'
+          abierto ? 'border-on-surface' : 'border-outline-variant focus:border-on-surface'
         }`}
       >
-        <span className={seleccionado ? 'truncate text-on-surface' : 'truncate text-on-surface-variant'}>
+        <span className={seleccionado ? 'truncate text-on-surface' : 'truncate text-on-surface-subtle'}>
           {seleccionado ? seleccionado.name : placeholder}
         </span>
         {seleccionado?.codigo && (
-          <span className="ml-auto shrink-0 font-mono text-label-sm uppercase tracking-wide text-on-surface">
+          <span className="ml-auto shrink-0 font-mono text-[12px] uppercase tracking-[0.04em] text-on-surface">
             {seleccionado.codigo}
           </span>
         )}
-        {!mostrarOjo && <ChevronDown className="h-4 w-4 shrink-0 text-on-surface-variant" strokeWidth={2} />}
+        {!mostrarOjo && (
+          <ChevronDown
+            className={`h-4 w-4 shrink-0 text-on-surface-variant transition-transform duration-base ease-standard ${abierto ? 'rotate-180' : ''}`}
+            strokeWidth={1.75}
+          />
+        )}
       </button>
 
       {/* Ojo + flecha superpuestos al campo (position absolute sobre la caja
@@ -294,11 +299,14 @@ function SearchableSelect({
             }}
             aria-label={`Ver detalle de ${[seleccionado.name, seleccionado.codigo].filter(Boolean).join(' ')}`}
             title="Ver detalle del equipo"
-            className="pointer-events-auto grid h-8 w-8 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/25 active:scale-[0.90] transition-transform"
+            className="pointer-events-auto grid h-8 w-8 place-items-center rounded-boton text-on-surface-variant transition duration-fast ease-standard hover:bg-surface-container hover:text-on-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-foco focus-visible:ring-offset-2 active:scale-[0.90]"
           >
-            <Eye className="h-4 w-4" strokeWidth={2} />
+            <Eye className="h-4 w-4" strokeWidth={1.75} />
           </button>
-          <ChevronDown className="h-4 w-4 shrink-0 text-on-surface-variant" strokeWidth={2} />
+          <ChevronDown
+            className={`h-4 w-4 shrink-0 text-on-surface-variant transition-transform duration-base ease-standard ${abierto ? 'rotate-180' : ''}`}
+            strokeWidth={1.75}
+          />
         </div>
       )}
 
@@ -315,14 +323,14 @@ function SearchableSelect({
           // con animate-view-in crea su propio contexto de apilamiento y
           // puede atrapar un position:fixed dentro de él.
           <div
-            className={`fixed inset-0 z-50 flex items-center justify-center bg-on-surface/40 p-4 transition-opacity duration-200 ${
+            className={`fixed inset-0 z-50 flex items-center justify-center bg-tinta/40 p-4 transition-opacity duration-base ease-standard ${
               visibleMobil ? 'opacity-100' : 'opacity-0'
             } ${usarMd ? 'md:hidden' : 'sm:hidden'}`}
             onClick={() => setAbierto(false)}
           >
             <div
               onClick={(e) => e.stopPropagation()}
-              className={`flex max-h-[70vh] w-full max-w-sm flex-col overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest shadow-lg transition-all duration-200 ease-out ${
+              className={`flex max-h-[70vh] w-full max-w-sm flex-col overflow-hidden rounded-tarjeta bg-white shadow-modal transition-[opacity,transform] duration-base ease-standard ${
                 visibleMobil ? 'translate-y-0 scale-100 opacity-100' : 'translate-y-2 scale-95 opacity-0'
               }`}
             >
@@ -344,8 +352,8 @@ function SearchableSelect({
             style={{ position: 'fixed', top: coords.top, left: coords.left, width: coords.width }}
             className={
               usarMd
-                ? 'animate-view-in z-30 hidden max-h-72 flex-col overflow-hidden rounded-lg border border-outline-variant bg-surface shadow-lg md:flex'
-                : 'animate-view-in z-30 hidden max-h-72 flex-col overflow-hidden rounded-lg border border-outline-variant bg-surface shadow-lg sm:flex'
+                ? 'animate-drop-in z-30 hidden max-h-72 flex-col overflow-hidden rounded-xl bg-white shadow-flotante md:flex'
+                : 'animate-drop-in z-30 hidden max-h-72 flex-col overflow-hidden rounded-xl bg-white shadow-flotante sm:flex'
             }
           >
             {contenido}
