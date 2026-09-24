@@ -5,8 +5,8 @@
  * lógica -- y va detrás de todo el contenido (z-0, sin eventos de puntero).
  *
  * Regla de contraste: ningún texto a nivel de pantalla va directo sobre la
- * montaña; el contenido que cae encima va en tarjeta blanca o sobre el
- * papel translúcido (`bg-papel-velo` + blur).
+ * montaña; el contenido que cae encima va en tarjeta blanca o sobre papel
+ * opaco (`bg-papel`: barras inferiores, cabeceras y pie), sin blur.
  *
  * En móvil las capas quedan quietas y con `prefers-reduced-motion` no se
  * anima nada (reglas `[data-sierra]` en index.css). Se oculta al imprimir.

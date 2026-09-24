@@ -436,7 +436,7 @@ function EquiposList() {
         {/* Tabla + paginador en una sola tarjeta en escritorio (patrón de
             Historial); en móvil el envoltorio no dibuja nada. */}
         <div className="flex flex-col gap-stack-lg md:gap-0 md:overflow-hidden md:rounded-tarjeta md:bg-white md:shadow-tarjeta">
-        <div className="hidden md:block overflow-x-auto">
+        <div className="@container hidden md:block overflow-x-auto">
           {cargandoLista ? (
             <SkeletonTabla columnas={6} filas={5} />
           ) : sinContenido ? (
@@ -450,9 +450,12 @@ function EquiposList() {
                   <th className={`w-36 ${celdaEncabezado}`}>Marca</th>
                   <th className={`w-48 ${celdaEncabezado}`}>Características</th>
                   <th className={`w-32 ${celdaEncabezado}`}>Estado</th>
-                  {/* Acciones fija a la derecha: por debajo de ~1210px la tabla se desplaza en
-                      horizontal y así ver/editar siguen a la vista (con filete que la separa). */}
-                  <th className={`sticky right-0 w-[148px] bg-surface-container text-right before:absolute before:inset-y-0 before:left-0 before:w-px before:bg-outline-variant xl:before:hidden ${celdaEncabezado}`}>Acciones</th>
+                  {/* Acciones fija a la derecha: si el envoltorio (@container) mide menos que
+                      el min-w de la tabla (900px), esta se desplaza en horizontal y ver/editar
+                      siguen a la vista con un filete que la separa; con la tabla entera el
+                      filete se oculta (@[900px]). Encabezado a la izquierda: empieza en la
+                      misma x que el ojo (la tercera ranura queda libre si no hay "+"). */}
+                  <th className={`sticky right-0 w-[148px] bg-surface-container text-left before:absolute before:inset-y-0 before:left-0 before:w-px before:bg-outline-variant @[900px]:before:hidden ${celdaEncabezado}`}>Acciones</th>
                 </tr>
               </thead>
               <tbody className="font-body-md text-body-md text-on-surface">
@@ -499,7 +502,7 @@ function EquiposList() {
                         <td className="px-4 py-4">
                           <EstadoEquipo equipoId={equipo.id} />
                         </td>
-                        <td className="sticky right-0 bg-white px-4 py-4 transition-colors duration-fast before:absolute before:inset-y-0 before:left-0 before:w-px before:bg-outline-variant xl:before:hidden ease-standard group-hover:bg-surface-container">
+                        <td className="sticky right-0 bg-white px-4 py-4 transition-colors duration-fast before:absolute before:inset-y-0 before:left-0 before:w-px before:bg-outline-variant @[900px]:before:hidden ease-standard group-hover:bg-surface-container">
                           {/* Ver y editar son del EQUIPO, no de sus
                               características: antes se deshabilitaban cuando el
                               equipo no tenía ninguna, y entonces no había forma

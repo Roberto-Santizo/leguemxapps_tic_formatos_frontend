@@ -105,7 +105,9 @@ function UsuarioView() {
             {/* Rejilla de 2 columnas: el eyebrow ocupa todo el ancho y "Editar"
                 queda siempre a la derecha del título (en móvil no baja a una
                 línea propia). El envoltorio del texto es `contents` para no
-                cambiar el orden del DOM. */}
+                cambiar el orden del DOM. En móvil "Editar" se centra con la primera
+                línea del título y la bajada usa todo el ancho; desde md: baja al pie
+                de la bajada. */}
             <div className="-mt-1 grid grid-cols-[minmax(0,1fr)_auto] gap-x-4 md:mt-0">
               <div className="contents">
                 <div className="col-span-2 flex items-center gap-3 font-eyebrow text-eyebrow uppercase text-on-surface-variant">
@@ -115,12 +117,12 @@ function UsuarioView() {
                 <h1 className="col-start-1 row-start-2 mt-1.5 font-display-lg text-titulo-movil md:text-display-lg text-on-surface break-words">
                   {usuario.name}
                 </h1>
-                <p className="col-start-1 row-start-3 mt-1 font-body-lg text-body-lg text-on-surface-variant">Información completa del usuario.</p>
+                <p className="col-span-2 row-start-3 mt-1 md:col-span-1 font-body-lg text-body-lg text-on-surface-variant">Información completa del usuario.</p>
               </div>
               <button
                 type="button"
                 onClick={() => setConfirmando(true)}
-                className={`col-start-2 row-span-2 row-start-2 self-center md:self-end ${botonSecundario}`}
+                className={`col-start-2 row-start-2 mt-px self-start md:row-span-2 md:mt-0 md:self-end ${botonSecundario}`}
               >
                 <Pencil className="h-4 w-4" strokeWidth={1.75} />
                 Editar

@@ -65,10 +65,12 @@ export function cerrarToast(id) {
  * mockup; desde `md:` alineado con el borde derecho del contenido -- 32px de
  * padding del <main> + su canal de scroll -- y a la altura del botón volver)
  * y ABAJO en móvil, a lo ancho con 12px de margen: arriba tapaba el botón
- * "volver" justo después de guardar y el toque solo cerraba el aviso. En
- * móvil, si la pantalla tiene barra de acciones fija (`data-barra-inferior`)
- * o el cajón está abierto, index.css lo sube para no tapar esos botones
- * (reglas sobre `[data-toaster]`).
+ * "volver" justo después de guardar y el toque solo cerraba el aviso. Si la
+ * pantalla tiene barra de acciones fija (`data-barra-inferior`, las 4 hojas),
+ * index.css lo pone en todos los tamaños 12px por encima de la barra según su
+ * alto real (`--alto-barra`) y, desde md:, alineado con sus botones; con el
+ * cajón móvil abierto lo mete dentro del cajón, sobre "Cerrar Sesión" (reglas
+ * sobre `[data-toaster]`, con respaldo para navegadores sin `:has()`).
  * Entra con `toastIn` (desde arriba a la derecha) en escritorio y con
  * `toastInAbajo` (sube desde el pie) en móvil. El éxito va en pastilla
  * negra de tinta; el error, en blanco con filete e ícono rojos.

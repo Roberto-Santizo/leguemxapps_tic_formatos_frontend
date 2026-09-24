@@ -239,6 +239,9 @@ function Login() {
       </div>
 
       {/* Tarjeta de acceso */}
+      {/* React 18 no conoce `inert` como booleano: se pasa el string '' (presente) o
+          undefined (ausente). Al migrar a React 19 cambiar a inert={telonCubre}: ahí
+          inert="" equivale a false y el bloqueo durante el telón desaparecería sin aviso. */}
       <div className="lg-lado-tarjeta" inert={telonCubre ? '' : undefined}>
         <div
           className={`lg-tarjeta${exito ? ' lg-ok' : ''}`}

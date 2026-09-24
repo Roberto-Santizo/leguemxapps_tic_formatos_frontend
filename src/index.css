@@ -167,19 +167,73 @@ main[data-sheet] > .bg-background {
   }
 }
 
-/* ── Toast en móvil: nunca encima de botones fijos ─────────────────────
-   Abajo por defecto (Toast.jsx). Si la pantalla tiene una barra de acciones
-   fija (las 4 hojas llevan `data-barra-inferior`), sube por encima de la
-   más alta (112px con 3 botones en rejilla) + 12px; si el cajón está abierto
-   (su overlay lleva `data-cajon-abierto`), sube por encima de la tarjeta de
-   perfil / "Cerrar Sesión" (pie del cajón: 20px + tarjeta de 108px) + 12px.
-   Sin soporte de :has() queda abajo, como antes. */
+/* ── Toast: nunca encima de botones fijos ─────────────────────────────
+   Toast.jsx lo deja abajo en móvil (<640) y arriba a la derecha desde sm:.
+   Estas reglas lo recolocan cuando hay algo fijo que no debe tapar.
+
+   1) Hojas con barra de acciones fija. Cada barra declara su forma en
+      `data-barra-inferior` y aquí se traduce a su alto real en la variable
+      `--alto-barra` (sin la safe-area, que la barra suma en su padding):
+        "una-fila"         64px  (Ver devolución; 1 fila de botones)
+        "texto-y-botones"  90px  <640 (leyenda + fila de botones) / 64px desde sm:
+                                 (Nueva entrega, Registrar devolución)
+        "rejilla"          64px, y 112px <768 si tiene 3 botones (Ver entrega
+                                 admin con equipos pendientes: 1 + 2 en rejilla).
+                                 Se cuenta el 3.er hijo con :has(), así el JSX no
+                                 repite la condición de negocio.
+      El toast va siempre 12px por encima de la barra, en todos los tamaños
+      (arriba tapaba el eyebrow de la hoja); desde md: su borde derecho es el
+      de los botones de la barra (contenido max-w-4xl = 896px centrado en el
+      área que empieza tras el aside de 240px, con 32px de padding y el canal
+      de scroll de 10px): right = max(42px, 50vw − 563px).
+   2) Cajón móvil abierto (su overlay lleva `data-cajon-abierto`, <768): el
+      toast va DENTRO del cajón (ancho min(304px, 86%) − 12px por lado), por
+      encima de la tarjeta de perfil / "Cerrar Sesión" (pie del cajón 20px +
+      tarjeta 108px + 12px de aire).
+   3) Sin :has() (Firefox < 121, p. ej. ESR 115 en Windows 7/8): en móvil el
+      toast sube siempre por encima de la barra más alta (112 + 12px), como el
+      `bottom-24` de origin/main; en sm:/escritorio se queda arriba. */
+body:has([data-barra-inferior]) {
+  --alto-barra: 64px;
+}
 @media (max-width: 639px) {
-  body:has([data-barra-inferior]) [data-toaster] {
-    bottom: calc(124px + env(safe-area-inset-bottom));
+  body:has([data-barra-inferior="texto-y-botones"]) {
+    --alto-barra: 90px;
   }
+}
+@media (max-width: 767px) {
+  body:has([data-barra-inferior="rejilla"] > * > :nth-child(3)) {
+    --alto-barra: 112px;
+  }
+}
+body:has([data-barra-inferior]) [data-toaster] {
+  top: auto;
+  bottom: calc(var(--alto-barra) + 12px + env(safe-area-inset-bottom));
+}
+body:has([data-barra-inferior]) [data-toaster] > * {
+  animation-name: toastInAbajo;
+}
+@media (min-width: 768px) {
+  body:has([data-barra-inferior]) [data-toaster] {
+    bottom: calc(var(--alto-barra) + 12px);
+    right: max(42px, calc(50vw - 563px));
+  }
+}
+@media (max-width: 767px) {
   body:has([data-cajon-abierto]) [data-toaster] {
+    top: auto;
     bottom: 140px;
+    left: 12px;
+    right: auto;
+    width: calc(min(304px, 86%) - 24px);
+    align-items: stretch;
+  }
+}
+@supports not selector(:has(*)) {
+  @media (max-width: 639px) {
+    body [data-toaster] {
+      bottom: calc(124px + env(safe-area-inset-bottom));
+    }
   }
 }
 
