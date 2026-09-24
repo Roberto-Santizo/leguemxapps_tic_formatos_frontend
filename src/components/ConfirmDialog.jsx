@@ -24,8 +24,9 @@ import { AlertTriangle } from 'lucide-react'
  * en AuthContext, por ejemplo). No afecta a los usos existentes: ese segundo
  * argumento siempre puede ignorarse.
  *
- * Entra y sale con la misma transición corta (150ms, opacidad + escala), en
- * vez de aparecer animado y desaparecer de golpe.
+ * Entra y sale con las curvas del mockup Sierra (overlayIn/modalIn: 200ms,
+ * opacidad + escala 0.95→1; al cerrar, overlayOut/modalOut en 150ms), en vez
+ * de aparecer animado y desaparecer de golpe.
  *
  * Se pinta con un portal a document.body (igual que el panel de escritorio
  * de SearchableSelect) en vez de quedar donde el JSX de cada pantalla lo
@@ -128,7 +129,7 @@ function ConfirmDialog({
 
   return createPortal(
     <div
-      className={`fixed inset-0 z-50 flex items-center justify-center bg-on-surface/40 p-4 transition-opacity duration-200 ${visible ? 'opacity-100' : 'opacity-0'}`}
+      className={`fixed inset-0 z-50 flex items-center justify-center bg-tinta/40 p-4 transition-opacity ease-standard sm:p-6 ${visible ? 'opacity-100 duration-base' : 'opacity-0 duration-fast'}`}
       onClick={() => !procesando && onCancelar?.()}
     >
       <form
@@ -138,14 +139,14 @@ function ConfirmDialog({
         aria-modal="true"
         aria-labelledby={titulo ? 'confirm-dialog-titulo' : undefined}
         onClick={(e) => e.stopPropagation()}
-        className={`w-full max-w-sm rounded-xl border border-outline-variant bg-surface-container-lowest p-5 shadow-lg transition-all duration-200 ease-out ${
-          visible ? 'translate-y-0 opacity-100 scale-100' : 'translate-y-2 opacity-0 scale-95'
+        className={`w-full max-w-[460px] rounded-tarjeta bg-surface-container-lowest p-6 shadow-modal transition-[opacity,transform] ease-standard ${
+          visible ? 'scale-100 opacity-100 duration-base' : 'scale-95 opacity-0 duration-fast'
         }`}
       >
         <div className={peligro ? 'flex items-start gap-3.5' : undefined}>
           {peligro && (
-            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-error-container text-on-error-container">
-              <AlertTriangle className="h-5 w-5" strokeWidth={2} />
+            <div className="grid h-10 w-10 shrink-0 animate-badge-pop place-items-center rounded-full bg-error-container text-on-error-container">
+              <AlertTriangle className="h-5 w-5" strokeWidth={1.75} />
             </div>
           )}
 
@@ -153,23 +154,23 @@ function ConfirmDialog({
             {titulo && (
               <h2
                 id="confirm-dialog-titulo"
-                className="mb-1.5 font-headline-md text-headline-md font-bold text-on-surface"
+                className="mb-1.5 font-headline-md text-[20px] font-semibold leading-7 tracking-[-0.02em] text-on-surface"
               >
                 {titulo}
               </h2>
             )}
-            {mensaje && <p className="font-body-md text-body-md text-on-surface-variant break-words">{mensaje}</p>}
+            {mensaje && <p className="font-body-md text-body-md text-on-surface-subtle break-words">{mensaje}</p>}
           </div>
         </div>
 
         {requierePassword && (
           <div className="mt-4 flex flex-col gap-1.5">
-            <label className="font-label-bold text-label-bold text-on-surface">Tu contraseña</label>
+            <label className="text-[12px] font-semibold leading-4 text-on-surface">Tu contraseña</label>
             <input
               ref={passwordRef}
               type="password"
               disabled={procesando}
-              className="h-11 w-full rounded-lg border border-outline-variant bg-surface px-3.5 font-body-md text-body-md text-on-surface transition-colors hover:border-outline focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25"
+              className="h-11 w-full rounded-boton border border-outline-variant bg-surface px-3 font-body-md text-body-md text-on-surface transition-colors duration-fast ease-standard hover:border-outline focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
@@ -182,25 +183,25 @@ function ConfirmDialog({
               type="checkbox"
               checked={noPreguntar}
               onChange={(e) => setNoPreguntar(e.target.checked)}
-              className="h-4 w-4 shrink-0 rounded border-outline-variant text-primary focus:outline-none focus:ring-2 focus:ring-primary/25"
+              className="h-4 w-4 shrink-0 rounded border-outline text-primary focus:outline-none focus:ring-2 focus:ring-foco focus:ring-offset-2"
             />
             {textoNoPreguntar}
           </label>
         )}
 
         {errorAMostrar && (
-          <p className="mt-3 rounded-lg border border-error/30 bg-error-container/40 px-3 py-2 font-label-sm text-label-sm text-error">
+          <p className="mt-3 animate-hint-in rounded-boton border border-error/30 bg-error-container/40 px-3 py-2 font-label-sm text-label-sm text-error">
             {errorAMostrar}
           </p>
         )}
 
-        <div className="mt-5 flex justify-end gap-2.5">
+        <div className="mt-6 flex justify-end gap-2">
           <button
             ref={requierePassword ? null : cancelarRef}
             type="button"
             disabled={procesando}
             onClick={onCancelar}
-            className="inline-flex h-10 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high disabled:opacity-60 active:scale-[0.97] transition-transform"
+            className="inline-flex h-10 items-center justify-center rounded-boton border border-outline-variant bg-surface px-4 font-body-md text-body-md font-medium text-on-surface transition-[transform,background-color] duration-fast ease-standard hover:bg-surface-container active:scale-[0.97] active:bg-surface-container-highest disabled:opacity-60"
           >
             {textoCancelar}
           </button>
@@ -208,8 +209,10 @@ function ConfirmDialog({
             type="submit"
             disabled={procesando}
             className={[
-              'inline-flex h-10 items-center justify-center rounded-lg px-4 font-label-bold text-label-bold shadow-sm transition-all hover:brightness-110 active:brightness-95 active:scale-[0.97] disabled:opacity-60',
-              peligro ? 'bg-error text-on-error' : 'bg-primary text-on-primary',
+              'inline-flex h-10 items-center justify-center rounded-boton px-4 font-body-md text-body-md font-medium transition-[transform,background-color,filter] duration-fast ease-standard active:scale-[0.97] disabled:opacity-60',
+              peligro
+                ? 'bg-error text-on-error hover:brightness-110 active:brightness-95'
+                : 'bg-tinta text-on-primary hover:bg-tinta-hover',
             ].join(' ')}
           >
             {procesando ? 'Procesando...' : textoConfirmar}

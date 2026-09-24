@@ -61,10 +61,11 @@ export function cerrarToast(id) {
 /**
  * Contenedor visual. Se monta UNA sola vez, en AppLayout.
  *
- * Posición: en móvil se coloca por encima de la barra de acciones fija que
- * usan los formatos de acta (sticky bottom-0, ~68px de alto), para no taparle
- * el botón de guardar al usuario justo cuando acaba de guardar. En escritorio
- * se ancla abajo a la derecha.
+ * Posición (sistema Sierra): arriba a la derecha en escritorio y bajo la
+ * barra superior de 56px en móvil, como en el mockup -- así tampoco tapa la
+ * barra de acciones fija que usan los formatos de acta (sticky bottom-0).
+ * Entra con `toastIn` (desde arriba a la derecha). El éxito va en pastilla
+ * negra de tinta; el error, en blanco con filete e ícono rojos.
  */
 export function Toaster() {
   const [lista, setLista] = useState(avisos)
@@ -80,7 +81,7 @@ export function Toaster() {
   if (lista.length === 0) return null
 
   return (
-    <div className="pointer-events-none fixed inset-x-4 bottom-24 z-[70] flex flex-col items-stretch gap-2 sm:inset-x-auto sm:bottom-6 sm:right-6 sm:items-end">
+    <div className="pointer-events-none fixed inset-x-3 top-[64px] z-[70] flex flex-col items-stretch gap-2 sm:inset-x-auto sm:right-6 sm:top-6 sm:items-end">
       {lista.map((aviso) => {
         const esError = aviso.tipo === 'error'
         const Icono = esError ? AlertTriangle : CheckCircle2
@@ -91,17 +92,17 @@ export function Toaster() {
             aria-live="polite"
             onClick={() => quitarAviso(aviso.id)}
             className={[
-              'animate-view-in pointer-events-auto flex w-full cursor-pointer items-start gap-3 rounded-xl border bg-surface-container-lowest px-4 py-3 shadow-lg transition-colors sm:w-80',
+              'animate-toast-in pointer-events-auto flex w-full cursor-pointer items-center gap-2.5 rounded-[22px] py-1.5 pl-4 pr-1.5 shadow-toast transition-colors duration-fast ease-standard sm:w-auto sm:max-w-[400px]',
               esError
-                ? 'border-error/30 hover:bg-error-container/30'
-                : 'border-outline-variant hover:bg-surface-container-low',
+                ? 'bg-surface-container-lowest text-on-surface ring-1 ring-error/40 hover:bg-error-container/30'
+                : 'bg-tinta text-on-primary hover:bg-tinta-hover',
             ].join(' ')}
           >
             <Icono
-              className={`mt-0.5 h-4.5 w-4.5 shrink-0 ${esError ? 'text-error' : 'text-on-surface'}`}
-              strokeWidth={2}
+              className={`h-4 w-4 shrink-0 animate-icon-pop ${esError ? 'text-error' : 'text-on-primary'}`}
+              strokeWidth={1.75}
             />
-            <p className="flex-1 font-body-md text-body-md text-on-surface break-words">{aviso.mensaje}</p>
+            <p className="flex-1 py-1.5 font-body-md text-body-md font-medium break-words">{aviso.mensaje}</p>
             <button
               type="button"
               onClick={(e) => {
@@ -109,9 +110,14 @@ export function Toaster() {
                 quitarAviso(aviso.id)
               }}
               aria-label="Cerrar aviso"
-              className="-mr-1 grid h-9 w-9 shrink-0 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface active:scale-[0.90] transition-transform"
+              className={[
+                'grid h-8 w-8 shrink-0 place-items-center rounded-full transition-[transform,background-color,color] duration-fast ease-standard active:scale-[0.90]',
+                esError
+                  ? 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
+                  : 'text-on-primary/70 hover:bg-on-primary/15 hover:text-on-primary',
+              ].join(' ')}
             >
-              <X className="h-4 w-4" strokeWidth={2} />
+              <X className="h-4 w-4" strokeWidth={1.75} />
             </button>
           </div>
         )
