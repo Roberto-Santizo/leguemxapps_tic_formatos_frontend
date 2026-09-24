@@ -175,7 +175,7 @@ function Usuarios() {
                   return (
                     <tr
                       key={u.id}
-                      className="h-[72px] border-t border-outline-variant transition-colors duration-fast hover:bg-surface-container-low"
+                      className="h-[72px] border-t border-outline-variant transition-colors duration-fast hover:bg-surface-container"
                     >
                       <td className="px-4 py-3">
                         <div className="flex min-w-0 items-center gap-3">

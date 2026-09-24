@@ -62,8 +62,13 @@ export function cerrarToast(id) {
  * Contenedor visual. Se monta UNA sola vez, en AppLayout.
  *
  * Posición (sistema Sierra): arriba a la derecha desde `sm:` (como el
- * mockup) y ABAJO en móvil, a lo ancho con 12px de margen: arriba tapaba el
- * botón "volver" justo después de guardar y el toque solo cerraba el aviso.
+ * mockup; desde `md:` alineado con el borde derecho del contenido -- 32px de
+ * padding del <main> + su canal de scroll -- y a la altura del botón volver)
+ * y ABAJO en móvil, a lo ancho con 12px de margen: arriba tapaba el botón
+ * "volver" justo después de guardar y el toque solo cerraba el aviso. En
+ * móvil, si la pantalla tiene barra de acciones fija (`data-barra-inferior`)
+ * o el cajón está abierto, index.css lo sube para no tapar esos botones
+ * (reglas sobre `[data-toaster]`).
  * Entra con `toastIn` (desde arriba a la derecha) en escritorio y con
  * `toastInAbajo` (sube desde el pie) en móvil. El éxito va en pastilla
  * negra de tinta; el error, en blanco con filete e ícono rojos.
@@ -82,7 +87,10 @@ export function Toaster() {
   if (lista.length === 0) return null
 
   return (
-    <div className="pointer-events-none fixed inset-x-3 bottom-[calc(16px+env(safe-area-inset-bottom))] z-[70] flex flex-col items-stretch gap-2 sm:inset-x-auto sm:bottom-auto sm:right-6 sm:top-6 sm:items-end">
+    <div
+      data-toaster
+      className="pointer-events-none fixed inset-x-3 bottom-[calc(16px+env(safe-area-inset-bottom))] z-[70] flex flex-col items-stretch gap-2 sm:inset-x-auto sm:bottom-auto sm:right-4 sm:top-[calc(theme(spacing.barra-movil)+12px)] sm:items-end md:right-[42px] md:top-10"
+    >
       {lista.map((aviso) => {
         const esError = aviso.tipo === 'error'
         const Icono = esError ? AlertTriangle : CheckCircle2

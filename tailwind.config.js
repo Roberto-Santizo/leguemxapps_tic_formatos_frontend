@@ -97,7 +97,7 @@ export default {
 
         /* ── Tokens nuevos del sistema Sierra ─────────────────────────────── */
         papel: '#f4f5f1', // fondo de página (mismo valor que `background`)
-        'papel-velo': 'rgba(244, 245, 241, 0.9)', // cabeceras sobre la cordillera (+ blur 12px)
+        'papel-velo': 'rgba(244, 245, 241, 0.9)', // velo sobre la cordillera (sin blur: la sierra deriva y el blur repinta cada cuadro)
         tinta: '#0a0a0a', // botón primario negro
         'tinta-hover': '#262626', // hover del botón primario
         // Marca: solo login, logo y cordillera de fondo.
@@ -118,6 +118,7 @@ export default {
         tarjeta: '16px', // tarjetas y paneles blancos
         menu: '10px', // ítems del menú lateral y botón de la barra móvil
         aviso: '22px', // pastilla del Toast
+        casilla: '4px', // checkbox (ConfirmDialog "no volver a preguntar")
       },
       boxShadow: {
         sm: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
@@ -160,6 +161,10 @@ export default {
         'label-sm': ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
         'label-bold': ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
         eyebrow: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
+        // Papel aprobado (hoja de entrega/devolución en pantalla): conserva la
+        // tipografía de origin/main para el título, que era Manrope. Se usa
+        // SOLO dentro del papel: `font-papel text-titulo-papel`.
+        papel: ['Manrope', 'Inter', 'sans-serif'],
       },
       fontSize: {
         'body-lg': ['16px', { lineHeight: '24px', fontWeight: '400' }],
@@ -183,6 +188,14 @@ export default {
         // Inputs en móvil: 16px evita el zoom automático de iOS al enfocar.
         'input-movil': ['16px', { lineHeight: '24px' }],
         'titulo-movil': ['26px', { lineHeight: '30px', letterSpacing: '-0.04em', fontWeight: '800' }],
+        //  - nano: marca del menú, pie y chip "Corregida aquí" (mono 10px).
+        //  - titulo-modal: título de ConfirmDialog y EquipoDetalleModal.
+        //  - titulo-papel: título del papel ("Hoja de Entrega de Equipo"...),
+        //    idéntico al `headline-lg` de origin/main + font-extrabold que
+        //    aprobó el cliente; va con `font-papel` (Manrope).
+        nano: ['10px', { lineHeight: '16px' }],
+        'titulo-modal': ['20px', { lineHeight: '28px', letterSpacing: '-0.02em', fontWeight: '600' }],
+        'titulo-papel': ['24px', { lineHeight: '32px', letterSpacing: '-0.02em', fontWeight: '800' }],
       },
       transitionDuration: {
         fast: '150ms',
@@ -197,7 +210,6 @@ export default {
       // Solo los keyframes que usa alguna pantalla (el resto del catálogo del
       // mockup -- modalIn/Out, dockIn, numBump... -- se podó por no tener uso).
       keyframes: {
-        pageIn: { from: { opacity: '0', transform: 'translateY(8px)' }, to: { opacity: '1', transform: 'none' } },
         popIn: { from: { opacity: '0', transform: 'translateY(6px)' }, to: { opacity: '1', transform: 'none' } },
         dropIn: { from: { opacity: '0', transform: 'translateY(-4px)' }, to: { opacity: '1', transform: 'none' } },
         hintIn: { from: { opacity: '0', transform: 'translateY(-3px)' }, to: { opacity: '1', transform: 'none' } },
@@ -216,7 +228,6 @@ export default {
         sierraDrift: { from: { transform: 'translateX(0)' }, to: { transform: 'translateX(-50%)' } },
       },
       animation: {
-        'page-in': 'pageIn 280ms cubic-bezier(0.4, 0, 0.2, 1) both',
         'pop-in': 'popIn 200ms cubic-bezier(0.4, 0, 0.2, 1) both',
         'drop-in': 'dropIn 150ms cubic-bezier(0.4, 0, 0.2, 1) both',
         'hint-in': 'hintIn 150ms cubic-bezier(0.4, 0, 0.2, 1) both',

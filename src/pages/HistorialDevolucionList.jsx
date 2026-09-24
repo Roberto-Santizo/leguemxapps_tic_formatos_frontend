@@ -172,26 +172,26 @@ function HistorialDevolucionList() {
                     <th className="h-11 px-4 font-mono text-micro font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap">
                       Fecha
                     </th>
-                    <th className="h-11 px-4 font-mono text-micro font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap">
+                    <th className="min-w-[200px] h-11 px-4 font-mono text-micro font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap">
                       Colaborador
                     </th>
-                    <th className="h-11 px-4 font-mono text-micro font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap">
+                    <th className="min-w-[160px] h-11 px-4 font-mono text-micro font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap">
                       Departamento
                     </th>
-                    <th className="w-28 h-11 px-4 font-mono text-micro font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap">
+                    <th className="w-24 h-11 px-4 font-mono text-micro font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap">
                       Entrega
                     </th>
                     <th className="w-32 h-11 px-4 font-mono text-micro font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap">
                       Estado
                     </th>
-                    <th className="w-28 h-11 px-4 font-mono text-micro font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap text-right">
+                    <th className="w-20 h-11 px-4 font-mono text-micro font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap text-right">
                       Ver
                     </th>
                   </tr>
                 </thead>
                 <tbody className="font-body-md text-body-md text-on-surface">
                   {visibles.map((documento) => (
-                    <tr key={documento.id} className="h-[72px] border-t border-outline-variant transition-colors duration-fast hover:bg-surface-container-low">
+                    <tr key={documento.id} className="h-[72px] border-t border-outline-variant transition-colors duration-fast hover:bg-surface-container">
                       <td className="px-4 py-4 font-mono text-meta text-on-surface-variant tabular-nums whitespace-nowrap">
                         {formatearFecha(documento.return_date)}
                       </td>
@@ -201,7 +201,7 @@ function HistorialDevolucionList() {
                       <td className="px-4 py-4 text-on-surface-variant break-words">
                         {documento.employee_department || '—'}
                       </td>
-                      <td className="px-4 py-4 font-mono text-meta text-on-surface-variant tabular-nums">
+                      <td className="px-4 py-4 font-mono text-meta text-on-surface-variant tabular-nums whitespace-nowrap">
                         #{documento.delivery_document_id}
                       </td>
                       <td className="px-4 py-4">
@@ -240,7 +240,6 @@ function HistorialDevolucionList() {
                   key={documento.id}
                   type="button"
                   onClick={() => verDocumento(documento)}
-                  data-reveal
                   className="flex w-full items-center justify-between gap-3 rounded-tarjeta bg-white p-4 text-left shadow-tarjeta transition duration-fast ease-standard hover:shadow-flotante active:scale-[0.99]"
                 >
                   <div className="min-w-0">

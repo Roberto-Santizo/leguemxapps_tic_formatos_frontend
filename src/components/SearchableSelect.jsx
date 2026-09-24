@@ -267,8 +267,10 @@ function SearchableSelect({
           mostrarOjo ? 'pr-[4.25rem]' : 'pr-3'
         } ${
           // Foco igual que los inputs (index.css): borde tinta + filete de 1px,
-          // sin anillo azul, para que el campo no tenga dos indicadores.
-          abierto ? 'border-on-surface ring-1 ring-on-surface' : 'border-outline-variant focus:border-on-surface focus:ring-1 focus:ring-on-surface'
+          // sin anillo azul, para que el campo no tenga dos indicadores. Abierto
+          // queda solo el borde tinta de 1px: el indicador grueso lo lleva el
+          // buscador del desplegable, que es donde se teclea.
+          abierto ? 'border-on-surface' : 'border-outline-variant focus:border-on-surface focus:ring-1 focus:ring-on-surface'
         }`}
       >
         <span className={seleccionado ? 'truncate text-on-surface' : 'truncate text-on-surface-subtle'}>

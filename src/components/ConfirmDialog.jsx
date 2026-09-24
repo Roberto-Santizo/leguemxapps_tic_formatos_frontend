@@ -154,7 +154,7 @@ function ConfirmDialog({
             {titulo && (
               <h2
                 id="confirm-dialog-titulo"
-                className="mb-1.5 font-headline-md text-[20px] font-semibold leading-7 tracking-[-0.02em] text-on-surface"
+                className="mb-1.5 font-headline-md text-titulo-modal text-on-surface"
               >
                 {titulo}
               </h2>
@@ -183,7 +183,7 @@ function ConfirmDialog({
               type="checkbox"
               checked={noPreguntar}
               onChange={(e) => setNoPreguntar(e.target.checked)}
-              className="h-4 w-4 shrink-0 rounded-[4px] border-outline text-primary"
+              className="h-4 w-4 shrink-0 rounded-casilla border-outline text-primary"
             />
             {textoNoPreguntar}
           </label>

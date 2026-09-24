@@ -232,7 +232,7 @@ function FirmaPad({ titulo, subtitulo, firmaUrl, onConfirmar, onReiniciar }) {
           type="button"
           onClick={handleConfirmar}
           disabled={modo !== 'historico' && vacio}
-          className="inline-flex h-8 items-center justify-center rounded-boton bg-tinta px-3 text-[13px] font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97] disabled:cursor-not-allowed disabled:bg-surface-container-high disabled:text-on-surface-subtle disabled:shadow-none disabled:active:scale-100"
+          className="inline-flex h-8 items-center justify-center rounded-boton bg-tinta px-3 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97] disabled:cursor-not-allowed disabled:bg-surface-container-high disabled:text-on-surface-subtle disabled:shadow-none disabled:active:scale-100"
         >
           Confirmar firma
         </button>

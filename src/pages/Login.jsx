@@ -10,8 +10,14 @@ const CLAVE_TELON = 'legumex_telon_visto'
 // cobra en cada inicio de sesión, no solo la primera vez como el telón).
 const ESPERA_EXITO_MS = 650
 // El telón termina de bajar a los 2.5 s (1 s de espera + 1.5 s de caída, ver
-// .lg-telon en index.css). Respaldo por si el navegador no avisa animationend.
+// .lg-telon en index.css) y la tarjeta termina de aparecer en ese mismo
+// instante (.lg-tarjeta); `inert` se quita en el animationend de la tarjeta.
+// Respaldo por si el navegador no avisa animationend.
 const FIN_TELON_MS = 2600
+// Duración del salto de cada letra (.lg-letra en index.css) y margen para que
+// la ola completa termine antes de navegar (ESPERA_EXITO_MS).
+const SALTO_LETRA_MS = 360
+const FIN_OLA_MS = ESPERA_EXITO_MS - 50
 
 function telonYaVisto() {
   try {
@@ -42,14 +48,17 @@ function saludoSegunHora() {
   return 'Buenas noches'
 }
 
-// Parte un texto en letras que saltan en ola (una tras otra cada 12 ms, para
-// que la ola completa quepa en la espera de éxito de 650 ms).
+// Parte un texto en letras que saltan en ola, una tras otra cada 8 ms (menos
+// si el texto es largo), para que la última termine su salto antes de navegar
+// (ESPERA_EXITO_MS) y ninguna se corte a media ola.
 function LetrasEnOla({ texto, inicio }) {
-  return Array.from(texto).map((letra, i) => (
+  const letras = Array.from(texto)
+  const paso = Math.max(0, Math.min(8, (FIN_OLA_MS - SALTO_LETRA_MS - inicio) / Math.max(1, letras.length - 1)))
+  return letras.map((letra, i) => (
     <span
       key={i}
       className="lg-letra"
-      style={{ animationDelay: `${inicio + i * 12}ms` }}
+      style={{ animationDelay: `${Math.round(inicio + i * paso)}ms` }}
     >
       {letra === ' ' ? '\u00a0' : letra}
     </span>
@@ -175,13 +184,7 @@ function Login() {
       onMouseLeave={conParallax ? soltarParallax : undefined}
     >
       {mostrarTelon && (
-        <div
-          aria-hidden="true"
-          className="lg-telon"
-          onAnimationEnd={(e) => {
-            if (e.target === e.currentTarget) setTelonCubre(false)
-          }}
-        >
+        <div aria-hidden="true" className="lg-telon">
           <div className="lg-telon-fondo" />
           <svg className="lg-telon-borde" viewBox="0 0 1280 120" preserveAspectRatio="none">
             <polygon points="0,0 1280,0 1280,60 1100,25 900,58 680,10 460,55 250,20 0,60" />
@@ -237,7 +240,13 @@ function Login() {
 
       {/* Tarjeta de acceso */}
       <div className="lg-lado-tarjeta" inert={telonCubre ? '' : undefined}>
-        <div className={`lg-tarjeta${exito ? ' lg-ok' : ''}`}>
+        <div
+          className={`lg-tarjeta${exito ? ' lg-ok' : ''}`}
+          onAnimationEnd={(e) => {
+            // Fin de la aparición de la tarjeta (= fin del telón): queda libre.
+            if (e.target === e.currentTarget && e.animationName === 'lgFade') setTelonCubre(false)
+          }}
+        >
           {/* Región viva montada desde el inicio: solo cambia su texto, así los
               lectores de pantalla anuncian el éxito (las letras en ola van
               aria-hidden para que no se lean de una en una). */}

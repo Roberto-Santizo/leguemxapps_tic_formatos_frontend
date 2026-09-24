@@ -52,10 +52,11 @@ function Paginador({ pagina, ultimaPagina, total, plural, tamano = TAMANO_PAGINA
   // sobre la montaña). `enPie` (solo estilo): la pantalla lo mete dentro del
   // pie gris de su tabla, así que en escritorio pierde su tarjeta para no
   // dibujar una caja dentro de otra; en móvil (tarjetas) sigue siendo tarjeta.
+  // Botones de 40px en móvil (objetivo táctil) y 32px desde md: dentro del pie.
   const flecha =
-    'inline-flex h-8 items-center justify-center gap-1 rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97] disabled:cursor-not-allowed disabled:text-on-surface-subtle disabled:hover:bg-white disabled:active:scale-100'
+    'inline-flex h-10 items-center justify-center gap-1 rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97] md:h-8 disabled:cursor-not-allowed disabled:text-on-surface-subtle disabled:hover:bg-white disabled:active:scale-100'
   const numero =
-    'inline-grid h-8 min-w-8 place-items-center rounded-boton px-2 font-mono text-meta tabular-nums transition duration-fast ease-standard active:scale-[0.97]'
+    'inline-grid h-10 min-w-10 place-items-center rounded-boton px-2 md:h-8 md:min-w-8 font-mono text-meta tabular-nums transition duration-fast ease-standard active:scale-[0.97]'
 
   const pie = enPie ? 'md:rounded-none md:bg-transparent md:p-0 md:shadow-none' : ''
 
@@ -92,7 +93,7 @@ function Paginador({ pagina, ultimaPagina, total, plural, tamano = TAMANO_PAGINA
             n === null ? (
               <span
                 key={`hueco-${i}`}
-                className="inline-grid h-8 w-6 place-items-center font-mono text-meta text-on-surface-subtle"
+                className="inline-grid h-10 w-6 place-items-center font-mono text-meta text-on-surface-variant md:h-8"
                 aria-hidden="true"
               >
                 …

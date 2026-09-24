@@ -57,7 +57,7 @@ function EditorFechaLocal({ value, corregida, onChange, onRestablecer, title }) 
         <>
           <span
             title="Este ajuste solo se ve en este navegador -- no cambia el registro real del servidor"
-            className="inline-flex h-5 animate-badge-pop items-center gap-1 rounded-full border border-outline-variant bg-white px-2 font-mono text-[10px] uppercase tracking-[0.08em] text-on-surface-variant"
+            className="inline-flex h-5 animate-badge-pop items-center gap-1 rounded-full border border-outline-variant bg-white px-2 font-mono text-nano uppercase tracking-[0.08em] text-on-surface-variant"
           >
             <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-assigned" />
             Corregida aquí

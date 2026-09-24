@@ -380,7 +380,7 @@ function FormatoActa() {
             </Link>
             <div className="flex items-center gap-3 font-eyebrow text-eyebrow uppercase text-on-surface-variant">
               <span aria-hidden="true" className="h-px w-7 bg-outline" />
-              Actas / {formato.tituloCorto}
+              Actas / Nueva / {formato.tituloCorto.replace(/ de Equipo$/, '')}
             </div>
           </div>
 
@@ -399,7 +399,7 @@ function FormatoActa() {
                   <p className="font-label-sm text-label-sm uppercase tracking-widest text-on-surface-variant">
                     Agroindustria Legumex, S.A.
                   </p>
-                  <h2 className="mt-1 font-headline-lg text-headline-lg font-extrabold text-on-surface">
+                  <h2 className="mt-1 font-papel text-titulo-papel text-on-surface">
                     {formato.titulo}
                   </h2>
                   <p className="mt-1 font-body-md text-body-md text-on-surface-variant">
@@ -1196,7 +1196,7 @@ function FormatoActa() {
       </div>
 
       {/* Barra de acciones */}
-      <div className="fixed inset-x-0 bottom-0 z-30 bg-papel px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-barra-inferior md:left-drawer-width md:overflow-hidden md:bg-papel-velo md:px-8 md:pb-3 md:backdrop-blur-md md:[scrollbar-gutter:stable]">
+      <div data-barra-inferior className="fixed inset-x-0 bottom-0 z-30 bg-papel px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-barra-inferior md:left-drawer-width md:overflow-hidden md:px-8 md:pb-3 md:[scrollbar-gutter:stable]">
         <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-3">
           {esEntrega && errorGuardar ? (
             <p className="animate-pop-in rounded-boton border border-error/30 bg-error-container/60 px-3 py-2 font-label-sm text-label-sm text-error">

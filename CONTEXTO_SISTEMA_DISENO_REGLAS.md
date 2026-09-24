@@ -78,25 +78,39 @@ nunca escribir un componente de página nuevo para eso.
   - **Tinta**: títulos `#171717` (`on-surface`), secundario `#525252` / `#737373`
     (`on-surface-variant` / `on-surface-subtle`), bordes `#e5e5e5` (`outline-variant`),
     filete `#a3a3a3` (`outline`). CTA negro `bg-tinta` (`#0a0a0a`, hover `tinta-hover`).
+    - Contraste: `on-surface-subtle` (#737373) solo sobre blanco o `surface-container-low`
+      (4.74 / 4.54:1). Sobre papel, `surface-container` o `surface-container-high` no llega
+      a AA (4.33 / 4.35 / 4.02:1): ahí se usa `on-surface-variant` (#525252, 7.4:1).
+      `outline` (#a3a3a3, 2.5:1) nunca va en texto: solo filetes y chevrons decorativos.
   - **Foco y enlaces**: azul `foco` (`#2563eb`).
   - **Verde de marca** (`bosque #0b2a1e`, `brote`, `linea`, `exito`): SOLO en marca, login y
-    cordillera de fondo. En la app no hay verde en superficies ni textos.
+    cordillera de fondo. En la app no hay verde en superficies ni textos. El login no usa
+    las clases: repite esos valores como variables `--lg-bosque`, `--lg-acento`,
+    `--lg-linea` y `--lg-exito` en `index.css` (bloque `.lg-raiz`); si cambia uno, cambiar
+    ambos.
   - **Rojo** (`error*`): eliminar, errores y marcar un equipo como **extravío** en la
     devolución (fila, badge y botón en rojo -- pedido explícito del cliente).
   - **Verde salvia y ocre** (`available*` / `assigned*`): el badge "Disponible" / "En
     posesión" de Catálogo → Equipos y, desde la ronda 2 del rediseño, el **punto** de color
-    del chip de estado de Historial → Devolución (chip neutro blanco con borde
-    `outline-variant`; solo el punto lleva `bg-available` / `bg-assigned`). Apagados, al
-    mismo nivel de saturación que el rojo.
+    del chip de estado de Historial → Devolución (`devuelto` = `bg-available`, `parcial` =
+    `bg-assigned`, otro = `bg-outline`; `HistorialDevolucionList.jsx`, `puntoEstado`), el
+    del chip "N pendientes" de Registrar devolución (`BuscarDevolucion.jsx`, `bg-assigned`:
+    pendiente de devolver = parcial) y el del chip "Corregida aquí" de `EditorFechaLocal`
+    (`bg-assigned`: aviso de que esa fecha es un ajuste local, no el dato del servidor). El
+    chip siempre es neutro (blanco, borde `outline-variant`, texto `on-surface`/`-variant`):
+    solo el punto lleva color. En ningún otro lugar. Apagados, al mismo nivel de saturación
+    que el rojo.
   - Nada se escribe suelto (`bg-green-100`, hex o `rgba(...)` en JSX): colores, radios
-    (`rounded-boton` 8px, `rounded-tarjeta` 16px, `rounded-menu` 10px, `rounded-aviso` 22px),
+    (`rounded-boton` 8px, `rounded-tarjeta` 16px, `rounded-menu` 10px, `rounded-aviso` 22px,
+    `rounded-casilla` 4px del checkbox),
     sombras (`shadow-tarjeta` = sombra corta + filete de 1px en vez de `border`;
     `shadow-tarjeta-hover`, `shadow-tarjeta-foco`, `shadow-flotante`, `shadow-cajon`,
     `shadow-barra-inferior`) y tiempos (`duration-fast|base|page`, `ease-standard|salida|rebote`)
     están en `tailwind.config.js`. Si hace falta uno nuevo, se registra ahí.
 - **Tipografía**: Inter (400–800) para todo y **JetBrains Mono** (`font-mono` / `font-eyebrow`)
   para eyebrows, códigos, series, contadores y encabezados de tabla (mayúsculas, tracking
-  .1–.12em). Manrope se retiró. Tamaños siempre por token, nunca `text-[Npx]`:
+  .1–.12em). Manrope queda cargada (`index.html`, 700/800) SOLO para el título del papel
+  aprobado (ver abajo). Tamaños siempre por token, nunca `text-[Npx]`:
   - `text-display-lg` (32/800/−0.04em): título de pantalla en escritorio; en móvil
     `text-titulo-movil` (26px/30px/800/−0.04em) → `text-titulo-movil md:text-display-lg`.
   - `text-headline-lg` (24/700), `text-headline-md` (18/700, título de sección/tarjeta),
@@ -107,11 +121,21 @@ nunca escribir un componente de página nuevo para eso.
     aparte: `font-mono text-micro uppercase tracking-[0.1em]`.
   - `text-eyebrow` (11px, .12em) y `text-input-movil` (16px, inputs en móvil: evita el zoom
     de iOS al enfocar).
+  - `text-nano` (10px/16px, mono: marca del menú, pie, chip "Corregida aquí") y
+    `text-titulo-modal` (20/28/600/−0.02em: título de `ConfirmDialog` y
+    `EquipoDetalleModal`).
+  - **Papel** (hoja de entrega/devolución en pantalla, aprobada por el cliente): su título
+    usa `font-papel text-titulo-papel` (Manrope 24/32/800/−0.02em = el `headline-lg` de
+    origin/main + `font-extrabold`). Los tokens `headline-*` cambiaron a Inter en el
+    rediseño; dentro del papel NO se usan para no alterar lo aprobado. Si un token global
+    que el papel usa cambia, comparar la hoja contra una captura de origin/main.
   - Cada pantalla abre con **eyebrow de migas** (filete de 28px + ruta en mayúsculas) sobre
     el `h1`: `SECCIÓN / SUBSECCIÓN[ / ACCIÓN]`. Primer nivel: `ACTAS / NUEVA`, `HISTORIAL`,
     `CATÁLOGO`, `USUARIOS`; subpantallas p. ej. `CATÁLOGO / MARCAS / DETALLE`,
-    `HISTORIAL / PRÉSTAMO` (`EnConstruccion` recibe la ruta en la prop de texto `migas`).
-    Nada de "LEGUMEX / X".
+    `HISTORIAL / PRÉSTAMO`; vistas de detalle `… / DETALLE` (`HISTORIAL / ENTREGA /
+    DETALLE`), hoja nueva `ACTAS / NUEVA / ENTREGA`, registrar `HISTORIAL / DEVOLUCIÓN /
+    REGISTRAR`. Las migas no repiten texto crudo de la URL. `EnConstruccion` recibe la ruta
+    en la prop de texto `migas` (sin `migas` no pinta eyebrow). Nada de "LEGUMEX / X".
 - **Recetas repetidas a propósito** (sin `<Button>` genérico; al crear una pantalla nueva,
   copiar las clases de la más parecida):
   - Botón primario negro `h-10 rounded-boton bg-tinta text-white hover:bg-tinta-hover`;
@@ -131,8 +155,11 @@ nunca escribir un componente de página nuevo para eso.
     `h-11`.
   - **Márgenes**: todas las pantallas (listas, formularios, vistas, hojas, búsqueda) usan el
     mismo contenedor `px-4 pt-6 pb-10 md:px-8 md:pt-10` con su `max-w` de siempre.
-    Formularios y vistas "ver" alinean su tarjeta a la IZQUIERDA (sin `mx-auto`), para que
-    su borde coincida con el de las listas. Solo el papel de las hojas va centrado.
+    Formularios y vistas "ver" alinean su tarjeta a la IZQUIERDA del mismo carril de 1200px
+    que las listas, para que su borde izquierdo coincida con el de ellas en cualquier ancho:
+    `max-w-[600px]` (o 900) + `ml-[max(0px,calc((100%_-_1200px)/2))]` (el 1200 debe ser el
+    mismo `max-w` de las listas), o un envoltorio `mx-auto max-w-[1200px]` con la tarjeta
+    dentro sin `mx-auto`. Solo el papel de las hojas va centrado.
   - Orden de botones: el de siempre (Cancelar a la izquierda, primario a la derecha,
     alineados a la derecha en escritorio); el rediseño no mueve ni cambia de tipo ningún
     botón. La hamburguesa del `MobileHeader` va a la izquierda, del lado del que entra el
@@ -145,18 +172,21 @@ nunca escribir un componente de página nuevo para eso.
     también con el mouse); el borde pasa a tinta y un filete de 1px en la sombra lo engrosa
     a 2px. Reemplaza el borde + anillo azules de `@tailwindcss/forms`. El disparador de
     `SearchableSelect` (un botón que se ve como campo) imita lo mismo con
-    `focus:border-on-surface focus:ring-1 focus:ring-on-surface`; el `Buscador` (sin borde)
-    con `focus:shadow-tarjeta-foco`.
+    `focus:border-on-surface focus:ring-1 focus:ring-on-surface`; ABIERTO baja a solo
+    `border-on-surface` (1px), porque el indicador grueso lo lleva el buscador del
+    desplegable, donde se teclea (un solo contorno fuerte a la vez). El `Buscador` (sin
+    borde) usa `focus:shadow-tarjeta-foco`.
   - La hoja de papel conserva sus clases de foco propias (ganan por ser utilidades).
 - **Cordillera de fondo** (`components/SierraFondo.jsx`, componente decorativo autorizado):
   tres capas SVG de montaña en `bosque` fijas al pie (`clamp(240px,42vh,420px)`, opacidades
   8/22/42%) con deriva lenta (120s / 80s en contrasentido / 52s). Quieta en móvil, sin
   animación con movimiento reducido, oculta al imprimir. La montan `AppLayout` (detrás del
   shell, z-0) y `NotFound`. **Regla de contraste**: ningún texto a nivel de pantalla va
-  directo sobre la montaña; va en tarjeta blanca o sobre papel. `backdrop-blur` **solo
-  desde `md:`** (`bg-papel md:bg-papel-velo md:backdrop-blur-md`): en móvil el desenfoque
-  sobre contenido que se desplaza da tirones en los Android de planta, así que ahí el velo
-  es opaco (`bg-papel` o `bg-papel/95`).
+  directo sobre la montaña; va en tarjeta blanca o sobre papel. **Sin `backdrop-blur` en
+  ningún tamaño** sobre la cordillera: la sierra deriva sin fin y un `backdrop-filter`
+  encima la re-muestrea y desenfoca en cada cuadro (costo de GPU constante en las PC de
+  planta), y en móvil daba tirones al hacer scroll. Barras inferiores, pie y cabeceras van
+  en `bg-papel` (móvil) y `bg-papel-velo` / `bg-papel/95` (escritorio), sin blur.
 - **Shell** (`layouts/AppLayout.jsx`): menú lateral de 240px (`w-drawer-width`) transparente
   sobre el papel (ítem activo = tarjeta blanca), tarjeta de perfil al pie ("Cerrar Sesión"
   con `active:scale-[0.97]`, ícono sin rojo); `<main data-sheet>` scrollea por dentro, es
@@ -164,25 +194,51 @@ nunca escribir un componente de página nuevo para eso.
   para que el contenido no salte. El shell es `relative` sin z-index a propósito: no crea
   contexto de apilamiento y el cajón (z-50), la barra móvil (z-30), las barras de acciones
   (z-30), el Toast (z-70) y los portales (diálogos, SearchableSelect) compiten en el
-  contexto raíz. Móvil: barra superior de 56px en `bg-papel/95` sin blur, hamburguesa a la
-  izquierda, y cajón desde la izquierda (`invisible` cerrado, para que no reciba foco).
+  contexto raíz. Móvil: barra superior de 56px en `bg-papel` OPACO (al 95% se leía el
+  texto que pasa por debajo) y sin blur, isotipo con `alt=""` (el nombre ya va en texto),
+  hamburguesa a la izquierda, y cajón desde la izquierda (`invisible` cerrado, para que no reciba foco).
   - **Barras de acciones de las hojas** (entrega, devolución y sus vistas): `fixed inset-x-0
-    bottom-0 md:left-[240px] z-30`, de borde a borde del área de contenido y por encima del
-    canal del scroll (una barra sticky dentro del `<main>` quedaba 8px corta y, al final del
-    scroll, suelta sobre la montaña). `bg-papel md:bg-papel-velo md:backdrop-blur-md
-    shadow-barra-inferior`; el contenido lleva padding inferior para no quedar tapado, y
-    `animate-view-in` va en el contenedor interior, nunca en un ancestro de la barra.
-  - **Toast**: abajo en móvil (`bottom-[calc(16px+env(safe-area-inset-bottom))]`, a lo
-    ancho con 12px de margen, entra subiendo) y arriba a la derecha desde `sm:`. Arriba en
-    móvil tapaba el botón "volver" justo después de guardar: el toque solo cerraba el aviso.
+    bottom-0 md:left-drawer-width z-30` con el atributo **`data-barra-inferior`** (lo usa el
+    Toast en `index.css`), de borde a borde del área de contenido y por encima del canal del
+    scroll (una barra sticky dentro del `<main>` quedaba 8px corta y, al final del scroll,
+    suelta sobre la montaña). Fondo `bg-papel md:bg-papel/95` + `shadow-barra-inferior`,
+    sin blur. En escritorio lleva `md:overflow-hidden md:[scrollbar-gutter:stable]`: reserva
+    el mismo canal de 8px que el `<main>`, así su contenido (`mx-auto max-w-4xl`) queda
+    alineado con la hoja. Costo aceptado: tapa los últimos ~64px del riel de scroll del
+    `<main>`. El espacio para que nada quede debajo NO va en la hoja sino en el `<footer>`
+    hermano: la raíz de la pantalla lleva
+    `[&+footer]:pb-[calc(<alto>+env(safe-area-inset-bottom))] md:[&+footer]:pb-[88px]`, con
+    `<alto>` = alto de la barra en móvil + 24px (88 / 114 / 136 según cuántas filas ocupe la
+    barra de cada hoja). Si una barra cambia de alto, se ajusta ese número (y el del Toast,
+    abajo). El `<main>` tiene `scroll-pb-36` para que un campo enfocado con Tab no quede bajo
+    la barra. `animate-view-in` va en el contenedor interior, nunca en un ancestro de la
+    barra.
+  - **Toast** (`[data-toaster]`): abajo en móvil (`bottom-[calc(16px+env(safe-area-inset-bottom))]`,
+    a lo ancho con 12px de margen, entra subiendo); arriba en móvil tapaba el botón "volver"
+    justo después de guardar y el toque solo cerraba el aviso. Pero abajo no debe tapar
+    otros botones fijos (tras registrar una devolución se aterriza en la vista de la
+    entrega, que tiene barra; "No se pudo generar el PDF" sale sobre la misma barra), así
+    que `index.css` lo sube en móvil (`max-width: 639px`, con `:has()`):
+    `body:has([data-barra-inferior])` → `bottom: calc(124px + safe-area)` (barra más alta
+    112px + 12px) y `body:has([data-cajon-abierto])` (atributo del overlay del cajón) →
+    `bottom: 140px`, por encima de la tarjeta de perfil / "Cerrar Sesión". Sin soporte de
+    `:has()` queda abajo. Desde `sm:` va arriba a la derecha (bajo la barra móvil de 56px
+    hasta `md:`) y desde `md:` en `right-[42px] top-10`: su borde derecho cae en el del
+    contenido (32px de padding del `<main>` + 8px del canal + 2) y su borde superior a la
+    altura del botón volver.
 - **Login** (`pages/Login.jsx`, estilos con prefijo `lg-` en `index.css`): telón verde con el
   logo que baja con borde de cordillera (solo la primera vez por sesión del navegador,
   `sessionStorage`); **mientras cubre, la tarjeta queda `inert`** (no se puede escribir a
-  ciegas) y al terminar se enfoca el usuario. Sol, nubes, cuatro capas de montaña con
+  ciegas; en React 18 se pasa como string: `inert={telonCubre ? '' : undefined}`; al migrar
+  a React 19 cambiar a `inert={telonCubre}`). La tarjeta termina de aparecer a los 2.5 s,
+  junto con el telón, con la opacidad LINEAL y aparte del salto (`lgCardRise` + `lgFade`),
+  e `inert` se quita en el `animationend` de su `lgFade`: nunca se ve completa antes de
+  estar interactiva. Al quedar libre se enfoca el usuario. Sol, nubes, cuatro capas de montaña con
   parallax al mouse (una escritura por cuadro con `requestAnimationFrame`; apagado en
   pantallas táctiles y con movimiento reducido), titular línea por línea y tarjeta que
   sube. "Verificando…" con isotipo que se llena; si es correcto, saludo en verde letra por
-  letra y check dibujado (anunciado a lectores de pantalla por una región `aria-live`
+  letra (la ola se ajusta para que la última letra termine su salto de 360 ms antes de
+  navegar) y check dibujado (anunciado a lectores de pantalla por una región `aria-live`
   montada desde el inicio; las letras van `aria-hidden`), y se navega **650 ms después**
   (400 ms con movimiento reducido) al mismo destino de siempre: se cobra en cada inicio de
   sesión, por eso es corto. Si falla, aviso y sacudida del formulario. La lógica de
@@ -190,9 +246,14 @@ nunca escribir un componente de página nuevo para eso.
 - **Movimiento**: `animate-view-in` (entrada de pantalla: 8px, 280 ms, curva estándar),
   `animate-pop-in` (filas/tarjetas nuevas), `animate-drop-in` (desplegables),
   `animate-badge-pop` (contadores), `animate-card-rise` (tarjeta del 404), `shimmer`
-  (esqueletos), `data-reveal` (revelado al hacer scroll con `animation-timeline: view()`,
-  solo donde el navegador lo soporta, solo escritorio y **solo en tarjetas**: en filas `<tr>`
-  no funciona porque la línea de tiempo se ata al contenedor con overflow de la tabla).
+  (esqueletos), `animate-hint-in` (errores de campo), `animate-icon-pop` (ícono del Toast),
+  `animate-overlay-in` (fondo del cajón), `animate-toast-in` / `animate-toast-in-abajo`
+  (Toast escritorio / móvil), `animate-sierra-*` (deriva de la cordillera), `data-reveal`
+  (revelado al hacer scroll con `animation-timeline: view()`, solo donde el navegador lo
+  soporta, solo escritorio y **solo en tarjetas**: en filas `<tr>` no funciona porque la
+  línea de tiempo se ata al contenedor con overflow de la tabla, y en tarjetas `md:hidden`
+  tampoco, porque bajo 768px está anulado). Solo existen los keyframes que usa alguna
+  pantalla (`page-in` se quitó por no tener uso).
   **Toda animación de entrada termina en `transform: none` / `translate: none`**: un
   transform residual convierte al elemento en contenedor de sus hijos `position: fixed`
   (el buscador con lista de opciones quedó atrapado así una vez). Por lo mismo, ninguna
@@ -333,7 +394,8 @@ Sin librería externa: el estado vive en la URL con `useSearchParams` de React R
   MARCAS"). Las listas con tabla lo meten **dentro de la tarjeta de la tabla**, en el pie
   gris, y le pasan la prop de solo estilo `enPie`: en escritorio pierde su propia tarjeta
   para no dibujar una caja dentro de otra; en móvil (tarjetas) sigue siendo una tarjeta
-  suelta debajo. (Antes lo detectaba con un selector sobre la clase del padre; se cambió
+  suelta debajo. Sus botones miden 40px de alto en móvil (objetivo táctil) y 32px desde
+  `md:`, dentro del pie. (Antes lo detectaba con un selector sobre la clase del padre; se cambió
   por la prop explícita, que se puede encontrar con grep.)
 - Las funciones `listar*` de `api.js` aceptan `{ limit, page }` opcional (helper interno
   `listarPaginado`, y `laravelRequest(..., { conMeta: true })` para no perder los
@@ -435,7 +497,7 @@ Reglas relacionadas que se han repetido en las peticiones de trabajo:
   Acta e Historial, no un ancho distinto "a ojo".
 - Reusar componentes y patrones ya existentes (`ConfirmDialog`, `Toast`, `EstadoVacio`,
   `SearchableSelect`, `InlineEditableText`, `Buscador`, `Skeleton*`, `Paginador`,
-  `EquipoDetalleModal`, etc.) en
+  `EquipoDetalleModal`, `SierraFondo` (decorativo), etc.) en
   vez de crear uno nuevo con el mismo propósito.
 - No crear componentes compartidos nuevos sin autorización explícita.
 - Tocar solo los archivos estrictamente necesarios para el cambio pedido.

@@ -80,18 +80,26 @@ function CatalogoRegistroView({ textos, onObtener, rutaBase }) {
           </div>
         ) : (
           <>
-            <div className="-mt-1 md:mt-0 flex justify-between items-end gap-4 flex-wrap">
-              <div className="min-w-0">
-                <div className="flex items-center gap-3 font-eyebrow text-eyebrow uppercase text-on-surface-variant">
+            {/* Rejilla de 2 columnas: el eyebrow ocupa todo el ancho y "Editar"
+                queda siempre a la derecha del título (en móvil no baja a una
+                línea propia). El envoltorio del texto es `contents` para no
+                cambiar el orden del DOM. */}
+            <div className="-mt-1 grid grid-cols-[minmax(0,1fr)_auto] gap-x-4 md:mt-0">
+              <div className="contents">
+                <div className="col-span-2 flex items-center gap-3 font-eyebrow text-eyebrow uppercase text-on-surface-variant">
                   <span aria-hidden="true" className="h-px w-7 bg-outline" />
                   Catálogo / {textos.titulo} / Detalle
                 </div>
-                <h1 className="mt-1.5 break-words font-display-lg text-titulo-movil text-on-surface md:text-display-lg">
+                <h1 className="col-start-1 row-start-2 mt-1.5 break-words font-display-lg text-titulo-movil text-on-surface md:text-display-lg">
                   {registro.name}
                 </h1>
-                <p className="mt-1 font-body-lg text-body-lg text-on-surface-variant">Información completa del registro.</p>
+                <p className="col-start-1 row-start-3 mt-1 font-body-lg text-body-lg text-on-surface-variant">Información completa del registro.</p>
               </div>
-              <button type="button" onClick={() => setConfirmando(true)} className={botonSecundario}>
+              <button
+                type="button"
+                onClick={() => setConfirmando(true)}
+                className={`col-start-2 row-span-2 row-start-2 self-center md:self-end ${botonSecundario}`}
+              >
                 <Pencil className="h-4 w-4" strokeWidth={1.75} />
                 Editar
               </button>

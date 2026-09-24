@@ -62,6 +62,7 @@ function Sidebar({ abierto, onCerrar }) {
           onClick={onCerrar}
           aria-hidden="true"
           data-no-print
+          data-cajon-abierto
           className="fixed inset-0 z-40 bg-tinta/30 animate-overlay-in md:hidden"
         />
       )}
@@ -74,7 +75,7 @@ function Sidebar({ abierto, onCerrar }) {
       <nav
         data-no-print
         className={[
-          'flex flex-col gap-7 overflow-y-auto overscroll-contain custom-scrollbar',
+          'flex flex-col gap-7 overflow-y-auto overscroll-contain',
           'fixed left-0 top-0 bottom-0 z-50 w-[min(304px,86%)] bg-background px-3 pb-5 pt-5 shadow-cajon',
           'transition-[transform,visibility] duration-300 ease-salida',
           abierto ? 'visible translate-x-0' : 'invisible -translate-x-[106%]',
@@ -91,7 +92,7 @@ function Sidebar({ abierto, onCerrar }) {
                 tipográfico que usa MobileHeader (mono, mayúsculas) -- y
                 "Control Operativo" queda como descriptor, que es lo que
                 realmente es. */}
-            <h1 className="flex min-w-0 items-center gap-2 font-eyebrow text-[10px] uppercase leading-4 tracking-[0.12em] text-on-surface-variant">
+            <h1 className="flex min-w-0 items-center gap-2 font-eyebrow text-nano uppercase tracking-[0.12em] text-on-surface-variant">
               <span className="truncate">
                 <span className="font-medium text-on-surface">LEGUMEX</span> · Control Operativo
               </span>

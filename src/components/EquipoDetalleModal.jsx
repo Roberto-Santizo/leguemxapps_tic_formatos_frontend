@@ -155,7 +155,7 @@ function EquipoDetalleModal({ equipoId, onCerrar }) {
               <>
                 <h2
                   id="equipo-detalle-titulo"
-                  className="break-words font-headline-md text-[20px] font-semibold leading-7 tracking-[-0.02em] text-on-surface"
+                  className="break-words font-headline-md text-titulo-modal text-on-surface"
                 >
                   {equipo?.name ?? 'Equipo'}
                 </h2>

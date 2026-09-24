@@ -446,7 +446,7 @@ function EquiposList() {
               <thead>
                 <tr className="bg-surface-container">
                   <th className={`w-20 ${celdaEncabezado}`}>ID</th>
-                  <th className={celdaEncabezado}>Equipo</th>
+                  <th className={`min-w-[200px] ${celdaEncabezado}`}>Equipo</th>
                   <th className={`w-36 ${celdaEncabezado}`}>Marca</th>
                   <th className={`w-48 ${celdaEncabezado}`}>Características</th>
                   <th className={`w-32 ${celdaEncabezado}`}>Estado</th>
@@ -461,7 +461,7 @@ function EquiposList() {
                   return (
                     <Fragment key={equipo.id}>
                       <tr
-                        className="border-t border-outline-variant transition-colors duration-fast ease-standard hover:bg-surface-container-low"
+                        className="border-t border-outline-variant transition-colors duration-fast ease-standard hover:bg-surface-container"
                       >
                         <td className="h-[72px] px-4 py-4 font-mono text-meta text-on-surface-variant tabular-nums">
                           {equipo.id}

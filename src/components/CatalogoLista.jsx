@@ -216,7 +216,7 @@ function CatalogoLista({ textos, onListar, rutaBase }) {
                   {visibles.map((registro) => (
                     <tr
                       key={registro.id}
-                      className="border-t border-outline-variant transition-colors duration-fast ease-standard hover:bg-surface-container-low"
+                      className="border-t border-outline-variant transition-colors duration-fast ease-standard hover:bg-surface-container"
                     >
                       <td className="h-[72px] px-4 py-4 font-mono text-meta text-on-surface-variant tabular-nums">
                         {registro.id}

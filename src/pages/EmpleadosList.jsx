@@ -194,7 +194,7 @@ function EmpleadosList() {
                 {visibles.map((emp) => (
                   <tr
                     key={emp.id}
-                    className="border-t border-outline-variant transition-colors duration-fast ease-standard hover:bg-surface-container-low"
+                    className="border-t border-outline-variant transition-colors duration-fast ease-standard hover:bg-surface-container"
                   >
                     <td className="h-[72px] px-4 py-4 font-mono text-meta text-on-surface-variant">{emp.code}</td>
                     <td className="px-4 py-4 font-medium text-on-surface break-words">{emp.name}</td>
