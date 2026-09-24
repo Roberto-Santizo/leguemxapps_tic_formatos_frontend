@@ -102,7 +102,8 @@ export function Toaster() {
   // Posición sobre la barra fija de las hojas (solo estilo; ver arriba).
   useLayoutEffect(() => {
     const caja = contenedor.current
-    if (!hayAvisos || !caja) return undefined
+    // Sin ResizeObserver (navegador muy viejo) el aviso queda en su lugar por defecto.
+    if (!hayAvisos || !caja || typeof ResizeObserver === 'undefined') return undefined
     let barra = null
     const medir = () => {
       if (!barra) return

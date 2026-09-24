@@ -215,6 +215,11 @@ main[data-sheet] > .bg-background {
       top: auto;
       bottom: calc(140px + env(safe-area-inset-bottom));
     }
+    /* Sobre una hoja, sin :has() no hay regla del cajón: que tampoco tape
+       "Cerrar Sesión" si el cajón está abierto. */
+    [data-toaster][data-sobre-barra] {
+      bottom: max(calc(var(--alto-barra) + 12px), calc(140px + env(safe-area-inset-bottom)));
+    }
   }
 }
 
