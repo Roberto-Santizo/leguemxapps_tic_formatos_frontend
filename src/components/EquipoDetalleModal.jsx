@@ -114,8 +114,8 @@ function EquipoDetalleModal({ equipoId, onCerrar }) {
 
   const dato = (label, valor) => (
     <div className="min-w-0">
-      <p className="mb-0.5 font-label-bold text-label-bold uppercase tracking-wider text-on-surface-variant">{label}</p>
-      <p className="break-words font-body-md text-body-md text-on-surface">{valor}</p>
+      <p className="mb-1 font-mono text-[11px] uppercase leading-4 tracking-[0.1em] text-on-surface-variant">{label}</p>
+      <p className="break-words font-body-md text-body-md font-medium text-on-surface">{valor}</p>
     </div>
   )
 
@@ -123,8 +123,8 @@ function EquipoDetalleModal({ equipoId, onCerrar }) {
 
   return createPortal(
     <div
-      className={`fixed inset-0 z-50 flex items-center justify-center bg-on-surface/40 p-4 transition-opacity duration-200 ${
-        visible ? 'opacity-100' : 'opacity-0'
+      className={`fixed inset-0 z-50 flex items-center justify-center bg-tinta/40 p-4 transition-opacity ease-standard sm:p-6 ${
+        visible ? 'opacity-100 duration-base' : 'opacity-0 duration-fast'
       }`}
       onClick={onCerrar}
     >
@@ -134,15 +134,16 @@ function EquipoDetalleModal({ equipoId, onCerrar }) {
         aria-modal="true"
         aria-labelledby="equipo-detalle-titulo"
         onClick={(e) => e.stopPropagation()}
-        className={`flex max-h-[85vh] w-full max-w-md flex-col overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest shadow-lg transition-all duration-200 ease-out ${
-          visible ? 'translate-y-0 scale-100 opacity-100' : 'translate-y-2 scale-95 opacity-0'
+        className={`flex max-h-[85vh] w-full max-w-md flex-col overflow-hidden rounded-tarjeta bg-white shadow-modal transition-[opacity,transform] ease-standard ${
+          visible ? 'scale-100 opacity-100 duration-base' : 'scale-95 opacity-0 duration-fast'
         }`}
       >
         {/* Cabecera: eyebrow + nombre + marca · modelo. El botón de cerrar
             va arriba a la derecha, como en el resto de ventanas del sistema. */}
-        <div className="flex items-start justify-between gap-3 border-b border-outline-variant px-5 pb-4 pt-5">
+        <div className="flex items-start justify-between gap-3 border-b border-outline-variant px-6 pb-4 pt-6">
           <div className="min-w-0 flex-1">
-            <p className="mb-1 font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">
+            <p className="mb-1.5 flex items-center gap-3 font-eyebrow text-eyebrow uppercase text-on-surface-variant">
+              <span aria-hidden="true" className="h-px w-7 bg-outline" />
               Ficha del equipo
             </p>
             {cargando ? (
@@ -154,7 +155,7 @@ function EquipoDetalleModal({ equipoId, onCerrar }) {
               <>
                 <h2
                   id="equipo-detalle-titulo"
-                  className="break-words font-headline-md text-headline-md font-bold text-on-surface"
+                  className="break-words font-headline-md text-[20px] font-semibold leading-7 tracking-[-0.02em] text-on-surface"
                 >
                   {equipo?.name ?? 'Equipo'}
                 </h2>
@@ -171,28 +172,28 @@ function EquipoDetalleModal({ equipoId, onCerrar }) {
             type="button"
             onClick={onCerrar}
             aria-label="Cerrar"
-            className="grid h-9 w-9 shrink-0 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high active:scale-[0.90] transition-transform"
+            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-boton text-on-surface-variant transition duration-fast ease-standard hover:bg-surface-container hover:text-on-surface active:scale-[0.90]"
           >
-            <X className="h-4 w-4" strokeWidth={2} />
+            <X className="h-4 w-4" strokeWidth={1.75} />
           </button>
         </div>
 
         <div className="flex-1 overflow-y-auto">
           {error ? (
-            <div className="flex flex-col items-start gap-3 px-5 py-5">
-              <p className="rounded-lg border border-error/30 bg-error-container/40 px-3 py-2 font-label-sm text-label-sm text-error">
+            <div className="flex flex-col items-start gap-3 px-6 py-5">
+              <p className="rounded-boton border border-error/30 bg-error-container/40 px-3 py-2 font-label-sm text-label-sm text-error">
                 {error}
               </p>
               <button
                 type="button"
                 onClick={() => setIntento((n) => n + 1)}
-                className="inline-flex h-10 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high active:scale-[0.97] transition-transform"
+                className="inline-flex h-10 items-center justify-center rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
               >
                 Reintentar
               </button>
             </div>
           ) : cargando ? (
-            <div className="flex flex-col gap-5 px-5 py-5" aria-hidden="true">
+            <div className="flex flex-col gap-5 px-6 py-5" aria-hidden="true">
               <div className={`${barra} h-8 w-1/2`} />
               <div className="grid grid-cols-3 gap-4">
                 <div className={`${barra} h-3.5 w-full`} />
@@ -208,23 +209,23 @@ function EquipoDetalleModal({ equipoId, onCerrar }) {
                 {/* La serie es lo que se confronta contra la etiqueta física
                     del aparato, así que se le da el lugar de la placa: mono,
                     grande, en su propia franja. */}
-                <div className="border-b border-outline-variant bg-surface-container-low px-5 py-4">
-                  <p className="mb-1 font-label-bold text-label-bold uppercase tracking-wider text-on-surface-variant">
+                <div className="mx-6 mt-5 rounded-xl bg-surface-container-high px-4 py-3">
+                  <p className="mb-1 font-mono text-[11px] uppercase leading-4 tracking-[0.1em] text-on-surface-variant">
                     Serie
                   </p>
-                  <p className="break-all font-mono text-headline-md uppercase tracking-wide text-on-surface">
+                  <p className="break-all font-mono text-headline-md font-medium uppercase tracking-[0.06em] text-on-surface">
                     {equipo.serie || '—'}
                   </p>
                 </div>
 
-                <div className="grid grid-cols-3 gap-4 border-b border-outline-variant px-5 py-4">
+                <div className="grid grid-cols-3 gap-4 border-b border-outline-variant px-6 py-4">
                   {dato('Tipo', etiquetaTipoEquipo(equipo.type))}
                   {dato('Original', equipo.original ? 'Sí' : 'No')}
                   {dato('Usado', equipo.is_used ? 'Sí' : 'No')}
                 </div>
 
-                <div className="px-5 py-4">
-                  <p className="mb-2 font-label-bold text-label-bold uppercase tracking-wider text-on-surface-variant">
+                <div className="px-6 py-4">
+                  <p className="mb-2 font-mono text-[11px] uppercase leading-4 tracking-[0.1em] text-on-surface-variant">
                     {caracteristicas.length > 0 ? `Características (${caracteristicas.length})` : 'Características'}
                   </p>
                   {caracteristicas.length === 0 ? (
@@ -233,7 +234,7 @@ function EquipoDetalleModal({ equipoId, onCerrar }) {
                     <ul className="flex flex-col divide-y divide-outline-variant">
                       {caracteristicas.map((c) => (
                         <li key={c.id} className="flex flex-wrap items-baseline gap-x-1.5 gap-y-1 py-2">
-                          <span className="font-label-bold text-label-bold text-on-surface">{c.name}:</span>
+                          <span className="font-body-md text-body-md font-semibold text-on-surface">{c.name}:</span>
                           <span className="break-words font-body-md text-body-md text-on-surface-variant">
                             {c.description}
                           </span>
@@ -247,11 +248,11 @@ function EquipoDetalleModal({ equipoId, onCerrar }) {
           )}
         </div>
 
-        <div className="flex justify-end border-t border-outline-variant px-5 py-3">
+        <div className="flex justify-end border-t border-outline-variant px-6 py-4">
           <button
             type="button"
             onClick={onCerrar}
-            className="inline-flex h-10 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high active:scale-[0.97] transition-transform"
+            className="inline-flex h-10 items-center justify-center rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
           >
             Cerrar
           </button>

@@ -22,7 +22,7 @@ import { SkeletonTabla } from './Skeleton.jsx'
  */
 
 const inputClasses =
-  'h-11 w-full rounded-lg border border-outline-variant bg-surface px-3.5 font-body-md text-body-md text-on-surface transition-colors hover:border-outline focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25 disabled:opacity-60'
+  'h-10 w-full rounded-boton border border-outline-variant bg-white px-3 font-body-md text-[16px] md:text-body-md text-on-surface placeholder:text-on-surface-subtle transition duration-fast ease-standard hover:border-outline focus:border-on-surface focus:outline-none focus:ring-0 disabled:opacity-60'
 
 export function hayNombreRepetido(nombre, nombresExistentes, ignorar = '') {
   const limpio = (nombre || '').trim().toLowerCase()
@@ -63,11 +63,11 @@ export function FilasCaracteristicas({ filas, onChange, disabled, nombresExisten
         return (
           <div
             key={indice}
-            className="animate-view-in rounded-xl border border-outline-variant bg-surface-container-lowest p-4"
+            className="animate-pop-in rounded-xl border border-outline-variant bg-white p-4"
           >
             <div className="flex flex-col gap-stack-sm sm:flex-row sm:items-start">
-              <div className="flex flex-1 flex-col gap-1.5">
-                <label className="font-label-bold text-label-bold text-on-surface">Característica</label>
+              <div className="flex flex-1 flex-col gap-2">
+                <label className="text-[12px] font-semibold leading-4 text-on-surface">Característica</label>
                 <input
                   className={inputClasses}
                   value={fila.name}
@@ -78,14 +78,14 @@ export function FilasCaracteristicas({ filas, onChange, disabled, nombresExisten
                   placeholder="Ej. Memoria RAM"
                 />
                 {repetida && (
-                  <p className="font-label-sm text-label-sm text-error">
+                  <p className="animate-hint-in font-label-sm text-label-sm text-error">
                     Ya hay una característica con ese nombre en este equipo.
                   </p>
                 )}
               </div>
 
-              <div className="flex flex-1 flex-col gap-1.5">
-                <label className="font-label-bold text-label-bold text-on-surface">Descripción</label>
+              <div className="flex flex-1 flex-col gap-2">
+                <label className="text-[12px] font-semibold leading-4 text-on-surface">Descripción</label>
                 <input
                   className={inputClasses}
                   value={fila.description}
@@ -102,9 +102,9 @@ export function FilasCaracteristicas({ filas, onChange, disabled, nombresExisten
                 disabled={disabled || filas.length === 1}
                 aria-label="Quitar característica"
                 title={filas.length === 1 ? 'Debe quedar al menos una fila' : 'Quitar'}
-                className="grid h-11 w-11 shrink-0 place-items-center self-end rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface disabled:cursor-not-allowed disabled:opacity-55 disabled:hover:bg-transparent sm:mt-[26px] sm:self-start active:scale-[0.90] transition-transform"
+                className="grid h-10 w-10 shrink-0 place-items-center self-end rounded-boton text-on-surface-variant transition duration-fast ease-standard hover:bg-error-container/60 hover:text-error disabled:cursor-not-allowed disabled:opacity-55 disabled:hover:bg-transparent disabled:hover:text-on-surface-variant sm:mt-6 sm:self-start active:scale-[0.90]"
               >
-                <Trash2 className="h-4 w-4" strokeWidth={2} />
+                <Trash2 className="h-4 w-4" strokeWidth={1.75} />
               </button>
             </div>
           </div>
@@ -115,9 +115,9 @@ export function FilasCaracteristicas({ filas, onChange, disabled, nombresExisten
         type="button"
         onClick={agregar}
         disabled={disabled}
-        className="inline-flex h-11 items-center justify-center gap-2 self-start rounded-lg border border-dashed border-outline px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high disabled:opacity-60 active:scale-[0.97] transition-transform"
+        className="inline-flex h-10 items-center justify-center gap-2 self-start rounded-boton border border-dashed border-outline bg-white px-4 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:border-solid hover:bg-surface-container disabled:opacity-60 active:scale-[0.97]"
       >
-        <Plus className="h-4 w-4" strokeWidth={2.25} />
+        <Plus className="h-4 w-4" strokeWidth={1.75} />
         Agregar otra
       </button>
     </div>
@@ -227,7 +227,7 @@ export function CaracteristicasDeEquipo({
             <li key={c.id} className="flex flex-wrap items-baseline gap-x-1.5 gap-y-1 py-2.5">
               {soloLectura ? (
                 <>
-                  <span className="font-label-bold text-label-bold text-on-surface">{c.name}:</span>
+                  <span className="font-body-md text-body-md font-semibold text-on-surface">{c.name}:</span>
                   <span className="font-body-md text-body-md text-on-surface-variant break-words">
                     {c.description}
                   </span>
@@ -257,7 +257,7 @@ export function CaracteristicasDeEquipo({
       {!soloLectura && (
         <>
           {agregando ? (
-            <div className="animate-view-in flex flex-col gap-stack-sm rounded-xl border border-outline-variant bg-surface-container-low p-3.5">
+            <div className="animate-drop-in flex flex-col gap-stack-sm rounded-xl bg-surface-container-high p-3.5">
               {/* Misma tarjeta con títulos ("Característica" / "Descripción")
                   que en el alta del equipo. Antes aquí eran dos cajas sin
                   título, con la guía solo como texto gris adentro -- que
@@ -280,12 +280,12 @@ export function CaracteristicasDeEquipo({
                   type="button"
                   onClick={confirmarNueva}
                   disabled={guardando}
-                  className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-primary px-4 font-label-bold text-label-bold text-on-primary shadow-sm transition-all hover:brightness-110 active:brightness-95 active:scale-[0.97] disabled:opacity-60"
+                  className="inline-flex h-10 items-center justify-center gap-2 rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97] disabled:opacity-50"
                 >
                   {guardando ? (
                     <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} />
                   ) : (
-                    <Check className="h-4 w-4" strokeWidth={2.25} />
+                    <Check className="h-4 w-4" strokeWidth={1.75} />
                   )}
                   Guardar
                 </button>
@@ -293,9 +293,9 @@ export function CaracteristicasDeEquipo({
                   type="button"
                   onClick={cerrarAlta}
                   disabled={guardando}
-                  className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high disabled:opacity-60 active:scale-[0.97] transition-transform"
+                  className="inline-flex h-10 items-center justify-center gap-2 rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container disabled:opacity-60 active:scale-[0.97]"
                 >
-                  <X className="h-4 w-4" strokeWidth={2.25} />
+                  <X className="h-4 w-4" strokeWidth={1.75} />
                   Cancelar
                 </button>
               </div>
@@ -304,15 +304,15 @@ export function CaracteristicasDeEquipo({
             <button
               type="button"
               onClick={() => setAgregando(true)}
-              className="inline-flex h-10 items-center justify-center gap-2 self-start rounded-lg border border-dashed border-outline px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high active:scale-[0.97] transition-transform"
+              className="inline-flex h-10 items-center justify-center gap-2 self-start rounded-boton border border-dashed border-outline bg-white px-4 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:border-solid hover:bg-surface-container active:scale-[0.97]"
             >
-              <Plus className="h-4 w-4" strokeWidth={2.25} />
+              <Plus className="h-4 w-4" strokeWidth={1.75} />
               Agregar característica
             </button>
           )}
 
           {error && (
-            <p className="font-label-sm text-label-sm text-error rounded-lg border border-error/30 bg-error-container/40 px-3 py-2">
+            <p className="animate-hint-in rounded-boton border border-error/30 bg-error-container/40 px-3 py-2 font-label-sm text-label-sm text-error">
               {error}
             </p>
           )}

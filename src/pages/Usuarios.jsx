@@ -139,7 +139,7 @@ function Usuarios() {
               <span aria-hidden="true" className="h-px w-7 bg-outline" />
               Legumex / Usuarios
             </div>
-            <h1 className="mt-1.5 font-display-lg text-[26px] leading-[32px] md:text-display-lg text-on-surface">Usuarios</h1>
+            <h1 className="mt-1.5 font-display-lg text-[26px] font-extrabold leading-[32px] tracking-[-0.04em] md:text-display-lg text-on-surface">Usuarios</h1>
             <p className="mt-1 font-body-lg text-body-lg text-on-surface-variant">
               Cuentas con acceso al sistema y su rol.
             </p>

@@ -35,9 +35,9 @@ function notaHistoricaAPng() {
 function EncabezadoFirma({ titulo, subtitulo }) {
   return (
     <div className="mb-2.5 flex items-baseline justify-between gap-3">
-      <p className="font-label-bold text-label-bold text-on-surface">{titulo}</p>
+      <p className="text-[12px] font-semibold leading-4 text-on-surface">{titulo}</p>
       {subtitulo && (
-        <p className="shrink-0 font-label-sm text-label-sm text-on-surface-variant">{subtitulo}</p>
+        <p className="shrink-0 font-label-sm text-label-sm text-on-surface-subtle">{subtitulo}</p>
       )}
     </div>
   )
@@ -99,20 +99,20 @@ function FirmaPad({ titulo, subtitulo, firmaUrl, onConfirmar, onReiniciar }) {
 
   if (firmaUrl) {
     return (
-      <div className="flex flex-col rounded-xl border border-outline-variant bg-surface-container-lowest p-3">
+      <div className="flex flex-col rounded-xl border border-outline-variant bg-white p-3">
         <EncabezadoFirma titulo={titulo} subtitulo={subtitulo} />
-        <div className="grid aspect-[5/2] w-full place-items-center rounded-lg border border-outline-variant bg-surface-container-low p-2">
+        <div className="grid aspect-[5/2] w-full animate-pop-in place-items-center rounded-boton border border-outline-variant bg-surface-container-low p-2">
           <img src={firmaUrl} alt={`Firma de ${titulo}`} className="max-h-full max-w-full object-contain" />
         </div>
         <div className="mt-3 flex items-center justify-between gap-2">
-          <div className="flex items-center gap-1.5 text-on-surface-variant font-label-sm text-label-sm">
-            <CheckCircle2 className="h-3.5 w-3.5 text-on-surface" strokeWidth={2.25} />
+          <div className="flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.08em] text-on-surface-variant">
+            <CheckCircle2 className="h-3.5 w-3.5 animate-badge-pop text-on-surface" strokeWidth={2} />
             Firma confirmada
           </div>
           <button
             type="button"
             onClick={handleReiniciar}
-            className="rounded-md px-2 py-1 font-label-sm text-label-sm text-on-surface-variant underline-offset-2 transition-colors hover:text-error hover:underline active:scale-[0.97] transition-transform"
+            className="rounded-boton px-2 py-1 font-label-sm text-label-sm text-on-surface-variant underline-offset-2 transition duration-fast ease-standard hover:text-error hover:underline active:scale-[0.97]"
           >
             Reiniciar firma
           </button>
@@ -122,10 +122,12 @@ function FirmaPad({ titulo, subtitulo, firmaUrl, onConfirmar, onReiniciar }) {
   }
 
   return (
-    <div className="flex flex-col rounded-xl border border-outline-variant bg-surface-container-lowest p-3">
+    <div className="flex flex-col rounded-xl border border-outline-variant bg-white p-3">
       <EncabezadoFirma titulo={titulo} subtitulo={subtitulo} />
 
-      <div className="flex justify-center gap-1 mb-3 flex-wrap rounded-lg bg-surface-container p-1">
+      {/* Selector segmentado como el del mockup: la opción activa es una
+          pastilla blanca sobre el gris. */}
+      <div className="mb-3 flex flex-wrap justify-center gap-1 rounded-boton bg-surface-container p-1">
         <button
           type="button"
           onClick={() => {
@@ -136,8 +138,8 @@ function FirmaPad({ titulo, subtitulo, firmaUrl, onConfirmar, onReiniciar }) {
             // lienzo vacío y al pulsarlo no hacía nada ni decía por qué.
             setVacio(true)
           }}
-          className={`px-3 py-1 rounded font-label-sm text-label-sm transition-colors active:scale-[0.97] transition-transform ${
-            modo === 'dibujar' ? 'bg-primary text-on-primary shadow-sm' : 'text-on-surface-variant hover:text-on-surface'
+          className={`flex-1 whitespace-nowrap rounded-md px-3 py-1.5 text-[12px] font-medium leading-4 transition duration-fast ease-standard active:scale-[0.97] ${
+            modo === 'dibujar' ? 'bg-white text-on-surface shadow-tarjeta' : 'text-on-surface-variant hover:text-on-surface'
           }`}
         >
           Dibujar
@@ -148,8 +150,8 @@ function FirmaPad({ titulo, subtitulo, firmaUrl, onConfirmar, onReiniciar }) {
             setModo('subir')
             limpiarLienzo()
           }}
-          className={`px-3 py-1 rounded font-label-sm text-label-sm transition-colors active:scale-[0.97] transition-transform ${
-            modo === 'subir' ? 'bg-primary text-on-primary shadow-sm' : 'text-on-surface-variant hover:text-on-surface'
+          className={`flex-1 whitespace-nowrap rounded-md px-3 py-1.5 text-[12px] font-medium leading-4 transition duration-fast ease-standard active:scale-[0.97] ${
+            modo === 'subir' ? 'bg-white text-on-surface shadow-tarjeta' : 'text-on-surface-variant hover:text-on-surface'
           }`}
         >
           Subir imagen
@@ -161,8 +163,8 @@ function FirmaPad({ titulo, subtitulo, firmaUrl, onConfirmar, onReiniciar }) {
             limpiarLienzo()
             setPreviewSubida(null)
           }}
-          className={`px-3 py-1 rounded font-label-sm text-label-sm transition-colors active:scale-[0.97] transition-transform ${
-            modo === 'historico' ? 'bg-primary text-on-primary shadow-sm' : 'text-on-surface-variant hover:text-on-surface'
+          className={`flex-1 whitespace-nowrap rounded-md px-3 py-1.5 text-[12px] font-medium leading-4 transition duration-fast ease-standard active:scale-[0.97] ${
+            modo === 'historico' ? 'bg-white text-on-surface shadow-tarjeta' : 'text-on-surface-variant hover:text-on-surface'
           }`}
         >
           Registro histórico
@@ -173,7 +175,7 @@ function FirmaPad({ titulo, subtitulo, firmaUrl, onConfirmar, onReiniciar }) {
         // touch-action: none evita que un trazo con el dedo se interprete
         // como scroll de la página en móvil (Fase 1.1).
         <div
-          className="grid aspect-[5/2] w-full place-items-center overflow-hidden rounded-lg border border-dashed border-outline bg-surface"
+          className="grid aspect-[5/2] w-full place-items-center overflow-hidden rounded-boton border border-dashed border-outline bg-white"
           style={{ touchAction: 'none' }}
         >
           <SignatureCanvas
@@ -186,7 +188,7 @@ function FirmaPad({ titulo, subtitulo, firmaUrl, onConfirmar, onReiniciar }) {
       )}
 
       {modo === 'subir' && (
-        <div className="grid aspect-[5/2] w-full place-items-center rounded-lg border border-dashed border-outline bg-surface">
+        <div className="grid aspect-[5/2] w-full place-items-center rounded-boton border border-dashed border-outline bg-white">
           {previewSubida ? (
             <img
               src={previewSubida}
@@ -194,8 +196,10 @@ function FirmaPad({ titulo, subtitulo, firmaUrl, onConfirmar, onReiniciar }) {
               className="max-h-full max-w-full object-contain p-2"
             />
           ) : (
-            <label className="cursor-pointer text-on-surface-variant font-label-sm text-label-sm flex flex-col items-center gap-1.5 transition-colors hover:text-on-surface">
-              <Upload className="h-5 w-5" strokeWidth={2} />
+            <label className="flex cursor-pointer flex-col items-center gap-2 font-label-sm text-label-sm text-on-surface-variant transition-colors duration-fast hover:text-on-surface">
+              <span className="grid h-10 w-10 place-items-center rounded-xl bg-surface-container-high text-on-surface">
+                <Upload className="h-4.5 w-4.5" strokeWidth={1.75} />
+              </span>
               Seleccionar imagen de firma
               <input type="file" accept="image/*" className="hidden" onChange={handleArchivo} />
             </label>
@@ -204,8 +208,8 @@ function FirmaPad({ titulo, subtitulo, firmaUrl, onConfirmar, onReiniciar }) {
       )}
 
       {modo === 'historico' && (
-        <div className="grid aspect-[5/2] w-full place-items-center rounded-lg border border-dashed border-outline bg-surface px-4">
-          <p className="font-label-sm text-label-sm text-on-surface-variant text-center">
+        <div className="grid aspect-[5/2] w-full place-items-center rounded-boton border border-dashed border-outline bg-surface-container-low px-4">
+          <p className="font-label-sm text-label-sm text-on-surface-variant text-center text-pretty">
             Usa esta opción cuando el documento ya fue firmado en papel y solo se está migrando el
             registro al sistema (no hay trazo digital que capturar).
           </p>
@@ -217,7 +221,7 @@ function FirmaPad({ titulo, subtitulo, firmaUrl, onConfirmar, onReiniciar }) {
           <button
             type="button"
             onClick={limpiarLienzo}
-            className="rounded-md px-2 py-1 font-label-sm text-label-sm text-on-surface-variant underline-offset-2 transition-colors hover:text-error hover:underline active:scale-[0.97] transition-transform"
+            className="rounded-boton px-2 py-1 font-label-sm text-label-sm text-on-surface-variant underline-offset-2 transition duration-fast ease-standard hover:text-error hover:underline active:scale-[0.97]"
           >
             Borrar trazo
           </button>
@@ -228,7 +232,7 @@ function FirmaPad({ titulo, subtitulo, firmaUrl, onConfirmar, onReiniciar }) {
           type="button"
           onClick={handleConfirmar}
           disabled={modo !== 'historico' && vacio}
-          className="rounded-lg bg-surface-container-high px-3 py-1.5 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-highest active:brightness-95 active:scale-[0.97] transition-transform disabled:opacity-40 disabled:cursor-not-allowed"
+          className="inline-flex h-8 items-center justify-center rounded-boton bg-tinta px-3 text-[13px] font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97] disabled:cursor-not-allowed disabled:bg-surface-container-high disabled:text-on-surface-subtle disabled:shadow-none disabled:active:scale-100"
         >
           Confirmar firma
         </button>

@@ -126,7 +126,7 @@ function UsuarioForm() {
             <span aria-hidden="true" className="h-px w-7 bg-outline" />
             {esEdicion ? 'Usuarios / Editar' : 'Usuarios / Nuevo'}
           </div>
-          <h1 className="mt-1.5 font-display-lg text-[26px] leading-[32px] md:text-display-lg text-on-surface">
+          <h1 className="mt-1.5 font-display-lg text-[26px] font-extrabold leading-[32px] tracking-[-0.04em] md:text-display-lg text-on-surface">
             {esEdicion ? 'Editar usuario' : 'Nuevo usuario'}
           </h1>
         </div>

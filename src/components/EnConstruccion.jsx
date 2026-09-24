@@ -16,7 +16,7 @@ function EnConstruccion({ icon: Icon, titulo, descripcion }) {
             <span aria-hidden="true" className="h-px w-7 bg-outline" />
             Legumex
           </div>
-          <h1 className="mt-1.5 font-display-lg text-[26px] leading-[32px] md:text-display-lg text-on-surface">{titulo}</h1>
+          <h1 className="mt-1.5 font-display-lg text-[26px] font-extrabold leading-[32px] tracking-[-0.04em] md:text-display-lg text-on-surface">{titulo}</h1>
         </div>
 
         <div className="animate-pop-in rounded-tarjeta bg-white px-6 py-16 shadow-tarjeta sm:px-10">

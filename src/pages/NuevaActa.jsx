@@ -71,7 +71,7 @@ function NuevaActa() {
                 </div>
 
                 <div className="mt-auto flex items-center justify-between gap-2 border-t border-outline-variant pt-3">
-                  <span className="font-mono text-[11px] uppercase tracking-[0.1em] text-on-surface-variant">
+                  <span className="font-mono text-[11px] uppercase tracking-[0.04em] text-on-surface-variant sm:tracking-[0.1em]">
                     {formato.meta}
                   </span>
                   <ChevronRight

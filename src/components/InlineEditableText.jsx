@@ -68,7 +68,7 @@ function InlineEditableText({
         onChange={(e) => setDraft(e.target.value)}
         onBlur={commit}
         onKeyDown={handleKeyDown}
-        className={`bg-transparent border-0 border-b border-secondary focus:outline-none focus:ring-0 p-0 ${inputClassName}`}
+        className={`bg-transparent border-0 border-b border-on-surface rounded-none focus:outline-none focus:ring-0 p-0 ${inputClassName}`}
         style={{ width: `${Math.max(draft.length, placeholder.length, 4)}ch` }}
       />
     )
@@ -79,7 +79,7 @@ function InlineEditableText({
       type="button"
       onClick={() => setEditing(true)}
       title={title || 'Clic para editar'}
-      className={`group inline-flex items-center gap-1 text-left hover:text-secondary transition-colors active:scale-[0.97] transition-transform cursor-text ${className}`}
+      className={`group inline-flex items-center gap-1 rounded-sm text-left underline-offset-4 decoration-outline-variant transition duration-fast ease-standard hover:underline hover:decoration-outline active:scale-[0.97] cursor-text focus:outline-none focus-visible:ring-2 focus-visible:ring-foco focus-visible:ring-offset-2 ${className}`}
     >
       <span>{value || placeholder}</span>
       {/* Antes solo aparecía con group-hover, así que en celular (sin hover)
@@ -88,8 +88,8 @@ function InlineEditableText({
           permanente en táctil -- y sube de opacidad al pasar el mouse en
           escritorio. */}
       <Pencil
-        className="h-3 w-3 opacity-40 group-hover:opacity-70 transition-opacity"
-        strokeWidth={2.25}
+        className="h-3 w-3 shrink-0 opacity-40 transition-opacity duration-fast group-hover:opacity-80"
+        strokeWidth={2}
       />
     </button>
   )

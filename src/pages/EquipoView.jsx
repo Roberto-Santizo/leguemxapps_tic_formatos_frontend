@@ -19,6 +19,15 @@ import { etiquetaTipoEquipo } from './EquipoForm.jsx'
  *
  * "Editar" pide confirmación antes de entrar al formulario de edición.
  */
+// Recetas visuales "Sierra" (BRIEF, ola 2), repetidas a propósito.
+const botonVolver =
+  'inline-flex h-9 items-center gap-2 self-start rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]'
+const botonSecundario =
+  'inline-flex h-10 items-center justify-center gap-2 rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface shadow-sm transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]'
+const tarjeta = 'rounded-tarjeta bg-white p-4 shadow-tarjeta md:p-6'
+const tituloSeccion =
+  'mb-4 flex items-center gap-2 font-headline-md text-headline-md font-bold text-on-surface'
+
 function EquipoView() {
   const { id } = useParams()
   const { token } = useAuth()
@@ -68,22 +77,19 @@ function EquipoView() {
   }, [id, token, intento])
 
   const campo = (label, valor) => (
-    <div>
-      <p className="font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider mb-0.5">{label}</p>
-      <p className="font-body-md text-body-md text-on-surface">{valor}</p>
+    <div className="min-w-0 rounded-xl bg-surface-container-high px-4 py-3">
+      <p className="mb-1 font-mono text-[11px] uppercase leading-4 tracking-[0.1em] text-on-surface-variant">{label}</p>
+      <p className="break-words font-body-md text-body-md font-medium text-on-surface">{valor}</p>
     </div>
   )
 
   return (
-    <div className="animate-view-in flex-1 p-container-padding md:p-stack-lg bg-background">
+    <div className="animate-view-in flex-1 p-container-padding md:p-stack-lg">
       {/* Mismo ancho que su formulario (EquipoForm, 900px): ver y editar de
           una misma entidad no deben cambiar de ancho al pasar de una a otra. */}
-      <div className="max-w-[900px] mx-auto flex flex-col gap-stack-md">
-        <Link
-          to="/catalogo/equipos"
-          className="inline-flex h-10 items-center gap-2 self-start rounded-lg border border-outline-variant bg-surface-container-high px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:border-outline hover:bg-surface-container-highest active:scale-[0.97] transition-transform"
-        >
-          <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={2.5} />
+      <div className="max-w-[900px] mx-auto flex flex-col gap-stack-lg">
+        <Link to="/catalogo/equipos" className={botonVolver}>
+          <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={1.75} />
           Equipos
         </Link>
 
@@ -92,7 +98,7 @@ function EquipoView() {
         ) : error ? (
           // Mismo estado de error que las listas (EstadoVacio con
           // "Reintentar"), en vez de una línea roja suelta sin ninguna salida.
-          <div className="rounded-xl border border-outline-variant bg-surface-container-lowest shadow-sm">
+          <div className="rounded-tarjeta bg-white shadow-tarjeta">
             <EstadoVacio
               variante="error"
               titulo="No se pudo cargar el equipo"
@@ -101,7 +107,7 @@ function EquipoView() {
                 <button
                   type="button"
                   onClick={() => setIntento((n) => n + 1)}
-                  className="inline-flex h-10 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high active:scale-[0.97] transition-transform"
+                  className={botonSecundario}
                 >
                   Reintentar
                 </button>
@@ -110,24 +116,28 @@ function EquipoView() {
           </div>
         ) : (
           <>
-            <div className="flex justify-between items-start gap-4 flex-wrap">
-              <div>
-                <h1 className="font-headline-lg text-headline-lg font-bold text-on-surface mb-1">{equipo.name}</h1>
-                <p className="font-body-md text-body-md text-on-surface-variant">Información completa del equipo.</p>
+            <div className="flex justify-between items-end gap-4 flex-wrap">
+              <div className="min-w-0">
+                <div className="flex items-center gap-3 font-eyebrow text-eyebrow uppercase text-on-surface-variant">
+                  <span aria-hidden="true" className="h-px w-7 bg-outline" />
+                  Catálogo / Equipos / Detalle
+                </div>
+                <h1 className="mt-1.5 break-words font-display-lg text-[26px] leading-[32px] font-extrabold tracking-[-0.04em] text-on-surface md:text-display-lg">
+                  {equipo.name}
+                </h1>
+                <p className="mt-1 font-body-lg text-body-lg text-on-surface-variant">Información completa del equipo.</p>
               </div>
-              <button
-                type="button"
-                onClick={() => setConfirmando(true)}
-                className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high active:scale-[0.97] transition-transform"
-              >
-                <Pencil className="h-4 w-4" strokeWidth={2} />
+              <button type="button" onClick={() => setConfirmando(true)} className={botonSecundario}>
+                <Pencil className="h-4 w-4" strokeWidth={1.75} />
                 Editar
               </button>
             </div>
 
-            <section className="rounded-xl border border-outline-variant bg-surface-container-lowest p-5 shadow-sm">
-              <h2 className="font-headline-md text-headline-md font-bold text-on-surface mb-4">Datos del equipo</h2>
-              <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))' }}>
+            <section data-reveal className={tarjeta}>
+              <h2 className={tituloSeccion}>Datos del equipo</h2>
+              {/* Seis datos: 3 × 2 en escritorio y 2 × 3 en móvil, sin una
+                  baldosa huérfana en la última fila. */}
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                 {campo('Marca', marca?.name ?? '—')}
                 {campo('Modelo', equipo.model ?? '—')}
                 {campo('Serie', equipo.serie ?? '—')}
@@ -137,8 +147,8 @@ function EquipoView() {
               </div>
             </section>
 
-            <section className="rounded-xl border border-outline-variant bg-surface-container-lowest p-5 shadow-sm">
-              <h2 className="font-headline-md text-headline-md font-bold text-on-surface mb-4">
+            <section data-reveal className={tarjeta}>
+              <h2 className={tituloSeccion}>
                 {caracteristicas.length > 0 ? `Características (${caracteristicas.length})` : 'Características'}
               </h2>
               {caracteristicas.length === 0 ? (
@@ -146,8 +156,8 @@ function EquipoView() {
               ) : (
                 <ul className="flex flex-col divide-y divide-outline-variant">
                   {caracteristicas.map((c) => (
-                    <li key={c.id} className="flex flex-wrap items-baseline gap-x-1.5 gap-y-1 py-2.5">
-                      <span className="font-label-bold text-label-bold text-on-surface">{c.name}:</span>
+                    <li key={c.id} className="flex flex-wrap items-baseline gap-x-1.5 gap-y-1 py-3">
+                      <span className="font-body-md text-body-md font-semibold text-on-surface">{c.name}:</span>
                       <span className="font-body-md text-body-md text-on-surface-variant">{c.description}</span>
                     </li>
                   ))}
@@ -155,9 +165,9 @@ function EquipoView() {
               )}
             </section>
 
-            <section className="rounded-xl border border-outline-variant bg-surface-container-lowest p-5 shadow-sm">
-              <h2 className="flex items-center gap-2 font-headline-md text-headline-md font-bold text-on-surface mb-4">
-                <History className="h-5 w-5 shrink-0 text-primary" strokeWidth={2} />
+            <section data-reveal className={tarjeta}>
+              <h2 className={tituloSeccion}>
+                <History className="h-5 w-5 shrink-0 text-on-surface-variant" strokeWidth={1.75} />
                 {historial.length > 0 ? `Historial de Asignaciones (${historial.length})` : 'Historial de Asignaciones'}
               </h2>
               {historial.length === 0 ? (
@@ -167,14 +177,14 @@ function EquipoView() {
               ) : (
                 <ul className="flex flex-col divide-y divide-outline-variant">
                   {historial.map((h) => (
-                    <li key={h.delivery_document_detail_id} className="flex flex-wrap items-start justify-between gap-x-3 gap-y-1 py-2.5">
-                      <div>
-                        <p className="font-label-bold text-label-bold text-on-surface">{h.employee_name || '—'}</p>
+                    <li key={h.delivery_document_detail_id} className="flex flex-wrap items-start justify-between gap-x-3 gap-y-1 py-3">
+                      <div className="min-w-0">
+                        <p className="font-body-md text-body-md font-semibold text-on-surface">{h.employee_name || '—'}</p>
                         <p className="font-body-md text-body-md text-on-surface-variant">
                           {h.employee_department || '—'} · Entregado el {formatearFecha(h.delivery_date)}
                         </p>
                         {h.returned && (
-                          <p className="font-label-sm text-label-sm text-on-surface-variant">
+                          <p className="mt-0.5 font-mono text-[11px] leading-4 tracking-[0.04em] text-on-surface-subtle">
                             Devuelto el {formatearFecha(h.return_date)}
                             {h.return_observations ? ` · ${h.return_observations}` : ''}
                           </p>
@@ -183,10 +193,14 @@ function EquipoView() {
                       <span
                         className={
                           h.returned
-                            ? 'shrink-0 rounded-full bg-surface-container-high px-2.5 py-1 font-label-sm text-label-sm text-on-surface-variant'
-                            : 'shrink-0 rounded-full bg-primary/10 px-2.5 py-1 font-label-sm text-label-sm text-primary'
+                            ? 'inline-flex h-6 shrink-0 items-center gap-1.5 rounded-full bg-surface-container-high px-2.5 text-[12px] font-medium leading-4 text-on-surface-variant'
+                            : 'inline-flex h-6 shrink-0 items-center gap-1.5 rounded-full border border-outline-variant bg-white px-2.5 text-[12px] font-medium leading-4 text-on-surface'
                         }
                       >
+                        <span
+                          aria-hidden="true"
+                          className={`h-1.5 w-1.5 rounded-full ${h.returned ? 'bg-outline' : 'bg-on-surface'}`}
+                        />
                         {h.returned ? 'Devuelto' : 'En uso'}
                       </span>
                     </li>

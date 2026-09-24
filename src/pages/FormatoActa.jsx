@@ -1206,12 +1206,12 @@ function FormatoActa() {
               {esEntrega ? 'Complete los datos para guardar' : 'Borrador · sin guardar'}
             </span>
           )}
-          <div className="flex items-center gap-3">
+          <div className="flex w-full items-center gap-3 sm:ml-auto sm:w-auto">
             <button
               type="button"
               onClick={() => navigate('/')}
               disabled={esEntrega && guardando}
-              className="inline-flex h-10 items-center justify-center rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface shadow-sm transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97] disabled:opacity-50"
+              className="inline-flex flex-1 sm:flex-none h-10 items-center justify-center rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface shadow-sm transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97] disabled:opacity-50"
             >
               Cancelar
             </button>
@@ -1219,7 +1219,7 @@ function FormatoActa() {
               type="button"
               onClick={esEntrega ? handleClicFinalizarEntrega : undefined}
               disabled={esEntrega && (guardando || cargandoCatalogos)}
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex flex-1 sm:flex-none h-10 items-center justify-center gap-2 rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {esEntrega && guardando && <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} />}
               {formato.textoAccion}
