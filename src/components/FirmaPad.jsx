@@ -35,7 +35,7 @@ function notaHistoricaAPng() {
 function EncabezadoFirma({ titulo, subtitulo }) {
   return (
     <div className="mb-2.5 flex items-baseline justify-between gap-3">
-      <p className="text-[12px] font-semibold leading-4 text-on-surface">{titulo}</p>
+      <p className="text-meta font-semibold leading-4 text-on-surface">{titulo}</p>
       {subtitulo && (
         <p className="shrink-0 font-label-sm text-label-sm text-on-surface-subtle">{subtitulo}</p>
       )}
@@ -105,7 +105,7 @@ function FirmaPad({ titulo, subtitulo, firmaUrl, onConfirmar, onReiniciar }) {
           <img src={firmaUrl} alt={`Firma de ${titulo}`} className="max-h-full max-w-full object-contain" />
         </div>
         <div className="mt-3 flex items-center justify-between gap-2">
-          <div className="flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.08em] text-on-surface-variant">
+          <div className="flex items-center gap-1.5 font-mono text-micro uppercase tracking-[0.08em] text-on-surface-variant">
             <CheckCircle2 className="h-3.5 w-3.5 animate-badge-pop text-on-surface" strokeWidth={2} />
             Firma confirmada
           </div>
@@ -138,7 +138,7 @@ function FirmaPad({ titulo, subtitulo, firmaUrl, onConfirmar, onReiniciar }) {
             // lienzo vacío y al pulsarlo no hacía nada ni decía por qué.
             setVacio(true)
           }}
-          className={`min-w-0 flex-1 rounded-md px-2 py-1.5 text-center text-[12px] [text-wrap:balance] font-medium leading-4 transition duration-fast ease-standard active:scale-[0.97] ${
+          className={`min-w-0 flex-1 rounded-md px-2 py-1.5 text-center text-meta [text-wrap:balance] font-medium leading-4 transition duration-fast ease-standard active:scale-[0.97] ${
             modo === 'dibujar' ? 'bg-white text-on-surface shadow-tarjeta' : 'text-on-surface-variant hover:text-on-surface'
           }`}
         >
@@ -150,7 +150,7 @@ function FirmaPad({ titulo, subtitulo, firmaUrl, onConfirmar, onReiniciar }) {
             setModo('subir')
             limpiarLienzo()
           }}
-          className={`min-w-0 flex-1 rounded-md px-2 py-1.5 text-center text-[12px] [text-wrap:balance] font-medium leading-4 transition duration-fast ease-standard active:scale-[0.97] ${
+          className={`min-w-0 flex-1 rounded-md px-2 py-1.5 text-center text-meta [text-wrap:balance] font-medium leading-4 transition duration-fast ease-standard active:scale-[0.97] ${
             modo === 'subir' ? 'bg-white text-on-surface shadow-tarjeta' : 'text-on-surface-variant hover:text-on-surface'
           }`}
         >
@@ -163,7 +163,7 @@ function FirmaPad({ titulo, subtitulo, firmaUrl, onConfirmar, onReiniciar }) {
             limpiarLienzo()
             setPreviewSubida(null)
           }}
-          className={`min-w-0 flex-1 rounded-md px-2 py-1.5 text-center text-[12px] [text-wrap:balance] font-medium leading-4 transition duration-fast ease-standard active:scale-[0.97] ${
+          className={`min-w-0 flex-1 rounded-md px-2 py-1.5 text-center text-meta [text-wrap:balance] font-medium leading-4 transition duration-fast ease-standard active:scale-[0.97] ${
             modo === 'historico' ? 'bg-white text-on-surface shadow-tarjeta' : 'text-on-surface-variant hover:text-on-surface'
           }`}
         >

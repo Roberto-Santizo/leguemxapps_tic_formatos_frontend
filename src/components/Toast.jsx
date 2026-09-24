@@ -61,10 +61,11 @@ export function cerrarToast(id) {
 /**
  * Contenedor visual. Se monta UNA sola vez, en AppLayout.
  *
- * Posición (sistema Sierra): arriba a la derecha en escritorio y bajo la
- * barra superior de 56px en móvil, como en el mockup -- así tampoco tapa la
- * barra de acciones fija que usan los formatos de acta (sticky bottom-0).
- * Entra con `toastIn` (desde arriba a la derecha). El éxito va en pastilla
+ * Posición (sistema Sierra): arriba a la derecha desde `sm:` (como el
+ * mockup) y ABAJO en móvil, a lo ancho con 12px de margen: arriba tapaba el
+ * botón "volver" justo después de guardar y el toque solo cerraba el aviso.
+ * Entra con `toastIn` (desde arriba a la derecha) en escritorio y con
+ * `toastInAbajo` (sube desde el pie) en móvil. El éxito va en pastilla
  * negra de tinta; el error, en blanco con filete e ícono rojos.
  */
 export function Toaster() {
@@ -81,7 +82,7 @@ export function Toaster() {
   if (lista.length === 0) return null
 
   return (
-    <div className="pointer-events-none fixed inset-x-3 top-[64px] z-[70] flex flex-col items-stretch gap-2 sm:inset-x-auto sm:right-6 sm:top-6 sm:items-end">
+    <div className="pointer-events-none fixed inset-x-3 bottom-[calc(16px+env(safe-area-inset-bottom))] z-[70] flex flex-col items-stretch gap-2 sm:inset-x-auto sm:bottom-auto sm:right-6 sm:top-6 sm:items-end">
       {lista.map((aviso) => {
         const esError = aviso.tipo === 'error'
         const Icono = esError ? AlertTriangle : CheckCircle2
@@ -92,7 +93,7 @@ export function Toaster() {
             aria-live="polite"
             onClick={() => quitarAviso(aviso.id)}
             className={[
-              'animate-toast-in pointer-events-auto flex w-full cursor-pointer items-center gap-2.5 rounded-[22px] py-1.5 pl-4 pr-1.5 shadow-toast transition-colors duration-fast ease-standard sm:w-auto sm:max-w-[400px]',
+              'animate-toast-in-abajo sm:animate-toast-in pointer-events-auto flex w-full cursor-pointer items-center gap-2.5 rounded-aviso py-1.5 pl-4 pr-1.5 shadow-toast transition-colors duration-fast ease-standard sm:w-auto sm:max-w-[400px]',
               esError
                 ? 'bg-surface-container-lowest text-on-surface ring-1 ring-error/40 hover:bg-error-container/30'
                 : 'bg-tinta text-on-primary hover:bg-tinta-hover',

@@ -12,8 +12,8 @@ import { formatearFecha } from '../utils/fecha.js'
 const botonVolver =
   'inline-flex h-9 items-center gap-2 self-start rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]'
 const botonSecundario =
-  'inline-flex h-10 items-center justify-center gap-2 rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface shadow-sm transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]'
-const etiquetaDato = 'mb-1 font-mono text-[11px] uppercase leading-4 tracking-[0.1em] text-on-surface-variant'
+  'inline-flex h-10 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface shadow-sm transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]'
+const etiquetaDato = 'mb-1 font-mono text-micro uppercase leading-4 tracking-[0.1em] text-on-surface-variant'
 const panelDato = 'min-w-0 rounded-xl bg-surface-container-high px-4 py-3'
 const tituloSeccion =
   'mb-4 flex items-center gap-2 font-headline-md text-headline-md font-bold text-on-surface'
@@ -94,8 +94,8 @@ function EmpleadoView() {
     : '—'
 
   return (
-    <div className="animate-view-in flex-1 p-container-padding md:p-stack-lg">
-      <div className="max-w-[600px] mx-auto flex flex-col gap-stack-lg">
+    <div className="animate-view-in flex-1 px-4 pt-6 pb-10 md:px-8 md:pt-10">
+      <div className="max-w-[600px] ml-[max(0px,calc((100%_-_1200px)/2))] flex flex-col gap-stack-lg">
         <Link to="/catalogo/empleados" className={botonVolver}>
           <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={1.75} />
           Empleados
@@ -122,13 +122,13 @@ function EmpleadoView() {
           </div>
         ) : (
           <>
-            <div className="flex justify-between items-end gap-4 flex-wrap">
+            <div className="-mt-1 md:mt-0 flex justify-between items-end gap-4 flex-wrap">
               <div className="min-w-0">
                 <div className="flex items-center gap-3 font-eyebrow text-eyebrow uppercase text-on-surface-variant">
                   <span aria-hidden="true" className="h-px w-7 bg-outline" />
                   Catálogo / Empleados / Detalle
                 </div>
-                <h1 className="mt-1.5 break-words font-display-lg text-[26px] leading-[32px] font-extrabold tracking-[-0.04em] text-on-surface md:text-display-lg">
+                <h1 className="mt-1.5 break-words font-display-lg text-titulo-movil text-on-surface md:text-display-lg">
                   {empleado.name}
                 </h1>
                 <p className="mt-1 font-body-lg text-body-lg text-on-surface-variant">Información completa del empleado.</p>
@@ -182,7 +182,7 @@ function EmpleadoView() {
                           {[eq.equipment_brand, eq.equipment_model].filter(Boolean).join(' · ') || '—'}
                           {eq.equipment_serie ? ` · Serie ${eq.equipment_serie}` : ''}
                         </p>
-                        <p className="mt-0.5 font-mono text-[11px] leading-4 tracking-[0.04em] text-on-surface-subtle">
+                        <p className="mt-0.5 font-mono text-micro leading-4 tracking-[0.04em] text-on-surface-subtle">
                           Entregado el {formatearFecha(eq.delivery_date)} · {nombrePlanta(eq.location)}
                         </p>
                         {eq.observations && (
@@ -193,7 +193,7 @@ function EmpleadoView() {
                       </div>
                       <Link
                         to={`/historial/entrega/${eq.delivery_document_id}`}
-                        className="inline-flex h-7 shrink-0 items-center rounded-full border border-outline-variant bg-white px-2.5 text-[12px] font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.95]"
+                        className="inline-flex h-7 shrink-0 items-center rounded-full border border-outline-variant bg-white px-2.5 text-meta font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.95]"
                       >
                         Ver entrega #{eq.delivery_document_id}
                       </Link>

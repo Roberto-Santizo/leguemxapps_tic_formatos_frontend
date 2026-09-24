@@ -22,7 +22,7 @@ import { SkeletonTabla } from './Skeleton.jsx'
  */
 
 const inputClasses =
-  'h-10 w-full rounded-boton border border-outline-variant bg-white px-3 font-body-md text-[16px] md:text-body-md text-on-surface placeholder:text-on-surface-subtle transition duration-fast ease-standard hover:border-outline focus:border-on-surface focus:outline-none focus:ring-0 disabled:opacity-60'
+  'h-11 w-full rounded-boton border border-outline-variant bg-white px-3 font-body-md text-input-movil md:text-body-md text-on-surface placeholder:text-on-surface-subtle transition duration-fast ease-standard hover:border-outline disabled:opacity-60'
 
 export function hayNombreRepetido(nombre, nombresExistentes, ignorar = '') {
   const limpio = (nombre || '').trim().toLowerCase()
@@ -67,7 +67,7 @@ export function FilasCaracteristicas({ filas, onChange, disabled, nombresExisten
           >
             <div className="flex flex-col gap-stack-sm sm:flex-row sm:items-start">
               <div className="flex flex-1 flex-col gap-2">
-                <label className="text-[12px] font-semibold leading-4 text-on-surface">Característica</label>
+                <label className="text-meta font-semibold leading-4 text-on-surface">Característica</label>
                 <input
                   className={inputClasses}
                   value={fila.name}
@@ -85,7 +85,7 @@ export function FilasCaracteristicas({ filas, onChange, disabled, nombresExisten
               </div>
 
               <div className="flex flex-1 flex-col gap-2">
-                <label className="text-[12px] font-semibold leading-4 text-on-surface">Descripción</label>
+                <label className="text-meta font-semibold leading-4 text-on-surface">Descripción</label>
                 <input
                   className={inputClasses}
                   value={fila.description}

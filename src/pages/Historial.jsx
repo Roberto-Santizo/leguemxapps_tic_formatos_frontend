@@ -22,14 +22,14 @@ function Historial() {
   )
 
   return (
-    <div className="flex-1 animate-view-in p-container-padding md:p-stack-lg">
+    <div className="flex-1 animate-view-in px-4 pt-6 pb-10 md:px-8 md:pt-10">
       <div className="max-w-[1200px] mx-auto flex flex-col gap-stack-lg">
         <div>
           <div className="flex items-center gap-3 font-eyebrow text-eyebrow uppercase text-on-surface-variant">
             <span aria-hidden="true" className="h-px w-7 bg-outline" />
-            Legumex / Historial
+            Historial
           </div>
-          <h1 className="mt-1.5 font-display-lg text-[26px] leading-[32px] font-extrabold tracking-[-0.04em] text-on-surface md:text-display-lg">
+          <h1 className="mt-1.5 font-display-lg text-titulo-movil text-on-surface md:text-display-lg">
             Historial de Actas
           </h1>
           <p className="mt-1 font-body-lg text-body-lg text-on-surface-variant">
@@ -40,7 +40,7 @@ function Historial() {
         <div className="flex flex-wrap items-center gap-x-6 gap-y-2 rounded-tarjeta bg-white px-5 py-3.5 shadow-tarjeta">
           <div className="flex items-center gap-2 text-on-surface-variant">
             <CalendarClock className="h-4 w-4 shrink-0" strokeWidth={1.75} />
-            <span className="font-mono text-[11px] font-medium uppercase tracking-[0.1em]">Vigencia de los formatos</span>
+            <span className="font-mono text-micro font-medium uppercase tracking-[0.1em]">Vigencia de los formatos</span>
           </div>
           <div className="flex items-center gap-1.5 font-body-md text-body-md text-on-surface">
             <span className="text-on-surface-variant">Emisión:</span>
@@ -85,7 +85,7 @@ function Historial() {
                     <Icon className="h-6 w-6" strokeWidth={1.75} />
                   </div>
                   {/* Código del formato: decorativo, igual que en Nueva Acta. */}
-                  <span className="inline-flex h-6 items-center rounded-full border border-outline-variant bg-white px-2.5 font-mono text-[11px] tracking-[0.1em] text-on-surface-variant">
+                  <span className="inline-flex h-6 items-center rounded-full border border-outline-variant bg-white px-2.5 font-mono text-micro tracking-[0.1em] text-on-surface-variant">
                     {formato.codigo}
                   </span>
                 </div>
@@ -100,7 +100,7 @@ function Historial() {
                 </div>
 
                 <div className="mt-auto flex items-center justify-between gap-2 border-t border-outline-variant pt-3">
-                  <span className="font-mono text-[11px] uppercase tracking-[0.1em] text-on-surface-variant">
+                  <span className="font-mono text-micro uppercase tracking-[0.1em] text-on-surface-variant">
                     {formato.id === 'entrega'
                       ? 'Buscar · Ver · Eliminar'
                       : formato.id === 'devolucion'

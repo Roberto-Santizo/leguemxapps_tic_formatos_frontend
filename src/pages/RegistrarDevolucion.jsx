@@ -190,10 +190,10 @@ function RegistrarDevolucion() {
   }
 
   return (
-    <div className="flex-1 animate-view-in">
-      <div className="p-container-padding md:p-8">
-        <div className="mx-auto max-w-4xl space-y-stack-lg pb-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
+    <div className="flex-1 [&+footer]:pb-[calc(114px+env(safe-area-inset-bottom))] md:[&+footer]:pb-[88px]">
+      <div className="px-4 pt-6 pb-10 md:px-8 md:pt-10">
+        <div className="mx-auto max-w-4xl animate-view-in space-y-stack-lg">
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-5">
             <Link
               to={`/historial/entrega/${id}`}
               className="inline-flex h-9 items-center gap-2 rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
@@ -292,7 +292,7 @@ function RegistrarDevolucion() {
                   itemsMarcados.length > 0 && (
                     <span
                       key={itemsMarcados.length}
-                      className="inline-flex h-6 animate-badge-pop items-center gap-1.5 rounded-full border border-outline-variant bg-white px-2.5 font-mono text-[11px] tabular-nums text-on-surface-variant"
+                      className="inline-flex h-6 animate-badge-pop items-center gap-1.5 rounded-full border border-outline-variant bg-white px-2.5 font-mono text-micro tabular-nums text-on-surface-variant"
                     >
                       <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-on-surface" />
                       {itemsMarcados.length} seleccionado{itemsMarcados.length === 1 ? '' : 's'}
@@ -532,14 +532,14 @@ function RegistrarDevolucion() {
       </div>
 
       {!cargando && !error && entrega && (
-        <div className="sticky bottom-0 z-30 bg-papel-velo px-container-padding py-3 shadow-barra-inferior backdrop-blur-md md:px-8">
+        <div className="fixed inset-x-0 bottom-0 z-30 bg-papel px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-barra-inferior md:left-drawer-width md:overflow-hidden md:bg-papel-velo md:px-8 md:pb-3 md:backdrop-blur-md md:[scrollbar-gutter:stable]">
           <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-3">
             {errorGuardar ? (
               <p className="animate-pop-in rounded-boton border border-error/30 bg-error-container/60 px-3 py-2 font-label-sm text-label-sm text-error">
                 {errorGuardar}
               </p>
             ) : (
-              <span className="font-mono text-[11px] uppercase tracking-[0.1em] text-on-surface-variant">
+              <span className="font-mono text-micro uppercase tracking-[0.1em] text-on-surface-variant">
                 Complete los datos para guardar
               </span>
             )}

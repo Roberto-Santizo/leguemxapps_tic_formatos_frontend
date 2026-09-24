@@ -194,13 +194,13 @@ function HistorialDevolucionView() {
   }
 
   return (
-    <div className="flex-1 animate-view-in">
-      <div className="p-container-padding md:p-8">
-        <div className="mx-auto max-w-4xl space-y-stack-lg pb-4">
-          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+    <div className="flex-1 [&+footer]:pb-[calc(88px+env(safe-area-inset-bottom))] md:[&+footer]:pb-[88px]">
+      <div className="px-4 pt-6 pb-10 md:px-8 md:pt-10">
+        <div className="mx-auto max-w-4xl animate-view-in space-y-stack-lg">
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-5">
             <Link
               to="/historial/devolucion"
-              className="inline-flex h-9 items-center gap-2 rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface shadow-sm transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
+              className="inline-flex h-9 items-center gap-2 rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
             >
               <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={1.75} />
               Devolución de Equipo
@@ -222,7 +222,7 @@ function HistorialDevolucionView() {
                 accion={
                   <Link
                     to="/historial/devolucion"
-                    className="inline-flex h-10 items-center justify-center gap-2 rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface shadow-sm transition duration-fast ease-standard hover:bg-surface-container disabled:opacity-50 active:scale-[0.97]"
+                    className="inline-flex h-10 items-center justify-center gap-2 rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface shadow-sm transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
                   >
                     Volver al historial
                   </Link>
@@ -637,7 +637,7 @@ function HistorialDevolucionView() {
       </div>
 
       {!cargando && !error && documento && (
-        <div className="sticky bottom-0 z-30 bg-papel-velo px-container-padding py-3 shadow-barra-inferior backdrop-blur-md md:px-8">
+        <div className="fixed inset-x-0 bottom-0 z-30 bg-papel px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-barra-inferior md:left-drawer-width md:overflow-hidden md:bg-papel-velo md:px-8 md:pb-3 md:backdrop-blur-md md:[scrollbar-gutter:stable]">
           <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-end gap-3">
             <button
               type="button"

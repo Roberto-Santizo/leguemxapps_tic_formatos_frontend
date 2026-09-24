@@ -190,7 +190,7 @@ function SearchableSelect({
               }
             }}
             placeholder="Buscar..."
-            className={`h-10 w-full rounded-boton border border-outline-variant bg-white pl-9 pr-3 font-body-md text-[16px] text-on-surface placeholder:text-on-surface-subtle transition-colors duration-fast ease-standard focus:border-on-surface focus:outline-none focus:ring-0 ${usarMd ? 'md:h-9 md:text-body-md' : 'sm:h-9 sm:text-body-md'}`}
+            className={`h-10 w-full rounded-boton border border-outline-variant bg-white pl-9 pr-3 font-body-md text-input-movil text-on-surface placeholder:text-on-surface-subtle transition-colors duration-fast ease-standard ${usarMd ? 'md:h-9 md:text-body-md' : 'sm:h-9 sm:text-body-md'}`}
           />
         </div>
         <button
@@ -227,7 +227,7 @@ function SearchableSelect({
                 {opcion.codigo ? (
                   <span className="flex min-w-0 flex-col">
                     <span className="truncate">{opcion.name}</span>
-                    <span className="break-all font-mono text-[11px] uppercase leading-4 tracking-[0.06em] text-on-surface-variant">{opcion.codigo}</span>
+                    <span className="break-all font-mono text-micro uppercase leading-4 tracking-[0.06em] text-on-surface-variant">{opcion.codigo}</span>
                   </span>
                 ) : (
                   <span className="truncate">{opcion.name}</span>
@@ -244,7 +244,7 @@ function SearchableSelect({
                   onClick={() => onVerDetalle(String(opcion.id))}
                   aria-label={`Ver detalle de ${[opcion.name, opcion.codigo].filter(Boolean).join(' ')}`}
                   title="Ver detalle del equipo"
-                  className="grid h-9 w-9 shrink-0 place-items-center rounded-boton text-on-surface-variant transition duration-fast ease-standard hover:bg-surface-container hover:text-on-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-foco focus-visible:ring-offset-2 active:scale-[0.90]"
+                  className="grid h-9 w-9 shrink-0 place-items-center rounded-boton text-on-surface-variant transition duration-fast ease-standard hover:bg-surface-container hover:text-on-surface active:scale-[0.90]"
                 >
                   <Eye className="h-4 w-4" strokeWidth={1.75} />
                 </button>
@@ -266,14 +266,16 @@ function SearchableSelect({
         className={`flex h-11 w-full items-center justify-between gap-2 rounded-boton border bg-white pl-3 font-body-md text-body-md text-on-surface transition duration-fast ease-standard hover:border-outline focus:outline-none disabled:opacity-60 active:scale-[0.99] ${
           mostrarOjo ? 'pr-[4.25rem]' : 'pr-3'
         } ${
-          abierto ? 'border-on-surface' : 'border-outline-variant focus:border-on-surface'
+          // Foco igual que los inputs (index.css): borde tinta + filete de 1px,
+          // sin anillo azul, para que el campo no tenga dos indicadores.
+          abierto ? 'border-on-surface ring-1 ring-on-surface' : 'border-outline-variant focus:border-on-surface focus:ring-1 focus:ring-on-surface'
         }`}
       >
         <span className={seleccionado ? 'truncate text-on-surface' : 'truncate text-on-surface-subtle'}>
           {seleccionado ? seleccionado.name : placeholder}
         </span>
         {seleccionado?.codigo && (
-          <span className="ml-auto shrink-0 font-mono text-[12px] uppercase tracking-[0.04em] text-on-surface">
+          <span className="ml-auto shrink-0 font-mono text-meta uppercase tracking-[0.04em] text-on-surface">
             {seleccionado.codigo}
           </span>
         )}
@@ -299,7 +301,7 @@ function SearchableSelect({
             }}
             aria-label={`Ver detalle de ${[seleccionado.name, seleccionado.codigo].filter(Boolean).join(' ')}`}
             title="Ver detalle del equipo"
-            className="pointer-events-auto grid h-8 w-8 place-items-center rounded-boton text-on-surface-variant transition duration-fast ease-standard hover:bg-surface-container hover:text-on-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-foco focus-visible:ring-offset-2 active:scale-[0.90]"
+            className="pointer-events-auto grid h-8 w-8 place-items-center rounded-boton text-on-surface-variant transition duration-fast ease-standard hover:bg-surface-container hover:text-on-surface active:scale-[0.90]"
           >
             <Eye className="h-4 w-4" strokeWidth={1.75} />
           </button>

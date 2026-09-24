@@ -39,9 +39,9 @@ import {
 
 // Recetas visuales "Sierra" (BRIEF, ola 2), repetidas a propósito.
 const inputClasses =
-  'h-10 w-full rounded-boton border border-outline-variant bg-white px-3 font-body-md text-[16px] text-on-surface placeholder:text-on-surface-subtle transition duration-fast ease-standard hover:border-outline focus:border-on-surface focus:outline-none focus:ring-0 disabled:opacity-60 md:text-body-md'
-const labelClasses = 'text-[12px] font-semibold leading-4 text-on-surface'
-const ayudaClasses = 'text-[12px] leading-4 text-on-surface-subtle'
+  'h-11 w-full rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-lg text-on-surface placeholder:text-on-surface-subtle transition duration-fast ease-standard hover:[&:not(:focus)]:border-outline disabled:opacity-60 md:text-body-md'
+const labelClasses = 'text-meta font-semibold leading-4 text-on-surface'
+const ayudaClasses = 'text-meta leading-4 text-on-surface-subtle'
 const enlaceAyuda = 'font-medium text-foco underline-offset-2 hover:text-foco-hover hover:underline'
 const errorCampo = 'animate-hint-in font-label-sm text-label-sm text-error'
 const botonVolver =
@@ -116,7 +116,7 @@ function ElijeSiNo({ label, value, onChange, disabled, ayuda }) {
             type="button"
             disabled={disabled}
             onClick={() => onChange(opcion.valor)}
-            className={`inline-flex h-10 min-w-[84px] items-center justify-center rounded-boton border px-4 font-body-md text-body-md font-medium transition duration-fast ease-standard active:scale-[0.97] disabled:opacity-60 ${
+            className={`inline-flex h-11 min-w-[84px] items-center justify-center rounded-boton border px-4 font-body-md text-body-md font-medium transition duration-fast ease-standard active:scale-[0.97] disabled:opacity-60 ${
               value === opcion.valor
                 ? 'border-tinta bg-tinta text-white shadow-sm'
                 : 'border-outline-variant bg-white text-on-surface hover:bg-surface-container'
@@ -278,19 +278,19 @@ function EquipoForm() {
   }
 
   return (
-    <div className="animate-view-in flex-1 p-container-padding md:p-stack-lg">
-      <div className="max-w-[900px] mx-auto flex flex-col gap-stack-lg">
+    <div className="animate-view-in flex-1 px-4 pt-6 pb-10 md:px-8 md:pt-10">
+      <div className="max-w-[900px] ml-[max(0px,calc((100%_-_1200px)/2))] flex flex-col gap-stack-lg">
         <Link to="/catalogo/equipos" className={botonVolver}>
           <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={1.75} />
           Equipos
         </Link>
 
-        <div>
+        <div className="-mt-1 md:mt-0">
           <div className="flex items-center gap-3 font-eyebrow text-eyebrow uppercase text-on-surface-variant">
             <span aria-hidden="true" className="h-px w-7 bg-outline" />
             Catálogo / Equipos / {esEdicion ? 'Editar' : 'Nuevo'}
           </div>
-          <h1 className="mt-1.5 font-display-lg text-[26px] leading-[32px] font-extrabold tracking-[-0.04em] text-on-surface md:text-display-lg">
+          <h1 className="mt-1.5 font-display-lg text-titulo-movil text-on-surface md:text-display-lg">
             {esEdicion ? 'Editar equipo' : 'Nuevo equipo'}
           </h1>
           <p className="mt-1 font-body-lg text-body-lg text-on-surface-variant">
@@ -459,9 +459,10 @@ function EquipoForm() {
               </p>
             )}
 
-            {/* Fila de botones del mockup: filete arriba, primario a la
-                izquierda (row-reverse solo cambia el orden visual). */}
-            <div className="flex flex-col-reverse gap-2 border-t border-outline-variant pt-5 sm:flex-row-reverse sm:justify-end">
+            {/* Fila de botones: filete arriba y, como antes del rediseño,
+                Cancelar + primario alineados a la derecha (en móvil el
+                primario queda arriba, a todo lo ancho). */}
+            <div className="flex flex-col-reverse gap-3 border-t border-outline-variant pt-5 sm:flex-row sm:justify-end">
               <Link to="/catalogo/equipos" className={botonSecundario}>
                 Cancelar
               </Link>

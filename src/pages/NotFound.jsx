@@ -31,7 +31,7 @@ function NotFound() {
             </p>
             <Link
               to="/"
-              className="mt-2 inline-flex h-11 w-full items-center justify-center gap-2 rounded-boton bg-tinta px-6 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97] sm:w-auto"
+              className="mt-2 inline-flex h-10 w-full items-center justify-center gap-2 rounded-boton bg-tinta px-6 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97] sm:w-auto"
             >
               <ArrowLeft className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" />
               Volver al inicio

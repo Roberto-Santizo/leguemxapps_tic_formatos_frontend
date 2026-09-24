@@ -8,8 +8,8 @@ import { SkeletonFormulario } from './Skeleton.jsx'
 // Recetas visuales "Sierra" (BRIEF, ola 2), repetidas a propósito en cada
 // pantalla en vez de un componente de botón/campo genérico.
 const inputClasses =
-  'h-10 w-full rounded-boton border border-outline-variant bg-white px-3 font-body-md text-[16px] text-on-surface placeholder:text-on-surface-subtle transition duration-fast ease-standard hover:border-outline focus:border-on-surface focus:outline-none focus:ring-0 disabled:opacity-60 md:text-body-md'
-const labelClasses = 'text-[12px] font-semibold leading-4 text-on-surface'
+  'h-11 w-full rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-lg text-on-surface placeholder:text-on-surface-subtle transition duration-fast ease-standard hover:[&:not(:focus)]:border-outline disabled:opacity-60 md:text-body-md'
+const labelClasses = 'text-meta font-semibold leading-4 text-on-surface'
 const botonVolver =
   'inline-flex h-9 items-center gap-2 self-start rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]'
 const botonSecundario =
@@ -77,19 +77,19 @@ function CatalogoFormPage({ textos, onObtener, onCrear, onActualizar, rutaBase }
   }
 
   return (
-    <div className="animate-view-in flex-1 p-container-padding md:p-stack-lg">
-      <div className="max-w-[600px] mx-auto flex flex-col gap-stack-lg">
+    <div className="animate-view-in flex-1 px-4 pt-6 pb-10 md:px-8 md:pt-10">
+      <div className="max-w-[600px] ml-[max(0px,calc((100%_-_1200px)/2))] flex flex-col gap-stack-lg">
         <Link to={rutaBase} className={botonVolver}>
           <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={1.75} />
           {textos.titulo}
         </Link>
 
-        <div>
+        <div className="-mt-1 md:mt-0">
           <div className="flex items-center gap-3 font-eyebrow text-eyebrow uppercase text-on-surface-variant">
             <span aria-hidden="true" className="h-px w-7 bg-outline" />
             Catálogo / {textos.titulo} / {esEdicion ? 'Editar' : 'Nuevo'}
           </div>
-          <h1 className="mt-1.5 font-display-lg text-[26px] leading-[32px] font-extrabold tracking-[-0.04em] text-on-surface md:text-display-lg">
+          <h1 className="mt-1.5 font-display-lg text-titulo-movil text-on-surface md:text-display-lg">
             {esEdicion ? textos.tituloEditar : textos.tituloCrear}
           </h1>
         </div>
@@ -126,10 +126,10 @@ function CatalogoFormPage({ textos, onObtener, onCrear, onActualizar, rutaBase }
               </p>
             )}
 
-            {/* Fila de botones del mockup: filete arriba, primario a la
-                izquierda (row-reverse solo cambia el orden visual; en móvil
-                el primario queda arriba, a todo lo ancho). */}
-            <div className="flex flex-col-reverse gap-2 border-t border-outline-variant pt-5 sm:flex-row-reverse sm:justify-end">
+            {/* Fila de botones: filete arriba y, como antes del rediseño,
+                Cancelar + primario alineados a la derecha (en móvil el
+                primario queda arriba, a todo lo ancho). */}
+            <div className="flex flex-col-reverse gap-3 border-t border-outline-variant pt-5 sm:flex-row sm:justify-end">
               <Link to={rutaBase} className={botonSecundario}>
                 Cancelar
               </Link>

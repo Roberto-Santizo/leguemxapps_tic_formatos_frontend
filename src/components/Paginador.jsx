@@ -34,7 +34,7 @@ function paginasVisibles(actual, ultima) {
   return salida
 }
 
-function Paginador({ pagina, ultimaPagina, total, plural, tamano = TAMANO_PAGINA, onCambiar }) {
+function Paginador({ pagina, ultimaPagina, total, plural, tamano = TAMANO_PAGINA, onCambiar, enPie = false }) {
   const desde = total ? (pagina - 1) * tamano + 1 : 0
   const hasta = Math.min(pagina * tamano, total)
   const ultima = Math.max(1, ultimaPagina)
@@ -47,25 +47,23 @@ function Paginador({ pagina, ultimaPagina, total, plural, tamano = TAMANO_PAGINA
 
   // Sistema "Sierra": pie como el de la tabla del mockup -- franja gris con el
   // conteo en mono ("MOSTRANDO 1–10 DE 26") a la izquierda y los botones
-  // secundarios "‹ Anterior" / "Siguiente ›" a la derecha. Es una tarjeta
-  // propia porque las pantallas lo ponen debajo de la tabla/las tarjetas y
-  // puede caer sobre la cordillera (nunca texto directo sobre la montaña).
+  // secundarios "‹ Anterior" / "Siguiente ›" a la derecha. Por defecto es una
+  // tarjeta propia porque puede caer sobre la cordillera (nunca texto directo
+  // sobre la montaña). `enPie` (solo estilo): la pantalla lo mete dentro del
+  // pie gris de su tabla, así que en escritorio pierde su tarjeta para no
+  // dibujar una caja dentro de otra; en móvil (tarjetas) sigue siendo tarjeta.
   const flecha =
     'inline-flex h-8 items-center justify-center gap-1 rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97] disabled:cursor-not-allowed disabled:text-on-surface-subtle disabled:hover:bg-white disabled:active:scale-100'
   const numero =
-    'inline-grid h-8 min-w-8 place-items-center rounded-boton px-2 font-mono text-[12px] tabular-nums transition duration-fast ease-standard active:scale-[0.97]'
+    'inline-grid h-8 min-w-8 place-items-center rounded-boton px-2 font-mono text-meta tabular-nums transition duration-fast ease-standard active:scale-[0.97]'
 
-  // Si una pantalla ya lo mete en el pie gris de su tabla (padre con
-  // bg-surface-container), en escritorio se quita su propia tarjeta para no
-  // dibujar una caja dentro de otra.
-  const dentroDePie =
-    'md:[[class*=bg-surface-container]>&]:rounded-none md:[[class*=bg-surface-container]>&]:bg-transparent md:[[class*=bg-surface-container]>&]:p-0 md:[[class*=bg-surface-container]>&]:shadow-none'
+  const pie = enPie ? 'md:rounded-none md:bg-transparent md:p-0 md:shadow-none' : ''
 
   return (
     <div
-      className={`flex flex-col gap-3 rounded-tarjeta bg-surface-container px-4 py-3 shadow-tarjeta sm:flex-row sm:items-center sm:justify-between ${dentroDePie}`}
+      className={`flex flex-col gap-3 rounded-tarjeta bg-surface-container px-4 py-3 shadow-tarjeta sm:flex-row sm:items-center sm:justify-between ${pie}`}
     >
-      <p className="font-mono text-[11px] uppercase leading-4 tracking-[0.1em] text-on-surface-variant tabular-nums">
+      <p className="font-mono text-micro uppercase leading-4 tracking-[0.1em] text-on-surface-variant tabular-nums">
         {conteo}
         <span className="hidden sm:inline">
           {' '}
@@ -85,7 +83,7 @@ function Paginador({ pagina, ultimaPagina, total, plural, tamano = TAMANO_PAGINA
           <span className="hidden sm:inline">Anterior</span>
         </button>
 
-        <span className="sm:hidden flex-1 px-2 text-center font-mono text-[11px] uppercase tracking-[0.1em] text-on-surface-variant tabular-nums">
+        <span className="sm:hidden flex-1 px-2 text-center font-mono text-micro uppercase tracking-[0.1em] text-on-surface-variant tabular-nums">
           Página {pagina} de {ultima}
         </span>
 
@@ -94,7 +92,7 @@ function Paginador({ pagina, ultimaPagina, total, plural, tamano = TAMANO_PAGINA
             n === null ? (
               <span
                 key={`hueco-${i}`}
-                className="inline-grid h-8 w-6 place-items-center font-mono text-[12px] text-on-surface-subtle"
+                className="inline-grid h-8 w-6 place-items-center font-mono text-meta text-on-surface-subtle"
                 aria-hidden="true"
               >
                 …

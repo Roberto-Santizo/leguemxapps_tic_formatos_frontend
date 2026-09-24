@@ -87,9 +87,9 @@ const FILTROS_ESTADO = [
 const botonVolver =
   'inline-flex h-9 items-center gap-2 self-start rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]'
 const botonPrimario =
-  'inline-flex h-10 items-center justify-center gap-2 rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97]'
+  'inline-flex h-10 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97]'
 const celdaEncabezado =
-  'h-11 px-4 font-mono text-[11px] font-medium uppercase tracking-[0.1em] text-on-surface-variant whitespace-nowrap'
+  'h-11 px-4 font-mono text-micro font-medium uppercase tracking-[0.1em] text-on-surface-variant whitespace-nowrap'
 
 function EquiposList() {
   const { token } = useAuth()
@@ -338,7 +338,7 @@ function EquiposList() {
     return (
       <span
         className={[
-          'inline-flex h-6 items-center gap-1.5 rounded-full px-2.5 text-[12px] font-medium leading-4 whitespace-nowrap',
+          'inline-flex h-6 items-center gap-1.5 rounded-full px-2.5 text-meta font-medium leading-4 whitespace-nowrap',
           libre
             ? 'bg-available-container text-on-available-container'
             : 'bg-assigned-container text-on-assigned-container',
@@ -357,20 +357,20 @@ function EquiposList() {
     'inline-flex h-9 w-9 items-center justify-center rounded-boton text-on-surface-variant transition duration-fast ease-standard hover:bg-surface-container hover:text-on-surface active:scale-[0.90]'
 
   return (
-    <div className="animate-view-in flex-1 p-container-padding md:p-stack-lg">
+    <div className="animate-view-in flex-1 px-4 pt-6 pb-10 md:px-8 md:pt-10">
       <div className="max-w-[1200px] mx-auto flex flex-col gap-stack-lg">
         <Link to="/catalogo" className={botonVolver}>
           <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={1.75} />
           Catálogo
         </Link>
 
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+        <div className="-mt-1 md:mt-0 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
           <div className="min-w-0">
             <div className="flex items-center gap-3 font-eyebrow text-eyebrow uppercase text-on-surface-variant">
               <span aria-hidden="true" className="h-px w-7 bg-outline" />
               Catálogo / Equipos
             </div>
-            <h1 className="mt-1.5 font-display-lg text-[26px] leading-[32px] font-extrabold tracking-[-0.04em] text-on-surface md:text-display-lg">
+            <h1 className="mt-1.5 font-display-lg text-titulo-movil text-on-surface md:text-display-lg">
               Equipos
             </h1>
             <p className="mt-1 font-body-lg text-body-lg text-on-surface-variant">
@@ -411,7 +411,7 @@ function EquiposList() {
                     onClick={() => setParametro('estado', valor)}
                     aria-pressed={puesto}
                     className={[
-                      'inline-flex h-8 items-center gap-1.5 rounded-full border px-3 text-[12px] font-medium leading-4 transition duration-fast ease-standard active:scale-[0.97]',
+                      'inline-flex h-8 items-center gap-1.5 rounded-full border px-3 text-meta font-medium leading-4 transition duration-fast ease-standard active:scale-[0.97]',
                       puesto
                         ? `border-transparent ${activo}`
                         : 'border-outline-variant bg-white text-on-surface-variant hover:bg-surface-container hover:text-on-surface',
@@ -433,7 +433,10 @@ function EquiposList() {
             alcanza para las columnas de esta tabla y la de acciones quedaba
             cortada e inalcanzable, sin forma de desplazarse. Mismo patrón que
             ya usaban las tablas de actas. */}
-        <div className="hidden md:block rounded-tarjeta bg-white shadow-tarjeta overflow-x-auto">
+        {/* Tabla + paginador en una sola tarjeta en escritorio (patrón de
+            Historial); en móvil el envoltorio no dibuja nada. */}
+        <div className="flex flex-col gap-stack-lg md:gap-0 md:overflow-hidden md:rounded-tarjeta md:bg-white md:shadow-tarjeta">
+        <div className="hidden md:block overflow-x-auto">
           {cargandoLista ? (
             <SkeletonTabla columnas={6} filas={5} />
           ) : sinContenido ? (
@@ -447,7 +450,7 @@ function EquiposList() {
                   <th className={`w-40 ${celdaEncabezado}`}>Marca</th>
                   <th className={`w-56 ${celdaEncabezado}`}>Características</th>
                   <th className={`w-32 ${celdaEncabezado}`}>Estado</th>
-                  <th className={`w-36 text-right ${celdaEncabezado}`}>Acciones</th>
+                  <th className={`w-40 text-right ${celdaEncabezado}`}>Acciones</th>
                 </tr>
               </thead>
               <tbody className="font-body-md text-body-md text-on-surface">
@@ -458,10 +461,9 @@ function EquiposList() {
                   return (
                     <Fragment key={equipo.id}>
                       <tr
-                        data-reveal
                         className="border-t border-outline-variant transition-colors duration-fast ease-standard hover:bg-surface-container-low"
                       >
-                        <td className="h-[72px] px-4 py-4 font-mono text-[12px] text-on-surface-variant tabular-nums">
+                        <td className="h-[72px] px-4 py-4 font-mono text-meta text-on-surface-variant tabular-nums">
                           {equipo.id}
                         </td>
                         {/* La serie va debajo del nombre y no en columna
@@ -473,7 +475,7 @@ function EquiposList() {
                         <td className="px-4 py-4 font-medium text-on-surface break-words">
                           {equipo.name}
                           {equipo.serie && (
-                            <span className="mt-0.5 block break-all font-mono text-[12px] font-normal uppercase leading-4 text-on-surface-variant">
+                            <span className="mt-0.5 block break-all font-mono text-meta font-normal uppercase leading-4 text-on-surface-variant">
                               {equipo.serie}
                             </span>
                           )}
@@ -502,7 +504,11 @@ function EquiposList() {
                               de abrir ni corregir su nombre, marca, modelo o
                               serie desde esta lista. El "+" sigue apareciendo
                               solo cuando falta la primera característica. */}
-                          <div className="flex items-center justify-end gap-1">
+                          {/* Tres ranuras fijas de 36px alineadas a la
+                              derecha: ojo y lápiz caen siempre en la misma x
+                              y el "+" ocupa la tercera solo cuando aplica, sin
+                              desalinear las filas (D10). */}
+                          <div className="grid grid-cols-[repeat(3,2.25rem)] items-center justify-end gap-1">
                             <Link
                               to={`/catalogo/equipos/${equipo.id}/ver`}
                               aria-label={`Ver información de ${equipo.name}`}
@@ -526,7 +532,7 @@ function EquiposList() {
                                 onClick={() => alternar(equipo.id, 'agregar')}
                                 aria-label={`Agregar característica a ${equipo.name}`}
                                 title="Agregar característica"
-                                className="ml-1 inline-flex h-9 w-9 items-center justify-center rounded-boton border border-outline-variant bg-white text-on-surface shadow-sm transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.90]"
+                                className={iconoActivo}
                               >
                                 <Plus className="h-4 w-4" strokeWidth={1.75} />
                               </button>
@@ -539,7 +545,7 @@ function EquiposList() {
                         <tr className="border-t border-outline-variant bg-surface-container-low">
                           <td colSpan={6} className="px-4 py-4">
                             <div className="animate-drop-in">
-                              <p className="mb-3 font-mono text-[11px] uppercase leading-4 tracking-[0.1em] text-on-surface-variant">
+                              <p className="mb-3 font-mono text-micro uppercase leading-4 tracking-[0.1em] text-on-surface-variant">
                                 {abierta.modo === 'ver'
                                   ? 'Características registradas'
                                   : `Agregar característica a ${equipo.name}`}
@@ -584,11 +590,11 @@ function EquiposList() {
                       <p className="font-body-md text-body-md font-semibold text-on-surface break-words">
                         {equipo.name}
                       </p>
-                      <p className="mt-0.5 text-[12px] leading-4 text-on-surface-variant break-words">
+                      <p className="mt-0.5 text-meta leading-4 text-on-surface-variant break-words">
                         {equipo.brand || '—'} · {tiene ? `${total} caract.` : 'Sin características'}
                       </p>
                       {equipo.serie && (
-                        <p className="mt-0.5 break-all font-mono text-[11px] uppercase leading-4 tracking-[0.1em] text-on-surface-subtle">
+                        <p className="mt-0.5 break-all font-mono text-micro uppercase leading-4 tracking-[0.1em] text-on-surface-subtle">
                           {equipo.serie}
                         </p>
                       )}
@@ -616,15 +622,19 @@ function EquiposList() {
         </div>
 
         {!cargandoLista && !errorCarga && (
-          <Paginador
-            pagina={pagina}
-            ultimaPagina={ultimaPagina}
-            tamano={limite}
-            total={totalEquipos}
-            plural="equipos"
-            onCambiar={irAPagina}
-          />
+          <div className="md:border-t md:border-outline-variant md:bg-surface-container md:px-4 md:py-2.5">
+            <Paginador
+              pagina={pagina}
+              ultimaPagina={ultimaPagina}
+              tamano={limite}
+              total={totalEquipos}
+              plural="equipos"
+              onCambiar={irAPagina}
+              enPie
+            />
+          </div>
         )}
+        </div>
       </div>
 
       <ConfirmDialog

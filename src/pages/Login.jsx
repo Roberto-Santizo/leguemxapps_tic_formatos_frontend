@@ -6,8 +6,12 @@ import { useAuth } from '../context/AuthContext.jsx'
 // El telón verde solo se muestra la primera vez por sesión del navegador;
 // si vuelve al login (cerrar sesión, sesión vencida) entra directo.
 const CLAVE_TELON = 'legumex_telon_visto'
-// Tiempo que se deja ver la animación de éxito antes de navegar.
-const ESPERA_EXITO_MS = 1250
+// Tiempo que se deja ver la animación de éxito antes de navegar (corto: se
+// cobra en cada inicio de sesión, no solo la primera vez como el telón).
+const ESPERA_EXITO_MS = 650
+// El telón termina de bajar a los 2.5 s (1 s de espera + 1.5 s de caída, ver
+// .lg-telon en index.css). Respaldo por si el navegador no avisa animationend.
+const FIN_TELON_MS = 2600
 
 function telonYaVisto() {
   try {
@@ -19,6 +23,16 @@ function telonYaVisto() {
 
 function movimientoReducido() {
   return typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+}
+
+// Parallax solo con mouse y con movimiento permitido (en táctil no hay hover
+// y en movimiento reducido el paisaje queda quieto).
+function parallaxPermitido() {
+  return (
+    typeof window !== 'undefined' &&
+    !movimientoReducido() &&
+    !window.matchMedia?.('(pointer: coarse)').matches
+  )
 }
 
 function saludoSegunHora() {
@@ -36,7 +50,7 @@ function LetrasEnOla({ texto, inicio }) {
       className="lg-letra"
       style={{ animationDelay: `${inicio + i * 28}ms` }}
     >
-      {letra === ' ' ? ' ' : letra}
+      {letra === ' ' ? '\u00a0' : letra}
     </span>
   ))
 }
@@ -64,7 +78,14 @@ function Login() {
   const [mostrarTelon] = useState(() => !telonYaVisto())
   const [exito, setExito] = useState(null) // { nombre } mientras corre la animación de éxito
   const [sacudir, setSacudir] = useState(false)
+  // Mientras el telón cubre la pantalla la tarjeta queda `inert` (no recibe
+  // foco ni tecleo a ciegas); al terminar de bajar se enfoca el usuario.
+  const [telonCubre, setTelonCubre] = useState(mostrarTelon)
+  const [conParallax] = useState(parallaxPermitido)
   const temporizador = useRef(null)
+  const inputUsuario = useRef(null)
+  const cuadroParallax = useRef(0)
+  const posParallax = useRef(null)
 
   useEffect(() => {
     try {
@@ -72,8 +93,23 @@ function Login() {
     } catch (_) {
       // sin sessionStorage (modo privado estricto): el telón sale siempre
     }
-    return () => clearTimeout(temporizador.current)
+    return () => {
+      clearTimeout(temporizador.current)
+      cancelAnimationFrame(cuadroParallax.current)
+    }
   }, [])
+
+  useEffect(() => {
+    if (!telonCubre) return undefined
+    const respaldo = setTimeout(() => setTelonCubre(false), movimientoReducido() ? 0 : FIN_TELON_MS)
+    return () => clearTimeout(respaldo)
+  }, [telonCubre])
+
+  // Autofoco al quedar libre la tarjeta (en la primera visita, al terminar el
+  // telón; en las siguientes, de inmediato).
+  useEffect(() => {
+    if (!telonCubre) inputUsuario.current?.focus()
+  }, [telonCubre])
 
   const redirectTo = location.state?.from?.pathname || '/'
 
@@ -101,29 +137,50 @@ function Login() {
     }
   }
 
-  // Parallax: la posición del mouse (−0.5…0.5) mueve cada capa según su profundidad.
+  // Parallax: la posición del mouse (−0.5…0.5) mueve cada capa según su
+  // profundidad. Se escribe como mucho una vez por cuadro (requestAnimationFrame).
+  function pintarParallax(el, mx, my) {
+    posParallax.current = { el, mx, my }
+    if (cuadroParallax.current) return
+    cuadroParallax.current = requestAnimationFrame(() => {
+      cuadroParallax.current = 0
+      const pos = posParallax.current
+      pos.el.style.setProperty('--mx', pos.mx)
+      pos.el.style.setProperty('--my', pos.my)
+    })
+  }
+
   function moverParallax(event) {
     const el = event.currentTarget
     const r = el.getBoundingClientRect()
-    el.style.setProperty('--mx', ((event.clientX - r.left) / r.width - 0.5).toFixed(3))
-    el.style.setProperty('--my', ((event.clientY - r.top) / r.height - 0.5).toFixed(3))
+    pintarParallax(
+      el,
+      ((event.clientX - r.left) / r.width - 0.5).toFixed(3),
+      ((event.clientY - r.top) / r.height - 0.5).toFixed(3),
+    )
   }
 
   function soltarParallax(event) {
-    event.currentTarget.style.setProperty('--mx', '0')
-    event.currentTarget.style.setProperty('--my', '0')
+    pintarParallax(event.currentTarget, '0', '0')
   }
 
   const ocupado = loading || Boolean(exito)
+  const saludoExito = exito?.nombre ? `¡Hola, ${exito.nombre}!` : '¡Bienvenido!'
 
   return (
     <div
       className={`lg-raiz${mostrarTelon ? '' : ' lg-sin-telon'}`}
-      onMouseMove={moverParallax}
-      onMouseLeave={soltarParallax}
+      onMouseMove={conParallax ? moverParallax : undefined}
+      onMouseLeave={conParallax ? soltarParallax : undefined}
     >
       {mostrarTelon && (
-        <div aria-hidden="true" className="lg-telon">
+        <div
+          aria-hidden="true"
+          className="lg-telon"
+          onAnimationEnd={(e) => {
+            if (e.target === e.currentTarget) setTelonCubre(false)
+          }}
+        >
           <div className="lg-telon-fondo" />
           <svg className="lg-telon-borde" viewBox="0 0 1280 120" preserveAspectRatio="none">
             <polygon points="0,0 1280,0 1280,60 1100,25 900,58 680,10 460,55 250,20 0,60" />
@@ -178,11 +235,19 @@ function Login() {
       </div>
 
       {/* Tarjeta de acceso */}
-      <div className="lg-lado-tarjeta">
+      <div className="lg-lado-tarjeta" inert={telonCubre ? '' : undefined}>
         <div className={`lg-tarjeta${exito ? ' lg-ok' : ''}`}>
+          {/* Región viva montada desde el inicio: solo cambia su texto, así los
+              lectores de pantalla anuncian el éxito (las letras en ola van
+              aria-hidden para que no se lean de una en una). */}
+          <p className="sr-only" aria-live="polite">
+            {exito ? `Credenciales correctas. ${saludoExito}` : ''}
+          </p>
           {exito ? (
-            <h1 aria-live="polite" className="lg-titulo lg-titulo-ok">
-              <LetrasEnOla texto={exito.nombre ? `¡Hola, ${exito.nombre}!` : '¡Bienvenido!'} inicio={120} />
+            <h1 aria-label={saludoExito} className="lg-titulo lg-titulo-ok">
+              <span aria-hidden="true" className="contents">
+                <LetrasEnOla texto={saludoExito} inicio={120} />
+              </span>
             </h1>
           ) : (
             <h1 className="lg-titulo">Iniciar sesión</h1>
@@ -214,7 +279,7 @@ function Login() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="admin"
-                autoFocus
+                ref={inputUsuario}
                 autoComplete="username"
               />
             </div>
@@ -266,9 +331,10 @@ function Login() {
                   >
                     <path d="M20 6 9 17l-5-5" />
                   </svg>
-                  <span className="inline-flex">
+                  <span aria-hidden="true" className="inline-flex">
                     <LetrasEnOla texto="Credenciales correctas" inicio={60} />
                   </span>
+                  <span className="sr-only">Credenciales correctas</span>
                 </>
               ) : loading ? (
                 <>

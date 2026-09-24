@@ -25,8 +25,10 @@ function iniciales(nombre) {
 }
 
 const botonSecundario =
-  'inline-flex h-10 items-center justify-center gap-2 rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface shadow-sm transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]'
-const etiqueta = 'mb-1.5 font-mono text-[11px] uppercase tracking-[0.1em] text-on-surface-variant'
+  'inline-flex h-10 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface shadow-sm transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]'
+// Mismo panel gris de solo lectura que CatalogoRegistroView / EquipoView.
+const etiqueta = 'mb-1 font-mono text-micro uppercase leading-4 tracking-[0.1em] text-on-surface-variant'
+const panelDato = 'min-w-0 rounded-xl bg-surface-container-high px-4 py-3'
 
 /**
  * Vista completa de un usuario -- destino del ojo/tarjeta en Usuarios.jsx.
@@ -65,13 +67,13 @@ function UsuarioView() {
     : null
 
   return (
-    <div className="animate-view-in flex-1 p-container-padding md:p-stack-lg">
+    <div className="animate-view-in flex-1 px-4 pt-6 pb-10 md:px-8 md:pt-10">
       {/* Mismo ancho que su formulario (UsuarioForm, 600px): ver y editar de
           una misma entidad no deben cambiar de ancho al pasar de una a otra. */}
-      <div className="max-w-[600px] mx-auto flex flex-col gap-stack-lg">
+      <div className="max-w-[600px] ml-[max(0px,calc((100%_-_1200px)/2))] flex flex-col gap-stack-lg">
         <Link
           to="/usuarios"
-          className="inline-flex h-9 items-center gap-2 self-start rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface shadow-sm transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
+          className="inline-flex h-9 items-center gap-2 self-start rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
         >
           <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={1.75} />
           Usuarios
@@ -100,13 +102,13 @@ function UsuarioView() {
           </div>
         ) : (
           <>
-            <div className="flex justify-between items-start sm:items-end gap-4 flex-wrap">
+            <div className="-mt-1 md:mt-0 flex justify-between items-end gap-4 flex-wrap">
               <div className="min-w-0">
                 <div className="flex items-center gap-3 font-eyebrow text-eyebrow uppercase text-on-surface-variant">
                   <span aria-hidden="true" className="h-px w-7 bg-outline" />
                   Usuarios / Detalle
                 </div>
-                <h1 className="mt-1.5 font-display-lg text-[26px] font-extrabold leading-[32px] tracking-[-0.04em] md:text-display-lg text-on-surface break-words">
+                <h1 className="mt-1.5 font-display-lg text-titulo-movil md:text-display-lg text-on-surface break-words">
                   {usuario.name}
                 </h1>
                 <p className="mt-1 font-body-lg text-body-lg text-on-surface-variant">Información completa del usuario.</p>
@@ -117,24 +119,24 @@ function UsuarioView() {
               </button>
             </div>
 
-            <section className="animate-pop-in rounded-tarjeta bg-white p-4 shadow-tarjeta sm:p-6">
-              <div className="mb-5 flex items-center gap-3 border-b border-outline-variant pb-5">
+            <section className="rounded-tarjeta bg-white p-4 shadow-tarjeta md:p-6">
+              <div className="mb-4 flex items-center gap-3">
                 <span
                   aria-hidden="true"
-                  className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-outline bg-white text-[14px] font-semibold text-on-surface"
+                  className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-outline bg-white text-meta font-semibold text-on-surface"
                 >
                   {iniciales(usuario.name)}
                 </span>
-                <h2 className="font-headline-md text-headline-md text-on-surface">Datos del usuario</h2>
+                <h2 className="font-headline-md text-headline-md font-bold text-on-surface">Datos del usuario</h2>
               </div>
-              <div className="grid gap-5" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))' }}>
-                <div className="min-w-0">
+              <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))' }}>
+                <div className={panelDato}>
                   <p className={etiqueta}>Usuario</p>
-                  <p className="font-mono text-[13px] text-on-surface break-all">{usuario.username}</p>
+                  <p className="font-mono text-body-md text-on-surface break-all">{usuario.username}</p>
                 </div>
-                <div>
+                <div className={panelDato}>
                   <p className={etiqueta}>Rol</p>
-                  <span className="inline-flex h-6 items-center gap-1.5 rounded-full border border-outline-variant bg-white px-2.5 text-[12px] font-medium text-on-surface">
+                  <span className="inline-flex h-6 items-center gap-1.5 rounded-full border border-outline-variant bg-white px-2.5 text-meta font-medium text-on-surface">
                     <span aria-hidden="true" className={`h-1.5 w-1.5 rounded-full ${rolInfo.classes}`} />
                     {rolInfo.label}
                   </span>

@@ -24,9 +24,9 @@ import { listarEmpleados, listarDepartamentos } from '../services/api.js'
 const botonVolver =
   'inline-flex h-9 items-center gap-2 self-start rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]'
 const botonPrimario =
-  'inline-flex h-10 items-center justify-center gap-2 rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97]'
+  'inline-flex h-10 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97]'
 const celdaEncabezado =
-  'h-11 px-4 font-mono text-[11px] font-medium uppercase tracking-[0.1em] text-on-surface-variant whitespace-nowrap'
+  'h-11 px-4 font-mono text-micro font-medium uppercase tracking-[0.1em] text-on-surface-variant whitespace-nowrap'
 
 function EmpleadosList() {
   const { token } = useAuth()
@@ -143,20 +143,20 @@ function EmpleadosList() {
   }
 
   return (
-    <div className="animate-view-in flex-1 p-container-padding md:p-stack-lg">
+    <div className="animate-view-in flex-1 px-4 pt-6 pb-10 md:px-8 md:pt-10">
       <div className="max-w-[1200px] mx-auto flex flex-col gap-stack-lg">
         <Link to="/catalogo" className={botonVolver}>
           <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={1.75} />
           Catálogo
         </Link>
 
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+        <div className="-mt-1 md:mt-0 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
           <div className="min-w-0">
             <div className="flex items-center gap-3 font-eyebrow text-eyebrow uppercase text-on-surface-variant">
               <span aria-hidden="true" className="h-px w-7 bg-outline" />
               Catálogo / Empleados
             </div>
-            <h1 className="mt-1.5 font-display-lg text-[26px] leading-[32px] font-extrabold tracking-[-0.04em] text-on-surface md:text-display-lg">
+            <h1 className="mt-1.5 font-display-lg text-titulo-movil text-on-surface md:text-display-lg">
               Empleados
             </h1>
             <p className="mt-1 font-body-lg text-body-lg text-on-surface-variant">
@@ -171,8 +171,11 @@ function EmpleadosList() {
 
         <Buscador value={busqueda} onChange={setBusqueda} placeholder="Buscar por código, nombre o departamento..." />
 
+        {/* Tabla + paginador en una sola tarjeta en escritorio (patrón de
+            Historial); en móvil el envoltorio no dibuja nada. */}
+        <div className="flex flex-col gap-stack-lg md:gap-0 md:overflow-hidden md:rounded-tarjeta md:bg-white md:shadow-tarjeta">
         {/* ---- Escritorio: tabla, ojo (ver) + lápiz (editar con confirmación) ---- */}
-        <div className="hidden md:block rounded-tarjeta bg-white shadow-tarjeta overflow-x-auto">
+        <div className="hidden md:block overflow-x-auto">
           {cargando ? (
             <SkeletonTabla columnas={4} filas={5} />
           ) : sinContenido ? (
@@ -191,10 +194,9 @@ function EmpleadosList() {
                 {visibles.map((emp) => (
                   <tr
                     key={emp.id}
-                    data-reveal
                     className="border-t border-outline-variant transition-colors duration-fast ease-standard hover:bg-surface-container-low"
                   >
-                    <td className="h-[72px] px-4 py-4 font-mono text-[12px] text-on-surface-variant">{emp.code}</td>
+                    <td className="h-[72px] px-4 py-4 font-mono text-meta text-on-surface-variant">{emp.code}</td>
                     <td className="px-4 py-4 font-medium text-on-surface break-words">{emp.name}</td>
                     <td className="px-4 py-4 text-on-surface-variant break-words">{nombreDepartamento(emp)}</td>
                     <td className="px-4 py-4">
@@ -230,7 +232,7 @@ function EmpleadosList() {
               >
                 <div className="min-w-0">
                   <p className="font-body-md text-body-md font-semibold text-on-surface break-words">{emp.name}</p>
-                  <p className="mt-0.5 text-[12px] leading-4 text-on-surface-variant break-words">
+                  <p className="mt-0.5 text-meta leading-4 text-on-surface-variant break-words">
                     <span className="font-mono">{emp.code}</span> · {nombreDepartamento(emp)}
                   </p>
                 </div>
@@ -240,15 +242,19 @@ function EmpleadosList() {
         </div>
 
         {!cargando && !errorCarga && (
-          <Paginador
-            pagina={pagina}
-            ultimaPagina={ultimaPagina}
-            tamano={limite}
-            total={total}
-            plural="empleados"
-            onCambiar={irAPagina}
-          />
+          <div className="md:border-t md:border-outline-variant md:bg-surface-container md:px-4 md:py-2.5">
+            <Paginador
+              pagina={pagina}
+              ultimaPagina={ultimaPagina}
+              tamano={limite}
+              total={total}
+              plural="empleados"
+              onCambiar={irAPagina}
+              enPie
+            />
+          </div>
         )}
+        </div>
       </div>
 
       <ConfirmDialog

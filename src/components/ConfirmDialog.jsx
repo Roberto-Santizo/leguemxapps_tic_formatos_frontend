@@ -165,12 +165,12 @@ function ConfirmDialog({
 
         {requierePassword && (
           <div className="mt-4 flex flex-col gap-1.5">
-            <label className="text-[12px] font-semibold leading-4 text-on-surface">Tu contraseña</label>
+            <label className="text-meta font-semibold leading-4 text-on-surface">Tu contraseña</label>
             <input
               ref={passwordRef}
               type="password"
               disabled={procesando}
-              className="h-11 w-full rounded-boton border border-outline-variant bg-surface px-3 font-body-md text-body-md text-on-surface transition-colors duration-fast ease-standard hover:border-outline focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10"
+              className="h-11 w-full rounded-boton border border-outline-variant bg-surface px-3 font-body-md text-body-md text-on-surface transition-colors duration-fast ease-standard hover:border-outline"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
@@ -183,7 +183,7 @@ function ConfirmDialog({
               type="checkbox"
               checked={noPreguntar}
               onChange={(e) => setNoPreguntar(e.target.checked)}
-              className="h-4 w-4 shrink-0 rounded-[4px] border-outline text-primary focus:outline-none focus:ring-2 focus:ring-foco focus:ring-offset-2"
+              className="h-4 w-4 shrink-0 rounded-[4px] border-outline text-primary"
             />
             {textoNoPreguntar}
           </label>

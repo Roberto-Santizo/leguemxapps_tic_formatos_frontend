@@ -119,23 +119,23 @@ function HistorialDevolucionList() {
   }
 
   return (
-    <div className="animate-view-in flex-1 p-container-padding md:p-stack-lg">
+    <div className="flex-1 animate-view-in px-4 pt-6 pb-10 md:px-8 md:pt-10">
       <div className="max-w-[1200px] mx-auto flex flex-col gap-stack-lg">
         <Link
           to="/historial"
-          className="inline-flex h-9 items-center gap-2 self-start rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface shadow-sm transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
+          className="inline-flex h-9 items-center gap-2 self-start rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
         >
           <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={1.75} />
           Historial de Actas
         </Link>
 
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+        <div className="-mt-1 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end md:mt-0">
           <div className="min-w-0">
             <div className="flex items-center gap-3 font-eyebrow text-eyebrow uppercase text-on-surface-variant">
               <span aria-hidden="true" className="h-px w-7 bg-outline" />
               Historial / Devolución
             </div>
-            <h1 className="mt-1.5 font-display-lg text-[26px] leading-[32px] font-extrabold tracking-[-0.04em] text-on-surface md:text-display-lg">
+            <h1 className="mt-1.5 font-display-lg text-titulo-movil text-on-surface md:text-display-lg">
               Devolución de Equipo
             </h1>
             <p className="mt-1 font-body-lg text-body-lg text-on-surface-variant">
@@ -145,7 +145,7 @@ function HistorialDevolucionList() {
           {isAdmin && (
             <Link
               to="/historial/devolucion/nueva"
-              className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97]"
+              className="inline-flex h-10 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97]"
             >
               <Plus className="h-4 w-4" strokeWidth={1.75} />
               Registrar devolución
@@ -169,30 +169,30 @@ function HistorialDevolucionList() {
               <table className="w-full min-w-[720px] text-left border-collapse">
                 <thead>
                   <tr className="bg-surface-container">
-                    <th className="h-11 px-4 font-mono text-[11px] font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap">
+                    <th className="h-11 px-4 font-mono text-micro font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap">
                       Fecha
                     </th>
-                    <th className="h-11 px-4 font-mono text-[11px] font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap">
+                    <th className="h-11 px-4 font-mono text-micro font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap">
                       Colaborador
                     </th>
-                    <th className="h-11 px-4 font-mono text-[11px] font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap">
+                    <th className="h-11 px-4 font-mono text-micro font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap">
                       Departamento
                     </th>
-                    <th className="w-28 h-11 px-4 font-mono text-[11px] font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap">
+                    <th className="w-28 h-11 px-4 font-mono text-micro font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap">
                       Entrega
                     </th>
-                    <th className="w-32 h-11 px-4 font-mono text-[11px] font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap">
+                    <th className="w-32 h-11 px-4 font-mono text-micro font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap">
                       Estado
                     </th>
-                    <th className="w-16 h-11 px-4 font-mono text-[11px] font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap text-right">
+                    <th className="w-28 h-11 px-4 font-mono text-micro font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap text-right">
                       Ver
                     </th>
                   </tr>
                 </thead>
                 <tbody className="font-body-md text-body-md text-on-surface">
                   {visibles.map((documento) => (
-                    <tr key={documento.id} data-reveal className="h-[72px] border-t border-outline-variant transition-colors duration-fast hover:bg-surface-container-low">
-                      <td className="px-4 py-4 font-mono text-[12px] text-on-surface-variant tabular-nums whitespace-nowrap">
+                    <tr key={documento.id} className="h-[72px] border-t border-outline-variant transition-colors duration-fast hover:bg-surface-container-low">
+                      <td className="px-4 py-4 font-mono text-meta text-on-surface-variant tabular-nums whitespace-nowrap">
                         {formatearFecha(documento.return_date)}
                       </td>
                       <td className="px-4 py-4 font-medium text-on-surface break-words">
@@ -201,11 +201,11 @@ function HistorialDevolucionList() {
                       <td className="px-4 py-4 text-on-surface-variant break-words">
                         {documento.employee_department || '—'}
                       </td>
-                      <td className="px-4 py-4 font-mono text-[12px] text-on-surface-variant tabular-nums">
+                      <td className="px-4 py-4 font-mono text-meta text-on-surface-variant tabular-nums">
                         #{documento.delivery_document_id}
                       </td>
                       <td className="px-4 py-4">
-                        <span className="inline-flex h-6 items-center gap-1.5 rounded-full border border-outline-variant bg-white px-2.5 text-[12px] font-medium text-on-surface whitespace-nowrap">
+                        <span className="inline-flex h-6 items-center gap-1.5 rounded-full border border-outline-variant bg-white px-2.5 text-meta font-medium text-on-surface whitespace-nowrap">
                           <span aria-hidden="true" className={`h-1.5 w-1.5 rounded-full ${puntoEstado(documento.delivery_document_status)}`} />
                           {nombreEstado(documento.delivery_document_status)}
                         </span>
@@ -247,11 +247,11 @@ function HistorialDevolucionList() {
                     <p className="font-body-md text-body-md font-semibold text-on-surface break-words">
                       {documento.employee_name || '—'}
                     </p>
-                    <p className="mt-1 font-mono text-[11px] leading-4 text-on-surface-variant break-words">
+                    <p className="mt-1 font-mono text-micro leading-4 text-on-surface-variant break-words">
                       {documento.employee_department || '—'} · Entrega #{documento.delivery_document_id}
                     </p>
                   </div>
-                  <span className="inline-flex h-6 shrink-0 items-center gap-1.5 rounded-full border border-outline-variant bg-white px-2.5 text-[12px] font-medium text-on-surface">
+                  <span className="inline-flex h-6 shrink-0 items-center gap-1.5 rounded-full border border-outline-variant bg-white px-2.5 text-meta font-medium text-on-surface">
                     <span aria-hidden="true" className={`h-1.5 w-1.5 rounded-full ${puntoEstado(documento.delivery_document_status)}`} />
                     {nombreEstado(documento.delivery_document_status)}
                   </span>
@@ -269,6 +269,7 @@ function HistorialDevolucionList() {
                 total={total}
                 plural="devoluciones"
                 onCambiar={irAPagina}
+                enPie
               />
             </div>
           )}

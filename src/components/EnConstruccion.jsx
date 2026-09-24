@@ -6,17 +6,21 @@
  *
  * Se retira cuando el endpoint correspondiente exista: en ese punto la
  * página vuelve a construirse contra la API real.
+ *
+ * `migas` (opcional, solo texto del eyebrow): ruta de la pantalla en formato
+ * "Sección / Subsección" (p. ej. "Historial / Préstamo"); se pinta en
+ * mayúsculas como en el resto de cabeceras.
  */
-function EnConstruccion({ icon: Icon, titulo, descripcion }) {
+function EnConstruccion({ icon: Icon, titulo, descripcion, migas = 'Legumex' }) {
   return (
-    <div className="flex-1 animate-view-in p-container-padding md:p-stack-lg">
+    <div className="flex-1 animate-view-in px-4 pt-6 pb-10 md:px-8 md:pt-10">
       <div className="max-w-[1200px] mx-auto flex flex-col gap-stack-lg">
         <div className="min-w-0">
           <div className="flex items-center gap-3 font-eyebrow text-eyebrow uppercase text-on-surface-variant">
             <span aria-hidden="true" className="h-px w-7 bg-outline" />
-            Legumex
+            {migas}
           </div>
-          <h1 className="mt-1.5 font-display-lg text-[26px] font-extrabold leading-[32px] tracking-[-0.04em] md:text-display-lg text-on-surface">{titulo}</h1>
+          <h1 className="mt-1.5 font-display-lg text-titulo-movil md:text-display-lg text-on-surface">{titulo}</h1>
         </div>
 
         <div className="animate-pop-in rounded-tarjeta bg-white px-6 py-16 shadow-tarjeta sm:px-10">

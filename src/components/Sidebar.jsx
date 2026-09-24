@@ -20,7 +20,7 @@ function NavItem({ to, icon: Icon, label, end, onNavigate }) {
       onClick={onNavigate}
       className={({ isActive }) =>
         [
-          'group flex h-11 items-center gap-2.5 rounded-[10px] px-2.5 font-body-md text-body-md',
+          'group flex h-11 items-center gap-2.5 rounded-menu px-2.5 font-body-md text-body-md',
           'transition-[transform,background-color,box-shadow,color] duration-fast ease-standard active:scale-[0.97]',
           isActive
             ? 'bg-surface-container-lowest font-medium text-on-surface shadow-tarjeta'
@@ -32,7 +32,7 @@ function NavItem({ to, icon: Icon, label, end, onNavigate }) {
         <>
           <Icon
             className={[
-              'h-[17px] w-[17px] shrink-0 transition-transform duration-base ease-rebote group-hover:scale-110',
+              'h-4.5 w-4.5 shrink-0 transition-transform duration-base ease-rebote group-hover:scale-110',
               isActive ? 'text-on-surface' : 'text-on-surface-variant group-hover:text-on-surface',
             ].join(' ')}
             strokeWidth={1.75}
@@ -101,7 +101,7 @@ function Sidebar({ abierto, onCerrar }) {
           <button
             onClick={onCerrar}
             aria-label="Cerrar menú"
-            className="grid h-11 w-11 shrink-0 place-items-center rounded-[10px] text-on-surface-variant transition-[transform,background-color] duration-fast ease-standard hover:bg-surface-container-lowest hover:text-on-surface active:scale-[0.90] active:bg-surface-container-high md:hidden"
+            className="grid h-11 w-11 shrink-0 place-items-center rounded-menu text-on-surface-variant transition-[transform,background-color] duration-fast ease-standard hover:bg-surface-container-lowest hover:text-on-surface active:scale-[0.90] active:bg-surface-container-high md:hidden"
           >
             <X className="h-5 w-5" strokeWidth={1.75} />
           </button>
@@ -127,7 +127,7 @@ function Sidebar({ abierto, onCerrar }) {
         {/* Tarjeta de perfil: usuario actual + cerrar sesión */}
         <div className="mt-auto flex flex-col gap-3 rounded-tarjeta bg-surface-container-lowest p-3 shadow-tarjeta">
           <div className="flex items-center gap-2 px-1">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-outline bg-surface-container-lowest text-[12px] font-semibold uppercase text-on-surface">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-outline bg-surface-container-lowest text-meta font-semibold uppercase text-on-surface">
               {user?.name?.charAt(0) ?? '?'}
             </div>
             <div className="min-w-0">
@@ -139,10 +139,10 @@ function Sidebar({ abierto, onCerrar }) {
           </div>
           <button
             onClick={handleLogout}
-            className="group flex h-10 w-full items-center justify-center gap-2 rounded-boton border border-outline-variant bg-surface-container-lowest px-3 font-body-md text-body-md font-medium text-on-surface transition-[transform,background-color] duration-fast ease-standard hover:bg-surface-container active:scale-[0.96] active:bg-surface-container-highest"
+            className="group flex h-10 w-full items-center justify-center gap-2 rounded-boton border border-outline-variant bg-surface-container-lowest px-3 font-body-md text-body-md font-medium text-on-surface transition-[transform,background-color] duration-fast ease-standard hover:bg-surface-container active:scale-[0.97] active:bg-surface-container-highest"
           >
             <LogOut
-              className="h-[17px] w-[17px] shrink-0 text-on-surface-variant transition-[transform,color] duration-base ease-standard group-hover:translate-x-[3px] group-hover:scale-110 group-hover:text-error"
+              className="h-4.5 w-4.5 shrink-0 text-on-surface-variant transition-[transform,color] duration-base ease-standard group-hover:translate-x-[3px] group-hover:scale-110 group-hover:text-on-surface"
               strokeWidth={1.75}
             />
             Cerrar Sesión

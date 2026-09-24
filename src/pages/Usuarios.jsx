@@ -114,15 +114,12 @@ function Usuarios() {
 
   const iconoActivo =
     'inline-flex h-9 w-9 items-center justify-center rounded-boton text-on-surface-variant transition duration-fast ease-standard hover:bg-surface-container hover:text-on-surface active:scale-[0.90]'
-  // "Editar" con texto, como en la tabla de usuarios del mockup.
-  const botonEditar =
-    'inline-flex h-8 items-center justify-center gap-1.5 rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]'
   // Avatar con iniciales: círculo blanco con filete, como el mockup.
   const avatar =
     'grid shrink-0 place-items-center rounded-full border border-outline bg-white font-semibold text-on-surface'
   const chipRol =
-    'inline-flex h-6 items-center gap-1.5 rounded-full border border-outline-variant bg-white px-2.5 text-[12px] font-medium text-on-surface whitespace-nowrap'
-  const th = 'h-11 px-4 font-mono text-[11px] font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap'
+    'inline-flex h-6 items-center gap-1.5 rounded-full border border-outline-variant bg-white px-2.5 text-meta font-medium text-on-surface whitespace-nowrap'
+  const th = 'h-11 px-4 font-mono text-micro font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap'
   const conteo =
     visibles.length === usuarios.length ? `${usuarios.length} usuarios` : `${visibles.length} de ${usuarios.length} usuarios`
 
@@ -131,22 +128,22 @@ function Usuarios() {
   }
 
   return (
-    <div className="animate-view-in flex-1 p-container-padding md:p-stack-lg">
+    <div className="animate-view-in flex-1 px-4 pt-6 pb-10 md:px-8 md:pt-10">
       <div className="max-w-[1200px] mx-auto flex flex-col gap-stack-lg">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
           <div className="min-w-0">
             <div className="flex items-center gap-3 font-eyebrow text-eyebrow uppercase text-on-surface-variant">
               <span aria-hidden="true" className="h-px w-7 bg-outline" />
-              Legumex / Usuarios
+              Usuarios
             </div>
-            <h1 className="mt-1.5 font-display-lg text-[26px] font-extrabold leading-[32px] tracking-[-0.04em] md:text-display-lg text-on-surface">Usuarios</h1>
+            <h1 className="mt-1.5 font-display-lg text-titulo-movil md:text-display-lg text-on-surface">Usuarios</h1>
             <p className="mt-1 font-body-lg text-body-lg text-on-surface-variant">
               Cuentas con acceso al sistema y su rol.
             </p>
           </div>
           <Link
             to="/usuarios/nuevo"
-            className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97]"
+            className="inline-flex h-10 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97]"
           >
             <Plus className="h-4 w-4" strokeWidth={1.75} />
             Nuevo usuario
@@ -169,7 +166,7 @@ function Usuarios() {
                 <tr className="bg-surface-container">
                   <th className={th}>Usuario</th>
                   <th className={`w-56 ${th}`}>Rol</th>
-                  <th className={`w-44 text-right ${th}`}>Acciones</th>
+                  <th className={`w-28 text-right ${th}`}>Acciones</th>
                 </tr>
               </thead>
               <tbody className="font-body-md text-body-md text-on-surface">
@@ -178,15 +175,14 @@ function Usuarios() {
                   return (
                     <tr
                       key={u.id}
-                      data-reveal
                       className="h-[72px] border-t border-outline-variant transition-colors duration-fast hover:bg-surface-container-low"
                     >
                       <td className="px-4 py-3">
                         <div className="flex min-w-0 items-center gap-3">
-                          <span className={`h-8 w-8 text-[12px] ${avatar}`}>{iniciales(u.name)}</span>
+                          <span className={`h-8 w-8 text-meta ${avatar}`}>{iniciales(u.name)}</span>
                           <div className="min-w-0">
                             <div className="font-medium text-on-surface truncate">{u.name}</div>
-                            <div className="font-mono text-[12px] text-on-surface-variant truncate">{u.username}</div>
+                            <div className="font-mono text-meta text-on-surface-variant truncate">{u.username}</div>
                           </div>
                         </div>
                       </td>
@@ -197,7 +193,7 @@ function Usuarios() {
                         </span>
                       </td>
                       <td className="px-4 py-3">
-                        <div className="flex items-center justify-end gap-1.5">
+                        <div className="flex items-center justify-end gap-1">
                           <button type="button" onClick={() => verUsuario(u)} aria-label={`Ver ${u.name}`} title="Ver" className={iconoActivo}>
                             <Eye className="h-4 w-4" strokeWidth={1.75} />
                           </button>
@@ -206,10 +202,9 @@ function Usuarios() {
                             onClick={() => setConfirmando(u)}
                             aria-label={`Editar ${u.name}`}
                             title="Editar"
-                            className={botonEditar}
+                            className={iconoActivo}
                           >
-                            <Pencil className="h-3.5 w-3.5" strokeWidth={1.75} />
-                            <span aria-hidden="true">Editar</span>
+                            <Pencil className="h-4 w-4" strokeWidth={1.75} />
                           </button>
                         </div>
                       </td>
@@ -220,7 +215,7 @@ function Usuarios() {
             </table>
             </div>
             {/* Pie de la tabla, como el mockup: conteo en mono sobre gris. */}
-            <div className="flex h-12 items-center border-t border-outline-variant bg-surface-container px-4 font-mono text-[11px] uppercase tracking-[0.1em] text-on-surface-variant tabular-nums">
+            <div className="flex h-12 items-center border-t border-outline-variant bg-surface-container px-4 font-mono text-micro uppercase tracking-[0.1em] text-on-surface-variant tabular-nums">
               {conteo}
             </div>
             </>
@@ -244,10 +239,10 @@ function Usuarios() {
                   className="flex w-full items-center justify-between gap-3 rounded-tarjeta bg-white p-4 text-left shadow-tarjeta transition duration-fast ease-standard hover:bg-surface-container-low active:scale-[0.99]"
                 >
                   <div className="min-w-0 flex items-center gap-3">
-                    <span className={`h-10 w-10 text-[13px] ${avatar}`}>{iniciales(u.name)}</span>
+                    <span className={`h-10 w-10 text-meta ${avatar}`}>{iniciales(u.name)}</span>
                     <div className="min-w-0">
                       <p className="font-body-md text-body-md font-semibold text-on-surface break-words">{u.name}</p>
-                      <p className="font-mono text-[12px] text-on-surface-variant break-all">{u.username}</p>
+                      <p className="font-mono text-meta text-on-surface-variant break-all">{u.username}</p>
                     </div>
                   </div>
                   <span className={`shrink-0 ${chipRol}`}>
@@ -261,7 +256,7 @@ function Usuarios() {
         </div>
 
         {!cargando && !sinContenido && (
-          <p className="md:hidden px-1 font-mono text-[11px] uppercase tracking-[0.1em] text-on-surface-variant tabular-nums">
+          <p className="md:hidden px-1 font-mono text-micro uppercase tracking-[0.1em] text-on-surface-variant tabular-nums">
             {conteo}
           </p>
         )}

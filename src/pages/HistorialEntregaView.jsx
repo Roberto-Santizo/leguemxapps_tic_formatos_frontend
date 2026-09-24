@@ -248,16 +248,16 @@ function HistorialEntregaView() {
   }
 
   return (
-    <div className="flex-1 animate-view-in">
+    <div className="flex-1 [&+footer]:pb-[calc(136px+env(safe-area-inset-bottom))] md:[&+footer]:pb-[88px]">
       {/* El ref del PDF NO envuelve el botón "volver": antes la captura lo
           incluía y el acta descargada salía con una flecha de navegación
           impresa. Ahora arranca en el membrete. */}
-      <div className="p-container-padding md:p-8">
-        <div className="mx-auto max-w-4xl space-y-stack-lg pb-4">
-          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+      <div className="px-4 pt-6 pb-10 md:px-8 md:pt-10">
+        <div className="mx-auto max-w-4xl animate-view-in space-y-stack-lg">
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-5">
             <Link
               to="/historial/entrega"
-              className="inline-flex h-9 items-center gap-2 rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface shadow-sm transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
+              className="inline-flex h-9 items-center gap-2 rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
             >
               <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={1.75} />
               Entrega de Equipo
@@ -281,7 +281,7 @@ function HistorialEntregaView() {
                 accion={
                   <Link
                     to="/historial/entrega"
-                    className="inline-flex h-10 items-center justify-center gap-2 rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface shadow-sm transition duration-fast ease-standard hover:bg-surface-container disabled:opacity-50 active:scale-[0.97]"
+                    className="inline-flex h-10 items-center justify-center gap-2 rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface shadow-sm transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
                   >
                     Volver al historial
                   </Link>
@@ -700,13 +700,13 @@ function HistorialEntregaView() {
       </div>
 
       {!cargando && !error && documento && (
-        <div className="sticky bottom-0 z-30 bg-papel-velo px-container-padding py-3 shadow-barra-inferior backdrop-blur-md md:px-8">
-          <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-end gap-3">
+        <div className="fixed inset-x-0 bottom-0 z-30 bg-papel px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-barra-inferior md:left-drawer-width md:overflow-hidden md:bg-papel-velo md:px-8 md:pb-3 md:backdrop-blur-md md:[scrollbar-gutter:stable]">
+          <div className="mx-auto grid max-w-4xl grid-cols-2 gap-2 md:flex md:flex-wrap md:items-center md:justify-end md:gap-3">
             {isAdmin && documento.items?.some((it) => !it.returned) && (
               <button
                 type="button"
                 onClick={() => navigate(`/historial/entrega/${id}/devolucion`)}
-                className="inline-flex h-10 items-center justify-center gap-2 rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface shadow-sm transition duration-fast ease-standard hover:bg-surface-container disabled:opacity-50 active:scale-[0.97]"
+                className="col-span-2 inline-flex h-10 w-full items-center justify-center gap-2 whitespace-nowrap rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface shadow-sm transition duration-fast ease-standard hover:bg-surface-container disabled:opacity-50 active:scale-[0.97] md:w-auto"
               >
                 <Undo2 className="h-4 w-4" strokeWidth={1.75} />
                 Registrar devolución
@@ -716,7 +716,7 @@ function HistorialEntregaView() {
               type="button"
               onClick={handleDescargarPdf}
               disabled={generandoPdf}
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover disabled:opacity-50 active:scale-[0.97]"
+              className="inline-flex h-10 w-full items-center justify-center gap-2 whitespace-nowrap rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover disabled:opacity-50 active:scale-[0.97] only:col-span-2 md:w-auto"
             >
               {generandoPdf ? (
                 <Loader2 className="h-4 w-4 animate-spin" strokeWidth={1.75} />
@@ -729,7 +729,7 @@ function HistorialEntregaView() {
               <button
                 type="button"
                 onClick={() => setEliminando(true)}
-                className="inline-flex h-10 items-center justify-center gap-2 rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-error shadow-sm transition duration-fast ease-standard hover:bg-error-container/60 active:scale-[0.97]"
+                className="inline-flex h-10 w-full items-center justify-center gap-2 whitespace-nowrap rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-error shadow-sm transition duration-fast ease-standard hover:bg-error-container/60 active:scale-[0.97] md:w-auto"
               >
                 <Trash2 className="h-4 w-4" strokeWidth={1.75} />
                 Eliminar

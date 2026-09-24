@@ -144,23 +144,23 @@ function HistorialEntregaList() {
   }
 
   return (
-    <div className="animate-view-in flex-1 p-container-padding md:p-stack-lg">
+    <div className="flex-1 animate-view-in px-4 pt-6 pb-10 md:px-8 md:pt-10">
       <div className="max-w-[1200px] mx-auto flex flex-col gap-stack-lg">
         <Link
           to="/historial"
-          className="inline-flex h-9 items-center gap-2 self-start rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface shadow-sm transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
+          className="inline-flex h-9 items-center gap-2 self-start rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
         >
           <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={1.75} />
           Historial de Actas
         </Link>
 
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+        <div className="-mt-1 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end md:mt-0">
           <div className="min-w-0">
             <div className="flex items-center gap-3 font-eyebrow text-eyebrow uppercase text-on-surface-variant">
               <span aria-hidden="true" className="h-px w-7 bg-outline" />
               Historial / Entrega
             </div>
-            <h1 className="mt-1.5 font-display-lg text-[26px] leading-[32px] font-extrabold tracking-[-0.04em] text-on-surface md:text-display-lg">
+            <h1 className="mt-1.5 font-display-lg text-titulo-movil text-on-surface md:text-display-lg">
               Entrega de Equipo
             </h1>
             <p className="mt-1 font-body-lg text-body-lg text-on-surface-variant">
@@ -170,7 +170,7 @@ function HistorialEntregaList() {
           {isAdmin && (
             <Link
               to="/actas/entrega/nueva"
-              className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97]"
+              className="inline-flex h-10 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97]"
             >
               <Plus className="h-4 w-4" strokeWidth={1.75} />
               Registrar entrega
@@ -194,30 +194,30 @@ function HistorialEntregaList() {
               <table className="w-full min-w-[720px] text-left border-collapse">
                 <thead>
                   <tr className="bg-surface-container">
-                    <th className="h-11 px-4 font-mono text-[11px] font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap">
+                    <th className="h-11 px-4 font-mono text-micro font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap">
                       Fecha
                     </th>
-                    <th className="h-11 px-4 font-mono text-[11px] font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap">
+                    <th className="h-11 px-4 font-mono text-micro font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap">
                       Colaborador
                     </th>
-                    <th className="h-11 px-4 font-mono text-[11px] font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap">
+                    <th className="h-11 px-4 font-mono text-micro font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap">
                       Departamento
                     </th>
-                    <th className="h-11 px-4 font-mono text-[11px] font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap">
+                    <th className="h-11 px-4 font-mono text-micro font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap">
                       Planta
                     </th>
-                    <th className="w-28 h-11 px-4 font-mono text-[11px] font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap">
+                    <th className="w-28 h-11 px-4 font-mono text-micro font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap">
                       Equipos
                     </th>
-                    <th className="w-28 h-11 px-4 font-mono text-[11px] font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap text-right">
+                    <th className="w-28 h-11 px-4 font-mono text-micro font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap text-right">
                       Acciones
                     </th>
                   </tr>
                 </thead>
                 <tbody className="font-body-md text-body-md text-on-surface">
                   {visibles.map((documento) => (
-                    <tr key={documento.id} data-reveal className="h-[72px] border-t border-outline-variant transition-colors duration-fast hover:bg-surface-container-low">
-                      <td className="px-4 py-4 font-mono text-[12px] text-on-surface-variant tabular-nums whitespace-nowrap">
+                    <tr key={documento.id} className="h-[72px] border-t border-outline-variant transition-colors duration-fast hover:bg-surface-container-low">
+                      <td className="px-4 py-4 font-mono text-meta text-on-surface-variant tabular-nums whitespace-nowrap">
                         {formatearFecha(documento.delivery_date)}
                       </td>
                       <td className="px-4 py-4 font-medium text-on-surface break-words">
@@ -229,7 +229,7 @@ function HistorialEntregaList() {
                       <td className="px-4 py-4 text-on-surface-variant whitespace-nowrap">
                         {nombrePlanta(documento.location)}
                       </td>
-                      <td className="px-4 py-4 font-mono text-[12px] text-on-surface-variant tabular-nums">
+                      <td className="px-4 py-4 font-mono text-meta text-on-surface-variant tabular-nums">
                         {Array.isArray(documento.items) ? documento.items.length : 0}
                       </td>
                       <td className="px-4 py-4">
@@ -282,7 +282,7 @@ function HistorialEntregaList() {
                     <p className="font-body-md text-body-md font-semibold text-on-surface break-words">
                       {documento.employee_name || '—'}
                     </p>
-                    <p className="mt-1 font-mono text-[11px] leading-4 text-on-surface-variant break-words">
+                    <p className="mt-1 font-mono text-micro leading-4 text-on-surface-variant break-words">
                       {nombrePlanta(documento.location)} · {Array.isArray(documento.items) ? documento.items.length : 0} equipo(s)
                     </p>
                   </div>
@@ -300,6 +300,7 @@ function HistorialEntregaList() {
                 total={total}
                 plural="entregas"
                 onCambiar={irAPagina}
+                enPie
               />
             </div>
           )}

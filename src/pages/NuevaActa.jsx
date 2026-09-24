@@ -20,14 +20,14 @@ function rutaDeFormato(formato) {
  */
 function NuevaActa() {
   return (
-    <div className="flex-1 animate-view-in p-container-padding md:p-stack-lg">
+    <div className="flex-1 animate-view-in px-4 pt-6 pb-10 md:px-8 md:pt-10">
       <div className="max-w-[1200px] mx-auto flex flex-col gap-stack-lg">
         <div>
           <div className="flex items-center gap-3 font-eyebrow text-eyebrow uppercase text-on-surface-variant">
             <span aria-hidden="true" className="h-px w-7 bg-outline" />
             Actas / Nueva
           </div>
-          <h1 className="mt-1.5 font-display-lg text-[26px] leading-[32px] font-extrabold tracking-[-0.04em] text-on-surface md:text-display-lg">
+          <h1 className="mt-1.5 font-display-lg text-titulo-movil text-on-surface md:text-display-lg">
             Nueva Acta
           </h1>
           <p className="mt-1 max-w-3xl font-body-lg text-body-lg text-pretty text-on-surface-variant">
@@ -56,7 +56,7 @@ function NuevaActa() {
                   <div className="grid h-14 w-14 shrink-0 place-items-center rounded-xl bg-surface-container-high text-on-surface transition-colors duration-base ease-standard group-hover:bg-surface-container-highest">
                     <Icon className="h-6 w-6" strokeWidth={1.75} />
                   </div>
-                  <span className="inline-flex h-6 items-center rounded-full border border-outline-variant bg-white px-2.5 font-mono text-[11px] tracking-[0.1em] text-on-surface-variant">
+                  <span className="inline-flex h-6 items-center rounded-full border border-outline-variant bg-white px-2.5 font-mono text-micro tracking-[0.1em] text-on-surface-variant">
                     {formato.codigo}
                   </span>
                 </div>
@@ -71,7 +71,7 @@ function NuevaActa() {
                 </div>
 
                 <div className="mt-auto flex items-center justify-between gap-2 border-t border-outline-variant pt-3">
-                  <span className="font-mono text-[11px] uppercase tracking-[0.04em] text-on-surface-variant sm:tracking-[0.1em]">
+                  <span className="font-mono text-micro uppercase tracking-[0.04em] text-on-surface-variant sm:tracking-[0.1em]">
                     {formato.meta}
                   </span>
                   <ChevronRight

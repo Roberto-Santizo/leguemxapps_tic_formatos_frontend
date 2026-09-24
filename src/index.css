@@ -8,15 +8,10 @@
    Los colores y demás tokens viven en tailwind.config.js. */
 
 :root {
-  --duration-fast: 150ms;
-  --duration-base: 200ms;
+  /* Solo las dos que usa el CSS de abajo; el resto de tiempos, curvas y
+     colores son tokens de tailwind.config.js (duration-*, ease-*, papel...). */
   --duration-page: 280ms;
   --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
-  --ease-salida: cubic-bezier(0.22, 1, 0.36, 1);
-  --ease-rebote: cubic-bezier(0.34, 1.56, 0.64, 1);
-  --papel: #f4f5f1;
-  --tinta: #171717;
-  --foco: #2563eb;
 }
 
 html,
@@ -39,12 +34,45 @@ textarea::placeholder {
   color: #737373;
 }
 
-/* Anillo de foco del mockup: azul 2px con separación de 2px, en todo
-   elemento interactivo navegado con teclado. */
-:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+/* ── Foco: UN solo indicador por tipo de elemento ──────────────────────
+   - Botones, enlaces, tarjetas clicables, etc.: anillo azul 2px con 2px de
+     separación en :focus-visible. `outline` sigue el radio propio del
+     elemento, así que no se fuerza border-radius (una tarjeta de 16px
+     conserva su anillo redondo).
+   - Campos de texto, select y textarea: el navegador los marca como
+     :focus-visible también con el mouse, así que no llevan anillo: el borde
+     pasa a tinta y un filete de 1px por dentro de la sombra lo engrosa a
+     2px (como el mockup). Reemplaza el borde + anillo azules que pone
+     @tailwindcss/forms. Las pantallas NO ponen clases de foco propias en
+     sus inputs; las que las traen (la hoja de papel) siguen ganando porque
+     las utilidades van después de la capa base. */
+:where(a, button, summary, [tabindex], [role='button']):focus-visible {
   outline: 2px solid #2563eb;
   outline-offset: 2px;
-  border-radius: 0.375rem;
+}
+
+@layer base {
+  [type='text']:focus,
+  input:where(:not([type])):focus,
+  [type='email']:focus,
+  [type='url']:focus,
+  [type='password']:focus,
+  [type='number']:focus,
+  [type='date']:focus,
+  [type='datetime-local']:focus,
+  [type='month']:focus,
+  [type='search']:focus,
+  [type='tel']:focus,
+  [type='time']:focus,
+  [type='week']:focus,
+  [multiple]:focus,
+  textarea:focus,
+  select:focus {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    border-color: #171717;
+    box-shadow: 0 0 0 1px #171717;
+  }
 }
 
 /* Scrollbars finas y neutras, acordes al papel. */
@@ -69,16 +97,12 @@ textarea::placeholder {
   background: #a3a3a3;
   background-clip: padding-box;
 }
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
 
 /* ── Contenedor principal sobre la cordillera ──────────────────────────
    AppLayout pinta la sierra fija al pie y el <main data-sheet> scrollea por
-   encima, transparente. Varias pantallas traen su raíz con `bg-background`
-   (papel opaco) que taparía la montaña: aquí se vuelve transparente SOLO para
-   la raíz directa de cada pantalla -- el papel lo pone el body/AppLayout,
-   así que el color de fondo visible es el mismo. */
+   encima, transparente. RESPALDO: ninguna pantalla trae hoy su raíz con
+   `bg-background` (papel opaco), pero si una nueva lo hace taparía la
+   montaña; aquí se vuelve transparente solo la raíz directa. */
 main[data-sheet] > .bg-background {
   background-color: transparent;
 }
@@ -86,11 +110,11 @@ main[data-sheet] > .bg-background {
 /* ── Transición de entrada de pantalla ─────────────────────────────────
    `animate-view-in` la usan casi todas las vistas (y filas/tarjetas nuevas).
    Se conserva el nombre de la clase, pero con la curva y duración del mockup
-   (pageIn: 12px hacia arriba, 280ms, curva estándar). */
+   (pageIn: 8px hacia arriba, 280ms, curva estándar). */
 @keyframes viewIn {
   from {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(8px);
   }
   /* Termina en `none` (no en translateY(0)): con fill-mode `both` un transform
      residual convierte la raíz en contenedor de los hijos `position: fixed`
@@ -114,9 +138,11 @@ main[data-sheet] > .bg-background {
     opacity: 0;
     translate: 0 18px;
   }
+  /* `none` y no `0 0`: igual que viewIn, un translate residual atraparía a
+     los hijos position: fixed. */
   to {
     opacity: 1;
-    translate: 0 0;
+    translate: none;
   }
 }
 @supports (animation-timeline: view()) {
@@ -526,8 +552,7 @@ main[data-sheet] > .bg-background {
   transition: border-color 300ms ease, box-shadow 300ms ease;
 }
 .lg-input::placeholder { color: #737373; }
-.lg-input:focus { outline: none; border-color: #000000; box-shadow: none; }
-.lg-input:focus-visible { outline: 2px solid #2563eb; outline-offset: 2px; }
+.lg-input:focus { outline: none; border-color: #000000; box-shadow: 0 0 0 1px #000000; }
 .lg-input-pwd { padding-right: 46px; }
 .lg-ok .lg-input {
   border-color: var(--lg-exito);

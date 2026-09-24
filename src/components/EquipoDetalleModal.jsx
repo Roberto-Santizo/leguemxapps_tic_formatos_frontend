@@ -114,7 +114,7 @@ function EquipoDetalleModal({ equipoId, onCerrar }) {
 
   const dato = (label, valor) => (
     <div className="min-w-0">
-      <p className="mb-1 font-mono text-[11px] uppercase leading-4 tracking-[0.1em] text-on-surface-variant">{label}</p>
+      <p className="mb-1 font-mono text-micro uppercase leading-4 tracking-[0.1em] text-on-surface-variant">{label}</p>
       <p className="break-words font-body-md text-body-md font-medium text-on-surface">{valor}</p>
     </div>
   )
@@ -210,7 +210,7 @@ function EquipoDetalleModal({ equipoId, onCerrar }) {
                     del aparato, así que se le da el lugar de la placa: mono,
                     grande, en su propia franja. */}
                 <div className="mx-6 mt-5 rounded-xl bg-surface-container-high px-4 py-3">
-                  <p className="mb-1 font-mono text-[11px] uppercase leading-4 tracking-[0.1em] text-on-surface-variant">
+                  <p className="mb-1 font-mono text-micro uppercase leading-4 tracking-[0.1em] text-on-surface-variant">
                     Serie
                   </p>
                   <p className="break-all font-mono text-headline-md font-medium uppercase tracking-[0.06em] text-on-surface">
@@ -225,7 +225,7 @@ function EquipoDetalleModal({ equipoId, onCerrar }) {
                 </div>
 
                 <div className="px-6 py-4">
-                  <p className="mb-2 font-mono text-[11px] uppercase leading-4 tracking-[0.1em] text-on-surface-variant">
+                  <p className="mb-2 font-mono text-micro uppercase leading-4 tracking-[0.1em] text-on-surface-variant">
                     {caracteristicas.length > 0 ? `Características (${caracteristicas.length})` : 'Características'}
                   </p>
                   {caracteristicas.length === 0 ? (

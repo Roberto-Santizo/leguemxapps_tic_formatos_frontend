@@ -44,7 +44,7 @@ function SierraFondo({ className = 'fixed inset-x-0 bottom-0 h-[clamp(240px,42vh
     <div aria-hidden="true" data-sierra data-no-print className={`pointer-events-none z-0 text-bosque ${className}`}>
       {CAPAS.map((capa) => (
         <div
-          key={capa.opacidad}
+          key={capa.deriva}
           className="absolute inset-0 overflow-hidden animate-sierra-rise"
           style={{ animationDelay: capa.retraso }}
         >

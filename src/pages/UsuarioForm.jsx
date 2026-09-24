@@ -17,10 +17,10 @@ import { obtenerUsuario, crearUsuario, editarUsuario } from '../services/api.js'
  */
 
 const inputClasses =
-  'h-10 w-full rounded-boton border border-outline-variant bg-white px-3 font-body-md text-[16px] md:text-body-md text-on-surface placeholder:text-on-surface-subtle transition duration-fast ease-standard hover:border-outline focus:border-on-surface focus:outline-none focus:ring-0 disabled:opacity-60'
+  'h-11 w-full rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-lg md:text-body-md text-on-surface placeholder:text-on-surface-subtle transition duration-fast ease-standard hover:[&:not(:focus)]:border-outline disabled:opacity-60'
 
 // Etiqueta de campo del mockup (12px, semibold).
-const labelClasses = 'text-[12px] font-semibold leading-4 text-on-surface'
+const labelClasses = 'text-meta font-semibold leading-4 text-on-surface'
 // Ojo de mostrar/ocultar contraseña, dentro del input.
 const ojoClasses =
   'absolute right-1 top-1/2 -translate-y-1/2 grid h-8 w-8 place-items-center rounded-boton text-on-surface-variant transition duration-fast ease-standard hover:bg-surface-container hover:text-on-surface disabled:opacity-50 active:scale-[0.90]'
@@ -111,22 +111,22 @@ function UsuarioForm() {
   }
 
   return (
-    <div className="animate-view-in flex-1 p-container-padding md:p-stack-lg">
-      <div className="max-w-[600px] mx-auto flex flex-col gap-stack-lg">
+    <div className="animate-view-in flex-1 px-4 pt-6 pb-10 md:px-8 md:pt-10">
+      <div className="max-w-[600px] ml-[max(0px,calc((100%_-_1200px)/2))] flex flex-col gap-stack-lg">
         <Link
           to="/usuarios"
-          className="inline-flex h-9 items-center gap-2 self-start rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface shadow-sm transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
+          className="inline-flex h-9 items-center gap-2 self-start rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
         >
           <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={1.75} />
           Usuarios
         </Link>
 
-        <div className="min-w-0">
+        <div className="-mt-1 md:mt-0 min-w-0">
           <div className="flex items-center gap-3 font-eyebrow text-eyebrow uppercase text-on-surface-variant">
             <span aria-hidden="true" className="h-px w-7 bg-outline" />
             {esEdicion ? 'Usuarios / Editar' : 'Usuarios / Nuevo'}
           </div>
-          <h1 className="mt-1.5 font-display-lg text-[26px] font-extrabold leading-[32px] tracking-[-0.04em] md:text-display-lg text-on-surface">
+          <h1 className="mt-1.5 font-display-lg text-titulo-movil md:text-display-lg text-on-surface">
             {esEdicion ? 'Editar usuario' : 'Nuevo usuario'}
           </h1>
         </div>
@@ -136,7 +136,7 @@ function UsuarioForm() {
         ) : (
           <form
             onSubmit={handleSubmit}
-            className="animate-pop-in flex flex-col gap-stack-lg rounded-tarjeta bg-white p-4 shadow-tarjeta sm:p-6"
+            className="flex flex-col gap-5 rounded-tarjeta bg-white p-4 shadow-tarjeta md:p-6"
           >
             <section className="flex flex-col gap-5">
               <div className="flex flex-col gap-2">
@@ -260,24 +260,25 @@ function UsuarioForm() {
             </section>
 
             {error && (
-              <p className="animate-pop-in rounded-xl bg-error-container/60 px-4 py-3 font-body-md text-body-md text-on-error-container">
+              <p className="animate-hint-in font-label-sm text-label-sm text-error rounded-boton border border-error/30 bg-error-container/40 px-3 py-2">
                 {error}
               </p>
             )}
 
-            {/* Como el formulario del mockup: filete y acciones al pie de la
-                tarjeta, el primario negro primero (a la izquierda). */}
-            <div className="flex flex-col-reverse gap-2.5 border-t border-outline-variant pt-5 sm:flex-row-reverse sm:justify-end">
+            {/* Fila de botones: filete arriba y, como antes del rediseño,
+                Cancelar + primario alineados a la derecha (en móvil el
+                primario queda arriba, a todo lo ancho). */}
+            <div className="flex flex-col-reverse gap-3 border-t border-outline-variant pt-5 sm:flex-row sm:justify-end">
               <Link
                 to="/usuarios"
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
+                className="inline-flex h-10 items-center justify-center gap-2 rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
               >
                 Cancelar
               </Link>
               <button
                 type="submit"
                 disabled={guardando || !completo}
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-boton bg-tinta px-5 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97] disabled:opacity-50 disabled:hover:bg-tinta disabled:active:scale-100"
+                className="inline-flex h-10 items-center justify-center gap-2 rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97] disabled:opacity-50 disabled:hover:bg-tinta disabled:active:scale-100"
               >
                 {guardando ? <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} /> : <Save className="h-4 w-4" strokeWidth={1.75} />}
                 {esEdicion ? 'Guardar cambios' : 'Crear usuario'}

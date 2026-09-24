@@ -116,6 +116,8 @@ export default {
         full: '9999px',
         boton: '8px', // botones e inputs del mockup
         tarjeta: '16px', // tarjetas y paneles blancos
+        menu: '10px', // ítems del menú lateral y botón de la barra móvil
+        aviso: '22px', // pastilla del Toast
       },
       boxShadow: {
         sm: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
@@ -124,6 +126,10 @@ export default {
         lg: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
         // Tarjeta blanca del mockup: sombra corta + filete de 1px en vez de borde.
         tarjeta: '0 1px 2px rgba(0, 0, 0, 0.06), 0 0 0 1px #e5e5e5',
+        // Variantes del filete para cajas sin borde propio (Buscador): hover
+        // gris medio y foco en tinta de 2px (mismo grosor que los inputs).
+        'tarjeta-hover': '0 1px 2px rgba(0, 0, 0, 0.06), 0 0 0 1px #a3a3a3',
+        'tarjeta-foco': '0 1px 2px rgba(0, 0, 0, 0.06), 0 0 0 2px #171717',
         // Paneles flotantes (menús, avisos, cajón móvil) con la sombra verde larga.
         flotante: '0 1px 2px rgba(0, 0, 0, 0.06), 0 0 0 1px #e5e5e5, 0 24px 48px -24px rgba(11, 42, 30, 0.3)',
         modal: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1)',
@@ -166,6 +172,17 @@ export default {
         'label-bold': ['12px', { lineHeight: '16px', fontWeight: '700' }],
         // Eyebrow / encabezado de tabla / contador: mono 11px en mayúsculas.
         eyebrow: ['11px', { lineHeight: '16px', letterSpacing: '0.12em', fontWeight: '400' }],
+        // Tamaños sueltos que antes iban como text-[12px] / text-[11px] / text-[26px]:
+        //  - meta: metadatos, labels de formulario, códigos en tabla (12px).
+        //  - micro: etiquetas mono de tabla/paginador/chips (11px); el tracking se
+        //    combina aparte: `font-mono text-micro tracking-[0.1em] uppercase`.
+        //  - titulo-movil: título de pantalla en móvil (26px / 800 / -0.04em);
+        //    en escritorio sigue `md:text-display-lg`.
+        meta: ['12px', { lineHeight: '16px' }],
+        micro: ['11px', { lineHeight: '14px' }],
+        // Inputs en móvil: 16px evita el zoom automático de iOS al enfocar.
+        'input-movil': ['16px', { lineHeight: '24px' }],
+        'titulo-movil': ['26px', { lineHeight: '30px', letterSpacing: '-0.04em', fontWeight: '800' }],
       },
       transitionDuration: {
         fast: '150ms',
@@ -177,52 +194,38 @@ export default {
         salida: 'cubic-bezier(0.22, 1, 0.36, 1)',
         rebote: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
       },
+      // Solo los keyframes que usa alguna pantalla (el resto del catálogo del
+      // mockup -- modalIn/Out, dockIn, numBump... -- se podó por no tener uso).
       keyframes: {
-        pageIn: { from: { opacity: '0', transform: 'translateY(12px)' }, to: { opacity: '1', transform: 'none' } },
-        pageInFwd: { from: { opacity: '0', transform: 'translate(18px, 6px)' }, to: { opacity: '1', transform: 'none' } },
-        pageInBack: { from: { opacity: '0', transform: 'translate(-18px, 6px)' }, to: { opacity: '1', transform: 'none' } },
+        pageIn: { from: { opacity: '0', transform: 'translateY(8px)' }, to: { opacity: '1', transform: 'none' } },
         popIn: { from: { opacity: '0', transform: 'translateY(6px)' }, to: { opacity: '1', transform: 'none' } },
         dropIn: { from: { opacity: '0', transform: 'translateY(-4px)' }, to: { opacity: '1', transform: 'none' } },
         hintIn: { from: { opacity: '0', transform: 'translateY(-3px)' }, to: { opacity: '1', transform: 'none' } },
-        modalIn: { from: { opacity: '0', transform: 'scale(0.95)' }, to: { opacity: '1', transform: 'none' } },
-        modalOut: { from: { opacity: '1', transform: 'scale(1)' }, to: { opacity: '0', transform: 'scale(0.95)' } },
         overlayIn: { from: { opacity: '0' }, to: { opacity: '1' } },
-        overlayOut: { from: { opacity: '1' }, to: { opacity: '0' } },
         toastIn: { from: { opacity: '0', transform: 'translate(24px, -16px)' }, to: { opacity: '1', transform: 'none' } },
-        toastOut: { from: { opacity: '1' }, to: { opacity: '0' } },
-        dockIn: { from: { opacity: '0', transform: 'translateY(16px) scale(0.98)' }, to: { opacity: '1', transform: 'none' } },
+        toastInAbajo: { from: { opacity: '0', transform: 'translateY(16px)' }, to: { opacity: '1', transform: 'none' } },
         cardRise: { from: { opacity: '0', transform: 'translateY(24px) scale(0.98)' }, to: { opacity: '1', transform: 'none' } },
         badgePop: {
           '0%': { transform: 'scale(0.4)', opacity: '0' },
           '60%': { transform: 'scale(1.08)', opacity: '1' },
-          '100%': { transform: 'scale(1)', opacity: '1' },
+          '100%': { transform: 'none', opacity: '1' },
         },
-        iconPop: { '0%': { transform: 'scale(1)' }, '45%': { transform: 'scale(1.22)' }, '100%': { transform: 'scale(1)' } },
-        checkDraw: { from: { strokeDashoffset: '26' }, to: { strokeDashoffset: '0' } },
+        iconPop: { '0%': { transform: 'scale(1)' }, '45%': { transform: 'scale(1.22)' }, '100%': { transform: 'none' } },
         shimmer: { '0%': { backgroundPosition: '100% 0' }, '100%': { backgroundPosition: '-100% 0' } },
-        numBump: { '0%': { transform: 'translateY(-4px)', opacity: '0' }, '100%': { transform: 'translateY(0)', opacity: '1' } },
-        sierraRise: { from: { transform: 'translateY(28px)', opacity: '0' }, to: { transform: 'translateY(0)', opacity: '1' } },
+        sierraRise: { from: { transform: 'translateY(28px)', opacity: '0' }, to: { transform: 'none', opacity: '1' } },
         sierraDrift: { from: { transform: 'translateX(0)' }, to: { transform: 'translateX(-50%)' } },
       },
       animation: {
         'page-in': 'pageIn 280ms cubic-bezier(0.4, 0, 0.2, 1) both',
-        'page-in-fwd': 'pageInFwd 280ms cubic-bezier(0.4, 0, 0.2, 1) both',
-        'page-in-back': 'pageInBack 280ms cubic-bezier(0.4, 0, 0.2, 1) both',
         'pop-in': 'popIn 200ms cubic-bezier(0.4, 0, 0.2, 1) both',
         'drop-in': 'dropIn 150ms cubic-bezier(0.4, 0, 0.2, 1) both',
         'hint-in': 'hintIn 150ms cubic-bezier(0.4, 0, 0.2, 1) both',
-        'modal-in': 'modalIn 200ms cubic-bezier(0.4, 0, 0.2, 1) both',
-        'modal-out': 'modalOut 150ms cubic-bezier(0.4, 0, 0.2, 1) both',
         'overlay-in': 'overlayIn 200ms cubic-bezier(0.4, 0, 0.2, 1) both',
-        'overlay-out': 'overlayOut 150ms cubic-bezier(0.4, 0, 0.2, 1) both',
         'toast-in': 'toastIn 280ms cubic-bezier(0.22, 1, 0.36, 1) both',
-        'toast-out': 'toastOut 150ms cubic-bezier(0.4, 0, 0.2, 1) both',
-        'dock-in': 'dockIn 220ms cubic-bezier(0.22, 1, 0.36, 1) both',
+        'toast-in-abajo': 'toastInAbajo 280ms cubic-bezier(0.22, 1, 0.36, 1) both',
         'card-rise': 'cardRise 600ms cubic-bezier(0.22, 1, 0.36, 1) both',
         'badge-pop': 'badgePop 360ms cubic-bezier(0.34, 1.56, 0.64, 1) both',
         'icon-pop': 'iconPop 420ms cubic-bezier(0.4, 0, 0.2, 1) both',
-        'check-draw': 'checkDraw 420ms cubic-bezier(0.4, 0, 0.2, 1) both',
-        'num-bump': 'numBump 200ms cubic-bezier(0.4, 0, 0.2, 1) both',
         shimmer: 'shimmer 1.4s linear infinite',
         'sierra-rise': 'sierraRise 1200ms cubic-bezier(0.22, 1, 0.36, 1) both',
         'sierra-lenta': 'sierraDrift 120s linear infinite',
