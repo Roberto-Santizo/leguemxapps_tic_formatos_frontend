@@ -19,8 +19,8 @@ import {
   CaracteristicasDeEquipo,
   hayNombreRepetido,
 } from '../components/CaracteristicasEditor.jsx'
-
 import IsotipoCarga from '../components/IsotipoCarga.jsx'
+import EsperaLogo from '../components/EsperaLogo.jsx'
 /**
  * Alta y edición de un equipo (POST /equipments, PUT /equipments/{id}).
  *
@@ -483,6 +483,8 @@ function EquipoForm() {
           </form>
         )}
       </div>
+
+      <EsperaLogo activa={guardando} mensaje={esEdicion ? 'Guardando cambios…' : 'Creando registro…'} />
     </div>
   )
 }

@@ -23,7 +23,6 @@ import ConfirmDialog from '../components/ConfirmDialog.jsx'
 import EquipoDetalleModal from '../components/EquipoDetalleModal.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
 import { listarEmpleados, listarDepartamentos, listarEquiposDisponibles, crearDocumentoEntrega } from '../services/api.js'
-
 import IsotipoCarga from '../components/IsotipoCarga.jsx'
 import EsperaLogo from '../components/EsperaLogo.jsx'
 import ActaRegistrada from '../components/ActaRegistrada.jsx'
@@ -1258,7 +1257,7 @@ function FormatoActa() {
 
       {esEntrega && <EquipoDetalleModal equipoId={equipoDetalleId} onCerrar={() => setEquipoDetalleId('')} />}
 
-      {esEntrega && guardando && <EsperaLogo mensaje="Guardando entrega…" />}
+      {esEntrega && !entregaLista && <EsperaLogo activa={guardando} mensaje="Guardando entrega…" />}
       {entregaLista && (
         <ActaRegistrada
           codigo={`${formato.codigo || 'E-EQUIPO'} · REGISTRADA`}

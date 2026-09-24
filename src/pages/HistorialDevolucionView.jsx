@@ -35,7 +35,6 @@ import { constanciaDevolucion } from '../utils/fecha.js'
 import useFechaLocal from '../hooks/useFechaLocal.js'
 import { esExtravio, textoSinPrefijoExtravio, marcarExtravio } from '../utils/extravio.js'
 import { construirHtmlDevolucion } from '../pdf/plantillaDevolucion.js'
-
 import IsotipoCarga from '../components/IsotipoCarga.jsx'
 import EsperaLogo from '../components/EsperaLogo.jsx'
 const formato = FORMATOS.devolucion
@@ -657,7 +656,7 @@ function HistorialDevolucionView() {
         </div>
       )}
 
-      {generandoPdf && <EsperaLogo mensaje="Generando PDF…" />}
+      <EsperaLogo activa={generandoPdf} mensaje="Generando PDF…" />
     </div>
   )
 }

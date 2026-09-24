@@ -4,8 +4,8 @@ import { ArrowLeft, Save } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 import { mostrarToast } from './Toast.jsx'
 import { SkeletonFormulario } from './Skeleton.jsx'
-
 import IsotipoCarga from './IsotipoCarga.jsx'
+import EsperaLogo from './EsperaLogo.jsx'
 // Recetas visuales "Sierra" (BRIEF, ola 2), repetidas a propósito en cada
 // pantalla en vez de un componente de botón/campo genérico.
 const inputClasses =
@@ -146,6 +146,8 @@ function CatalogoFormPage({ textos, onObtener, onCrear, onActualizar, rutaBase }
           </form>
         )}
       </div>
+
+      <EsperaLogo activa={guardando} mensaje={esEdicion ? 'Guardando cambios…' : 'Creando registro…'} />
     </div>
   )
 }

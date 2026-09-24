@@ -5,8 +5,8 @@ import { useAuth } from '../context/AuthContext.jsx'
 import { mostrarToast } from '../components/Toast.jsx'
 import { SkeletonFormulario } from '../components/Skeleton.jsx'
 import { obtenerUsuario, crearUsuario, editarUsuario } from '../services/api.js'
-
 import IsotipoCarga from '../components/IsotipoCarga.jsx'
+import EsperaLogo from '../components/EsperaLogo.jsx'
 /**
  * Alta y edición de un usuario (POST /users, PUT /users/{id}), mismo patrón
  * que EmpleadoForm.jsx: un solo formulario para ambos casos, según si hay
@@ -288,6 +288,8 @@ function UsuarioForm() {
           </form>
         )}
       </div>
+
+      <EsperaLogo activa={guardando} mensaje={esEdicion ? 'Guardando cambios…' : 'Creando registro…'} />
     </div>
   )
 }

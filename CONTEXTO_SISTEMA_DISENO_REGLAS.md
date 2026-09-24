@@ -280,10 +280,18 @@ nunca escribir un componente de página nuevo para eso.
     sobre botón negro, `tono="tinta"` sobre fondo claro; alto `h-3` en botones y `h-2.5` en
     botones de solo ícono. En las barras de las hojas se oculta bajo `sm` (`max-sm:!hidden`)
     porque partía el texto del botón; ahí la espera con logo ya da la señal.
-  - `EsperaLogo.jsx`: espera de pantalla completa (logo que se llena de abajo arriba, mensaje
-    mono y barra) mientras se guarda una entrega o devolución y mientras se genera el PDF.
-    Se monta con el estado que la página ya tenía (`guardando`, `generandoPdf`); aparece a
-    los 250ms para no parpadear en respuestas rápidas, pero bloquea los clics desde el inicio.
+  - `EsperaLogo.jsx` (`<EsperaLogo activa={estado} mensaje="…" />`): espera de pantalla
+    completa, con las montañas del isotipo en silueta negra de fondo y el isotipo a color
+    llenándose de abajo arriba, mensaje mono y barra. Recibe el estado que la página ya
+    tenía (`guardando`, `generandoPdf`, `borrando`); bloquea los clics desde el inicio, se
+    ve a los 250ms (una respuesta rápida no parpadea) y, una vez visible, dura al menos
+    600ms. **No se agregan retrasos a las operaciones.** Dónde va: acciones que guardan o
+    borran un registro completo — crear/editar marca, departamento, equipo, empleado y
+    usuario, guardar entrega o devolución, eliminar una entrega, generar el PDF. Las
+    ediciones pequeñas dentro de una pantalla (agregar/quitar equipo de una entrega,
+    características, fechas, observaciones) llevan solo el `IsotipoCarga` del botón: una
+    pantalla completa ahí interrumpiría más de lo que ayuda. Las listas y vistas siguen
+    con esqueletos (`Skeleton`) al cargar.
   - `ActaRegistrada.jsx`: al guardar una entrega o devolución, tarjeta con check que se
     dibuja, dos anillos y chispas (1,5 s; 0,5 s con movimiento reducido). Después se muestra
     el Toast y se navega igual que antes (mismo destino); el temporizador se limpia si la
@@ -299,10 +307,14 @@ nunca escribir un componente de página nuevo para eso.
   línea de tiempo se ata al contenedor con overflow de la tabla, y en tarjetas `md:hidden`
   tampoco, porque bajo 768px está anulado). Solo existen los keyframes que usa alguna
   pantalla (`page-in` se quitó por no tener uso).
-  **Toda animación de entrada termina en `transform: none` / `translate: none`**: un
-  transform residual convierte al elemento en contenedor de sus hijos `position: fixed`
-  (el buscador con lista de opciones quedó atrapado así una vez). Por lo mismo, ninguna
-  animación con transform va en un elemento que contenga un panel `fixed`.
+  **Toda animación de entrada usa `fill-mode: backwards` (nunca `both`/`forwards`) y
+  termina en `transform: none` / `translate: none`**: un transform residual convierte al
+  elemento en contenedor de sus hijos `position: fixed` (el buscador con lista de opciones
+  quedó atrapado así una vez, y la espera con logo quedaba dentro del área de contenido).
+  Ojo: con `both`, Chrome deja un `matrix(1,0,0,1,0,0)` al final aunque el keyframe diga
+  `none`; con `backwards` el elemento vuelve a su estilo propio al terminar. Solo las
+  animaciones que deben quedarse en su estado final (salidas, anillos y chispas de
+  `ActaRegistrada`, login) usan `both`, y ninguna envuelve elementos `fixed`.
   `prefers-reduced-motion` se respeta globalmente en `index.css` (todo se resuelve al
   instante; sierra, parallax y revelado apagados).
 - **Animación de "presión" en botones/tarjetas clicables**: todo `<button>` y todo `<Link>`

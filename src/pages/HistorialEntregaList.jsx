@@ -13,6 +13,7 @@ import { FORMATOS } from '../config/formatos.js'
 import { listarDocumentosEntrega, eliminarDocumentoEntrega } from '../services/api.js'
 import { formatearFecha } from '../utils/fecha.js'
 
+import EsperaLogo from '../components/EsperaLogo.jsx'
 function nombrePlanta(location) {
   if (location === 'Planta Tejar' || location === 'Planta Parramos') return location
   return Number(location) === 1 ? 'Planta Tejar' : 'Planta Parramos'
@@ -325,6 +326,8 @@ function HistorialEntregaList() {
         }}
         onConfirmar={confirmarEliminar}
       />
+
+      <EsperaLogo activa={borrando} mensaje="Eliminando entrega…" />
     </div>
   )
 }

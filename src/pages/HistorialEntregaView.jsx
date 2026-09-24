@@ -36,7 +36,6 @@ import {
 import { generarPdfPapelFisico } from '../utils/generatePdfPapelFisico.js'
 import useFechaLocal from '../hooks/useFechaLocal.js'
 import { construirHtmlEntrega } from '../pdf/plantillaEntrega.js'
-
 import IsotipoCarga from '../components/IsotipoCarga.jsx'
 import EsperaLogo from '../components/EsperaLogo.jsx'
 const formato = FORMATOS.entrega
@@ -776,7 +775,8 @@ function HistorialEntregaView() {
         onConfirmar={confirmarQuitarEquipo}
       />
 
-      {generandoPdf && <EsperaLogo mensaje="Generando PDF…" />}
+      <EsperaLogo activa={generandoPdf} mensaje="Generando PDF…" />
+      <EsperaLogo activa={borrando} mensaje="Eliminando entrega…" />
     </div>
   )
 }

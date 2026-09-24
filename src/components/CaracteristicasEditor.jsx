@@ -3,7 +3,6 @@ import { Plus, Trash2, Check, X } from 'lucide-react'
 import InlineEditableText from './InlineEditableText.jsx'
 import { mostrarToast } from './Toast.jsx'
 import { SkeletonTabla } from './Skeleton.jsx'
-
 import IsotipoCarga from './IsotipoCarga.jsx'
 /**
  * Características de un equipo, en sus dos situaciones:

@@ -126,7 +126,12 @@ main[data-sheet] > .bg-background {
 }
 
 .animate-view-in {
-  animation: viewIn var(--duration-page) var(--ease-standard) both;
+  /* `backwards`, no `both`: con `both` Chrome deja al final un transform de
+     identidad (matrix(1,0,0,1,0,0)) aunque el keyframe termine en `none`, y
+     la raíz de la pantalla atrapaba a los hijos `position: fixed` (la espera
+     con logo quedaba dentro del área de contenido). Al terminar, el elemento
+     vuelve a su estilo propio, que ya es el estado final. */
+  animation: viewIn var(--duration-page) var(--ease-standard) backwards;
 }
 
 /* ── Revelado de tarjetas al hacer scroll (mockup: cardReveal) ─────────
@@ -821,7 +826,9 @@ main[data-sheet] > .bg-background {
   width: auto;
   display: block;
 }
-.espera-logo__logo img:first-child { filter: grayscale(1); opacity: 0.25; }
+/* Base: las montañas del isotipo en silueta negra (mockup de Tickets); encima
+   se llena el isotipo a color. */
+.espera-logo__logo img:first-child { filter: brightness(0); opacity: 0.16; }
 .espera-logo__logo img + img {
   position: absolute;
   inset: 0;

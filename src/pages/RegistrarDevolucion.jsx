@@ -12,7 +12,6 @@ import { FORMATOS } from '../config/formatos.js'
 import { obtenerDocumentoEntrega, listarDetallesEntrega, crearDocumentoDevolucion } from '../services/api.js'
 import { formatearFecha, constanciaDevolucion } from '../utils/fecha.js'
 import { marcarExtravio } from '../utils/extravio.js'
-
 import IsotipoCarga from '../components/IsotipoCarga.jsx'
 import EsperaLogo from '../components/EsperaLogo.jsx'
 import ActaRegistrada from '../components/ActaRegistrada.jsx'
@@ -590,7 +589,7 @@ function RegistrarDevolucion() {
         onConfirmar={handleConfirmarFinalizarDevolucion}
       />
 
-      {guardando && <EsperaLogo mensaje="Guardando devolución…" />}
+      {!devolucionLista && <EsperaLogo activa={guardando} mensaje="Guardando devolución…" />}
       {devolucionLista && (
         <ActaRegistrada
           codigo="DEV-EQ-01 · REGISTRADA"
