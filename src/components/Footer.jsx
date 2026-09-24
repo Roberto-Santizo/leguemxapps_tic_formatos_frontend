@@ -7,7 +7,7 @@
 function Footer() {
   return (
     <footer data-no-print className="mt-auto flex w-full justify-center px-4 pb-4 pt-6">
-      <p className="rounded-full bg-papel px-3 py-1 font-eyebrow text-nano uppercase tracking-[0.1em] text-on-surface-variant">
+      <p className="rounded-full bg-papel px-3 py-1 text-center font-eyebrow text-nano uppercase tracking-[0.1em] text-on-surface-variant max-[359px]:tracking-[0.02em]">
         © LEGUMEX · Todos los derechos reservados.
       </p>
     </footer>

@@ -187,12 +187,29 @@ main[data-sheet] > .bg-background {
       existe: en móvil (<640) el toast sin barra sube siempre a 140px, por
       encima de "Cerrar Sesión" con o sin cajón (la regla 1 sigue midiendo).
       Desde sm: se queda arriba a la derecha, que ya no toca el cajón. */
+/* Al pasar de una hoja a una lista (o al revés) con el aviso visible, el
+   cambio de altura se desliza en vez de saltar. */
+[data-toaster] {
+  transition:
+    bottom 200ms var(--ease-standard),
+    left 200ms var(--ease-standard),
+    right 200ms var(--ease-standard);
+}
 [data-toaster][data-sobre-barra] {
   top: auto;
   bottom: calc(var(--alto-barra, 112px) + 12px);
+  /* El aviso nuevo aparece arriba y el que ya estaba no se mueve. */
+  flex-direction: column-reverse;
 }
 [data-toaster][data-sobre-barra] > * {
   animation-name: toastInAbajo;
+}
+@media (max-width: 767px) {
+  /* Mismo ancho que la columna de botones de la barra (padding 16px). */
+  [data-toaster][data-sobre-barra] {
+    left: 16px;
+    right: 16px;
+  }
 }
 @media (min-width: 768px) {
   [data-toaster][data-sobre-barra] {
