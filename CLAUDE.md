@@ -70,7 +70,8 @@ en español; mantener ese idioma.
   usar estas utilidades, no `new Date(str)` directo.
 - Componentes compartidos existentes (reusar, no duplicar): `ConfirmDialog`, `Toast`,
   `EstadoVacio`, `SearchableSelect`, `InlineEditableText`, `Buscador`, `Skeleton`,
-  `FirmaPad`, `CaracteristicasEditor`, `EditorFechaLocal`, `Paginador`, `EquipoDetalleModal`.
+  `FirmaPad`, `CaracteristicasEditor`, `EditorFechaLocal`, `Paginador`, `EquipoDetalleModal`,
+  `SierraFondo` (cordillera decorativa del fondo y del 404).
 - Listas paginadas: `hooks/usePaginacion.js` (`useListaPaginada`, estado `?page=&q=` en la
   URL, búsqueda híbrida porque el backend no filtra por texto) + `components/Paginador.jsx`.
   Contrato del backend en `paginacion.md`; `listar*(token, { limit, page })` en `api.js`.
