@@ -183,7 +183,7 @@ function ConfirmDialog({
               type="checkbox"
               checked={noPreguntar}
               onChange={(e) => setNoPreguntar(e.target.checked)}
-              className="h-4 w-4 shrink-0 rounded border-outline text-primary focus:outline-none focus:ring-2 focus:ring-foco focus:ring-offset-2"
+              className="h-4 w-4 shrink-0 rounded-[4px] border-outline text-primary focus:outline-none focus:ring-2 focus:ring-foco focus:ring-offset-2"
             />
             {textoNoPreguntar}
           </label>

@@ -82,22 +82,20 @@ function Sidebar({ abierto, onCerrar }) {
         ].join(' ')}
       >
         {/* Marca */}
-        <div className="flex items-center justify-between gap-2 px-2">
-          <div className="flex min-w-0 items-center gap-3">
-            <img src="/logo-legumex-icon.png" alt="Legumex" className="block h-[34px] w-auto shrink-0" />
-            <div className="min-w-0">
-              {/* El sistema se llamaba distinto según dónde lo vieras:
-                  "Control Operativo" aquí y "LEGUMEX" en el encabezado móvil.
-                  Ahora el nombre es uno solo -- con el mismo tratamiento
-                  tipográfico que usa MobileHeader -- y "Control Operativo"
-                  baja a descriptor, que es lo que realmente es. */}
-              <h1 className="truncate font-headline-md text-[15px] font-extrabold leading-tight tracking-[-0.03em] text-on-surface">
-                LEGUMEX
-              </h1>
-              <p className="truncate font-eyebrow text-[10px] uppercase leading-tight tracking-[0.1em] text-on-surface-variant">
-                Control Operativo
-              </p>
-            </div>
+        <div className="flex items-start justify-between gap-2 pl-2">
+          <div className="flex min-w-0 flex-col gap-2.5 pt-1">
+            <img src="/logo-legumex-icon.png" alt="" aria-hidden="true" className="block h-[34px] w-auto self-start" />
+            {/* El sistema se llamaba distinto según dónde lo vieras:
+                "Control Operativo" aquí y "LEGUMEX" en el encabezado móvil.
+                Ahora el nombre es uno solo -- con el mismo tratamiento
+                tipográfico que usa MobileHeader (mono, mayúsculas) -- y
+                "Control Operativo" queda como descriptor, que es lo que
+                realmente es. */}
+            <h1 className="flex min-w-0 items-center gap-2 font-eyebrow text-[10px] uppercase leading-4 tracking-[0.12em] text-on-surface-variant">
+              <span className="truncate">
+                <span className="font-medium text-on-surface">LEGUMEX</span> · Control Operativo
+              </span>
+            </h1>
           </div>
           {/* Botón cerrar: solo visible en móvil/tablet pequeña (drawer superpuesto) */}
           <button
