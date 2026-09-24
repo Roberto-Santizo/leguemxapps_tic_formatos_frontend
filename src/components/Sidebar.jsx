@@ -10,6 +10,8 @@ const ETIQUETA_ROL = {
   user: 'Usuario',
 }
 
+// Ítem del menú con el estilo del aside Sierra: transparente sobre el papel;
+// el activo va en tarjeta blanca con filete y sombra corta.
 function NavItem({ to, icon: Icon, label, end, onNavigate }) {
   return (
     <NavLink
@@ -18,10 +20,11 @@ function NavItem({ to, icon: Icon, label, end, onNavigate }) {
       onClick={onNavigate}
       className={({ isActive }) =>
         [
-          'group flex items-center gap-3 min-h-11 px-3 py-2.5 rounded-lg font-body-md transition-colors duration-150 active:scale-[0.97] transition-transform',
+          'group flex h-11 items-center gap-2.5 rounded-[10px] px-2.5 font-body-md text-body-md',
+          'transition-[transform,background-color,box-shadow,color] duration-fast ease-standard active:scale-[0.97]',
           isActive
-            ? 'bg-primary-container text-on-primary-container font-bold'
-            : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface',
+            ? 'bg-surface-container-lowest font-medium text-on-surface shadow-tarjeta'
+            : 'text-on-surface-variant hover:bg-surface-container-lowest/60 hover:text-on-surface active:bg-surface-container-high',
         ].join(' ')
       }
     >
@@ -29,12 +32,12 @@ function NavItem({ to, icon: Icon, label, end, onNavigate }) {
         <>
           <Icon
             className={[
-              'h-5 w-5 shrink-0 transition-transform group-hover:scale-110',
-              isActive ? 'text-primary' : 'text-on-surface-variant group-hover:text-on-surface',
+              'h-[17px] w-[17px] shrink-0 transition-transform duration-base ease-rebote group-hover:scale-110',
+              isActive ? 'text-on-surface' : 'text-on-surface-variant group-hover:text-on-surface',
             ].join(' ')}
-            strokeWidth={2}
+            strokeWidth={1.75}
           />
-          <span className="font-label-bold text-label-bold truncate">{label}</span>
+          <span className="truncate">{label}</span>
         </>
       )}
     </NavLink>
@@ -58,38 +61,40 @@ function Sidebar({ abierto, onCerrar }) {
         <div
           onClick={onCerrar}
           aria-hidden="true"
-          className="fixed inset-0 bg-on-surface/40 z-40 md:hidden transition-opacity duration-300"
+          data-no-print
+          className="fixed inset-0 z-40 bg-tinta/30 animate-overlay-in md:hidden"
         />
       )}
 
+      {/*
+        Escritorio: columna de 240px dentro del shell, transparente sobre el
+        papel y fija mientras el <main> scrollea. Móvil: cajón que entra desde
+        la izquierda sobre el papel, con sombra verde larga.
+      */}
       <nav
+        data-no-print
         className={[
-          'flex flex-col bg-surface-container-lowest fixed left-0 top-0 h-full w-drawer-width max-w-[85vw] border-r border-outline-variant z-50',
-          'transition-transform duration-300 ease-out shadow-2xl md:shadow-none',
-          abierto ? 'translate-x-0' : '-translate-x-full',
-          'md:translate-x-0',
+          'flex flex-col gap-7 overflow-y-auto overscroll-contain custom-scrollbar',
+          'fixed left-0 top-0 bottom-0 z-50 w-[min(304px,86%)] bg-background px-3 pb-5 pt-5 shadow-cajon',
+          'transition-[transform,visibility] duration-300 ease-salida',
+          abierto ? 'visible translate-x-0' : 'invisible -translate-x-[106%]',
+          'md:visible md:relative md:z-auto md:h-full md:w-drawer-width md:shrink-0 md:translate-x-0 md:bg-transparent md:pb-5 md:pt-6 md:shadow-none md:transition-none',
         ].join(' ')}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between h-20 px-6 border-b border-outline-variant shrink-0">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="grid h-11 w-11 shrink-0 place-items-center">
-              <img
-                src="/logo-legumex-icon.png"
-                alt="Legumex"
-                className="h-full w-full object-contain"
-              />
-            </div>
+        {/* Marca */}
+        <div className="flex items-center justify-between gap-2 px-2">
+          <div className="flex min-w-0 items-center gap-3">
+            <img src="/logo-legumex-icon.png" alt="Legumex" className="block h-[34px] w-auto shrink-0" />
             <div className="min-w-0">
               {/* El sistema se llamaba distinto según dónde lo vieras:
                   "Control Operativo" aquí y "LEGUMEX" en el encabezado móvil.
                   Ahora el nombre es uno solo -- con el mismo tratamiento
                   tipográfico que usa MobileHeader -- y "Control Operativo"
                   baja a descriptor, que es lo que realmente es. */}
-              <h1 className="font-headline-lg text-headline-lg font-bold tracking-tight text-on-surface leading-tight truncate">
+              <h1 className="truncate font-headline-md text-[15px] font-extrabold leading-tight tracking-[-0.03em] text-on-surface">
                 LEGUMEX
               </h1>
-              <p className="font-label-sm text-label-sm text-on-surface-variant leading-tight truncate">
+              <p className="truncate font-eyebrow text-[10px] uppercase leading-tight tracking-[0.1em] text-on-surface-variant">
                 Control Operativo
               </p>
             </div>
@@ -98,14 +103,14 @@ function Sidebar({ abierto, onCerrar }) {
           <button
             onClick={onCerrar}
             aria-label="Cerrar menú"
-            className="md:hidden grid h-11 w-11 shrink-0 place-items-center rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface active:bg-surface-container-highest transition-colors active:scale-[0.90] transition-transform"
+            className="grid h-11 w-11 shrink-0 place-items-center rounded-[10px] text-on-surface-variant transition-[transform,background-color] duration-fast ease-standard hover:bg-surface-container-lowest hover:text-on-surface active:scale-[0.90] active:bg-surface-container-high md:hidden"
           >
-            <X className="h-5 w-5" strokeWidth={2} />
+            <X className="h-5 w-5" strokeWidth={1.75} />
           </button>
         </div>
 
         {/* Main Tabs */}
-        <div className="flex-1 overflow-y-auto px-4 py-6 space-y-1 custom-scrollbar">
+        <div className="flex flex-col gap-1">
           {/*
             El primer ítem ya no es un formato concreto: ahora abre el
             selector de los seis formatos. Se deja SIN "end" para que quede
@@ -121,25 +126,28 @@ function Sidebar({ abierto, onCerrar }) {
           {isAdmin && <NavItem to="/usuarios" icon={Users} label="Usuarios" onNavigate={onCerrar} />}
         </div>
 
-        {/* Footer: usuario actual + cerrar sesión */}
-        <div className="px-4 pb-4 pt-4 border-t border-outline-variant shrink-0">
-          <div className="flex items-center gap-3 px-2 py-2 mb-1">
-            <div className="w-9 h-9 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center font-label-bold text-label-bold shrink-0">
+        {/* Tarjeta de perfil: usuario actual + cerrar sesión */}
+        <div className="mt-auto flex flex-col gap-3 rounded-tarjeta bg-surface-container-lowest p-3 shadow-tarjeta">
+          <div className="flex items-center gap-2 px-1">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-outline bg-surface-container-lowest text-[12px] font-semibold uppercase text-on-surface">
               {user?.name?.charAt(0) ?? '?'}
             </div>
             <div className="min-w-0">
-              <p className="font-label-bold text-label-bold text-on-surface truncate">{user?.name}</p>
-              <p className="font-label-sm text-label-sm text-on-surface-variant capitalize truncate">
+              <p className="truncate font-body-md text-body-md font-medium text-on-surface">{user?.name}</p>
+              <p className="truncate font-label-sm text-label-sm font-normal text-on-surface-subtle">
                 {ETIQUETA_ROL[user?.role] ?? 'Usuario'}
               </p>
             </div>
           </div>
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 min-h-11 px-3 py-2.5 rounded-lg text-on-surface-variant font-body-md hover:bg-surface-container-high hover:text-on-surface transition-colors duration-150 group active:scale-[0.97] transition-transform"
+            className="group flex h-10 w-full items-center justify-center gap-2 rounded-boton border border-outline-variant bg-surface-container-lowest px-3 font-body-md text-body-md font-medium text-on-surface transition-[transform,background-color] duration-fast ease-standard hover:bg-surface-container active:scale-[0.96] active:bg-surface-container-highest"
           >
-            <LogOut className="h-5 w-5 shrink-0 transition-transform group-hover:scale-110" strokeWidth={2} />
-            <span className="font-label-bold text-label-bold">Cerrar Sesión</span>
+            <LogOut
+              className="h-[17px] w-[17px] shrink-0 text-on-surface-variant transition-[transform,color] duration-base ease-standard group-hover:translate-x-[3px] group-hover:scale-110 group-hover:text-error"
+              strokeWidth={1.75}
+            />
+            Cerrar Sesión
           </button>
         </div>
       </nav>
