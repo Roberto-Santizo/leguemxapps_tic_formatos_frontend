@@ -92,9 +92,12 @@ main[data-sheet] > .bg-background {
     opacity: 0;
     transform: translateY(12px);
   }
+  /* Termina en `none` (no en translateY(0)): con fill-mode `both` un transform
+     residual convierte la raíz en contenedor de los hijos `position: fixed`
+     (buscador a pantalla completa, paneles) y los deja atrapados. */
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: none;
   }
 }
 

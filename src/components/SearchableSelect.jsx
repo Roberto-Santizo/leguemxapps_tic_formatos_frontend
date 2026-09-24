@@ -352,8 +352,8 @@ function SearchableSelect({
             style={{ position: 'fixed', top: coords.top, left: coords.left, width: coords.width }}
             className={
               usarMd
-                ? 'animate-drop-in z-30 hidden max-h-72 flex-col overflow-hidden rounded-xl bg-white shadow-flotante md:flex'
-                : 'animate-drop-in z-30 hidden max-h-72 flex-col overflow-hidden rounded-xl bg-white shadow-flotante sm:flex'
+                ? 'animate-drop-in z-40 hidden max-h-72 flex-col overflow-hidden rounded-xl bg-white shadow-flotante md:flex'
+                : 'animate-drop-in z-40 hidden max-h-72 flex-col overflow-hidden rounded-xl bg-white shadow-flotante sm:flex'
             }
           >
             {contenido}
