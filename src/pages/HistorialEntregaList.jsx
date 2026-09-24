@@ -89,7 +89,7 @@ function HistorialEntregaList() {
   const sinContenido = !cargando && (Boolean(errorCarga) || !hayRegistros)
 
   const botonSecundario =
-    'inline-flex h-10 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high active:scale-[0.97] transition-transform'
+    'inline-flex h-10 items-center justify-center gap-2 rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface shadow-sm transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]'
 
   const estado = errorCarga ? (
     <EstadoVacio
@@ -131,44 +131,48 @@ function HistorialEntregaList() {
   )
 
   const iconoActivo =
-    'inline-grid h-9 w-9 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface active:scale-[0.90] transition-transform'
+    'inline-flex h-9 w-9 items-center justify-center rounded-boton text-on-surface-variant transition duration-fast ease-standard hover:bg-surface-container hover:text-on-surface active:scale-[0.90]'
   // La basura es la única acción irreversible de la tabla: gris en reposo
   // (como el ojo) pero roja al pasar el mouse, igual que "quitar equipo" en
   // HistorialEntregaView -- rojo = borrar, la regla de la paleta. Antes usaba
   // iconoActivo y se veía igual de inofensiva que "ver".
   const iconoPeligro =
-    'inline-grid h-9 w-9 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-error-container hover:text-on-error-container active:scale-[0.90] transition-transform'
+    'inline-flex h-9 w-9 items-center justify-center rounded-boton text-on-surface-variant transition duration-fast ease-standard hover:bg-error-container/60 hover:text-error active:scale-[0.90]'
 
   function verDocumento(documento) {
     navigate(`/historial/entrega/${documento.id}`)
   }
 
   return (
-    <div className="animate-view-in flex-1 p-container-padding md:p-stack-lg bg-background">
+    <div className="animate-view-in flex-1 p-container-padding md:p-stack-lg">
       <div className="max-w-[1200px] mx-auto flex flex-col gap-stack-lg">
         <Link
           to="/historial"
-          className="inline-flex h-10 items-center gap-2 self-start rounded-lg border border-outline-variant bg-surface-container-high px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:border-outline hover:bg-surface-container-highest active:scale-[0.97] transition-transform"
+          className="inline-flex h-9 items-center gap-2 self-start rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface shadow-sm transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
         >
-          <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={2.5} />
+          <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={1.75} />
           Historial de Actas
         </Link>
 
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
-          <div>
-            <h1 className="font-headline-lg text-headline-lg font-bold text-on-surface mb-1">
+          <div className="min-w-0">
+            <div className="flex items-center gap-3 font-eyebrow text-eyebrow uppercase text-on-surface-variant">
+              <span aria-hidden="true" className="h-px w-7 bg-outline" />
+              Historial / Entrega
+            </div>
+            <h1 className="mt-1.5 font-display-lg text-[26px] leading-[32px] font-extrabold tracking-[-0.04em] text-on-surface md:text-display-lg">
               Entrega de Equipo
             </h1>
-            <p className="font-body-md text-body-md text-on-surface-variant">
+            <p className="mt-1 font-body-lg text-body-lg text-on-surface-variant">
               Documentos de entrega registrados, con el equipo incluido en cada uno.
             </p>
           </div>
           {isAdmin && (
             <Link
               to="/actas/entrega/nueva"
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-primary px-4 font-label-bold text-label-bold text-on-primary shadow-sm transition-all hover:brightness-110 active:brightness-95 active:scale-[0.97]"
+              className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97]"
             >
-              <Plus className="h-4.5 w-4.5" strokeWidth={2} />
+              <Plus className="h-4 w-4" strokeWidth={1.75} />
               Registrar entrega
             </Link>
           )}
@@ -176,122 +180,130 @@ function HistorialEntregaList() {
 
         <Buscador value={busqueda} onChange={setBusqueda} placeholder="Buscar por colaborador, departamento o planta..." />
 
-        {/* ---- Escritorio y tablet: tabla, ojo (ver) + basura (eliminar con confirmación) ---- */}
-        <div className="hidden md:block bg-surface-container-lowest border border-outline-variant rounded-xl overflow-x-auto shadow-sm">
-          {cargando ? (
-            <SkeletonTabla columnas={6} filas={5} />
-          ) : sinContenido ? (
-            estado
-          ) : (
-            <table className="w-full min-w-[720px] text-left border-collapse text-sm">
-              <thead>
-                <tr className="bg-surface-container-low border-b border-outline-variant">
-                  <th className="px-5 py-3.5 font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider whitespace-nowrap">
-                    Fecha
-                  </th>
-                  <th className="px-5 py-3.5 font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider whitespace-nowrap">
-                    Colaborador
-                  </th>
-                  <th className="px-5 py-3.5 font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider whitespace-nowrap">
-                    Departamento
-                  </th>
-                  <th className="px-5 py-3.5 font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider whitespace-nowrap">
-                    Planta
-                  </th>
-                  <th className="w-28 px-5 py-3.5 font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider whitespace-nowrap">
-                    Equipos
-                  </th>
-                  <th className="w-28 px-5 py-3.5 font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider whitespace-nowrap text-right">
-                    Acciones
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="font-body-md text-on-surface divide-y divide-outline-variant">
-                {visibles.map((documento) => (
-                  <tr key={documento.id} className="hover:bg-surface-container-low transition-colors">
-                    <td className="px-5 py-4 text-on-surface-variant whitespace-nowrap">
-                      {formatearFecha(documento.delivery_date)}
-                    </td>
-                    <td className="px-5 py-4 font-medium text-on-surface break-words">
-                      {documento.employee_name || '—'}
-                    </td>
-                    <td className="px-5 py-4 text-on-surface-variant break-words">
-                      {documento.employee_department || '—'}
-                    </td>
-                    <td className="px-5 py-4 text-on-surface-variant whitespace-nowrap">
-                      {nombrePlanta(documento.location)}
-                    </td>
-                    <td className="px-5 py-4 font-mono text-on-surface-variant tabular-nums">
-                      {Array.isArray(documento.items) ? documento.items.length : 0}
-                    </td>
-                    <td className="px-5 py-4">
-                      <div className="flex items-center justify-end gap-1">
-                        <button
-                          type="button"
-                          onClick={() => verDocumento(documento)}
-                          aria-label={`Ver entrega de ${documento.employee_name}`}
-                          title="Ver"
-                          className={iconoActivo}
-                        >
-                          <Eye className="h-4 w-4" strokeWidth={2} />
-                        </button>
-                        {isAdmin && (
+        {/* Tabla + paginador en una sola tarjeta en escritorio (el paginador
+            queda de pie de tabla, como en el mockup); en móvil el envoltorio
+            no dibuja nada y las tarjetas siguen sueltas. */}
+        <div className="flex flex-col gap-stack-lg md:gap-0 md:overflow-hidden md:rounded-tarjeta md:bg-white md:shadow-tarjeta">
+          {/* ---- Escritorio y tablet: tabla, ojo (ver) + basura (eliminar con confirmación) ---- */}
+          <div className="hidden md:block overflow-x-auto">
+            {cargando ? (
+              <SkeletonTabla columnas={6} filas={5} />
+            ) : sinContenido ? (
+              estado
+            ) : (
+              <table className="w-full min-w-[720px] text-left border-collapse">
+                <thead>
+                  <tr className="bg-surface-container">
+                    <th className="h-11 px-4 font-mono text-[11px] font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap">
+                      Fecha
+                    </th>
+                    <th className="h-11 px-4 font-mono text-[11px] font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap">
+                      Colaborador
+                    </th>
+                    <th className="h-11 px-4 font-mono text-[11px] font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap">
+                      Departamento
+                    </th>
+                    <th className="h-11 px-4 font-mono text-[11px] font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap">
+                      Planta
+                    </th>
+                    <th className="w-28 h-11 px-4 font-mono text-[11px] font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap">
+                      Equipos
+                    </th>
+                    <th className="w-28 h-11 px-4 font-mono text-[11px] font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap text-right">
+                      Acciones
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="font-body-md text-body-md text-on-surface">
+                  {visibles.map((documento) => (
+                    <tr key={documento.id} data-reveal className="h-[72px] border-t border-outline-variant transition-colors duration-fast hover:bg-surface-container-low">
+                      <td className="px-4 py-4 font-mono text-[12px] text-on-surface-variant tabular-nums whitespace-nowrap">
+                        {formatearFecha(documento.delivery_date)}
+                      </td>
+                      <td className="px-4 py-4 font-medium text-on-surface break-words">
+                        {documento.employee_name || '—'}
+                      </td>
+                      <td className="px-4 py-4 text-on-surface-variant break-words">
+                        {documento.employee_department || '—'}
+                      </td>
+                      <td className="px-4 py-4 text-on-surface-variant whitespace-nowrap">
+                        {nombrePlanta(documento.location)}
+                      </td>
+                      <td className="px-4 py-4 font-mono text-[12px] text-on-surface-variant tabular-nums">
+                        {Array.isArray(documento.items) ? documento.items.length : 0}
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="flex items-center justify-end gap-1">
                           <button
                             type="button"
-                            onClick={() => setEliminando(documento)}
-                            aria-label={`Eliminar entrega de ${documento.employee_name}`}
-                            title="Eliminar"
-                            className={iconoPeligro}
+                            onClick={() => verDocumento(documento)}
+                            aria-label={`Ver entrega de ${documento.employee_name}`}
+                            title="Ver"
+                            className={iconoActivo}
                           >
-                            <Trash2 className="h-4 w-4" strokeWidth={2} />
+                            <Eye className="h-4 w-4" strokeWidth={2} />
                           </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                          {isAdmin && (
+                            <button
+                              type="button"
+                              onClick={() => setEliminando(documento)}
+                              aria-label={`Eliminar entrega de ${documento.employee_name}`}
+                              title="Eliminar"
+                              className={iconoPeligro}
+                            >
+                              <Trash2 className="h-4 w-4" strokeWidth={2} />
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+
+          {/* ---- Móvil: tarjetas apiladas, sin botones -- toda la tarjeta lleva al detalle ---- */}
+          <div className="md:hidden flex flex-col gap-stack-sm">
+            {cargando ? (
+              <SkeletonTarjetas filas={4} />
+            ) : sinContenido ? (
+              <div className="rounded-tarjeta bg-white shadow-tarjeta">{estado}</div>
+            ) : (
+              visibles.map((documento) => (
+                <button
+                  key={documento.id}
+                  type="button"
+                  onClick={() => verDocumento(documento)}
+                  data-reveal
+                  className="flex w-full items-center justify-between gap-3 rounded-tarjeta bg-white p-4 text-left shadow-tarjeta transition duration-fast ease-standard hover:shadow-flotante active:scale-[0.99]"
+                >
+                  <div className="min-w-0">
+                    <p className="font-body-md text-body-md font-semibold text-on-surface break-words">
+                      {documento.employee_name || '—'}
+                    </p>
+                    <p className="mt-1 font-mono text-[11px] leading-4 text-on-surface-variant break-words">
+                      {nombrePlanta(documento.location)} · {Array.isArray(documento.items) ? documento.items.length : 0} equipo(s)
+                    </p>
+                  </div>
+                </button>
+              ))
+            )}
+          </div>
+
+          {!cargando && !errorCarga && (
+            <div className="md:border-t md:border-outline-variant md:bg-surface-container md:px-4 md:py-2.5">
+              <Paginador
+                pagina={pagina}
+                ultimaPagina={ultimaPagina}
+                tamano={limite}
+                total={total}
+                plural="entregas"
+                onCambiar={irAPagina}
+              />
+            </div>
           )}
         </div>
-
-        {/* ---- Móvil: tarjetas apiladas, sin botones -- toda la tarjeta lleva al detalle ---- */}
-        <div className="md:hidden flex flex-col gap-stack-sm">
-          {cargando ? (
-            <SkeletonTarjetas filas={4} />
-          ) : sinContenido ? (
-            <div className="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-sm">{estado}</div>
-          ) : (
-            visibles.map((documento) => (
-              <button
-                key={documento.id}
-                type="button"
-                onClick={() => verDocumento(documento)}
-                className="flex w-full items-center justify-between gap-3 rounded-xl border border-outline-variant bg-surface-container-lowest px-4 py-3.5 text-left shadow-sm transition-all hover:bg-surface-container-low active:scale-[0.99] active:bg-surface-container-low"
-              >
-                <div className="min-w-0">
-                  <p className="font-body-md text-body-md font-medium text-on-surface break-words">
-                    {documento.employee_name || '—'}
-                  </p>
-                  <p className="font-label-sm text-label-sm text-on-surface-variant break-words">
-                    {nombrePlanta(documento.location)} · {Array.isArray(documento.items) ? documento.items.length : 0} equipo(s)
-                  </p>
-                </div>
-              </button>
-            ))
-          )}
-        </div>
-
-        {!cargando && !errorCarga && (
-          <Paginador
-            pagina={pagina}
-            ultimaPagina={ultimaPagina}
-            tamano={limite}
-            total={total}
-            plural="entregas"
-            onCambiar={irAPagina}
-          />
-        )}
       </div>
 
       <ConfirmDialog

@@ -17,7 +17,13 @@ import { obtenerUsuario, crearUsuario, editarUsuario } from '../services/api.js'
  */
 
 const inputClasses =
-  'h-11 w-full rounded-lg border border-outline-variant bg-surface px-3.5 font-body-md text-body-md text-on-surface transition-colors hover:border-outline focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25 disabled:opacity-60'
+  'h-10 w-full rounded-boton border border-outline-variant bg-white px-3 font-body-md text-[16px] md:text-body-md text-on-surface placeholder:text-on-surface-subtle transition duration-fast ease-standard hover:border-outline focus:border-on-surface focus:outline-none focus:ring-0 disabled:opacity-60'
+
+// Etiqueta de campo del mockup (12px, semibold).
+const labelClasses = 'text-[12px] font-semibold leading-4 text-on-surface'
+// Ojo de mostrar/ocultar contraseña, dentro del input.
+const ojoClasses =
+  'absolute right-1 top-1/2 -translate-y-1/2 grid h-8 w-8 place-items-center rounded-boton text-on-surface-variant transition duration-fast ease-standard hover:bg-surface-container hover:text-on-surface disabled:opacity-50 active:scale-[0.90]'
 
 function UsuarioForm() {
   const { id } = useParams()
@@ -105,27 +111,36 @@ function UsuarioForm() {
   }
 
   return (
-    <div className="animate-view-in flex-1 p-container-padding md:p-stack-lg bg-background">
+    <div className="animate-view-in flex-1 p-container-padding md:p-stack-lg">
       <div className="max-w-[600px] mx-auto flex flex-col gap-stack-lg">
         <Link
           to="/usuarios"
-          className="inline-flex h-10 items-center gap-2 self-start rounded-lg border border-outline-variant bg-surface-container-high px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:border-outline hover:bg-surface-container-highest active:scale-[0.97] transition-transform"
+          className="inline-flex h-9 items-center gap-2 self-start rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface shadow-sm transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
         >
-          <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={2.5} />
+          <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={1.75} />
           Usuarios
         </Link>
 
-        <h1 className="font-headline-lg text-headline-lg font-bold text-on-surface">
-          {esEdicion ? 'Editar usuario' : 'Nuevo usuario'}
-        </h1>
+        <div className="min-w-0">
+          <div className="flex items-center gap-3 font-eyebrow text-eyebrow uppercase text-on-surface-variant">
+            <span aria-hidden="true" className="h-px w-7 bg-outline" />
+            {esEdicion ? 'Usuarios / Editar' : 'Usuarios / Nuevo'}
+          </div>
+          <h1 className="mt-1.5 font-display-lg text-[26px] leading-[32px] md:text-display-lg text-on-surface">
+            {esEdicion ? 'Editar usuario' : 'Nuevo usuario'}
+          </h1>
+        </div>
 
         {cargando ? (
           <SkeletonFormulario campos={4} />
         ) : (
-          <form onSubmit={handleSubmit} className="flex flex-col gap-stack-lg">
-            <section className="rounded-xl border border-outline-variant bg-surface-container-lowest p-5 shadow-sm flex flex-col gap-stack-md">
-              <div className="flex flex-col gap-1.5">
-                <label className="font-label-bold text-label-bold text-on-surface">Nombre completo</label>
+          <form
+            onSubmit={handleSubmit}
+            className="animate-pop-in flex flex-col gap-stack-lg rounded-tarjeta bg-white p-4 shadow-tarjeta sm:p-6"
+          >
+            <section className="flex flex-col gap-5">
+              <div className="flex flex-col gap-2">
+                <label className={labelClasses}>Nombre completo</label>
                 <input
                   className={inputClasses}
                   value={name}
@@ -141,8 +156,8 @@ function UsuarioForm() {
                 )}
               </div>
 
-              <div className="flex flex-col gap-1.5">
-                <label className="font-label-bold text-label-bold text-on-surface">Usuario</label>
+              <div className="flex flex-col gap-2">
+                <label className={labelClasses}>Usuario</label>
                 <input
                   className={inputClasses}
                   value={username}
@@ -157,9 +172,9 @@ function UsuarioForm() {
                 )}
               </div>
 
-              <div className="flex flex-col gap-1.5">
-                <label className="font-label-bold text-label-bold text-on-surface">Rol</label>
-                <select className={inputClasses} value={role} disabled={guardando} onChange={(e) => setRole(e.target.value)}>
+              <div className="flex flex-col gap-2">
+                <label className={labelClasses}>Rol</label>
+                <select className={`${inputClasses} pr-9`} value={role} disabled={guardando} onChange={(e) => setRole(e.target.value)}>
                   <option value="user">Usuario</option>
                   <option value="admin">Administrador</option>
                 </select>
@@ -168,11 +183,11 @@ function UsuarioForm() {
                 )}
               </div>
 
-              <div className="flex flex-col gap-1.5">
-                <label className="font-label-bold text-label-bold text-on-surface">
+              <div className="flex flex-col gap-2">
+                <label className={labelClasses}>
                   Contraseña
                   {esEdicion && (
-                    <span className="ml-1 font-body-md text-body-md font-normal text-on-surface-variant">
+                    <span className="ml-1 font-normal text-on-surface-subtle">
                       (dejar en blanco para no cambiarla)
                     </span>
                   )}
@@ -194,13 +209,13 @@ function UsuarioForm() {
                     disabled={guardando}
                     aria-label={mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                     tabIndex={-1}
-                    className="absolute right-1 top-1/2 -translate-y-1/2 grid h-9 w-9 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface disabled:opacity-50 active:scale-[0.90] transition-transform"
+                    className={ojoClasses}
                   >
                     {mostrarPassword ? <EyeOff className="h-4 w-4" strokeWidth={2} /> : <Eye className="h-4 w-4" strokeWidth={2} />}
                   </button>
                 </div>
                 {faltanCaracteres > 0 && (
-                  <p className="font-label-sm text-label-sm text-on-surface-variant">
+                  <p className="animate-hint-in font-label-sm text-label-sm text-on-surface-variant">
                     {faltanCaracteres === 1 ? 'Falta 1 carácter' : `Faltan ${faltanCaracteres} caracteres`} (mínimo 8).
                   </p>
                 )}
@@ -210,8 +225,8 @@ function UsuarioForm() {
               </div>
 
               {(password || !esEdicion) && (
-                <div className="flex flex-col gap-1.5">
-                  <label className="font-label-bold text-label-bold text-on-surface">Confirmar contraseña</label>
+                <div className="flex flex-col gap-2">
+                  <label className={labelClasses}>Confirmar contraseña</label>
                   <div className="relative">
                     <input
                       type={mostrarConfirmacion ? 'text' : 'password'}
@@ -228,7 +243,7 @@ function UsuarioForm() {
                       disabled={guardando}
                       aria-label={mostrarConfirmacion ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                       tabIndex={-1}
-                      className="absolute right-1 top-1/2 -translate-y-1/2 grid h-9 w-9 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface disabled:opacity-50 active:scale-[0.90] transition-transform"
+                      className={ojoClasses}
                     >
                       {mostrarConfirmacion ? (
                         <EyeOff className="h-4 w-4" strokeWidth={2} />
@@ -238,31 +253,33 @@ function UsuarioForm() {
                     </button>
                   </div>
                   {noCoinciden && (
-                    <p className="font-label-sm text-label-sm text-error">Las contraseñas no coinciden.</p>
+                    <p className="animate-hint-in font-label-sm text-label-sm text-error">Las contraseñas no coinciden.</p>
                   )}
                 </div>
               )}
             </section>
 
             {error && (
-              <p className="font-label-sm text-label-sm text-error rounded-lg border border-error/30 bg-error-container/40 px-3 py-2">
+              <p className="animate-pop-in rounded-xl bg-error-container/60 px-4 py-3 font-body-md text-body-md text-on-error-container">
                 {error}
               </p>
             )}
 
-            <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+            {/* Como el formulario del mockup: filete y acciones al pie de la
+                tarjeta, el primario negro primero (a la izquierda). */}
+            <div className="flex flex-col-reverse gap-2.5 border-t border-outline-variant pt-5 sm:flex-row-reverse sm:justify-end">
               <Link
                 to="/usuarios"
-                className="inline-flex h-11 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high active:scale-[0.97] transition-transform"
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
               >
                 Cancelar
               </Link>
               <button
                 type="submit"
                 disabled={guardando || !completo}
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-primary px-5 font-label-bold text-label-bold text-on-primary shadow-sm transition-all hover:brightness-110 active:brightness-95 active:scale-[0.97] disabled:opacity-60"
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-boton bg-tinta px-5 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97] disabled:opacity-50 disabled:hover:bg-tinta disabled:active:scale-100"
               >
-                {guardando ? <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} /> : <Save className="h-4 w-4" strokeWidth={2.25} />}
+                {guardando ? <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} /> : <Save className="h-4 w-4" strokeWidth={1.75} />}
                 {esEdicion ? 'Guardar cambios' : 'Crear usuario'}
               </button>
             </div>

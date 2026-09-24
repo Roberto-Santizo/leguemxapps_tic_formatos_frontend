@@ -68,7 +68,7 @@ function filtrarEquipo(e, filtro) {
 // botones no se pueden traducir a un parámetro del backend -- filtran en el
 // cliente, sobre el inventario completo.
 const FILTROS_ESTADO = [
-  { valor: '', etiqueta: 'Todos', activo: 'bg-secondary-container text-on-secondary-container' },
+  { valor: '', etiqueta: 'Todos', activo: 'bg-tinta text-white' },
   {
     valor: 'disponible',
     etiqueta: 'Disponible',
@@ -82,6 +82,14 @@ const FILTROS_ESTADO = [
     activo: 'bg-assigned-container text-on-assigned-container',
   },
 ]
+
+// Recetas visuales "Sierra" (BRIEF, ola 2), repetidas a propósito.
+const botonVolver =
+  'inline-flex h-9 items-center gap-2 self-start rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]'
+const botonPrimario =
+  'inline-flex h-10 items-center justify-center gap-2 rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97]'
+const celdaEncabezado =
+  'h-11 px-4 font-mono text-[11px] font-medium uppercase tracking-[0.1em] text-on-surface-variant whitespace-nowrap'
 
 function EquiposList() {
   const { token } = useAuth()
@@ -229,7 +237,7 @@ function EquiposList() {
   const sinContenido = !cargandoLista && (Boolean(errorCarga) || !hayRegistros)
 
   const botonSecundario =
-    'inline-flex h-10 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high active:scale-[0.97] transition-transform'
+    'inline-flex h-10 items-center justify-center gap-2 rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface shadow-sm transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]'
 
   const estado = errorCarga ? (
     <EstadoVacio
@@ -330,7 +338,7 @@ function EquiposList() {
     return (
       <span
         className={[
-          'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 font-label-sm text-label-sm font-medium whitespace-nowrap',
+          'inline-flex h-6 items-center gap-1.5 rounded-full px-2.5 text-[12px] font-medium leading-4 whitespace-nowrap',
           libre
             ? 'bg-available-container text-on-available-container'
             : 'bg-assigned-container text-on-assigned-container',
@@ -346,32 +354,32 @@ function EquiposList() {
   }
 
   const iconoActivo =
-    'inline-grid h-9 w-9 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface active:scale-[0.90] transition-transform'
+    'inline-flex h-9 w-9 items-center justify-center rounded-boton text-on-surface-variant transition duration-fast ease-standard hover:bg-surface-container hover:text-on-surface active:scale-[0.90]'
 
   return (
-    <div className="animate-view-in flex-1 p-container-padding md:p-stack-lg bg-background">
+    <div className="animate-view-in flex-1 p-container-padding md:p-stack-lg">
       <div className="max-w-[1200px] mx-auto flex flex-col gap-stack-lg">
-        <Link
-          to="/catalogo"
-          className="inline-flex h-10 items-center gap-2 self-start rounded-lg border border-outline-variant bg-surface-container-high px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:border-outline hover:bg-surface-container-highest active:scale-[0.97] transition-transform"
-        >
-          <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={2.5} />
+        <Link to="/catalogo" className={botonVolver}>
+          <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={1.75} />
           Catálogo
         </Link>
 
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
-          <div>
-            <h1 className="font-headline-lg text-headline-lg font-bold text-on-surface mb-1">Equipos</h1>
-            <p className="font-body-md text-body-md text-on-surface-variant">
+          <div className="min-w-0">
+            <div className="flex items-center gap-3 font-eyebrow text-eyebrow uppercase text-on-surface-variant">
+              <span aria-hidden="true" className="h-px w-7 bg-outline" />
+              Catálogo / Equipos
+            </div>
+            <h1 className="mt-1.5 font-display-lg text-[26px] leading-[32px] font-extrabold tracking-[-0.04em] text-on-surface md:text-display-lg">
+              Equipos
+            </h1>
+            <p className="mt-1 font-body-lg text-body-lg text-on-surface-variant">
               Inventario de equipo y sus características técnicas.
             </p>
           </div>
 
-          <Link
-            to="/catalogo/equipos/nuevo"
-            className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-primary px-4 font-label-bold text-label-bold text-on-primary shadow-sm transition-all hover:brightness-110 active:brightness-95 active:scale-[0.97]"
-          >
-            <Plus className="h-4.5 w-4.5" strokeWidth={2} />
+          <Link to="/catalogo/equipos/nuevo" className={botonPrimario}>
+            <Plus className="h-4 w-4" strokeWidth={1.75} />
             Nuevo equipo
           </Link>
         </div>
@@ -403,10 +411,10 @@ function EquiposList() {
                     onClick={() => setParametro('estado', valor)}
                     aria-pressed={puesto}
                     className={[
-                      'inline-flex h-9 items-center gap-1.5 rounded-full border px-3.5 font-label-bold text-label-bold transition-colors active:scale-[0.97] transition-transform',
+                      'inline-flex h-8 items-center gap-1.5 rounded-full border px-3 text-[12px] font-medium leading-4 transition duration-fast ease-standard active:scale-[0.97]',
                       puesto
                         ? `border-transparent ${activo}`
-                        : 'border-outline-variant bg-surface text-on-surface-variant hover:border-outline hover:bg-surface-container-high',
+                        : 'border-outline-variant bg-white text-on-surface-variant hover:bg-surface-container hover:text-on-surface',
                     ].join(' ')}
                   >
                     {punto && (
@@ -425,44 +433,35 @@ function EquiposList() {
             alcanza para las columnas de esta tabla y la de acciones quedaba
             cortada e inalcanzable, sin forma de desplazarse. Mismo patrón que
             ya usaban las tablas de actas. */}
-        <div className="hidden md:block bg-surface-container-lowest border border-outline-variant rounded-xl overflow-x-auto shadow-sm">
+        <div className="hidden md:block rounded-tarjeta bg-white shadow-tarjeta overflow-x-auto">
           {cargandoLista ? (
             <SkeletonTabla columnas={6} filas={5} />
           ) : sinContenido ? (
             estado
           ) : (
-            <table className="w-full min-w-[760px] text-left border-collapse text-sm">
+            <table className="w-full min-w-[760px] text-left border-collapse">
               <thead>
-                <tr className="bg-surface-container-low border-b border-outline-variant">
-                  <th className="w-20 px-5 py-3.5 font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider whitespace-nowrap">
-                    ID
-                  </th>
-                  <th className="px-5 py-3.5 font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider whitespace-nowrap">
-                    Equipo
-                  </th>
-                  <th className="w-40 px-5 py-3.5 font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider whitespace-nowrap">
-                    Marca
-                  </th>
-                  <th className="w-56 px-5 py-3.5 font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider whitespace-nowrap">
-                    Características
-                  </th>
-                  <th className="w-32 px-5 py-3.5 font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider whitespace-nowrap">
-                    Estado
-                  </th>
-                  <th className="w-36 px-5 py-3.5 font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider whitespace-nowrap text-right">
-                    Acciones
-                  </th>
+                <tr className="bg-surface-container">
+                  <th className={`w-20 ${celdaEncabezado}`}>ID</th>
+                  <th className={celdaEncabezado}>Equipo</th>
+                  <th className={`w-40 ${celdaEncabezado}`}>Marca</th>
+                  <th className={`w-56 ${celdaEncabezado}`}>Características</th>
+                  <th className={`w-32 ${celdaEncabezado}`}>Estado</th>
+                  <th className={`w-36 text-right ${celdaEncabezado}`}>Acciones</th>
                 </tr>
               </thead>
-              <tbody className="font-body-md text-on-surface divide-y divide-outline-variant">
+              <tbody className="font-body-md text-body-md text-on-surface">
                 {visibles.map((equipo) => {
                   const total = conteoDe(equipo)
                   const tiene = total > 0
                   const desplegada = abierta?.id === equipo.id
                   return (
                     <Fragment key={equipo.id}>
-                      <tr className="hover:bg-surface-container-low transition-colors">
-                        <td className="px-5 py-4 font-mono text-on-surface-variant tabular-nums">
+                      <tr
+                        data-reveal
+                        className="border-t border-outline-variant transition-colors duration-fast ease-standard hover:bg-surface-container-low"
+                      >
+                        <td className="h-[72px] px-4 py-4 font-mono text-[12px] text-on-surface-variant tabular-nums">
                           {equipo.id}
                         </td>
                         {/* La serie va debajo del nombre y no en columna
@@ -471,32 +470,32 @@ function EquiposList() {
                             el buscador ahora encuentra por serie, y un
                             resultado que no la enseña no se puede contrastar
                             contra la etiqueta del equipo. */}
-                        <td className="px-5 py-4 font-medium text-on-surface break-words">
+                        <td className="px-4 py-4 font-medium text-on-surface break-words">
                           {equipo.name}
                           {equipo.serie && (
-                            <span className="block break-all font-mono text-label-sm font-normal uppercase tracking-wide text-on-surface-variant">
+                            <span className="mt-0.5 block break-all font-mono text-[12px] font-normal uppercase leading-4 text-on-surface-variant">
                               {equipo.serie}
                             </span>
                           )}
                         </td>
-                        <td className="px-5 py-4 text-on-surface-variant break-words">
+                        <td className="px-4 py-4 text-on-surface-variant break-words">
                           {equipo.brand || '—'}
                         </td>
-                        <td className="px-5 py-4">
+                        <td className="px-4 py-4">
                           {tiene ? (
-                            <span className="font-label-bold text-label-bold text-on-surface">
+                            <span className="font-medium text-on-surface">
                               {total} {total === 1 ? 'característica' : 'características'}
                             </span>
                           ) : (
-                            <span className="font-body-md text-body-md text-on-surface-variant">
+                            <span className="text-on-surface-subtle">
                               No contiene características
                             </span>
                           )}
                         </td>
-                        <td className="px-5 py-4">
+                        <td className="px-4 py-4">
                           <EstadoEquipo equipoId={equipo.id} />
                         </td>
-                        <td className="px-5 py-4">
+                        <td className="px-4 py-4">
                           {/* Ver y editar son del EQUIPO, no de sus
                               características: antes se deshabilitaban cuando el
                               equipo no tenía ninguna, y entonces no había forma
@@ -510,7 +509,7 @@ function EquiposList() {
                               title="Ver"
                               className={iconoActivo}
                             >
-                              <Eye className="h-4 w-4" strokeWidth={2} />
+                              <Eye className="h-4 w-4" strokeWidth={1.75} />
                             </Link>
                             <button
                               type="button"
@@ -519,7 +518,7 @@ function EquiposList() {
                               title="Editar equipo y características"
                               className={iconoActivo}
                             >
-                              <Pencil className="h-4 w-4" strokeWidth={2} />
+                              <Pencil className="h-4 w-4" strokeWidth={1.75} />
                             </button>
                             {!tiene && (
                               <button
@@ -527,9 +526,9 @@ function EquiposList() {
                                 onClick={() => alternar(equipo.id, 'agregar')}
                                 aria-label={`Agregar característica a ${equipo.name}`}
                                 title="Agregar característica"
-                                className="ml-1 inline-grid h-9 w-9 place-items-center rounded-lg border border-outline-variant bg-surface text-on-surface transition-colors hover:border-outline hover:bg-surface-container-high active:scale-[0.90] transition-transform"
+                                className="ml-1 inline-flex h-9 w-9 items-center justify-center rounded-boton border border-outline-variant bg-white text-on-surface shadow-sm transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.90]"
                               >
-                                <Plus className="h-4 w-4" strokeWidth={2.25} />
+                                <Plus className="h-4 w-4" strokeWidth={1.75} />
                               </button>
                             )}
                           </div>
@@ -537,10 +536,10 @@ function EquiposList() {
                       </tr>
 
                       {desplegada && (
-                        <tr className="bg-surface-container-low">
-                          <td colSpan={6} className="px-5 py-4">
-                            <div className="animate-view-in">
-                              <p className="font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider mb-2.5">
+                        <tr className="border-t border-outline-variant bg-surface-container-low">
+                          <td colSpan={6} className="px-4 py-4">
+                            <div className="animate-drop-in">
+                              <p className="mb-3 font-mono text-[11px] uppercase leading-4 tracking-[0.1em] text-on-surface-variant">
                                 {abierta.modo === 'ver'
                                   ? 'Características registradas'
                                   : `Agregar característica a ${equipo.name}`}
@@ -563,7 +562,7 @@ function EquiposList() {
           {cargandoLista ? (
             <SkeletonTarjetas filas={4} />
           ) : sinContenido ? (
-            <div className="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-sm">
+            <div className="rounded-tarjeta bg-white shadow-tarjeta">
               {estado}
             </div>
           ) : (
@@ -574,26 +573,26 @@ function EquiposList() {
               return (
                 <div
                   key={equipo.id}
-                  className="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-sm overflow-hidden"
+                  className="overflow-hidden rounded-tarjeta bg-white shadow-tarjeta"
                 >
                   <button
                     type="button"
                     onClick={() => navigate(`/catalogo/equipos/${equipo.id}/ver`)}
-                    className="flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left transition-all hover:bg-surface-container-low active:bg-surface-container-low active:scale-[0.99]"
+                    className="flex w-full items-center justify-between gap-3 p-4 text-left transition duration-fast ease-standard active:bg-surface-container-low active:scale-[0.99]"
                   >
                     <div className="min-w-0">
-                      <p className="font-body-md text-body-md font-medium text-on-surface break-words">
+                      <p className="font-body-md text-body-md font-semibold text-on-surface break-words">
                         {equipo.name}
                       </p>
-                      <p className="font-label-sm text-label-sm text-on-surface-variant break-words">
+                      <p className="mt-0.5 text-[12px] leading-4 text-on-surface-variant break-words">
                         {equipo.brand || '—'} · {tiene ? `${total} caract.` : 'Sin características'}
                       </p>
                       {equipo.serie && (
-                        <p className="break-all font-mono text-label-sm uppercase tracking-wide text-on-surface-variant">
+                        <p className="mt-0.5 break-all font-mono text-[11px] uppercase leading-4 tracking-[0.1em] text-on-surface-subtle">
                           {equipo.serie}
                         </p>
                       )}
-                      <div className="mt-1.5">
+                      <div className="mt-2">
                         <EstadoEquipo equipoId={equipo.id} />
                       </div>
                     </div>
@@ -606,7 +605,7 @@ function EquiposList() {
                   </button>
 
                   {desplegada && (
-                    <div className="animate-view-in border-t border-outline-variant px-4 py-3.5 flex flex-col gap-stack-sm">
+                    <div className="animate-drop-in border-t border-outline-variant bg-surface-container-low px-4 py-3.5 flex flex-col gap-stack-sm">
                       {editorDe(equipo.id, false, !tiene)}
                     </div>
                   )}

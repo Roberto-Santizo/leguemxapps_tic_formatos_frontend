@@ -29,8 +29,20 @@ import { SkeletonTabla, SkeletonTarjetas } from './Skeleton.jsx'
  * tiene filtro de texto en /brands ni /departments).
  */
 
+// Recetas visuales "Sierra" (BRIEF, ola 2): mismas clases en todas las
+// pantallas de Catálogo, repetidas a propósito en vez de un <Button> genérico.
 const botonSecundario =
-  'inline-flex h-10 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high active:scale-[0.97] transition-transform'
+  'inline-flex h-10 items-center justify-center gap-2 rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface shadow-sm transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]'
+const botonVolver =
+  'inline-flex h-9 items-center gap-2 self-start rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]'
+const botonPrimario =
+  'inline-flex h-10 items-center justify-center gap-2 rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97]'
+const botonFuturo =
+  'inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface-variant opacity-50 cursor-not-allowed'
+const celdaEncabezado =
+  'h-11 px-4 font-mono text-[11px] font-medium uppercase tracking-[0.1em] text-on-surface-variant whitespace-nowrap'
+const botonIconoTabla =
+  'inline-flex h-9 w-9 items-center justify-center rounded-boton text-on-surface-variant transition duration-fast ease-standard hover:bg-surface-container hover:text-on-surface active:scale-[0.90]'
 
 /**
  * Estado sin contenido: error, búsqueda sin coincidencias, o catálogo vacío.
@@ -126,23 +138,24 @@ function CatalogoLista({ textos, onListar, rutaBase }) {
 
   return (
     <>
-      <div className="animate-view-in flex-1 p-container-padding md:p-stack-lg bg-background">
+      <div className="animate-view-in flex-1 p-container-padding md:p-stack-lg">
         <div className="max-w-[1200px] mx-auto flex flex-col gap-stack-lg">
-          <Link
-            to="/catalogo"
-            className="inline-flex h-10 items-center gap-2 self-start rounded-lg border border-outline-variant bg-surface-container-high px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:border-outline hover:bg-surface-container-highest active:scale-[0.97] transition-transform"
-          >
-            <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={2.5} />
+          <Link to="/catalogo" className={botonVolver}>
+            <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={1.75} />
             Catálogo
           </Link>
 
           {/* Header */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
-            <div>
-              <h1 className="font-headline-lg text-headline-lg font-bold text-on-surface mb-1">
+            <div className="min-w-0">
+              <div className="flex items-center gap-3 font-eyebrow text-eyebrow uppercase text-on-surface-variant">
+                <span aria-hidden="true" className="h-px w-7 bg-outline" />
+                Catálogo / {textos.titulo}
+              </div>
+              <h1 className="mt-1.5 font-display-lg text-[26px] leading-[32px] font-extrabold tracking-[-0.04em] text-on-surface md:text-display-lg">
                 {textos.titulo}
               </h1>
-              <p className="font-body-md text-body-md text-on-surface-variant">{textos.subtitulo}</p>
+              <p className="mt-1 font-body-lg text-body-lg text-on-surface-variant">{textos.subtitulo}</p>
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
@@ -152,25 +165,22 @@ function CatalogoLista({ textos, onListar, rutaBase }) {
                 type="button"
                 disabled
                 title="Disponible en una fase futura"
-                className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface-variant opacity-55 cursor-not-allowed"
+                className={botonFuturo}
               >
-                <FileText className="h-4 w-4" strokeWidth={2.25} />
+                <FileText className="h-4 w-4" strokeWidth={1.75} />
                 PDF
               </button>
               <button
                 type="button"
                 disabled
                 title="Disponible en una fase futura"
-                className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface-variant opacity-55 cursor-not-allowed"
+                className={botonFuturo}
               >
-                <Download className="h-4 w-4" strokeWidth={2.25} />
+                <Download className="h-4 w-4" strokeWidth={1.75} />
                 Exportar
               </button>
-              <Link
-                to={`${rutaBase}/nuevo`}
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-primary px-4 font-label-bold text-label-bold text-on-primary shadow-sm transition-all hover:brightness-110 active:brightness-95 active:scale-[0.97]"
-              >
-                <Plus className="h-4.5 w-4.5" strokeWidth={2} />
+              <Link to={`${rutaBase}/nuevo`} className={botonPrimario}>
+                <Plus className="h-4 w-4" strokeWidth={1.75} />
                 {textos.textoCrear}
               </Link>
             </div>
@@ -179,54 +189,52 @@ function CatalogoLista({ textos, onListar, rutaBase }) {
           <Buscador value={busqueda} onChange={setBusqueda} placeholder={textos.placeholderBusqueda} />
 
           {/* ---- Desktop y tablet: tabla, ojo (ver) + lápiz (editar con confirmación) ---- */}
-          <div className="hidden md:block bg-surface-container-lowest border border-outline-variant rounded-xl overflow-x-auto shadow-sm">
+          <div className="hidden md:block rounded-tarjeta bg-white shadow-tarjeta overflow-x-auto">
             {cargando ? (
               <SkeletonTabla columnas={3} filas={5} />
             ) : sinContenido ? (
               estado
             ) : (
-              <table className="w-full min-w-[520px] text-left border-collapse text-sm">
+              <table className="w-full min-w-[520px] text-left border-collapse">
                 <thead>
-                  <tr className="bg-surface-container-low border-b border-outline-variant">
-                    <th className="w-24 px-5 py-3.5 font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider whitespace-nowrap">
-                      ID
-                    </th>
-                    <th className="px-5 py-3.5 font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider whitespace-nowrap">
-                      {textos.colNombre}
-                    </th>
-                    <th className="w-28 px-5 py-3.5 font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider whitespace-nowrap text-right">
-                      Acciones
-                    </th>
+                  <tr className="bg-surface-container">
+                    <th className={`w-24 ${celdaEncabezado}`}>ID</th>
+                    <th className={celdaEncabezado}>{textos.colNombre}</th>
+                    <th className={`w-28 text-right ${celdaEncabezado}`}>Acciones</th>
                   </tr>
                 </thead>
-                <tbody className="font-body-md text-on-surface divide-y divide-outline-variant">
+                <tbody className="font-body-md text-body-md text-on-surface">
                   {visibles.map((registro) => (
-                    <tr key={registro.id} className="hover:bg-surface-container-low transition-colors">
-                      <td className="px-5 py-4 font-mono text-on-surface-variant tabular-nums">
+                    <tr
+                      key={registro.id}
+                      data-reveal
+                      className="border-t border-outline-variant transition-colors duration-fast ease-standard hover:bg-surface-container-low"
+                    >
+                      <td className="h-[72px] px-4 py-4 font-mono text-[12px] text-on-surface-variant tabular-nums">
                         {registro.id}
                       </td>
-                      <td className="px-5 py-4 font-medium text-on-surface break-words">
+                      <td className="px-4 py-4 font-medium text-on-surface break-words">
                         {registro.name}
                       </td>
-                      <td className="px-5 py-4 text-right">
+                      <td className="px-4 py-4 text-right">
                         <div className="flex items-center justify-end gap-1">
                           <button
                             type="button"
                             onClick={() => verRegistro(registro)}
                             aria-label={`Ver ${registro.name}`}
                             title="Ver"
-                            className="inline-grid h-9 w-9 place-items-center rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors active:scale-[0.90] transition-transform"
+                            className={botonIconoTabla}
                           >
-                            <Eye className="h-4 w-4" strokeWidth={2} />
+                            <Eye className="h-4 w-4" strokeWidth={1.75} />
                           </button>
                           <button
                             type="button"
                             onClick={() => setConfirmando(registro)}
                             aria-label={`Editar ${registro.name}`}
                             title="Editar"
-                            className="inline-grid h-9 w-9 place-items-center rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors active:scale-[0.90] transition-transform"
+                            className={botonIconoTabla}
                           >
-                            <Pencil className="h-4 w-4" strokeWidth={2} />
+                            <Pencil className="h-4 w-4" strokeWidth={1.75} />
                           </button>
                         </div>
                       </td>
@@ -242,7 +250,7 @@ function CatalogoLista({ textos, onListar, rutaBase }) {
             {cargando ? (
               <SkeletonTarjetas filas={4} />
             ) : sinContenido ? (
-              <div className="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-sm">
+              <div className="rounded-tarjeta bg-white shadow-tarjeta">
                 {estado}
               </div>
             ) : (
@@ -251,13 +259,13 @@ function CatalogoLista({ textos, onListar, rutaBase }) {
                   key={registro.id}
                   type="button"
                   onClick={() => verRegistro(registro)}
-                  className="flex w-full items-center justify-between gap-3 bg-surface-container-lowest border border-outline-variant rounded-xl shadow-sm px-4 py-3.5 text-left transition-all hover:bg-surface-container-low active:scale-[0.99] active:bg-surface-container-low"
+                  className="flex w-full items-center justify-between gap-3 rounded-tarjeta bg-white p-4 text-left shadow-tarjeta transition duration-fast ease-standard active:scale-[0.99] active:bg-surface-container-low"
                 >
                   <div className="min-w-0">
-                    <p className="font-body-md text-body-md font-medium text-on-surface break-words">
+                    <p className="font-body-md text-body-md font-semibold text-on-surface break-words">
                       {registro.name}
                     </p>
-                    <p className="font-label-sm text-label-sm text-on-surface-variant font-mono tabular-nums">
+                    <p className="mt-0.5 font-mono text-[11px] uppercase tracking-[0.1em] text-on-surface-variant tabular-nums">
                       ID {registro.id}
                     </p>
                   </div>

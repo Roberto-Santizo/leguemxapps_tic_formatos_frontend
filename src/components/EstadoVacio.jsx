@@ -25,20 +25,22 @@ function EstadoVacio({ icon: Icon, variante = 'vacio', titulo, descripcion, acci
 
   const IconoFinal = Icon ?? (esError ? AlertTriangle : variante === 'busqueda' ? SearchX : Inbox)
 
+  // Sistema "Sierra": caja de ícono gris cálido (surface-container-high),
+  // como las tarjetas de selección; el error conserva su rojo apagado.
   const insignia = esError
-    ? 'rounded-full bg-error-container text-on-error-container'
-    : 'rounded-xl border border-outline-variant bg-surface-container-lowest text-primary'
+    ? 'rounded-xl bg-error-container text-on-error-container'
+    : 'rounded-xl bg-surface-container-high text-on-surface'
 
   return (
-    <div className="flex flex-col items-center gap-4 px-5 py-14 text-center">
+    <div className="animate-pop-in flex flex-col items-center gap-4 px-5 py-14 text-center">
       <div className={`grid h-14 w-14 shrink-0 place-items-center ${insignia}`}>
-        <IconoFinal className="h-6 w-6" strokeWidth={2} />
+        <IconoFinal className="h-6 w-6" strokeWidth={1.75} />
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <p className="font-label-bold text-label-bold text-on-surface">{titulo}</p>
+        <p className="font-body-lg text-body-lg font-semibold tracking-[-0.01em] text-on-surface">{titulo}</p>
         {descripcion && (
-          <p className="max-w-sm font-body-md text-body-md text-on-surface-variant break-words">
+          <p className="max-w-sm font-body-md text-body-md text-on-surface-variant break-words text-pretty">
             {descripcion}
           </p>
         )}

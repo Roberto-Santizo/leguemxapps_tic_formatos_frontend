@@ -37,8 +37,20 @@ import {
  * las características.
  */
 
+// Recetas visuales "Sierra" (BRIEF, ola 2), repetidas a propósito.
 const inputClasses =
-  'h-11 w-full rounded-lg border border-outline-variant bg-surface px-3.5 font-body-md text-body-md text-on-surface transition-colors hover:border-outline focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25 disabled:opacity-60'
+  'h-10 w-full rounded-boton border border-outline-variant bg-white px-3 font-body-md text-[16px] text-on-surface placeholder:text-on-surface-subtle transition duration-fast ease-standard hover:border-outline focus:border-on-surface focus:outline-none focus:ring-0 disabled:opacity-60 md:text-body-md'
+const labelClasses = 'text-[12px] font-semibold leading-4 text-on-surface'
+const ayudaClasses = 'text-[12px] leading-4 text-on-surface-subtle'
+const enlaceAyuda = 'font-medium text-foco underline-offset-2 hover:text-foco-hover hover:underline'
+const errorCampo = 'animate-hint-in font-label-sm text-label-sm text-error'
+const botonVolver =
+  'inline-flex h-9 items-center gap-2 self-start rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]'
+const botonSecundario =
+  'inline-flex h-10 items-center justify-center gap-2 rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]'
+const botonPrimario =
+  'inline-flex h-10 items-center justify-center gap-2 rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97] disabled:opacity-50 disabled:active:scale-100'
+const tituloSeccion = 'font-headline-md text-headline-md font-bold text-on-surface'
 
 /**
  * Tipos de equipo que acepta el backend: es el enum App\Enums\EquipmentType,
@@ -92,9 +104,9 @@ const VACIO = {
 // accesorios de FormatoActa.
 function ElijeSiNo({ label, value, onChange, disabled, ayuda }) {
   return (
-    <div className="flex flex-col gap-1.5">
-      <label className="font-label-bold text-label-bold text-on-surface">{label}</label>
-      <div className="flex gap-2.5">
+    <div className="flex flex-col gap-2">
+      <label className={labelClasses}>{label}</label>
+      <div className="flex gap-2">
         {[
           { texto: 'Sí', valor: true },
           { texto: 'No', valor: false },
@@ -104,17 +116,17 @@ function ElijeSiNo({ label, value, onChange, disabled, ayuda }) {
             type="button"
             disabled={disabled}
             onClick={() => onChange(opcion.valor)}
-            className={`inline-flex h-11 min-w-[84px] items-center justify-center rounded-lg border px-4 font-label-bold text-label-bold transition-colors active:scale-[0.97] transition-transform disabled:opacity-60 ${
+            className={`inline-flex h-10 min-w-[84px] items-center justify-center rounded-boton border px-4 font-body-md text-body-md font-medium transition duration-fast ease-standard active:scale-[0.97] disabled:opacity-60 ${
               value === opcion.valor
-                ? 'border-primary bg-primary text-on-primary shadow-sm'
-                : 'border-outline-variant bg-surface text-on-surface hover:bg-surface-container-high'
+                ? 'border-tinta bg-tinta text-white shadow-sm'
+                : 'border-outline-variant bg-white text-on-surface hover:bg-surface-container'
             }`}
           >
             {opcion.texto}
           </button>
         ))}
       </div>
-      {ayuda && <p className="font-label-sm text-label-sm text-on-surface-variant">{ayuda}</p>}
+      {ayuda && <p className={ayudaClasses}>{ayuda}</p>}
     </div>
   )
 }
@@ -266,21 +278,22 @@ function EquipoForm() {
   }
 
   return (
-    <div className="animate-view-in flex-1 p-container-padding md:p-stack-lg bg-background">
+    <div className="animate-view-in flex-1 p-container-padding md:p-stack-lg">
       <div className="max-w-[900px] mx-auto flex flex-col gap-stack-lg">
-        <Link
-          to="/catalogo/equipos"
-          className="inline-flex h-10 items-center gap-2 self-start rounded-lg border border-outline-variant bg-surface-container-high px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:border-outline hover:bg-surface-container-highest active:scale-[0.97] transition-transform"
-        >
-          <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={2.5} />
+        <Link to="/catalogo/equipos" className={botonVolver}>
+          <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={1.75} />
           Equipos
         </Link>
 
         <div>
-          <h1 className="font-headline-lg text-headline-lg font-bold text-on-surface mb-1">
+          <div className="flex items-center gap-3 font-eyebrow text-eyebrow uppercase text-on-surface-variant">
+            <span aria-hidden="true" className="h-px w-7 bg-outline" />
+            Catálogo / Equipos / {esEdicion ? 'Editar' : 'Nuevo'}
+          </div>
+          <h1 className="mt-1.5 font-display-lg text-[26px] leading-[32px] font-extrabold tracking-[-0.04em] text-on-surface md:text-display-lg">
             {esEdicion ? 'Editar equipo' : 'Nuevo equipo'}
           </h1>
-          <p className="font-body-md text-body-md text-on-surface-variant">
+          <p className="mt-1 font-body-lg text-body-lg text-on-surface-variant">
             {esEdicion
               ? 'Cambia los datos del equipo y sus características.'
               : 'Registra el equipo y, si quieres, sus características desde ahora.'}
@@ -290,15 +303,16 @@ function EquipoForm() {
         {cargando ? (
           <SkeletonFormulario campos={6} />
         ) : (
-          <form onSubmit={handleSubmit} className="flex flex-col gap-stack-lg">
-            <section className="rounded-xl border border-outline-variant bg-surface-container-lowest p-5 shadow-sm flex flex-col gap-stack-md">
-              <h2 className="font-headline-md text-headline-md font-bold text-on-surface">
-                Datos del equipo
-              </h2>
+          <form
+            onSubmit={handleSubmit}
+            className="flex flex-col gap-6 rounded-tarjeta bg-white p-4 shadow-tarjeta md:p-6"
+          >
+            <section className="flex flex-col gap-5">
+              <h2 className={tituloSeccion}>Datos del equipo</h2>
 
-              <div className="grid grid-cols-1 gap-column-gap sm:grid-cols-2">
-                <div className="flex flex-col gap-1.5 sm:col-span-2">
-                  <label className="font-label-bold text-label-bold text-on-surface">Nombre</label>
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                <div className="flex flex-col gap-2 sm:col-span-2">
+                  <label className={labelClasses}>Nombre</label>
                   <input
                     className={inputClasses}
                     value={form.name}
@@ -309,12 +323,12 @@ function EquipoForm() {
                     required
                   />
                   {erroresCampo?.name?.[0] && (
-                    <p className="font-label-sm text-label-sm text-error">{erroresCampo.name[0]}</p>
+                    <p className={errorCampo}>{erroresCampo.name[0]}</p>
                   )}
                 </div>
 
-                <div className="flex flex-col gap-1.5">
-                  <label className="font-label-bold text-label-bold text-on-surface">Modelo</label>
+                <div className="flex flex-col gap-2">
+                  <label className={labelClasses}>Modelo</label>
                   <input
                     className={inputClasses}
                     value={form.model}
@@ -325,12 +339,12 @@ function EquipoForm() {
                     required
                   />
                   {erroresCampo?.model?.[0] && (
-                    <p className="font-label-sm text-label-sm text-error">{erroresCampo.model[0]}</p>
+                    <p className={errorCampo}>{erroresCampo.model[0]}</p>
                   )}
                 </div>
 
-                <div className="flex flex-col gap-1.5">
-                  <label className="font-label-bold text-label-bold text-on-surface">Marca</label>
+                <div className="flex flex-col gap-2">
+                  <label className={labelClasses}>Marca</label>
                   <SearchableSelect
                     options={marcas}
                     value={form.brand_id}
@@ -339,20 +353,20 @@ function EquipoForm() {
                     placeholder="Selecciona una marca"
                     emptyOptionsText="No hay marcas registradas todavía."
                   />
-                  <p className="font-label-sm text-label-sm text-on-surface-variant">
+                  <p className={ayudaClasses}>
                     ¿Falta una?{' '}
-                    <Link to="/catalogo/marcas" className="underline hover:text-on-surface">
+                    <Link to="/catalogo/marcas" className={enlaceAyuda}>
                       Regístrala en Marcas
                     </Link>
                     .
                   </p>
                   {erroresCampo?.brand_id?.[0] && (
-                    <p className="font-label-sm text-label-sm text-error">{erroresCampo.brand_id[0]}</p>
+                    <p className={errorCampo}>{erroresCampo.brand_id[0]}</p>
                   )}
                 </div>
 
-                <div className="flex flex-col gap-1.5">
-                  <label className="font-label-bold text-label-bold text-on-surface">Serie</label>
+                <div className="flex flex-col gap-2">
+                  <label className={labelClasses}>Serie</label>
                   <input
                     className={inputClasses}
                     value={form.serie}
@@ -363,12 +377,12 @@ function EquipoForm() {
                     required
                   />
                   {erroresCampo?.serie?.[0] && (
-                    <p className="font-label-sm text-label-sm text-error">{erroresCampo.serie[0]}</p>
+                    <p className={errorCampo}>{erroresCampo.serie[0]}</p>
                   )}
                 </div>
 
-                <div className="flex flex-col gap-1.5">
-                  <label className="font-label-bold text-label-bold text-on-surface">Tipo</label>
+                <div className="flex flex-col gap-2">
+                  <label className={labelClasses}>Tipo</label>
                   {/* Lista cerrada, no texto libre: el backend valida contra un
                       enum y cualquier otra cosa se rechaza al guardar. Mismo
                       componente que ya usan Marca, Empleado y Equipo en el
@@ -382,7 +396,7 @@ function EquipoForm() {
                     placeholder="Selecciona el tipo de equipo"
                   />
                   {erroresCampo?.type?.[0] && (
-                    <p className="font-label-sm text-label-sm text-error">{erroresCampo.type[0]}</p>
+                    <p className={errorCampo}>{erroresCampo.type[0]}</p>
                   )}
                 </div>
 
@@ -401,10 +415,10 @@ function EquipoForm() {
               </div>
             </section>
 
-            <section className="rounded-xl border border-outline-variant bg-surface-container-lowest p-5 shadow-sm flex flex-col gap-stack-md">
-              <h2 className="font-headline-md text-headline-md font-bold text-on-surface">
-                Características
-              </h2>
+            {/* Segunda sección dentro de la misma tarjeta, separada con un
+                filete (como el formulario del mockup). */}
+            <section className="flex flex-col gap-5 border-t border-outline-variant pt-6">
+              <h2 className={tituloSeccion}>Características</h2>
 
               {esEdicion ? (
                 <CaracteristicasDeEquipo
@@ -431,7 +445,7 @@ function EquipoForm() {
                   />
 
                   {quiereCaracteristicas === true && (
-                    <div className="animate-view-in">
+                    <div className="animate-drop-in">
                       <FilasCaracteristicas filas={filas} onChange={setFilas} disabled={guardando} />
                     </div>
                   )}
@@ -440,27 +454,26 @@ function EquipoForm() {
             </section>
 
             {errorGeneral && (
-              <p className="font-label-sm text-label-sm text-error rounded-lg border border-error/30 bg-error-container/40 px-3 py-2">
+              <p className="animate-hint-in font-label-sm text-label-sm text-error rounded-boton border border-error/30 bg-error-container/40 px-3 py-2">
                 {errorGeneral}
               </p>
             )}
 
-            <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-              <Link
-                to="/catalogo/equipos"
-                className="inline-flex h-11 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high active:scale-[0.97] transition-transform"
-              >
+            {/* Fila de botones del mockup: filete arriba, primario a la
+                izquierda (row-reverse solo cambia el orden visual). */}
+            <div className="flex flex-col-reverse gap-2 border-t border-outline-variant pt-5 sm:flex-row-reverse sm:justify-end">
+              <Link to="/catalogo/equipos" className={botonSecundario}>
                 Cancelar
               </Link>
               <button
                 type="submit"
                 disabled={guardando || !completo || hayDuplicadoEnBorrador}
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-primary px-5 font-label-bold text-label-bold text-on-primary shadow-sm transition-all hover:brightness-110 active:brightness-95 active:scale-[0.97] disabled:opacity-60"
+                className={botonPrimario}
               >
                 {guardando ? (
-                  <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} />
+                  <Loader2 className="h-4 w-4 animate-spin" strokeWidth={1.75} />
                 ) : (
-                  <Save className="h-4 w-4" strokeWidth={2.25} />
+                  <Save className="h-4 w-4" strokeWidth={1.75} />
                 )}
                 {esEdicion ? 'Guardar cambios' : 'Crear equipo'}
               </button>

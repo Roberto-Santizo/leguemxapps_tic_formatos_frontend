@@ -69,7 +69,7 @@ const celdaInputClass =
 
 function SeccionCard({ icon: Icon, titulo, nota, acciones, children }) {
   return (
-    <section className="overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest shadow-sm">
+    <section className="overflow-hidden rounded-tarjeta bg-white shadow-tarjeta">
       <header className="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant bg-surface-container-low px-5 py-3">
         <div className="flex items-center gap-2.5">
           {Icon && <Icon className="h-4.5 w-4.5 shrink-0 text-primary" strokeWidth={2} />}
@@ -369,16 +369,22 @@ function FormatoActa() {
     <div className="flex-1 animate-view-in">
       <div ref={hojaRef} className="p-container-padding md:p-8">
         <div className="mx-auto max-w-4xl space-y-stack-lg pb-4">
-          <Link
-            to="/"
-            className="inline-flex h-10 items-center gap-2 self-start rounded-lg border border-outline-variant bg-surface-container-high px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:border-outline hover:bg-surface-container-highest active:bg-surface-dim active:scale-[0.97] transition-transform"
-          >
-            <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={2.5} />
-            Nueva Acta
-          </Link>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <Link
+              to="/"
+              className="inline-flex h-9 items-center gap-2 rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
+            >
+              <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={1.75} />
+              Nueva Acta
+            </Link>
+            <div className="flex items-center gap-3 font-eyebrow text-eyebrow uppercase text-on-surface-variant">
+              <span aria-hidden="true" className="h-px w-7 bg-outline" />
+              Actas / {formato.tituloCorto}
+            </div>
+          </div>
 
           {/* Membrete */}
-          <div className="overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest shadow-sm">
+          <div className="overflow-hidden rounded-tarjeta bg-white shadow-tarjeta">
             <div className="flex flex-wrap items-start justify-between gap-column-gap p-stack-lg">
               <div className="flex items-start gap-stack-md">
                 <div className="grid h-14 w-14 shrink-0 place-items-center rounded-xl border border-outline-variant bg-surface-container-lowest p-1.5">
@@ -733,14 +739,14 @@ function FormatoActa() {
               acciones={
                 <div className="flex items-center gap-stack-sm">
                   {filasEntrega.length > 0 && (
-                    <span className="rounded-full border border-outline-variant px-2 py-0.5 font-mono text-label-sm tabular-nums text-on-surface-variant">
+                    <span key={filasEntrega.length} className="inline-flex h-6 min-w-6 animate-badge-pop items-center justify-center rounded-full border border-outline-variant bg-white px-2 font-mono text-[11px] tabular-nums text-on-surface-variant">
                       {filasEntrega.length}
                     </span>
                   )}
                   <button
                     type="button"
                     onClick={agregarFilaEntrega}
-                    className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 font-label-bold text-label-bold text-on-primary transition-opacity hover:opacity-90 active:scale-[0.90] transition-transform"
+                    className="inline-flex h-8 items-center gap-1.5 rounded-boton bg-tinta px-3 font-label-bold text-label-bold text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97]"
                   >
                     <PlusCircle className="h-4 w-4" strokeWidth={2} />
                     Agregar fila
@@ -750,7 +756,9 @@ function FormatoActa() {
             >
               {filasEntrega.length === 0 ? (
                 <div className="flex flex-col items-center gap-3 px-5 py-10 text-center">
-                  <formato.icon className="h-6 w-6 text-outline" strokeWidth={1.75} />
+                  <div className="grid h-12 w-12 place-items-center rounded-xl bg-surface-container-high">
+                    <formato.icon className="h-6 w-6 text-on-surface-variant" strokeWidth={1.75} />
+                  </div>
                   <div>
                     <p className="font-label-bold text-label-bold text-on-surface">
                       {formato.vacioTitulo}
@@ -762,7 +770,7 @@ function FormatoActa() {
                   <button
                     type="button"
                     onClick={agregarFilaEntrega}
-                    className="inline-flex h-11 items-center gap-2 rounded-lg border border-outline-variant bg-surface-container-lowest px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high active:scale-[0.97] transition-transform"
+                    className="inline-flex h-10 items-center justify-center gap-2 rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface shadow-sm transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
                   >
                     <PlusCircle className="h-4 w-4" strokeWidth={2} />
                     Agregar equipo
@@ -791,7 +799,7 @@ function FormatoActa() {
                         {filasEntrega.map((fila, indice) => (
                           <tr
                             key={fila.id}
-                            className="border-b border-outline-variant transition-colors hover:bg-surface-container-low"
+                            className="animate-pop-in border-b border-outline-variant transition-colors hover:bg-surface-container-low"
                           >
                             <td className="py-2 pl-5 pr-3 text-right font-mono text-body-md tabular-nums text-on-surface-variant">
                               {String(indice + 1).padStart(2, '0')}
@@ -838,12 +846,14 @@ function FormatoActa() {
                       leer todo de corrido. Sin animate-view-in aquí: el buscador de
                       equipo abre un panel "fixed" en pantalla completa, y un
                       ancestro animado (transform) lo dejaría atrapado dentro de la
-                      tarjeta en vez de cubrir toda la pantalla. */}
+                      tarjeta en vez de cubrir toda la pantalla. animate-pop-in sí
+                      sirve: termina en `transform: none`, así que al abrir el
+                      buscador (siempre después de los 200 ms) ya no hay transform. */}
                   <div className="flex flex-col gap-stack-sm p-4 md:hidden">
                     {filasEntrega.map((fila, indice) => (
                       <div
                         key={fila.id}
-                        className="rounded-xl border border-outline-variant bg-surface-container-lowest p-4"
+                        className="animate-pop-in rounded-xl border border-outline-variant bg-white p-4"
                       >
                         <div className="mb-stack-sm flex items-center justify-between">
                           <span className="font-label-bold text-label-bold text-on-surface">
@@ -890,7 +900,7 @@ function FormatoActa() {
                     <button
                       type="button"
                       onClick={agregarFilaEntrega}
-                      className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-dashed border-outline px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high active:scale-[0.97] transition-transform"
+                      className="inline-flex h-11 items-center justify-center gap-2 rounded-boton border border-dashed border-outline bg-white/60 px-4 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
                     >
                       <PlusCircle className="h-4 w-4" strokeWidth={2} />
                       Agregar otro equipo
@@ -910,7 +920,7 @@ function FormatoActa() {
                 <div className="flex items-center gap-stack-sm">
                   {filas.length > 0 && (
                     <>
-                      <span className="rounded-full border border-outline-variant px-2 py-0.5 font-mono text-label-sm tabular-nums text-on-surface-variant">
+                      <span key={filas.length} className="inline-flex h-6 min-w-6 animate-badge-pop items-center justify-center rounded-full border border-outline-variant bg-white px-2 font-mono text-[11px] tabular-nums text-on-surface-variant">
                         {filas.length}
                       </span>
                       <button
@@ -926,7 +936,7 @@ function FormatoActa() {
                   <button
                     type="button"
                     onClick={agregarFila}
-                    className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 font-label-bold text-label-bold text-on-primary transition-opacity hover:opacity-90 active:scale-[0.90] transition-transform"
+                    className="inline-flex h-8 items-center gap-1.5 rounded-boton bg-tinta px-3 font-label-bold text-label-bold text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97]"
                   >
                     <PlusCircle className="h-4 w-4" strokeWidth={2} />
                     Agregar fila
@@ -962,7 +972,9 @@ function FormatoActa() {
 
               {filas.length === 0 ? (
                 <div className="flex flex-col items-center gap-3 px-5 py-10 text-center">
-                  <formato.icon className="h-6 w-6 text-outline" strokeWidth={1.75} />
+                  <div className="grid h-12 w-12 place-items-center rounded-xl bg-surface-container-high">
+                    <formato.icon className="h-6 w-6 text-on-surface-variant" strokeWidth={1.75} />
+                  </div>
                   <div>
                     <p className="font-label-bold text-label-bold text-on-surface">
                       {formato.vacioTitulo}
@@ -974,7 +986,7 @@ function FormatoActa() {
                   <button
                     type="button"
                     onClick={agregarFila}
-                    className="inline-flex h-11 items-center gap-2 rounded-lg border border-outline-variant bg-surface-container-lowest px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high active:scale-[0.97] transition-transform"
+                    className="inline-flex h-10 items-center justify-center gap-2 rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface shadow-sm transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
                   >
                     <PlusCircle className="h-4 w-4" strokeWidth={2} />
                     Agregar fila en blanco
@@ -1006,7 +1018,7 @@ function FormatoActa() {
                       {filas.map((fila, indice) => (
                         <tr
                           key={fila.id}
-                          className="border-b border-outline-variant transition-colors hover:bg-surface-container-low"
+                          className="animate-pop-in border-b border-outline-variant transition-colors hover:bg-surface-container-low"
                         >
                           <td className="py-2 pl-5 pr-3 text-right font-mono text-body-md tabular-nums text-on-surface-variant">
                             {String(indice + 1).padStart(2, '0')}
@@ -1183,14 +1195,14 @@ function FormatoActa() {
       </div>
 
       {/* Barra de acciones */}
-      <div className="sticky bottom-0 z-30 border-t border-outline-variant bg-surface-container-lowest px-container-padding py-3 shadow-sm md:px-8">
+      <div className="sticky bottom-0 z-30 bg-papel-velo px-container-padding py-3 shadow-barra-inferior backdrop-blur-md md:px-8">
         <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-3">
           {esEntrega && errorGuardar ? (
-            <p className="font-label-sm text-label-sm text-error rounded-lg border border-error/30 bg-error-container/40 px-3 py-2">
+            <p className="animate-pop-in rounded-boton border border-error/30 bg-error-container/60 px-3 py-2 font-label-sm text-label-sm text-error">
               {errorGuardar}
             </p>
           ) : (
-            <span className="font-label-bold text-label-bold text-on-surface-variant">
+            <span className="font-mono text-[11px] uppercase tracking-[0.1em] text-on-surface-variant">
               {esEntrega ? 'Complete los datos para guardar' : 'Borrador · sin guardar'}
             </span>
           )}
@@ -1199,7 +1211,7 @@ function FormatoActa() {
               type="button"
               onClick={() => navigate('/')}
               disabled={esEntrega && guardando}
-              className="inline-flex h-11 items-center justify-center rounded-lg border border-outline-variant bg-surface-container-lowest px-6 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high disabled:opacity-60 active:scale-[0.97] transition-transform"
+              className="inline-flex h-10 items-center justify-center rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface shadow-sm transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97] disabled:opacity-50"
             >
               Cancelar
             </button>
@@ -1207,7 +1219,7 @@ function FormatoActa() {
               type="button"
               onClick={esEntrega ? handleClicFinalizarEntrega : undefined}
               disabled={esEntrega && (guardando || cargandoCatalogos)}
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-primary px-6 font-label-bold text-label-bold text-on-primary shadow-sm transition-opacity hover:opacity-90 active:scale-[0.97] transition-transform disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {esEntrega && guardando && <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} />}
               {formato.textoAccion}

@@ -95,17 +95,21 @@ function BuscarDevolucion() {
       <div className="mx-auto max-w-2xl space-y-stack-lg">
         <Link
           to="/historial/devolucion"
-          className="inline-flex h-10 items-center gap-2 self-start rounded-lg border border-outline-variant bg-surface-container-high px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:border-outline hover:bg-surface-container-highest active:scale-[0.97] transition-transform"
+          className="inline-flex h-9 items-center gap-2 rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
         >
-          <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={2.5} />
+          <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={1.75} />
           Devolución de Equipo
         </Link>
 
         <div>
-          <h1 className="font-headline-lg text-headline-lg font-bold text-on-surface mb-1">
+          <div className="flex items-center gap-3 font-eyebrow text-eyebrow uppercase text-on-surface-variant">
+            <span aria-hidden="true" className="h-px w-7 bg-outline" />
+            Historial / Devolución / Nueva
+          </div>
+          <h1 className="mt-1.5 font-display-lg text-[26px] leading-[32px] font-extrabold tracking-[-0.04em] text-on-surface md:text-display-lg">
             Registrar Devolución
           </h1>
-          <p className="font-body-md text-body-md text-on-surface-variant">
+          <p className="mt-1 font-body-lg text-body-lg text-pretty text-on-surface-variant">
             Busca al colaborador que está devolviendo equipo. Solo aparecen quienes ya tienen una
             entrega registrada.
           </p>
@@ -116,11 +120,11 @@ function BuscarDevolucion() {
           // aparece al terminar de cargar, en vez de una rueda girando.
           <SkeletonFormulario campos={1} />
         ) : error ? (
-          <div className="rounded-xl border border-outline-variant bg-surface-container-lowest shadow-sm">
+          <div className="rounded-tarjeta bg-white shadow-tarjeta">
             <EstadoVacio variante="error" titulo="No se pudieron cargar las entregas" descripcion={error} />
           </div>
         ) : responsables.length === 0 ? (
-          <div className="rounded-xl border border-outline-variant bg-surface-container-lowest shadow-sm">
+          <div className="rounded-tarjeta bg-white shadow-tarjeta">
             <EstadoVacio
               icon={formato.icon}
               titulo="Todavía no hay entregas registradas"
@@ -128,7 +132,7 @@ function BuscarDevolucion() {
               accion={
                 <Link
                   to="/actas/entrega/nueva"
-                  className="inline-flex h-10 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high active:scale-[0.97] transition-transform"
+                  className="inline-flex h-10 items-center justify-center rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97]"
                 >
                   Registrar una entrega
                 </Link>
@@ -136,9 +140,9 @@ function BuscarDevolucion() {
             />
           </div>
         ) : (
-          <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-5 shadow-sm">
-            <div className="flex flex-col gap-1.5">
-              <label className="font-label-bold text-label-bold text-on-surface">Responsable</label>
+          <div className="rounded-tarjeta bg-white p-4 shadow-tarjeta md:p-6">
+            <div className="flex flex-col gap-2">
+              <label className="text-[12px] font-semibold text-on-surface">Responsable</label>
               <SearchableSelect
                 options={responsables}
                 value={empleado}
@@ -153,8 +157,8 @@ function BuscarDevolucion() {
                 devuelta también se muestra aquí (con "Ya devuelta" y sin poder
                 abrirse), para que se entienda por qué no avanza. */}
             {(entregasDelEmpleado.length > 1 || unicaYaDevuelta) && (
-              <div className="mt-stack-lg flex flex-col gap-stack-sm">
-                <p className="font-label-bold text-label-bold text-on-surface">
+              <div className="mt-stack-lg flex animate-pop-in flex-col gap-stack-sm border-t border-outline-variant pt-stack-lg">
+                <p className="font-body-md text-body-md font-semibold text-pretty text-on-surface">
                   {unicaEntrega
                     ? `La única entrega de ${empleado} ya fue devuelta por completo -- no le queda equipo pendiente`
                     : `${empleado} tiene ${entregasDelEmpleado.length} entregas registradas -- elige cuál se está devolviendo`}
@@ -168,10 +172,10 @@ function BuscarDevolucion() {
                       type="button"
                       disabled={yaDevuelta}
                       onClick={() => navigate(`/historial/entrega/${entrega.id}/devolucion`)}
-                      className={`flex items-center justify-between gap-3 rounded-xl border border-outline-variant bg-surface-container-low px-4 py-3.5 text-left transition-colors ${
+                      className={`group flex items-center justify-between gap-3 rounded-xl border border-outline-variant bg-white px-4 py-3.5 text-left transition duration-base ease-standard ${
                         yaDevuelta
-                          ? 'cursor-not-allowed opacity-60'
-                          : 'hover:bg-surface-container-high active:scale-[0.97] transition-transform'
+                          ? 'cursor-not-allowed bg-surface-container-low opacity-60'
+                          : 'hover:-translate-y-px hover:border-outline hover:shadow-flotante active:scale-[0.99]'
                       }`}
                     >
                       <div className="min-w-0">
@@ -180,21 +184,26 @@ function BuscarDevolucion() {
                             {formatearFecha(entrega.delivery_date)} · {nombrePlanta(entrega.location)}
                           </p>
                           {yaDevuelta ? (
-                            <span className="rounded-full bg-surface-container-high px-2 py-0.5 font-label-sm text-label-sm font-bold uppercase tracking-wide text-on-surface-variant">
+                            <span className="inline-flex h-6 items-center gap-1.5 rounded-full border border-outline-variant bg-surface-container-high px-2.5 text-[12px] font-medium text-on-surface-variant">
+                              <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-outline" />
                               Ya devuelta
                             </span>
                           ) : (
-                            <span className="rounded-full bg-primary/10 px-2 py-0.5 font-label-sm text-label-sm font-bold uppercase tracking-wide text-primary">
+                            <span className="inline-flex h-6 items-center gap-1.5 rounded-full border border-outline-variant bg-white px-2.5 text-[12px] font-medium text-on-surface">
+                              <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-assigned" />
                               {pendientes} pendiente{pendientes === 1 ? '' : 's'}
                             </span>
                           )}
                         </div>
-                        <p className="font-label-sm text-label-sm text-on-surface-variant tabular-nums">
+                        <p className="mt-0.5 font-mono text-[11px] tabular-nums text-on-surface-variant">
                           {entrega.items_count ?? (Array.isArray(entrega.items) ? entrega.items.length : 0)} equipo(s) en
                           esta entrega
                         </p>
                       </div>
-                      <ChevronRight className="h-4 w-4 shrink-0 text-outline" strokeWidth={2} />
+                      <ChevronRight
+                        className="h-4 w-4 shrink-0 text-outline transition duration-base ease-standard group-hover:translate-x-0.5 group-hover:text-on-surface"
+                        strokeWidth={2}
+                      />
                     </button>
                   )
                 })}

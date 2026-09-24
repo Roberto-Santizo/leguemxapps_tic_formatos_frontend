@@ -14,6 +14,14 @@ import EstadoVacio from './EstadoVacio.jsx'
  * "Editar" pide confirmación y lleva a `rutaBase/:id`, la página de edición
  * (mismo patrón que Equipos: página aparte, no un modal).
  */
+// Recetas visuales "Sierra" (BRIEF, ola 2), repetidas a propósito.
+const botonVolver =
+  'inline-flex h-9 items-center gap-2 self-start rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]'
+const botonSecundario =
+  'inline-flex h-10 items-center justify-center gap-2 rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface shadow-sm transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]'
+const etiquetaDato = 'mb-1 font-mono text-[11px] uppercase leading-4 tracking-[0.1em] text-on-surface-variant'
+const panelDato = 'min-w-0 rounded-xl bg-surface-container-high px-4 py-3'
+
 function CatalogoRegistroView({ textos, onObtener, rutaBase }) {
   const { id } = useParams()
   const { token } = useAuth()
@@ -40,15 +48,12 @@ function CatalogoRegistroView({ textos, onObtener, rutaBase }) {
   }, [id, token, onObtener, intento])
 
   return (
-    <div className="animate-view-in flex-1 p-container-padding md:p-stack-lg bg-background">
+    <div className="animate-view-in flex-1 p-container-padding md:p-stack-lg">
       {/* Mismo ancho que su formulario (CatalogoFormPage, 600px): ver y editar
           de una misma entidad no deben cambiar de ancho al pasar de una a otra. */}
-      <div className="max-w-[600px] mx-auto flex flex-col gap-stack-md">
-        <Link
-          to={rutaBase}
-          className="inline-flex h-10 items-center gap-2 self-start rounded-lg border border-outline-variant bg-surface-container-high px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:border-outline hover:bg-surface-container-highest active:scale-[0.97] transition-transform"
-        >
-          <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={2.5} />
+      <div className="max-w-[600px] mx-auto flex flex-col gap-stack-lg">
+        <Link to={rutaBase} className={botonVolver}>
+          <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={1.75} />
           {textos.titulo}
         </Link>
 
@@ -57,7 +62,7 @@ function CatalogoRegistroView({ textos, onObtener, rutaBase }) {
         ) : error ? (
           // Mismo estado de error que las listas (EstadoVacio con
           // "Reintentar"), en vez de una línea roja suelta sin ninguna salida.
-          <div className="rounded-xl border border-outline-variant bg-surface-container-lowest shadow-sm">
+          <div className="rounded-tarjeta bg-white shadow-tarjeta">
             <EstadoVacio
               variante="error"
               titulo="No se pudo cargar el registro"
@@ -66,7 +71,7 @@ function CatalogoRegistroView({ textos, onObtener, rutaBase }) {
                 <button
                   type="button"
                   onClick={() => setIntento((n) => n + 1)}
-                  className="inline-flex h-10 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high active:scale-[0.97] transition-transform"
+                  className={botonSecundario}
                 >
                   Reintentar
                 </button>
@@ -75,33 +80,33 @@ function CatalogoRegistroView({ textos, onObtener, rutaBase }) {
           </div>
         ) : (
           <>
-            <div className="flex justify-between items-start gap-4 flex-wrap">
-              <div>
-                <h1 className="font-headline-lg text-headline-lg font-bold text-on-surface mb-1">{registro.name}</h1>
-                <p className="font-body-md text-body-md text-on-surface-variant">Información completa del registro.</p>
+            <div className="flex justify-between items-end gap-4 flex-wrap">
+              <div className="min-w-0">
+                <div className="flex items-center gap-3 font-eyebrow text-eyebrow uppercase text-on-surface-variant">
+                  <span aria-hidden="true" className="h-px w-7 bg-outline" />
+                  Catálogo / {textos.titulo} / Detalle
+                </div>
+                <h1 className="mt-1.5 break-words font-display-lg text-[26px] leading-[32px] font-extrabold tracking-[-0.04em] text-on-surface md:text-display-lg">
+                  {registro.name}
+                </h1>
+                <p className="mt-1 font-body-lg text-body-lg text-on-surface-variant">Información completa del registro.</p>
               </div>
-              <button
-                type="button"
-                onClick={() => setConfirmando(true)}
-                className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high active:scale-[0.97] transition-transform"
-              >
-                <Pencil className="h-4 w-4" strokeWidth={2} />
+              <button type="button" onClick={() => setConfirmando(true)} className={botonSecundario}>
+                <Pencil className="h-4 w-4" strokeWidth={1.75} />
                 Editar
               </button>
             </div>
 
-            <section className="rounded-xl border border-outline-variant bg-surface-container-lowest p-5 shadow-sm">
+            <section className="rounded-tarjeta bg-white p-4 shadow-tarjeta md:p-6">
               <h2 className="font-headline-md text-headline-md font-bold text-on-surface mb-4">Datos del registro</h2>
-              <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))' }}>
-                <div>
-                  <p className="font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider mb-0.5">ID</p>
-                  <p className="font-body-md text-body-md text-on-surface">{registro.id}</p>
+              <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))' }}>
+                <div className={panelDato}>
+                  <p className={etiquetaDato}>ID</p>
+                  <p className="font-mono text-body-md text-on-surface tabular-nums">{registro.id}</p>
                 </div>
-                <div>
-                  <p className="font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider mb-0.5">
-                    {textos.colNombre}
-                  </p>
-                  <p className="font-body-md text-body-md text-on-surface">{registro.name}</p>
+                <div className={panelDato}>
+                  <p className={etiquetaDato}>{textos.colNombre}</p>
+                  <p className="break-words font-body-md text-body-md font-medium text-on-surface">{registro.name}</p>
                 </div>
               </div>
             </section>

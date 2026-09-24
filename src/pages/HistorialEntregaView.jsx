@@ -254,18 +254,24 @@ function HistorialEntregaView() {
           impresa. Ahora arranca en el membrete. */}
       <div className="p-container-padding md:p-8">
         <div className="mx-auto max-w-4xl space-y-stack-lg pb-4">
-          <Link
-            to="/historial/entrega"
-            className="inline-flex h-10 items-center gap-2 self-start rounded-lg border border-outline-variant bg-surface-container-high px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:border-outline hover:bg-surface-container-highest active:scale-[0.97] transition-transform"
-          >
-            <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={2.5} />
-            Entrega de Equipo
-          </Link>
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+            <Link
+              to="/historial/entrega"
+              className="inline-flex h-9 items-center gap-2 rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface shadow-sm transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
+            >
+              <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={1.75} />
+              Entrega de Equipo
+            </Link>
+            <div className="flex items-center gap-3 font-eyebrow text-eyebrow uppercase text-on-surface-variant">
+              <span aria-hidden="true" className="h-px w-7 bg-outline" />
+              Historial / Entrega
+            </div>
+          </div>
 
           {cargando ? (
             <SkeletonDetalle secciones={3} camposPorSeccion={3} />
           ) : error || !documento ? (
-            <div className="rounded-xl border border-outline-variant bg-surface-container-lowest shadow-sm">
+            <div className="rounded-tarjeta bg-white shadow-tarjeta">
               <EstadoVacio
                 variante="error"
                 titulo={error ? 'No se pudo cargar el documento' : 'Documento no encontrado'}
@@ -275,7 +281,7 @@ function HistorialEntregaView() {
                 accion={
                   <Link
                     to="/historial/entrega"
-                    className="inline-flex h-10 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high active:scale-[0.97] transition-transform"
+                    className="inline-flex h-10 items-center justify-center gap-2 rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface shadow-sm transition duration-fast ease-standard hover:bg-surface-container disabled:opacity-50 active:scale-[0.97]"
                   >
                     Volver al historial
                   </Link>
@@ -694,15 +700,15 @@ function HistorialEntregaView() {
       </div>
 
       {!cargando && !error && documento && (
-        <div className="sticky bottom-0 z-30 border-t border-outline-variant bg-surface-container-lowest px-container-padding py-3 shadow-sm md:px-8">
+        <div className="sticky bottom-0 z-30 bg-papel-velo px-container-padding py-3 shadow-barra-inferior backdrop-blur-md md:px-8">
           <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-end gap-3">
             {isAdmin && documento.items?.some((it) => !it.returned) && (
               <button
                 type="button"
                 onClick={() => navigate(`/historial/entrega/${id}/devolucion`)}
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-outline-variant bg-surface-container-lowest px-6 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high active:scale-[0.97] transition-transform"
+                className="inline-flex h-10 items-center justify-center gap-2 rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface shadow-sm transition duration-fast ease-standard hover:bg-surface-container disabled:opacity-50 active:scale-[0.97]"
               >
-                <Undo2 className="h-4 w-4" strokeWidth={2.25} />
+                <Undo2 className="h-4 w-4" strokeWidth={1.75} />
                 Registrar devolución
               </button>
             )}
@@ -710,12 +716,12 @@ function HistorialEntregaView() {
               type="button"
               onClick={handleDescargarPdf}
               disabled={generandoPdf}
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-outline-variant bg-surface-container-lowest px-6 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high disabled:opacity-60 active:scale-[0.97] transition-transform"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover disabled:opacity-50 active:scale-[0.97]"
             >
               {generandoPdf ? (
-                <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} />
+                <Loader2 className="h-4 w-4 animate-spin" strokeWidth={1.75} />
               ) : (
-                <Download className="h-4 w-4" strokeWidth={2.25} />
+                <Download className="h-4 w-4" strokeWidth={1.75} />
               )}
               Descargar PDF
             </button>
@@ -723,9 +729,9 @@ function HistorialEntregaView() {
               <button
                 type="button"
                 onClick={() => setEliminando(true)}
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-error/30 bg-surface-container-lowest px-6 font-label-bold text-label-bold text-error transition-colors hover:bg-error-container active:scale-[0.97] transition-transform"
+                className="inline-flex h-10 items-center justify-center gap-2 rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-error shadow-sm transition duration-fast ease-standard hover:bg-error-container/60 active:scale-[0.97]"
               >
-                <Trash2 className="h-4 w-4" strokeWidth={2.25} />
+                <Trash2 className="h-4 w-4" strokeWidth={1.75} />
                 Eliminar
               </button>
             )}

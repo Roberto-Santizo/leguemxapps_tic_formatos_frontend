@@ -9,21 +9,25 @@
  */
 function EnConstruccion({ icon: Icon, titulo, descripcion }) {
   return (
-    <div className="flex-1 animate-view-in p-container-padding md:p-stack-lg bg-background">
+    <div className="flex-1 animate-view-in p-container-padding md:p-stack-lg">
       <div className="max-w-[1200px] mx-auto flex flex-col gap-stack-lg">
-        <div>
-          <h1 className="font-headline-lg text-headline-lg font-bold text-on-surface mb-1">{titulo}</h1>
+        <div className="min-w-0">
+          <div className="flex items-center gap-3 font-eyebrow text-eyebrow uppercase text-on-surface-variant">
+            <span aria-hidden="true" className="h-px w-7 bg-outline" />
+            Legumex
+          </div>
+          <h1 className="mt-1.5 font-display-lg text-[26px] leading-[32px] md:text-display-lg text-on-surface">{titulo}</h1>
         </div>
 
-        <div className="rounded-2xl border border-outline-variant bg-surface-container-lowest shadow-sm px-6 py-16 sm:px-10">
+        <div className="animate-pop-in rounded-tarjeta bg-white px-6 py-16 shadow-tarjeta sm:px-10">
           <div className="mx-auto flex max-w-md flex-col items-center gap-4 text-center">
             {Icon && (
-              <div className="grid h-14 w-14 shrink-0 place-items-center rounded-xl border border-outline-variant bg-surface-container-lowest text-primary">
-                <Icon className="h-6 w-6" strokeWidth={2} />
+              <div className="grid h-14 w-14 shrink-0 place-items-center rounded-xl bg-surface-container-high text-on-surface">
+                <Icon className="h-6 w-6" strokeWidth={1.75} />
               </div>
             )}
             <div className="flex flex-col gap-1.5">
-              <h2 className="font-headline-md text-headline-md font-bold text-on-surface">Próximamente</h2>
+              <h2 className="font-headline-md text-headline-md text-on-surface">Próximamente</h2>
               <p className="font-body-md text-body-md text-on-surface-variant">{descripcion}</p>
             </div>
           </div>

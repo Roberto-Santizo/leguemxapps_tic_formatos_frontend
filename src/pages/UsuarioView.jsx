@@ -9,9 +9,24 @@ import { obtenerUsuario } from '../services/api.js'
 
 // Mismos roles que ya usa Usuarios.jsx (lista) y UsuarioForm.jsx (select).
 const ROL_INFO = {
-  admin: { label: 'Administrador', classes: 'bg-on-surface text-surface' },
-  user: { label: 'Usuario', classes: 'border border-outline bg-surface text-on-surface' },
+  admin: { label: 'Administrador', classes: 'bg-on-surface' },
+  user: { label: 'Usuario', classes: 'bg-outline' },
 }
+
+// Mismas iniciales que el avatar de la lista (Usuarios.jsx). Solo decorativo.
+function iniciales(nombre) {
+  if (!nombre) return '—'
+  return nombre
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((p) => p[0].toUpperCase())
+    .join('')
+}
+
+const botonSecundario =
+  'inline-flex h-10 items-center justify-center gap-2 rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface shadow-sm transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]'
+const etiqueta = 'mb-1.5 font-mono text-[11px] uppercase tracking-[0.1em] text-on-surface-variant'
 
 /**
  * Vista completa de un usuario -- destino del ojo/tarjeta en Usuarios.jsx.
@@ -46,19 +61,19 @@ function UsuarioView() {
   }, [id, token, intento])
 
   const rolInfo = usuario
-    ? ROL_INFO[usuario.role] || { label: usuario.role, classes: 'bg-surface-container-high text-on-surface' }
+    ? ROL_INFO[usuario.role] || { label: usuario.role, classes: 'bg-outline' }
     : null
 
   return (
-    <div className="animate-view-in flex-1 p-container-padding md:p-stack-lg bg-background">
+    <div className="animate-view-in flex-1 p-container-padding md:p-stack-lg">
       {/* Mismo ancho que su formulario (UsuarioForm, 600px): ver y editar de
           una misma entidad no deben cambiar de ancho al pasar de una a otra. */}
-      <div className="max-w-[600px] mx-auto flex flex-col gap-stack-md">
+      <div className="max-w-[600px] mx-auto flex flex-col gap-stack-lg">
         <Link
           to="/usuarios"
-          className="inline-flex h-10 items-center gap-2 self-start rounded-lg border border-outline-variant bg-surface-container-high px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:border-outline hover:bg-surface-container-highest active:scale-[0.97] transition-transform"
+          className="inline-flex h-9 items-center gap-2 self-start rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface shadow-sm transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
         >
-          <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={2.5} />
+          <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={1.75} />
           Usuarios
         </Link>
 
@@ -67,7 +82,7 @@ function UsuarioView() {
         ) : error ? (
           // Mismo estado de error que las listas (EstadoVacio con
           // "Reintentar"), en vez de una línea roja suelta sin ninguna salida.
-          <div className="rounded-xl border border-outline-variant bg-surface-container-lowest shadow-sm">
+          <div className="rounded-tarjeta bg-white shadow-tarjeta">
             <EstadoVacio
               variante="error"
               titulo="No se pudo cargar el usuario"
@@ -76,7 +91,7 @@ function UsuarioView() {
                 <button
                   type="button"
                   onClick={() => setIntento((n) => n + 1)}
-                  className="inline-flex h-10 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high active:scale-[0.97] transition-transform"
+                  className={botonSecundario}
                 >
                   Reintentar
                 </button>
@@ -85,37 +100,42 @@ function UsuarioView() {
           </div>
         ) : (
           <>
-            <div className="flex justify-between items-start gap-4 flex-wrap">
-              <div>
-                <h1 className="font-headline-lg text-headline-lg font-bold text-on-surface mb-1">{usuario.name}</h1>
-                <p className="font-body-md text-body-md text-on-surface-variant">Información completa del usuario.</p>
+            <div className="flex justify-between items-start sm:items-end gap-4 flex-wrap">
+              <div className="min-w-0">
+                <div className="flex items-center gap-3 font-eyebrow text-eyebrow uppercase text-on-surface-variant">
+                  <span aria-hidden="true" className="h-px w-7 bg-outline" />
+                  Usuarios / Detalle
+                </div>
+                <h1 className="mt-1.5 font-display-lg text-[26px] leading-[32px] md:text-display-lg text-on-surface break-words">
+                  {usuario.name}
+                </h1>
+                <p className="mt-1 font-body-lg text-body-lg text-on-surface-variant">Información completa del usuario.</p>
               </div>
-              <button
-                type="button"
-                onClick={() => setConfirmando(true)}
-                className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high active:scale-[0.97] transition-transform"
-              >
-                <Pencil className="h-4 w-4" strokeWidth={2} />
+              <button type="button" onClick={() => setConfirmando(true)} className={botonSecundario}>
+                <Pencil className="h-4 w-4" strokeWidth={1.75} />
                 Editar
               </button>
             </div>
 
-            <section className="rounded-xl border border-outline-variant bg-surface-container-lowest p-5 shadow-sm">
-              <h2 className="font-headline-md text-headline-md font-bold text-on-surface mb-4">Datos del usuario</h2>
-              <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))' }}>
-                <div>
-                  <p className="font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider mb-0.5">
-                    Usuario
-                  </p>
-                  <p className="font-body-md text-body-md text-on-surface">{usuario.username}</p>
+            <section className="animate-pop-in rounded-tarjeta bg-white p-4 shadow-tarjeta sm:p-6">
+              <div className="mb-5 flex items-center gap-3 border-b border-outline-variant pb-5">
+                <span
+                  aria-hidden="true"
+                  className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-outline bg-white text-[14px] font-semibold text-on-surface"
+                >
+                  {iniciales(usuario.name)}
+                </span>
+                <h2 className="font-headline-md text-headline-md text-on-surface">Datos del usuario</h2>
+              </div>
+              <div className="grid gap-5" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))' }}>
+                <div className="min-w-0">
+                  <p className={etiqueta}>Usuario</p>
+                  <p className="font-mono text-[13px] text-on-surface break-all">{usuario.username}</p>
                 </div>
                 <div>
-                  <p className="font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider mb-0.5">
-                    Rol
-                  </p>
-                  <span
-                    className={`inline-flex items-center rounded-full px-2.5 py-1 font-label-sm text-label-sm uppercase tracking-wide ${rolInfo.classes}`}
-                  >
+                  <p className={etiqueta}>Rol</p>
+                  <span className="inline-flex h-6 items-center gap-1.5 rounded-full border border-outline-variant bg-white px-2.5 text-[12px] font-medium text-on-surface">
+                    <span aria-hidden="true" className={`h-1.5 w-1.5 rounded-full ${rolInfo.classes}`} />
                     {rolInfo.label}
                   </span>
                 </div>

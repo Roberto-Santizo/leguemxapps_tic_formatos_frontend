@@ -15,8 +15,16 @@ import { listarDepartamentos, obtenerEmpleado, crearEmpleado, actualizarEmpleado
  * general de catálogo para cualquier campo relacional).
  */
 
+// Recetas visuales "Sierra" (BRIEF, ola 2), repetidas a propósito.
 const inputClasses =
-  'h-11 w-full rounded-lg border border-outline-variant bg-surface px-3.5 font-body-md text-body-md text-on-surface transition-colors hover:border-outline focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25 disabled:opacity-60'
+  'h-10 w-full rounded-boton border border-outline-variant bg-white px-3 font-body-md text-[16px] text-on-surface placeholder:text-on-surface-subtle transition duration-fast ease-standard hover:border-outline focus:border-on-surface focus:outline-none focus:ring-0 disabled:opacity-60 md:text-body-md'
+const labelClasses = 'text-[12px] font-semibold leading-4 text-on-surface'
+const botonVolver =
+  'inline-flex h-9 items-center gap-2 self-start rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]'
+const botonSecundario =
+  'inline-flex h-10 items-center justify-center gap-2 rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]'
+const botonPrimario =
+  'inline-flex h-10 items-center justify-center gap-2 rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97] disabled:opacity-50 disabled:active:scale-100'
 
 function EmpleadoForm() {
   const { id } = useParams()
@@ -89,27 +97,33 @@ function EmpleadoForm() {
   }
 
   return (
-    <div className="animate-view-in flex-1 p-container-padding md:p-stack-lg bg-background">
+    <div className="animate-view-in flex-1 p-container-padding md:p-stack-lg">
       <div className="max-w-[600px] mx-auto flex flex-col gap-stack-lg">
-        <Link
-          to="/catalogo/empleados"
-          className="inline-flex h-10 items-center gap-2 self-start rounded-lg border border-outline-variant bg-surface-container-high px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:border-outline hover:bg-surface-container-highest active:scale-[0.97] transition-transform"
-        >
-          <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={2.5} />
+        <Link to="/catalogo/empleados" className={botonVolver}>
+          <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={1.75} />
           Empleados
         </Link>
 
-        <h1 className="font-headline-lg text-headline-lg font-bold text-on-surface">
-          {esEdicion ? 'Editar empleado' : 'Nuevo empleado'}
-        </h1>
+        <div>
+          <div className="flex items-center gap-3 font-eyebrow text-eyebrow uppercase text-on-surface-variant">
+            <span aria-hidden="true" className="h-px w-7 bg-outline" />
+            Catálogo / Empleados / {esEdicion ? 'Editar' : 'Nuevo'}
+          </div>
+          <h1 className="mt-1.5 font-display-lg text-[26px] leading-[32px] font-extrabold tracking-[-0.04em] text-on-surface md:text-display-lg">
+            {esEdicion ? 'Editar empleado' : 'Nuevo empleado'}
+          </h1>
+        </div>
 
         {cargando ? (
           <SkeletonFormulario campos={3} />
         ) : (
-          <form onSubmit={handleSubmit} className="flex flex-col gap-stack-lg">
-            <section className="rounded-xl border border-outline-variant bg-surface-container-lowest p-5 shadow-sm flex flex-col gap-stack-md">
-              <div className="flex flex-col gap-1.5">
-                <label className="font-label-bold text-label-bold text-on-surface">Código</label>
+          <form
+            onSubmit={handleSubmit}
+            className="flex flex-col gap-5 rounded-tarjeta bg-white p-4 shadow-tarjeta md:p-6"
+          >
+            <section className="flex flex-col gap-5">
+              <div className="flex flex-col gap-2">
+                <label className={labelClasses}>Código</label>
                 <input
                   className={inputClasses}
                   value={code}
@@ -124,8 +138,8 @@ function EmpleadoForm() {
                 )}
               </div>
 
-              <div className="flex flex-col gap-1.5">
-                <label className="font-label-bold text-label-bold text-on-surface">Nombre</label>
+              <div className="flex flex-col gap-2">
+                <label className={labelClasses}>Nombre</label>
                 <input
                   className={inputClasses}
                   value={name}
@@ -140,8 +154,8 @@ function EmpleadoForm() {
                 )}
               </div>
 
-              <div className="flex flex-col gap-1.5">
-                <label className="font-label-bold text-label-bold text-on-surface">Departamento</label>
+              <div className="flex flex-col gap-2">
+                <label className={labelClasses}>Departamento</label>
                 <SearchableSelect
                   options={departamentos}
                   value={departmentId}
@@ -150,9 +164,12 @@ function EmpleadoForm() {
                   placeholder="Selecciona un departamento"
                   emptyOptionsText="No hay departamentos registrados todavía."
                 />
-                <p className="font-label-sm text-label-sm text-on-surface-variant">
+                <p className="text-[12px] leading-4 text-on-surface-subtle">
                   ¿Falta uno?{' '}
-                  <Link to="/catalogo/departamentos" className="underline hover:text-on-surface">
+                  <Link
+                    to="/catalogo/departamentos"
+                    className="font-medium text-foco underline-offset-2 hover:text-foco-hover hover:underline"
+                  >
                     Regístralo en Departamentos
                   </Link>
                   .
@@ -161,24 +178,19 @@ function EmpleadoForm() {
             </section>
 
             {error && (
-              <p className="font-label-sm text-label-sm text-error rounded-lg border border-error/30 bg-error-container/40 px-3 py-2">
+              <p className="animate-hint-in font-label-sm text-label-sm text-error rounded-boton border border-error/30 bg-error-container/40 px-3 py-2">
                 {error}
               </p>
             )}
 
-            <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-              <Link
-                to="/catalogo/empleados"
-                className="inline-flex h-11 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high active:scale-[0.97] transition-transform"
-              >
+            {/* Fila de botones del mockup: filete arriba, primario a la
+                izquierda (row-reverse solo cambia el orden visual). */}
+            <div className="flex flex-col-reverse gap-2 border-t border-outline-variant pt-5 sm:flex-row-reverse sm:justify-end">
+              <Link to="/catalogo/empleados" className={botonSecundario}>
                 Cancelar
               </Link>
-              <button
-                type="submit"
-                disabled={guardando || !completo}
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-primary px-5 font-label-bold text-label-bold text-on-primary shadow-sm transition-all hover:brightness-110 active:brightness-95 active:scale-[0.97] disabled:opacity-60"
-              >
-                {guardando ? <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} /> : <Save className="h-4 w-4" strokeWidth={2.25} />}
+              <button type="submit" disabled={guardando || !completo} className={botonPrimario}>
+                {guardando ? <Loader2 className="h-4 w-4 animate-spin" strokeWidth={1.75} /> : <Save className="h-4 w-4" strokeWidth={1.75} />}
                 {esEdicion ? 'Guardar cambios' : 'Crear empleado'}
               </button>
             </div>

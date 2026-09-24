@@ -22,21 +22,25 @@ function Historial() {
   )
 
   return (
-    <div className="flex-1 animate-view-in p-container-padding md:p-stack-lg bg-background">
+    <div className="flex-1 animate-view-in p-container-padding md:p-stack-lg">
       <div className="max-w-[1200px] mx-auto flex flex-col gap-stack-lg">
         <div>
-          <h1 className="font-headline-lg text-headline-lg font-bold text-on-surface mb-1">
+          <div className="flex items-center gap-3 font-eyebrow text-eyebrow uppercase text-on-surface-variant">
+            <span aria-hidden="true" className="h-px w-7 bg-outline" />
+            Legumex / Historial
+          </div>
+          <h1 className="mt-1.5 font-display-lg text-[26px] leading-[32px] font-extrabold tracking-[-0.04em] text-on-surface md:text-display-lg">
             Historial de Actas
           </h1>
-          <p className="font-body-md text-body-md text-on-surface-variant">
+          <p className="mt-1 font-body-lg text-body-lg text-on-surface-variant">
             Elige el formato para ver, buscar y eliminar las actas ya registradas.
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 rounded-xl border border-outline-variant bg-surface-container-lowest px-5 py-3.5 shadow-sm">
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 rounded-tarjeta bg-white px-5 py-3.5 shadow-tarjeta">
           <div className="flex items-center gap-2 text-on-surface-variant">
-            <CalendarClock className="h-4 w-4 shrink-0" strokeWidth={2} />
-            <span className="font-label-bold text-label-bold uppercase tracking-wide">Vigencia de los formatos</span>
+            <CalendarClock className="h-4 w-4 shrink-0" strokeWidth={1.75} />
+            <span className="font-mono text-[11px] font-medium uppercase tracking-[0.1em]">Vigencia de los formatos</span>
           </div>
           <div className="flex items-center gap-1.5 font-body-md text-body-md text-on-surface">
             <span className="text-on-surface-variant">Emisión:</span>
@@ -73,14 +77,21 @@ function Historial() {
               <Link
                 key={formato.id}
                 to={`/historial/${formato.id}`}
-                className="group flex flex-col gap-stack-md rounded-2xl border border-outline-variant bg-surface-container-lowest p-6 shadow-sm transition-all duration-150 hover:border-outline hover:shadow-md active:scale-[0.99]"
+                data-reveal
+                className="group flex flex-col gap-stack-md rounded-tarjeta bg-white p-4 shadow-tarjeta transition duration-base ease-standard hover:-translate-y-0.5 hover:shadow-flotante active:scale-[0.99] md:p-6"
               >
-                <div className="grid h-14 w-14 shrink-0 place-items-center rounded-xl border border-outline-variant bg-surface-container-lowest text-primary transition-colors group-hover:border-outline">
-                  <Icon className="h-6 w-6" strokeWidth={2} />
+                <div className="flex items-start justify-between gap-3">
+                  <div className="grid h-14 w-14 shrink-0 place-items-center rounded-xl bg-surface-container-high text-on-surface transition-colors duration-base ease-standard group-hover:bg-surface-container-highest">
+                    <Icon className="h-6 w-6" strokeWidth={1.75} />
+                  </div>
+                  {/* Código del formato: decorativo, igual que en Nueva Acta. */}
+                  <span className="inline-flex h-6 items-center rounded-full border border-outline-variant bg-white px-2.5 font-mono text-[11px] tracking-[0.1em] text-on-surface-variant">
+                    {formato.codigo}
+                  </span>
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  <h2 className="font-headline-md text-headline-md font-bold text-on-surface">
+                  <h2 className="font-headline-md text-headline-md text-on-surface">
                     {formato.tituloCorto}
                   </h2>
                   <p className="font-body-md text-body-md text-on-surface-variant">
@@ -89,7 +100,7 @@ function Historial() {
                 </div>
 
                 <div className="mt-auto flex items-center justify-between gap-2 border-t border-outline-variant pt-3">
-                  <span className="font-label-bold text-label-bold text-on-surface-variant">
+                  <span className="font-mono text-[11px] uppercase tracking-[0.1em] text-on-surface-variant">
                     {formato.id === 'entrega'
                       ? 'Buscar · Ver · Eliminar'
                       : formato.id === 'devolucion'
@@ -97,8 +108,8 @@ function Historial() {
                         : 'Próximamente'}
                   </span>
                   <ChevronRight
-                    className="h-4 w-4 shrink-0 text-outline transition-transform group-hover:translate-x-0.5"
-                    strokeWidth={2}
+                    className="h-4 w-4 shrink-0 text-outline transition duration-base ease-standard group-hover:translate-x-0.5 group-hover:text-on-surface"
+                    strokeWidth={1.75}
                   />
                 </div>
               </Link>

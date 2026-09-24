@@ -5,8 +5,17 @@ import { useAuth } from '../context/AuthContext.jsx'
 import { mostrarToast } from './Toast.jsx'
 import { SkeletonFormulario } from './Skeleton.jsx'
 
+// Recetas visuales "Sierra" (BRIEF, ola 2), repetidas a propósito en cada
+// pantalla en vez de un componente de botón/campo genérico.
 const inputClasses =
-  'h-11 w-full rounded-lg border border-outline-variant bg-surface px-3.5 font-body-md text-body-md text-on-surface transition-colors hover:border-outline focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25 disabled:opacity-60'
+  'h-10 w-full rounded-boton border border-outline-variant bg-white px-3 font-body-md text-[16px] text-on-surface placeholder:text-on-surface-subtle transition duration-fast ease-standard hover:border-outline focus:border-on-surface focus:outline-none focus:ring-0 disabled:opacity-60 md:text-body-md'
+const labelClasses = 'text-[12px] font-semibold leading-4 text-on-surface'
+const botonVolver =
+  'inline-flex h-9 items-center gap-2 self-start rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]'
+const botonSecundario =
+  'inline-flex h-10 items-center justify-center gap-2 rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]'
+const botonPrimario =
+  'inline-flex h-10 items-center justify-center gap-2 rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97] disabled:opacity-50 disabled:active:scale-100'
 
 /**
  * Alta y edición de un catálogo simple de un solo campo (`name`): Marcas o
@@ -68,18 +77,19 @@ function CatalogoFormPage({ textos, onObtener, onCrear, onActualizar, rutaBase }
   }
 
   return (
-    <div className="animate-view-in flex-1 p-container-padding md:p-stack-lg bg-background">
+    <div className="animate-view-in flex-1 p-container-padding md:p-stack-lg">
       <div className="max-w-[600px] mx-auto flex flex-col gap-stack-lg">
-        <Link
-          to={rutaBase}
-          className="inline-flex h-10 items-center gap-2 self-start rounded-lg border border-outline-variant bg-surface-container-high px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:border-outline hover:bg-surface-container-highest active:scale-[0.97] transition-transform"
-        >
-          <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={2.5} />
+        <Link to={rutaBase} className={botonVolver}>
+          <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={1.75} />
           {textos.titulo}
         </Link>
 
         <div>
-          <h1 className="font-headline-lg text-headline-lg font-bold text-on-surface mb-1">
+          <div className="flex items-center gap-3 font-eyebrow text-eyebrow uppercase text-on-surface-variant">
+            <span aria-hidden="true" className="h-px w-7 bg-outline" />
+            Catálogo / {textos.titulo} / {esEdicion ? 'Editar' : 'Nuevo'}
+          </div>
+          <h1 className="mt-1.5 font-display-lg text-[26px] leading-[32px] font-extrabold tracking-[-0.04em] text-on-surface md:text-display-lg">
             {esEdicion ? textos.tituloEditar : textos.tituloCrear}
           </h1>
         </div>
@@ -87,10 +97,13 @@ function CatalogoFormPage({ textos, onObtener, onCrear, onActualizar, rutaBase }
         {cargando ? (
           <SkeletonFormulario campos={1} />
         ) : (
-          <form onSubmit={handleSubmit} className="flex flex-col gap-stack-lg">
-            <section className="rounded-xl border border-outline-variant bg-surface-container-lowest p-5 shadow-sm flex flex-col gap-stack-md">
-              <div className="flex flex-col gap-1.5">
-                <label className="font-label-bold text-label-bold text-on-surface">{textos.labelCampo}</label>
+          <form
+            onSubmit={handleSubmit}
+            className="flex flex-col gap-5 rounded-tarjeta bg-white p-4 shadow-tarjeta md:p-6"
+          >
+            <section className="flex flex-col gap-5">
+              <div className="flex flex-col gap-2">
+                <label className={labelClasses}>{textos.labelCampo}</label>
                 <input
                   className={inputClasses}
                   value={name}
@@ -108,27 +121,23 @@ function CatalogoFormPage({ textos, onObtener, onCrear, onActualizar, rutaBase }
             </section>
 
             {error && (
-              <p className="font-label-sm text-label-sm text-error rounded-lg border border-error/30 bg-error-container/40 px-3 py-2">
+              <p className="animate-hint-in font-label-sm text-label-sm text-error rounded-boton border border-error/30 bg-error-container/40 px-3 py-2">
                 {error}
               </p>
             )}
 
-            <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-              <Link
-                to={rutaBase}
-                className="inline-flex h-11 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high active:scale-[0.97] transition-transform"
-              >
+            {/* Fila de botones del mockup: filete arriba, primario a la
+                izquierda (row-reverse solo cambia el orden visual; en móvil
+                el primario queda arriba, a todo lo ancho). */}
+            <div className="flex flex-col-reverse gap-2 border-t border-outline-variant pt-5 sm:flex-row-reverse sm:justify-end">
+              <Link to={rutaBase} className={botonSecundario}>
                 Cancelar
               </Link>
-              <button
-                type="submit"
-                disabled={guardando || !name.trim()}
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-primary px-5 font-label-bold text-label-bold text-on-primary shadow-sm transition-all hover:brightness-110 active:brightness-95 active:scale-[0.97] disabled:opacity-60"
-              >
+              <button type="submit" disabled={guardando || !name.trim()} className={botonPrimario}>
                 {guardando ? (
-                  <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} />
+                  <Loader2 className="h-4 w-4 animate-spin" strokeWidth={1.75} />
                 ) : (
-                  <Save className="h-4 w-4" strokeWidth={2.25} />
+                  <Save className="h-4 w-4" strokeWidth={1.75} />
                 )}
                 {esEdicion ? 'Guardar cambios' : 'Crear'}
               </button>

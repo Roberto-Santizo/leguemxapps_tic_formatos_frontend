@@ -22,8 +22,8 @@ function iniciales(nombre) {
 // Historial: ver actas y corregir solo la fecha de encabezado y la fecha de
 // cada registro). "adminagricola" se retiró.
 const ROL_INFO = {
-  admin: { label: 'Administrador', classes: 'bg-on-surface text-surface' },
-  user: { label: 'Usuario', classes: 'border border-outline bg-surface text-on-surface' },
+  admin: { label: 'Administrador', classes: 'bg-on-surface' },
+  user: { label: 'Usuario', classes: 'bg-outline' },
 }
 
 /**
@@ -75,7 +75,7 @@ function Usuarios() {
   const sinContenido = !cargando && (Boolean(errorCarga) || !hayRegistros)
 
   const botonSecundario =
-    'inline-flex h-10 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high active:scale-[0.97] transition-transform'
+    'inline-flex h-10 items-center justify-center gap-2 rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface shadow-sm transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]'
 
   const estado = errorCarga ? (
     <EstadoVacio
@@ -113,27 +113,42 @@ function Usuarios() {
   )
 
   const iconoActivo =
-    'inline-grid h-9 w-9 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface active:scale-[0.90] transition-transform'
+    'inline-flex h-9 w-9 items-center justify-center rounded-boton text-on-surface-variant transition duration-fast ease-standard hover:bg-surface-container hover:text-on-surface active:scale-[0.90]'
+  // "Editar" con texto, como en la tabla de usuarios del mockup.
+  const botonEditar =
+    'inline-flex h-8 items-center justify-center gap-1.5 rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]'
+  // Avatar con iniciales: círculo blanco con filete, como el mockup.
+  const avatar =
+    'grid shrink-0 place-items-center rounded-full border border-outline bg-white font-semibold text-on-surface'
+  const chipRol =
+    'inline-flex h-6 items-center gap-1.5 rounded-full border border-outline-variant bg-white px-2.5 text-[12px] font-medium text-on-surface whitespace-nowrap'
+  const th = 'h-11 px-4 font-mono text-[11px] font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap'
+  const conteo =
+    visibles.length === usuarios.length ? `${usuarios.length} usuarios` : `${visibles.length} de ${usuarios.length} usuarios`
 
   function verUsuario(usuario) {
     navigate(`/usuarios/${usuario.id}/ver`)
   }
 
   return (
-    <div className="animate-view-in flex-1 p-container-padding md:p-stack-lg bg-background">
+    <div className="animate-view-in flex-1 p-container-padding md:p-stack-lg">
       <div className="max-w-[1200px] mx-auto flex flex-col gap-stack-lg">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
-          <div>
-            <h1 className="font-headline-lg text-headline-lg font-bold text-on-surface mb-1">Usuarios</h1>
-            <p className="font-body-md text-body-md text-on-surface-variant">
+          <div className="min-w-0">
+            <div className="flex items-center gap-3 font-eyebrow text-eyebrow uppercase text-on-surface-variant">
+              <span aria-hidden="true" className="h-px w-7 bg-outline" />
+              Legumex / Usuarios
+            </div>
+            <h1 className="mt-1.5 font-display-lg text-[26px] leading-[32px] md:text-display-lg text-on-surface">Usuarios</h1>
+            <p className="mt-1 font-body-lg text-body-lg text-on-surface-variant">
               Cuentas con acceso al sistema y su rol.
             </p>
           </div>
           <Link
             to="/usuarios/nuevo"
-            className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-primary px-4 font-label-bold text-label-bold text-on-primary shadow-sm transition-all hover:brightness-110 active:brightness-95 active:scale-[0.97]"
+            className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97]"
           >
-            <Plus className="h-4.5 w-4.5" strokeWidth={2} />
+            <Plus className="h-4 w-4" strokeWidth={1.75} />
             Nuevo usuario
           </Link>
         </div>
@@ -141,62 +156,60 @@ function Usuarios() {
         <Buscador value={busqueda} onChange={setBusqueda} placeholder="Buscar por nombre o usuario..." />
 
         {/* ---- Escritorio: tabla, ojo (ver) + lápiz (editar con confirmación) ---- */}
-        <div className="hidden md:block bg-surface-container-lowest border border-outline-variant rounded-xl overflow-x-auto shadow-sm">
+        <div className="hidden md:block overflow-hidden rounded-tarjeta bg-white shadow-tarjeta">
           {cargando ? (
             <SkeletonTabla columnas={3} filas={5} />
           ) : sinContenido ? (
             estado
           ) : (
-            <table className="w-full min-w-[520px] text-left border-collapse text-sm">
+            <>
+            <div className="overflow-x-auto">
+            <table className="w-full min-w-[520px] text-left border-collapse">
               <thead>
-                <tr className="bg-surface-container-low border-b border-outline-variant">
-                  <th className="px-5 py-3.5 font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider whitespace-nowrap">
-                    Usuario
-                  </th>
-                  <th className="px-5 py-3.5 font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider whitespace-nowrap">
-                    Rol
-                  </th>
-                  <th className="w-24 px-5 py-3.5 font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider whitespace-nowrap text-right">
-                    Acciones
-                  </th>
+                <tr className="bg-surface-container">
+                  <th className={th}>Usuario</th>
+                  <th className={`w-56 ${th}`}>Rol</th>
+                  <th className={`w-44 text-right ${th}`}>Acciones</th>
                 </tr>
               </thead>
-              <tbody className="font-body-md text-on-surface divide-y divide-outline-variant">
+              <tbody className="font-body-md text-body-md text-on-surface">
                 {visibles.map((u) => {
-                  const rolInfo = ROL_INFO[u.role] || { label: u.role, classes: 'bg-surface-container-high text-on-surface' }
+                  const rolInfo = ROL_INFO[u.role] || { label: u.role, classes: 'bg-outline' }
                   return (
-                    <tr key={u.id} className="hover:bg-surface-container-low transition-colors">
-                      <td className="px-5 py-4">
-                        <div className="inline-flex items-center gap-2.5">
-                          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-secondary-container font-label-bold text-[11px] text-on-secondary-container">
-                            {iniciales(u.name)}
-                          </span>
+                    <tr
+                      key={u.id}
+                      data-reveal
+                      className="h-[72px] border-t border-outline-variant transition-colors duration-fast hover:bg-surface-container-low"
+                    >
+                      <td className="px-4 py-3">
+                        <div className="flex min-w-0 items-center gap-3">
+                          <span className={`h-8 w-8 text-[12px] ${avatar}`}>{iniciales(u.name)}</span>
                           <div className="min-w-0">
                             <div className="font-medium text-on-surface truncate">{u.name}</div>
-                            <div className="font-label-sm text-label-sm text-on-surface-variant truncate">{u.username}</div>
+                            <div className="font-mono text-[12px] text-on-surface-variant truncate">{u.username}</div>
                           </div>
                         </div>
                       </td>
-                      <td className="px-5 py-4">
-                        <span
-                          className={`inline-flex items-center rounded-full px-2.5 py-1 font-label-sm text-label-sm uppercase tracking-wide ${rolInfo.classes}`}
-                        >
+                      <td className="px-4 py-3">
+                        <span className={chipRol}>
+                          <span aria-hidden="true" className={`h-1.5 w-1.5 rounded-full ${rolInfo.classes}`} />
                           {rolInfo.label}
                         </span>
                       </td>
-                      <td className="px-5 py-4">
-                        <div className="flex items-center justify-end gap-1">
+                      <td className="px-4 py-3">
+                        <div className="flex items-center justify-end gap-1.5">
                           <button type="button" onClick={() => verUsuario(u)} aria-label={`Ver ${u.name}`} title="Ver" className={iconoActivo}>
-                            <Eye className="h-4 w-4" strokeWidth={2} />
+                            <Eye className="h-4 w-4" strokeWidth={1.75} />
                           </button>
                           <button
                             type="button"
                             onClick={() => setConfirmando(u)}
                             aria-label={`Editar ${u.name}`}
                             title="Editar"
-                            className={iconoActivo}
+                            className={botonEditar}
                           >
-                            <Pencil className="h-4 w-4" strokeWidth={2} />
+                            <Pencil className="h-3.5 w-3.5" strokeWidth={1.75} />
+                            <span aria-hidden="true">Editar</span>
                           </button>
                         </div>
                       </td>
@@ -205,6 +218,12 @@ function Usuarios() {
                 })}
               </tbody>
             </table>
+            </div>
+            {/* Pie de la tabla, como el mockup: conteo en mono sobre gris. */}
+            <div className="flex h-12 items-center border-t border-outline-variant bg-surface-container px-4 font-mono text-[11px] uppercase tracking-[0.1em] text-on-surface-variant tabular-nums">
+              {conteo}
+            </div>
+            </>
           )}
         </div>
 
@@ -213,29 +232,26 @@ function Usuarios() {
           {cargando ? (
             <SkeletonTarjetas filas={4} />
           ) : sinContenido ? (
-            <div className="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-sm">{estado}</div>
+            <div className="rounded-tarjeta bg-white shadow-tarjeta">{estado}</div>
           ) : (
             visibles.map((u) => {
-              const rolInfo = ROL_INFO[u.role] || { label: u.role, classes: 'bg-surface-container-high text-on-surface' }
+              const rolInfo = ROL_INFO[u.role] || { label: u.role, classes: 'bg-outline' }
               return (
                 <button
                   key={u.id}
                   type="button"
                   onClick={() => verUsuario(u)}
-                  className="flex w-full items-center justify-between gap-3 rounded-xl border border-outline-variant bg-surface-container-lowest px-4 py-3.5 text-left shadow-sm transition-all hover:bg-surface-container-low active:scale-[0.99] active:bg-surface-container-low"
+                  className="flex w-full items-center justify-between gap-3 rounded-tarjeta bg-white p-4 text-left shadow-tarjeta transition duration-fast ease-standard hover:bg-surface-container-low active:scale-[0.99]"
                 >
-                  <div className="min-w-0 flex items-center gap-2.5">
-                    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-secondary-container font-label-bold text-[11px] text-on-secondary-container">
-                      {iniciales(u.name)}
-                    </span>
+                  <div className="min-w-0 flex items-center gap-3">
+                    <span className={`h-10 w-10 text-[13px] ${avatar}`}>{iniciales(u.name)}</span>
                     <div className="min-w-0">
-                      <p className="font-body-md text-body-md font-medium text-on-surface break-words">{u.name}</p>
-                      <p className="font-label-sm text-label-sm text-on-surface-variant break-words">{u.username}</p>
+                      <p className="font-body-md text-body-md font-semibold text-on-surface break-words">{u.name}</p>
+                      <p className="font-mono text-[12px] text-on-surface-variant break-all">{u.username}</p>
                     </div>
                   </div>
-                  <span
-                    className={`shrink-0 inline-flex items-center rounded-full px-2.5 py-1 font-label-sm text-label-sm uppercase tracking-wide ${rolInfo.classes}`}
-                  >
+                  <span className={`shrink-0 ${chipRol}`}>
+                    <span aria-hidden="true" className={`h-1.5 w-1.5 rounded-full ${rolInfo.classes}`} />
                     {rolInfo.label}
                   </span>
                 </button>
@@ -245,8 +261,8 @@ function Usuarios() {
         </div>
 
         {!cargando && !sinContenido && (
-          <p className="font-label-sm text-label-sm text-on-surface-variant tabular-nums">
-            {visibles.length === usuarios.length ? `${usuarios.length} usuarios` : `${visibles.length} de ${usuarios.length} usuarios`}
+          <p className="md:hidden px-1 font-mono text-[11px] uppercase tracking-[0.1em] text-on-surface-variant tabular-nums">
+            {conteo}
           </p>
         )}
       </div>

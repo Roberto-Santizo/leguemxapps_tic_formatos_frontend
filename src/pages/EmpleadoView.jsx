@@ -8,6 +8,16 @@ import { SkeletonDetalle } from '../components/Skeleton.jsx'
 import { obtenerEmpleado, listarDepartamentos, equiposDeEmpleado } from '../services/api.js'
 import { formatearFecha } from '../utils/fecha.js'
 
+// Recetas visuales "Sierra" (BRIEF, ola 2), repetidas a propósito.
+const botonVolver =
+  'inline-flex h-9 items-center gap-2 self-start rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]'
+const botonSecundario =
+  'inline-flex h-10 items-center justify-center gap-2 rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface shadow-sm transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]'
+const etiquetaDato = 'mb-1 font-mono text-[11px] uppercase leading-4 tracking-[0.1em] text-on-surface-variant'
+const panelDato = 'min-w-0 rounded-xl bg-surface-container-high px-4 py-3'
+const tituloSeccion =
+  'mb-4 flex items-center gap-2 font-headline-md text-headline-md font-bold text-on-surface'
+
 function nombrePlanta(location) {
   if (location === 'Planta Tejar' || location === 'Planta Parramos') return location
   return Number(location) === 1 ? 'Planta Tejar' : 'Planta Parramos'
@@ -84,20 +94,17 @@ function EmpleadoView() {
     : '—'
 
   return (
-    <div className="animate-view-in flex-1 p-container-padding md:p-stack-lg bg-background">
-      <div className="max-w-[600px] mx-auto flex flex-col gap-stack-md">
-        <Link
-          to="/catalogo/empleados"
-          className="inline-flex h-10 items-center gap-2 self-start rounded-lg border border-outline-variant bg-surface-container-high px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:border-outline hover:bg-surface-container-highest active:scale-[0.97] transition-transform"
-        >
-          <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={2.5} />
+    <div className="animate-view-in flex-1 p-container-padding md:p-stack-lg">
+      <div className="max-w-[600px] mx-auto flex flex-col gap-stack-lg">
+        <Link to="/catalogo/empleados" className={botonVolver}>
+          <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={1.75} />
           Empleados
         </Link>
 
         {cargando ? (
           <SkeletonDetalle secciones={2} camposPorSeccion={2} />
         ) : error ? (
-          <div className="rounded-xl border border-outline-variant bg-surface-container-lowest shadow-sm">
+          <div className="rounded-tarjeta bg-white shadow-tarjeta">
             <EstadoVacio
               variante="error"
               titulo="No se pudo cargar el empleado"
@@ -106,7 +113,7 @@ function EmpleadoView() {
                 <button
                   type="button"
                   onClick={() => setIntento((n) => n + 1)}
-                  className="inline-flex h-10 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high active:scale-[0.97] transition-transform"
+                  className={botonSecundario}
                 >
                   Reintentar
                 </button>
@@ -115,38 +122,40 @@ function EmpleadoView() {
           </div>
         ) : (
           <>
-            <div className="flex justify-between items-start gap-4 flex-wrap">
-              <div>
-                <h1 className="font-headline-lg text-headline-lg font-bold text-on-surface mb-1">{empleado.name}</h1>
-                <p className="font-body-md text-body-md text-on-surface-variant">Información completa del empleado.</p>
+            <div className="flex justify-between items-end gap-4 flex-wrap">
+              <div className="min-w-0">
+                <div className="flex items-center gap-3 font-eyebrow text-eyebrow uppercase text-on-surface-variant">
+                  <span aria-hidden="true" className="h-px w-7 bg-outline" />
+                  Catálogo / Empleados / Detalle
+                </div>
+                <h1 className="mt-1.5 break-words font-display-lg text-[26px] leading-[32px] font-extrabold tracking-[-0.04em] text-on-surface md:text-display-lg">
+                  {empleado.name}
+                </h1>
+                <p className="mt-1 font-body-lg text-body-lg text-on-surface-variant">Información completa del empleado.</p>
               </div>
-              <button
-                type="button"
-                onClick={() => setConfirmando(true)}
-                className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high active:scale-[0.97] transition-transform"
-              >
-                <Pencil className="h-4 w-4" strokeWidth={2} />
+              <button type="button" onClick={() => setConfirmando(true)} className={botonSecundario}>
+                <Pencil className="h-4 w-4" strokeWidth={1.75} />
                 Editar
               </button>
             </div>
 
-            <section className="rounded-xl border border-outline-variant bg-surface-container-lowest p-5 shadow-sm">
-              <h2 className="font-headline-md text-headline-md font-bold text-on-surface mb-4">Datos del empleado</h2>
-              <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))' }}>
-                <div>
-                  <p className="font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider mb-0.5">Código</p>
-                  <p className="font-body-md text-body-md text-on-surface">{empleado.code || '—'}</p>
+            <section data-reveal className="rounded-tarjeta bg-white p-4 shadow-tarjeta md:p-6">
+              <h2 className={tituloSeccion}>Datos del empleado</h2>
+              <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))' }}>
+                <div className={panelDato}>
+                  <p className={etiquetaDato}>Código</p>
+                  <p className="break-words font-mono text-body-md text-on-surface">{empleado.code || '—'}</p>
                 </div>
-                <div>
-                  <p className="font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider mb-0.5">Departamento</p>
-                  <p className="font-body-md text-body-md text-on-surface">{departamento}</p>
+                <div className={panelDato}>
+                  <p className={etiquetaDato}>Departamento</p>
+                  <p className="break-words font-body-md text-body-md font-medium text-on-surface">{departamento}</p>
                 </div>
               </div>
             </section>
 
-            <section className="rounded-xl border border-outline-variant bg-surface-container-lowest p-5 shadow-sm">
-              <h2 className="flex items-center gap-2 font-headline-md text-headline-md font-bold text-on-surface mb-4">
-                <HardDrive className="h-5 w-5 shrink-0 text-primary" strokeWidth={2} />
+            <section data-reveal className="rounded-tarjeta bg-white p-4 shadow-tarjeta md:p-6">
+              <h2 className={tituloSeccion}>
+                <HardDrive className="h-5 w-5 shrink-0 text-on-surface-variant" strokeWidth={1.75} />
                 {equipos.length > 0 ? `Equipo en su poder (${equipos.length})` : 'Equipo en su poder'}
               </h2>
 
@@ -163,17 +172,17 @@ function EmpleadoView() {
                   {equipos.map((eq) => (
                     <li
                       key={eq.delivery_document_detail_id}
-                      className="flex flex-wrap items-start justify-between gap-x-3 gap-y-2 py-2.5"
+                      className="flex flex-wrap items-start justify-between gap-x-3 gap-y-2 py-3"
                     >
                       <div className="min-w-0">
-                        <p className="font-label-bold text-label-bold text-on-surface break-words">
+                        <p className="font-body-md text-body-md font-semibold text-on-surface break-words">
                           {eq.equipment_name || '—'}
                         </p>
                         <p className="font-body-md text-body-md text-on-surface-variant break-words">
                           {[eq.equipment_brand, eq.equipment_model].filter(Boolean).join(' · ') || '—'}
                           {eq.equipment_serie ? ` · Serie ${eq.equipment_serie}` : ''}
                         </p>
-                        <p className="font-label-sm text-label-sm text-on-surface-variant">
+                        <p className="mt-0.5 font-mono text-[11px] leading-4 tracking-[0.04em] text-on-surface-subtle">
                           Entregado el {formatearFecha(eq.delivery_date)} · {nombrePlanta(eq.location)}
                         </p>
                         {eq.observations && (
@@ -184,7 +193,7 @@ function EmpleadoView() {
                       </div>
                       <Link
                         to={`/historial/entrega/${eq.delivery_document_id}`}
-                        className="shrink-0 rounded-full border border-outline-variant px-2.5 py-1 font-label-sm text-label-sm text-on-surface transition-colors hover:bg-surface-container-high active:scale-[0.90] transition-transform"
+                        className="inline-flex h-7 shrink-0 items-center rounded-full border border-outline-variant bg-white px-2.5 text-[12px] font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.95]"
                       >
                         Ver entrega #{eq.delivery_document_id}
                       </Link>

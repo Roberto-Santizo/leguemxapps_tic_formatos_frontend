@@ -193,20 +193,26 @@ function RegistrarDevolucion() {
     <div className="flex-1 animate-view-in">
       <div className="p-container-padding md:p-8">
         <div className="mx-auto max-w-4xl space-y-stack-lg pb-4">
-          <Link
-            to={`/historial/entrega/${id}`}
-            className="inline-flex h-10 items-center gap-2 self-start rounded-lg border border-outline-variant bg-surface-container-high px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:border-outline hover:bg-surface-container-highest active:scale-[0.97] transition-transform"
-          >
-            <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={2.5} />
-            Entrega
-          </Link>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <Link
+              to={`/historial/entrega/${id}`}
+              className="inline-flex h-9 items-center gap-2 rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
+            >
+              <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={1.75} />
+              Entrega
+            </Link>
+            <div className="flex items-center gap-3 font-eyebrow text-eyebrow uppercase text-on-surface-variant">
+              <span aria-hidden="true" className="h-px w-7 bg-outline" />
+              Historial / Entrega #{id} / Devolución
+            </div>
+          </div>
 
           {cargando ? (
             // Misma forma que la hoja que aparece al terminar de cargar (igual
             // que HistorialEntregaView), en vez de una rueda girando.
             <SkeletonDetalle secciones={3} camposPorSeccion={3} />
           ) : error || !entrega ? (
-            <div className="rounded-xl border border-outline-variant bg-surface-container-lowest shadow-sm">
+            <div className="rounded-tarjeta bg-white shadow-tarjeta">
               <EstadoVacio
                 variante="error"
                 titulo="No se pudo cargar la entrega"
@@ -214,7 +220,7 @@ function RegistrarDevolucion() {
                 accion={
                   <Link
                     to="/historial/entrega"
-                    className="inline-flex h-10 items-center justify-center rounded-lg border border-outline-variant bg-surface px-4 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high active:scale-[0.97] transition-transform"
+                    className="inline-flex h-10 items-center justify-center rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface shadow-sm transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
                   >
                     Volver al historial
                   </Link>
@@ -224,7 +230,7 @@ function RegistrarDevolucion() {
           ) : (
             <>
               {/* Membrete -- mismo bloque que las demás hojas */}
-              <div className="overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest shadow-sm">
+              <div className="overflow-hidden rounded-tarjeta bg-white shadow-tarjeta">
                 <div className="flex flex-wrap items-start justify-between gap-column-gap p-stack-lg">
                   <div className="flex items-start gap-stack-md">
                     <div className="grid h-14 w-14 shrink-0 place-items-center rounded-xl border border-outline-variant bg-surface-container-lowest p-1.5">
@@ -284,7 +290,11 @@ function RegistrarDevolucion() {
                 titulo={formato.tituloTablaCorta}
                 acciones={
                   itemsMarcados.length > 0 && (
-                    <span className="rounded-full border border-outline-variant px-2 py-0.5 font-mono text-label-sm tabular-nums text-on-surface-variant">
+                    <span
+                      key={itemsMarcados.length}
+                      className="inline-flex h-6 animate-badge-pop items-center gap-1.5 rounded-full border border-outline-variant bg-white px-2.5 font-mono text-[11px] tabular-nums text-on-surface-variant"
+                    >
+                      <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-on-surface" />
                       {itemsMarcados.length} seleccionado{itemsMarcados.length === 1 ? '' : 's'}
                     </span>
                   )
@@ -522,21 +532,21 @@ function RegistrarDevolucion() {
       </div>
 
       {!cargando && !error && entrega && (
-        <div className="sticky bottom-0 z-30 border-t border-outline-variant bg-surface-container-lowest px-container-padding py-3 shadow-sm md:px-8">
+        <div className="sticky bottom-0 z-30 bg-papel-velo px-container-padding py-3 shadow-barra-inferior backdrop-blur-md md:px-8">
           <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-3">
             {errorGuardar ? (
-              <p className="font-label-sm text-label-sm text-error rounded-lg border border-error/30 bg-error-container/40 px-3 py-2">
+              <p className="animate-pop-in rounded-boton border border-error/30 bg-error-container/60 px-3 py-2 font-label-sm text-label-sm text-error">
                 {errorGuardar}
               </p>
             ) : (
-              <span className="font-label-bold text-label-bold text-on-surface-variant">
+              <span className="font-mono text-[11px] uppercase tracking-[0.1em] text-on-surface-variant">
                 Complete los datos para guardar
               </span>
             )}
             <div className="flex items-center gap-3">
               <Link
                 to={`/historial/entrega/${id}`}
-                className="inline-flex h-11 items-center justify-center rounded-lg border border-outline-variant bg-surface-container-lowest px-6 font-label-bold text-label-bold text-on-surface transition-colors hover:bg-surface-container-high active:scale-[0.97] transition-transform"
+                className="inline-flex h-10 items-center justify-center rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface shadow-sm transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
               >
                 Cancelar
               </Link>
@@ -544,7 +554,7 @@ function RegistrarDevolucion() {
                 type="button"
                 onClick={handleClicFinalizarDevolucion}
                 disabled={guardando || pendientes.length === 0}
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-primary px-6 font-label-bold text-label-bold text-on-primary shadow-sm transition-opacity hover:opacity-90 active:scale-[0.97] transition-transform disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex h-10 items-center justify-center gap-2 rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {guardando && <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} />}
                 {formato.textoAccion}
