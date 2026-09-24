@@ -150,6 +150,22 @@ nunca escribir un componente de página nuevo para eso.
   - Tarjeta `bg-white rounded-tarjeta shadow-tarjeta` (sin `border` extra). Tabla con
     `thead` gris (`bg-surface-container`), `th` mono `text-micro`, filas de 72px y el pie
     gris con el `Paginador` dentro (ver Paginación). Chip de estado con punto.
+  - **Hover de fila**: `hover:bg-surface-container` en las 6 tablas (uno solo en todo el
+    sistema).
+  - **Columna de acciones fija** (solo Equipos, la única tabla que desplaza en horizontal:
+    `min-w-[900px]`): `th`/`td` `sticky right-0` con fondo propio (`bg-surface-container` en
+    el `th`; `bg-white` + `group-hover:bg-surface-container` en la celda, con `group` en la
+    fila) y filete `before:` de 1px a su izquierda. El envoltorio `overflow-x-auto` es
+    `@container` y el filete se oculta con `@[900px]:before:hidden`: solo se ve cuando la
+    tabla realmente se desplaza (ancho real del contenedor, no un breakpoint del viewport).
+    Sus acciones son 3 ranuras fijas de 36px (ojo, lápiz y "+" solo si aplica), así que el
+    encabezado "ACCIONES" va `text-left`: empieza en la misma x que el ojo.
+  - **Cabecera de las vistas "ver"** (Equipo, Empleado, Usuario, `CatalogoRegistroView`):
+    grid `grid-cols-[minmax(0,1fr)_auto]` con el envoltorio del texto en `contents` (no
+    cambia el orden del DOM: eyebrow → h1 → bajada → botón). Eyebrow `col-span-2`; "Editar"
+    en `col-start-2 row-start-2`: en móvil `self-start mt-px` (centrado con la primera línea
+    del título, 26/30px) y la bajada `col-span-2` a todo el ancho; desde `md:` el botón
+    `row-span-2 self-end` (al pie de la bajada) y la bajada `md:col-span-1`.
   - **Alturas**: inputs, selects y `SearchableSelect` de formulario `h-11` (44px); botones
     de formulario y de cabecera `h-10`; volver `h-9`; botones ícono `h-9 w-9`; `Buscador`
     `h-11`.
@@ -185,8 +201,10 @@ nunca escribir un componente de página nuevo para eso.
   directo sobre la montaña; va en tarjeta blanca o sobre papel. **Sin `backdrop-blur` en
   ningún tamaño** sobre la cordillera: la sierra deriva sin fin y un `backdrop-filter`
   encima la re-muestrea y desenfoca en cada cuadro (costo de GPU constante en las PC de
-  planta), y en móvil daba tirones al hacer scroll. Barras inferiores, pie y cabeceras van
-  en `bg-papel` opaco, sin blur (al 95% se leía a través el texto que pasa por debajo).
+  planta), y en móvil daba tirones al hacer scroll. Barras inferiores, pie (la pastilla
+  "© LEGUMEX", también desde `md:`) y cabeceras van en `bg-papel` opaco, sin blur (al 95%
+  se leía a través el texto que pasa por debajo; con velo al 90% la montaña se veía bajo el
+  texto del pie). El token `papel-velo` queda disponible, sin uso en `src/`.
 - **Shell** (`layouts/AppLayout.jsx`): menú lateral de 240px (`w-drawer-width`) transparente
   sobre el papel (ítem activo = tarjeta blanca), tarjeta de perfil al pie ("Cerrar Sesión"
   con `active:scale-[0.97]`, ícono sin rojo); `<main data-sheet>` scrollea por dentro, es
@@ -215,17 +233,30 @@ nunca escribir un componente de página nuevo para eso.
     barra.
   - **Toast** (`[data-toaster]`): abajo en móvil (`bottom-[calc(16px+env(safe-area-inset-bottom))]`,
     a lo ancho con 12px de margen, entra subiendo); arriba en móvil tapaba el botón "volver"
-    justo después de guardar y el toque solo cerraba el aviso. Pero abajo no debe tapar
-    otros botones fijos (tras registrar una devolución se aterriza en la vista de la
-    entrega, que tiene barra; "No se pudo generar el PDF" sale sobre la misma barra), así
-    que `index.css` lo sube en móvil (`max-width: 639px`, con `:has()`):
-    `body:has([data-barra-inferior])` → `bottom: calc(124px + safe-area)` (barra más alta
-    112px + 12px) y `body:has([data-cajon-abierto])` (atributo del overlay del cajón) →
-    `bottom: 140px`, por encima de la tarjeta de perfil / "Cerrar Sesión". Sin soporte de
-    `:has()` queda abajo. Desde `sm:` va arriba a la derecha (bajo la barra móvil de 56px
-    hasta `md:`) y desde `md:` en `right-[42px] top-10`: su borde derecho cae en el del
-    contenido (32px de padding del `<main>` + 8px del canal + 2) y su borde superior a la
-    altura del botón volver.
+    justo después de guardar y el toque solo cerraba el aviso. Desde `sm:` va arriba a la
+    derecha (bajo la barra móvil de 56px hasta `md:`) y desde `md:` en
+    `right-[max(42px,calc(50vw_-_715px))] top-10`: borde derecho en el del carril de 1200px
+    de listas y formularios (32px de padding del `<main>` + 10px de canal de scroll; por
+    encima de ~1512px el carril se centra y `50vw − 715px` lo sigue) y borde superior a la
+    altura del botón volver. Excepciones (reglas en `index.css`):
+    1. **Hojas con barra fija** (`data-barra-inferior`): en TODOS los tamaños va 12px por
+       encima de la barra y, desde `md:`, alineado con el borde derecho de sus botones
+       (arriba tapaba el eyebrow de la hoja). La barra mide 64/90/112/116px según ancho,
+       número de botones y si muestra un error de validación, así que no se adivina en
+       CSS: mientras hay avisos, `Toast.jsx` la mide con un `ResizeObserver` (y un
+       `MutationObserver` la sigue si aparece o desaparece con el aviso visible) y escribe
+       en su propio contenedor `data-sobre-barra`, `--alto-barra` (alto real, safe-area
+       incluida) y `--derecha-barra`. Es puramente visual: sin estado de React, sin tocar
+       las páginas. Regla: `[data-toaster][data-sobre-barra] { top:auto;
+       bottom: calc(var(--alto-barra) + 12px) }` y desde `md:` `right: var(--derecha-barra)`.
+       No usa `:has()`, así que vale en cualquier navegador.
+    2. **Cajón móvil abierto** (`<768`, el overlay lleva `data-cajon-abierto`):
+       `body:has([data-cajon-abierto]) [data-toaster]` → dentro del cajón (`left:12px`,
+       ancho `min(304px, 86%) − 24px`), a `bottom: 140px`, por encima de la tarjeta de
+       perfil / "Cerrar Sesión" (pie del cajón 20px + tarjeta 108px + 12px). Gana a la 1.
+    3. **Sin `:has()`** (Firefox < 121, p. ej. ESR 115 en Windows 7/8): regla
+       `@supports not selector(:has(*))` → en móvil (`<640`) el toast sin barra sube
+       siempre a `140px + safe-area`, por encima de "Cerrar Sesión" con o sin cajón.
 - **Login** (`pages/Login.jsx`, estilos con prefijo `lg-` en `index.css`): telón verde con el
   logo que baja con borde de cordillera (solo la primera vez por sesión del navegador,
   `sessionStorage`); **mientras cubre, la tarjeta queda `inert`** (no se puede escribir a

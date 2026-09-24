@@ -532,7 +532,7 @@ function RegistrarDevolucion() {
       </div>
 
       {!cargando && !error && entrega && (
-        <div data-barra-inferior="texto-y-botones" className="fixed inset-x-0 bottom-0 z-30 bg-papel px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-barra-inferior md:left-drawer-width md:overflow-hidden md:px-8 md:pb-3 md:[scrollbar-gutter:stable]">
+        <div data-barra-inferior className="fixed inset-x-0 bottom-0 z-30 bg-papel px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-barra-inferior md:left-drawer-width md:overflow-hidden md:px-8 md:pb-3 md:[scrollbar-gutter:stable]">
           <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-3">
             {errorGuardar ? (
               <p className="animate-pop-in rounded-boton border border-error/30 bg-error-container/60 px-3 py-2 font-label-sm text-label-sm text-error">

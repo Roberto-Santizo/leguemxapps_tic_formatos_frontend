@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { CheckCircle2, AlertTriangle, X } from 'lucide-react'
 
 /**
@@ -62,21 +62,34 @@ export function cerrarToast(id) {
  * Contenedor visual. Se monta UNA sola vez, en AppLayout.
  *
  * Posición (sistema Sierra): arriba a la derecha desde `sm:` (como el
- * mockup; desde `md:` alineado con el borde derecho del contenido -- 32px de
- * padding del <main> + su canal de scroll -- y a la altura del botón volver)
+ * mockup; desde `md:` alineado con el borde derecho del carril de 1200px de
+ * listas y formularios -- 32px de padding del <main> + su canal de scroll de
+ * 10px, y `50vw − 715px` cuando el carril se centra -- y a la altura del
+ * botón volver)
  * y ABAJO en móvil, a lo ancho con 12px de margen: arriba tapaba el botón
- * "volver" justo después de guardar y el toque solo cerraba el aviso. Si la
- * pantalla tiene barra de acciones fija (`data-barra-inferior`, las 4 hojas),
- * index.css lo pone en todos los tamaños 12px por encima de la barra según su
- * alto real (`--alto-barra`) y, desde md:, alineado con sus botones; con el
- * cajón móvil abierto lo mete dentro del cajón, sobre "Cerrar Sesión" (reglas
- * sobre `[data-toaster]`, con respaldo para navegadores sin `:has()`).
+ * "volver" justo después de guardar y el toque solo cerraba el aviso.
+ *
+ * Hojas con barra de acciones fija (`data-barra-inferior`, las 4 hojas): en
+ * TODOS los tamaños el aviso va 12px por encima de la barra y, desde md:,
+ * alineado con sus botones (arriba tapaba el eyebrow de la hoja). La barra
+ * mide 64, 90, 112 o 116px según el ancho, cuántos botones tenga y si
+ * muestra un error de validación, así que no se adivina en CSS: mientras hay
+ * avisos, un ResizeObserver mide la barra y escribe su alto y su borde
+ * derecho como variables CSS en ESTE contenedor (`--alto-barra`,
+ * `--derecha-barra`) y le pone `data-sobre-barra`; index.css hace el resto.
+ * Es puramente visual: no toca estado de React ni el de las páginas, y un
+ * MutationObserver sigue a la barra si aparece/desaparece con el aviso
+ * visible (p. ej. al aterrizar en la vista tras registrar). Funciona también
+ * sin `:has()`. Con el cajón móvil abierto, index.css lo mete dentro del
+ * cajón, sobre "Cerrar Sesión".
  * Entra con `toastIn` (desde arriba a la derecha) en escritorio y con
- * `toastInAbajo` (sube desde el pie) en móvil. El éxito va en pastilla
+ * `toastInAbajo` (sube desde el pie) en móvil y sobre la barra de las hojas. El éxito va en pastilla
  * negra de tinta; el error, en blanco con filete e ícono rojos.
  */
 export function Toaster() {
   const [lista, setLista] = useState(avisos)
+  const contenedor = useRef(null)
+  const hayAvisos = lista.length > 0
 
   useEffect(() => {
     suscriptores.add(setLista)
@@ -86,12 +99,49 @@ export function Toaster() {
     }
   }, [])
 
-  if (lista.length === 0) return null
+  // Posición sobre la barra fija de las hojas (solo estilo; ver arriba).
+  useLayoutEffect(() => {
+    const caja = contenedor.current
+    if (!hayAvisos || !caja) return undefined
+    let barra = null
+    const medir = () => {
+      if (!barra) return
+      const botones = barra.firstElementChild || barra
+      caja.style.setProperty('--alto-barra', `${barra.offsetHeight}px`)
+      caja.style.setProperty('--derecha-barra', `${Math.max(0, window.innerWidth - botones.getBoundingClientRect().right)}px`)
+    }
+    const observador = new ResizeObserver(medir)
+    const seguir = () => {
+      const actual = document.querySelector('[data-barra-inferior]')
+      if (actual === barra) return
+      if (barra) observador.unobserve(barra)
+      barra = actual
+      if (barra) {
+        observador.observe(barra)
+        caja.setAttribute('data-sobre-barra', '')
+        medir()
+      } else {
+        caja.removeAttribute('data-sobre-barra')
+      }
+    }
+    seguir()
+    const vigia = new MutationObserver(seguir)
+    vigia.observe(document.body, { childList: true, subtree: true })
+    window.addEventListener('resize', medir)
+    return () => {
+      observador.disconnect()
+      vigia.disconnect()
+      window.removeEventListener('resize', medir)
+    }
+  }, [hayAvisos])
+
+  if (!hayAvisos) return null
 
   return (
     <div
+      ref={contenedor}
       data-toaster
-      className="pointer-events-none fixed inset-x-3 bottom-[calc(16px+env(safe-area-inset-bottom))] z-[70] flex flex-col items-stretch gap-2 sm:inset-x-auto sm:bottom-auto sm:right-4 sm:top-[calc(theme(spacing.barra-movil)+12px)] sm:items-end md:right-[42px] md:top-10"
+      className="pointer-events-none fixed inset-x-3 bottom-[calc(16px+env(safe-area-inset-bottom))] z-[70] flex flex-col items-stretch gap-2 sm:inset-x-auto sm:bottom-auto sm:right-4 sm:top-[calc(theme(spacing.barra-movil)+12px)] sm:items-end md:right-[max(42px,calc(50vw_-_715px))] md:top-10"
     >
       {lista.map((aviso) => {
         const esError = aviso.tipo === 'error'

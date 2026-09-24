@@ -700,7 +700,7 @@ function HistorialEntregaView() {
       </div>
 
       {!cargando && !error && documento && (
-        <div data-barra-inferior="rejilla" className="fixed inset-x-0 bottom-0 z-30 bg-papel px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-barra-inferior md:left-drawer-width md:overflow-hidden md:px-8 md:pb-3 md:[scrollbar-gutter:stable]">
+        <div data-barra-inferior className="fixed inset-x-0 bottom-0 z-30 bg-papel px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-barra-inferior md:left-drawer-width md:overflow-hidden md:px-8 md:pb-3 md:[scrollbar-gutter:stable]">
           <div className="mx-auto grid max-w-4xl grid-cols-2 gap-2 md:flex md:flex-wrap md:items-center md:justify-end md:gap-3">
             {isAdmin && documento.items?.some((it) => !it.returned) && (
               <button

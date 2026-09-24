@@ -171,52 +171,32 @@ main[data-sheet] > .bg-background {
    Toast.jsx lo deja abajo en móvil (<640) y arriba a la derecha desde sm:.
    Estas reglas lo recolocan cuando hay algo fijo que no debe tapar.
 
-   1) Hojas con barra de acciones fija. Cada barra declara su forma en
-      `data-barra-inferior` y aquí se traduce a su alto real en la variable
-      `--alto-barra` (sin la safe-area, que la barra suma en su padding):
-        "una-fila"         64px  (Ver devolución; 1 fila de botones)
-        "texto-y-botones"  90px  <640 (leyenda + fila de botones) / 64px desde sm:
-                                 (Nueva entrega, Registrar devolución)
-        "rejilla"          64px, y 112px <768 si tiene 3 botones (Ver entrega
-                                 admin con equipos pendientes: 1 + 2 en rejilla).
-                                 Se cuenta el 3.er hijo con :has(), así el JSX no
-                                 repite la condición de negocio.
-      El toast va siempre 12px por encima de la barra, en todos los tamaños
-      (arriba tapaba el eyebrow de la hoja); desde md: su borde derecho es el
-      de los botones de la barra (contenido max-w-4xl = 896px centrado en el
-      área que empieza tras el aside de 240px, con 32px de padding y el canal
-      de scroll de 10px): right = max(42px, 50vw − 563px).
+   1) Hojas con barra de acciones fija (`data-barra-inferior`). Toast.jsx
+      mide la barra (ResizeObserver) y deja en el contenedor `data-sobre-barra`
+      + `--alto-barra` (alto real, safe-area incluida: 64/90/112/116px según
+      ancho, botones y error de validación) y `--derecha-barra` (distancia del
+      borde derecho de los botones al del viewport). El toast va 12px por
+      encima de la barra en todos los tamaños (arriba tapaba el eyebrow de la
+      hoja) y, desde md:, con el borde derecho de sus botones. No depende de
+      :has(), así que vale también en Firefox < 121.
    2) Cajón móvil abierto (su overlay lleva `data-cajon-abierto`, <768): el
       toast va DENTRO del cajón (ancho min(304px, 86%) − 12px por lado), por
       encima de la tarjeta de perfil / "Cerrar Sesión" (pie del cajón 20px +
-      tarjeta 108px + 12px de aire).
-   3) Sin :has() (Firefox < 121, p. ej. ESR 115 en Windows 7/8): en móvil el
-      toast sube siempre por encima de la barra más alta (112 + 12px), como el
-      `bottom-24` de origin/main; en sm:/escritorio se queda arriba. */
-body:has([data-barra-inferior]) {
-  --alto-barra: 64px;
-}
-@media (max-width: 639px) {
-  body:has([data-barra-inferior="texto-y-botones"]) {
-    --alto-barra: 90px;
-  }
-}
-@media (max-width: 767px) {
-  body:has([data-barra-inferior="rejilla"] > * > :nth-child(3)) {
-    --alto-barra: 112px;
-  }
-}
-body:has([data-barra-inferior]) [data-toaster] {
+      tarjeta 108px + 12px de aire). Gana a la regla 1 (va después).
+   3) Sin :has() (p. ej. Firefox ESR 115 en Windows 7/8) la regla 2 no
+      existe: en móvil (<640) el toast sin barra sube siempre a 140px, por
+      encima de "Cerrar Sesión" con o sin cajón (la regla 1 sigue midiendo).
+      Desde sm: se queda arriba a la derecha, que ya no toca el cajón. */
+[data-toaster][data-sobre-barra] {
   top: auto;
-  bottom: calc(var(--alto-barra) + 12px + env(safe-area-inset-bottom));
+  bottom: calc(var(--alto-barra, 112px) + 12px);
 }
-body:has([data-barra-inferior]) [data-toaster] > * {
+[data-toaster][data-sobre-barra] > * {
   animation-name: toastInAbajo;
 }
 @media (min-width: 768px) {
-  body:has([data-barra-inferior]) [data-toaster] {
-    bottom: calc(var(--alto-barra) + 12px);
-    right: max(42px, calc(50vw - 563px));
+  [data-toaster][data-sobre-barra] {
+    right: var(--derecha-barra, 42px);
   }
 }
 @media (max-width: 767px) {
@@ -231,8 +211,9 @@ body:has([data-barra-inferior]) [data-toaster] > * {
 }
 @supports not selector(:has(*)) {
   @media (max-width: 639px) {
-    body [data-toaster] {
-      bottom: calc(124px + env(safe-area-inset-bottom));
+    [data-toaster]:not([data-sobre-barra]) {
+      top: auto;
+      bottom: calc(140px + env(safe-area-inset-bottom));
     }
   }
 }
