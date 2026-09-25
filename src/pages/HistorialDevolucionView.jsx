@@ -5,6 +5,7 @@ import {
   Check,
   CircleUser,
   Download,
+  Eye,
   ExternalLink,
   Lock,
   MessageSquareText,
@@ -19,6 +20,7 @@ import InlineEditableText from '../components/InlineEditableText.jsx'
 import EditorFechaLocal from '../components/EditorFechaLocal.jsx'
 import SearchableSelect from '../components/SearchableSelect.jsx'
 import EquipoDetalleModal from '../components/EquipoDetalleModal.jsx'
+import useFichaEquipo from '../hooks/useFichaEquipo.js'
 import { IndicadorGuardando, mostrarToast } from '../components/Toast.jsx'
 import { SkeletonDetalle } from '../components/Skeleton.jsx'
 import { SeccionCard, Campo } from './FormatoActa.jsx'
@@ -47,6 +49,27 @@ function nombrePlanta(location) {
 
 const valorClass =
   'flex h-11 items-center rounded-lg border border-outline-variant bg-surface-container-low px-3.5 font-body-md text-body-md text-on-surface'
+
+// Ojo de un renglón de equipo: abre su ficha (características y, para
+// admin, "Editar"), igual que el ojo del selector al armar el acta. Mientras
+// se busca el equipo en el catálogo (el renglón no trae su id) muestra el
+// isotipo en lugar del ojo.
+function BotonFicha({ item, ficha }) {
+  const buscando = ficha.buscandoItem === item.id
+  return (
+    <button
+      type="button"
+      onClick={() => ficha.abrirDeItem(item)}
+      disabled={ficha.buscandoItem !== null}
+      aria-busy={buscando}
+      aria-label={`Ver ficha de ${item.equipment_name || 'equipo'}`}
+      title="Ver ficha del equipo"
+      className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface disabled:cursor-wait active:scale-[0.90] transition-transform"
+    >
+      {buscando ? <IsotipoCarga tono="tinta" className="h-2.5" /> : <Eye className="h-4 w-4" strokeWidth={2} />}
+    </button>
+  )
+}
 
 /**
  * Firma guardada en el storage -- mismo comportamiento que
@@ -88,9 +111,10 @@ function HistorialDevolucionView() {
   // --- Completar una devolución ya firmada: agregar un equipo pendiente de
   // la misma entrega que se quedó fuera (POST /return_document_details) ---
   const [agregandoEquipo, setAgregandoEquipo] = useState(false)
-  // Ficha del equipo (ojo del selector de "Agregar equipo"): ver y corregir
-  // sus datos sin salir de la devolución.
-  const [equipoDetalleId, setEquipoDetalleId] = useState('')
+  // Ficha del equipo (ojo de cada renglón y del selector de "Agregar
+  // equipo"): ver sus características y corregir sus datos sin salir de la
+  // devolución.
+  const ficha = useFichaEquipo(token)
   const [pendientes, setPendientes] = useState([])
   const [nuevoDetalleId, setNuevoDetalleId] = useState('')
   const [nuevoDetalleObs, setNuevoDetalleObs] = useState('')
@@ -148,11 +172,12 @@ function HistorialDevolucionView() {
   const verDetallePendiente = pendientes.some((it) => it.equipment_id)
     ? (detalleId) => {
         const it = pendientes.find((p) => String(p.id) === String(detalleId))
-        if (it?.equipment_id) setEquipoDetalleId(it.equipment_id)
+        if (it?.equipment_id) ficha.setEquipoId(String(it.equipment_id))
       }
     : undefined
 
   function refrescarTrasEditarEquipo() {
+    ficha.olvidarCatalogo()
     recargar().catch(() => {})
     if (documento?.delivery_document_id) {
       listarDetallesEntrega(token, { deliveryDocumentId: documento.delivery_document_id, pending: true })
@@ -384,6 +409,7 @@ function HistorialDevolucionView() {
                               {col}
                             </th>
                           ))}
+                          {isAdmin && <th className="w-12 py-2.5 pr-5" />}
                         </tr>
                       </thead>
                       <tbody>
@@ -407,7 +433,7 @@ function HistorialDevolucionView() {
                             <td className="py-2 pr-3 font-mono uppercase text-on-surface-variant">
                               {item.equipment_serie || '—'}
                             </td>
-                            <td className="py-2 pr-5 text-on-surface-variant break-words">
+                            <td className={`py-2 ${isAdmin ? 'pr-3' : 'pr-5'} text-on-surface-variant break-words`}>
                               {isAdmin ? (
                                 <InlineEditableText
                                   value={extravio ? textoSinPrefijoExtravio(item.observations) : item.observations || ''} placeholder="Sin observaciones" permitirVacio
@@ -418,6 +444,11 @@ function HistorialDevolucionView() {
                                 (extravio ? textoSinPrefijoExtravio(item.observations) : item.observations) || 'Sin observaciones'
                               )}
                             </td>
+                            {isAdmin && (
+                              <td className="py-2 pr-5">
+                                <BotonFicha item={item} ficha={ficha} />
+                              </td>
+                            )}
                           </tr>
                           )
                         })}
@@ -425,11 +456,12 @@ function HistorialDevolucionView() {
                         {agregandoEquipo && (
                           <tr className="border-b border-outline-variant bg-surface-container-low/40">
                             <td className="py-2 pl-5 pr-3" />
-                            {/* La tabla tiene 6 columnas (No., Equipo, Marca,
-                                Modelo, No. Serie, Observaciones): 1 + 2 + 2 + 1.
-                                Antes este colSpan era 3 y la fila sumaba 7,
-                                así que al abrir "Agregar equipo" la tabla ganaba
-                                una columna fantasma y se desalineaba del encabezado. */}
+                            {/* Solo admin agrega equipo, y para admin la tabla
+                                tiene 7 columnas (No., Equipo, Marca, Modelo,
+                                No. Serie, Observaciones y la del ojo):
+                                1 + 2 + 3 + 1. Si no suman lo mismo que el
+                                encabezado, la tabla gana una columna fantasma
+                                y se desalinea. */}
                             <td className="py-2 pr-3" colSpan={2}>
                               <SearchableSelect
                                 options={opcionesPendientes}
@@ -441,7 +473,7 @@ function HistorialDevolucionView() {
                                 emptyOptionsText="Ya no queda equipo pendiente de esta entrega."
                               />
                             </td>
-                            <td className="py-2 pr-3" colSpan={2}>
+                            <td className="py-2 pr-3" colSpan={3}>
                               <input
                                 type="text"
                                 value={nuevoDetalleObs}
@@ -496,17 +528,24 @@ function HistorialDevolucionView() {
                           extravio ? 'border-error bg-error-container/30' : 'border-outline-variant bg-surface-container-lowest'
                         }`}
                       >
-                        <div className="mb-stack-sm flex flex-wrap items-center gap-2">
-                          <span className="shrink-0 font-mono text-body-md tabular-nums text-on-surface-variant">
-                            {String(indice + 1).padStart(2, '0')}
-                          </span>
-                          <span className="font-label-bold text-label-bold text-on-surface break-words">
-                            {item.equipment_name || '—'}
-                          </span>
-                          {extravio && (
-                            <span className="inline-flex items-center rounded-full bg-error px-2 py-0.5 font-label-sm text-label-sm font-bold uppercase tracking-wide text-on-error">
-                              Extravío
+                        <div className="mb-stack-sm flex items-start justify-between gap-2">
+                          <div className="flex min-w-0 flex-wrap items-center gap-2">
+                            <span className="shrink-0 font-mono text-body-md tabular-nums text-on-surface-variant">
+                              {String(indice + 1).padStart(2, '0')}
                             </span>
+                            <span className="font-label-bold text-label-bold text-on-surface break-words">
+                              {item.equipment_name || '—'}
+                            </span>
+                            {extravio && (
+                              <span className="inline-flex items-center rounded-full bg-error px-2 py-0.5 font-label-sm text-label-sm font-bold uppercase tracking-wide text-on-error">
+                                Extravío
+                              </span>
+                            )}
+                          </div>
+                          {isAdmin && (
+                            <div className="-my-1 shrink-0">
+                              <BotonFicha item={item} ficha={ficha} />
+                            </div>
                           )}
                         </div>
 
@@ -694,8 +733,8 @@ function HistorialDevolucionView() {
       )}
 
       <EquipoDetalleModal
-        equipoId={equipoDetalleId}
-        onCerrar={() => setEquipoDetalleId('')}
+        equipoId={ficha.equipoId}
+        onCerrar={ficha.cerrar}
         editable
         onActualizado={refrescarTrasEditarEquipo}
       />

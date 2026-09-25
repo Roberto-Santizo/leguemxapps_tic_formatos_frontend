@@ -5,7 +5,7 @@
 export function nombreEstado(status) {
   if (status === 'devuelto') return 'Devuelto'
   if (status === 'parcial') return 'Parcial'
-  if (status === 'pendiente') return 'Pendiente'
+  if (status === 'pendiente') return 'En posesión'
   return '—'
 }
 
@@ -20,7 +20,7 @@ export function puntoEstado(status) {
 // Opciones del filtro "Estado" de las listas de actas (FiltrosActas).
 export const OPCIONES_ESTADO_ENTREGA = [
   { valor: '', etiqueta: 'Todos' },
-  { valor: 'pendiente', etiqueta: 'Pendiente', punto: 'bg-outline' },
+  { valor: 'pendiente', etiqueta: 'En posesión', punto: 'bg-outline' },
   { valor: 'parcial', etiqueta: 'Parcial', punto: 'bg-assigned' },
   { valor: 'devuelto', etiqueta: 'Devuelto', punto: 'bg-available' },
 ]

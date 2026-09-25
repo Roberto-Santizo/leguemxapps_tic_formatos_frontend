@@ -432,8 +432,12 @@ nunca escribir un componente de página nuevo para eso.
   (`normalizarNombre`: sin acentos ni mayúsculas). Mientras el departamento carga, el
   filtro no deja pasar nada (nunca se ve un instante el historial de todos). Si el backend
   agrega un filtro por departamento, el cambio va en `DepartamentoHistorial.jsx`.
+  La vista del departamento usa el ancho de las pantallas de tarjetas (1200px) en vez de
+  los 600px de su formulario: `CatalogoRegistroView` se ensancha solo cuando recibe
+  `extra` (Marcas sigue igual).
 - **Filtros de actas** (`hooks/useFiltrosActas.js` + `components/FiltrosActas.jsx`): estado
-  (Pendiente / Parcial / Devuelto; `status` en entregas, `delivery_document_status` en
+  (**En posesión** / Parcial / Devuelto -- el valor del backend sigue siendo `pendiente`,
+  solo cambia la etiqueta, también en el CSV; `status` en entregas, `delivery_document_status` en
   devoluciones), planta (solo entregas) y rango de fechas, en la URL (`?estado=&planta=&
   desde=&hasta=`), filtrados en el cliente vía `filtroExtra`. La lista de entregas tiene
   ahora columna **Estado** (mismo chip que devoluciones; `utils/estadoEntrega.js`).
@@ -463,6 +467,12 @@ nunca escribir un componente de página nuevo para eso.
   página. **Excepción documentada** a "Editar es una página dedicada": quien la usa está a
   mitad de un acta. Mientras se edita, el clic fuera no cierra y Escape / la X solo salen del
   modo edición (el foco vuelve a "Editar"; Tab queda dentro del diálogo). Las características se siguen editando en Catálogo → Equipos.
+- **Ojo en cada renglón de equipo** de `HistorialEntregaView` y `HistorialDevolucionView`
+  (solo admin, también en equipo ya devuelto): abre la misma ficha editable con sus
+  características. El renglón es el detalle del acta: `hooks/useFichaEquipo.js` usa su
+  `equipment_id` si viene y, si no, busca el equipo por serie en `GET /equipments`
+  (una vez, se reutiliza; se olvida al editar un equipo). En la tabla de entrega, un
+  renglón devuelto deja el hueco del bote para que los ojos queden en una columna.
 
 ## Paginación de listados (2026-09-14)
 

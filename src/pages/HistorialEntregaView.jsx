@@ -5,6 +5,7 @@ import {
   Check,
   CircleUser,
   Download,
+  Eye,
   Lock,
   MessageSquareText,
   PenLine,
@@ -21,6 +22,7 @@ import InlineEditableText from '../components/InlineEditableText.jsx'
 import EditorFechaLocal from '../components/EditorFechaLocal.jsx'
 import SearchableSelect from '../components/SearchableSelect.jsx'
 import EquipoDetalleModal from '../components/EquipoDetalleModal.jsx'
+import useFichaEquipo from '../hooks/useFichaEquipo.js'
 import { IndicadorGuardando, mostrarToast } from '../components/Toast.jsx'
 import { SkeletonDetalle } from '../components/Skeleton.jsx'
 import { SeccionCard, Campo } from './FormatoActa.jsx'
@@ -48,6 +50,27 @@ function nombrePlanta(location) {
 
 const valorClass =
   'flex h-11 items-center rounded-lg border border-outline-variant bg-surface-container-low px-3.5 font-body-md text-body-md text-on-surface'
+
+// Ojo de un renglón de equipo: abre su ficha (características y, para
+// admin, "Editar"), igual que el ojo del selector al armar el acta. Mientras
+// se busca el equipo en el catálogo (el renglón no trae su id) muestra el
+// isotipo en lugar del ojo.
+function BotonFicha({ item, ficha }) {
+  const buscando = ficha.buscandoItem === item.id
+  return (
+    <button
+      type="button"
+      onClick={() => ficha.abrirDeItem(item)}
+      disabled={ficha.buscandoItem !== null}
+      aria-busy={buscando}
+      aria-label={`Ver ficha de ${item.equipment_name || 'equipo'}`}
+      title="Ver ficha del equipo"
+      className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface disabled:cursor-wait active:scale-[0.90] transition-transform"
+    >
+      {buscando ? <IsotipoCarga tono="tinta" className="h-2.5" /> : <Eye className="h-4 w-4" strokeWidth={2} />}
+    </button>
+  )
+}
 
 /**
  * Firma guardada en el storage del backend. Si la imagen no carga (ruta
@@ -110,9 +133,10 @@ function HistorialEntregaView() {
   // fuera, corregir la observación de uno, o quitarlo (delivery_document_details) ---
   const [equipos, setEquipos] = useState([])
   const [agregandoEquipo, setAgregandoEquipo] = useState(false)
-  // Ficha del equipo (ojo del selector de "Agregar equipo"): ver y, si hace
-  // falta, corregir sus datos sin salir de la entrega.
-  const [equipoDetalleId, setEquipoDetalleId] = useState('')
+  // Ficha del equipo (ojo de cada renglón y del selector de "Agregar
+  // equipo"): ver sus características y, si hace falta, corregir sus datos
+  // sin salir de la entrega.
+  const ficha = useFichaEquipo(token)
   const [nuevoEquipoId, setNuevoEquipoId] = useState('')
   const [nuevoEquipoObs, setNuevoEquipoObs] = useState('')
   const [guardandoEquipo, setGuardandoEquipo] = useState(false)
@@ -168,6 +192,7 @@ function HistorialEntregaView() {
     .sort((a, b) => String(a.name ?? '').localeCompare(String(b.name ?? ''), 'es') || a.codigo.localeCompare(b.codigo, 'es'))
 
   function refrescarTrasEditarEquipo() {
+    ficha.olvidarCatalogo()
     listarEquiposDisponibles(token)
       .then((data) => setEquipos(Array.isArray(data) ? data : []))
       .catch(() => {})
@@ -422,7 +447,7 @@ function HistorialEntregaView() {
                               {col}
                             </th>
                           ))}
-                          <th className="w-12 py-2.5 pr-5" />
+                          <th className={`${isAdmin ? 'w-24' : 'w-12'} py-2.5 pr-5`} />
                         </tr>
                       </thead>
                       <tbody>
@@ -459,17 +484,23 @@ function HistorialEntregaView() {
                               )}
                             </td>
                             <td className="py-2 pr-5">
-                              {!item.returned && isAdmin && (
-                                <button
-                                  type="button"
-                                  onClick={() => setQuitando(item)}
-                                  aria-label="Quitar equipo de la entrega"
-                                  title="Quitar (se agregó por error)"
-                                  className="grid h-8 w-8 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-error-container hover:text-on-error-container active:scale-[0.90] transition-transform"
-                                >
-                                  <Trash2 className="h-4 w-4" strokeWidth={2} />
-                                </button>
-                              )}
+                              <div className="flex items-center justify-end gap-1">
+                                {isAdmin && <BotonFicha item={item} ficha={ficha} />}
+                                {/* Devuelto: no se puede quitar, pero se deja el hueco del
+                                    bote para que los ojos queden en una sola columna. */}
+                                {item.returned && isAdmin && <span aria-hidden="true" className="h-8 w-8 shrink-0" />}
+                                {!item.returned && isAdmin && (
+                                  <button
+                                    type="button"
+                                    onClick={() => setQuitando(item)}
+                                    aria-label="Quitar equipo de la entrega"
+                                    title="Quitar (se agregó por error)"
+                                    className="grid h-8 w-8 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-error-container hover:text-on-error-container active:scale-[0.90] transition-transform"
+                                  >
+                                    <Trash2 className="h-4 w-4" strokeWidth={2} />
+                                  </button>
+                                )}
+                              </div>
                             </td>
                           </tr>
                         ))}
@@ -480,7 +511,7 @@ function HistorialEntregaView() {
                             <td className="py-2 pr-3" colSpan={4}>
                               <SearchableSelect
                                 options={opcionesEquipo}
-                                onVerDetalle={setEquipoDetalleId}
+                                onVerDetalle={ficha.setEquipoId}
                                 value={nuevoEquipoId}
                                 onChange={setNuevoEquipoId}
                                 disabled={guardandoEquipo}
@@ -554,16 +585,22 @@ function HistorialEntregaView() {
                               </span>
                             )}
                           </div>
-                          {!item.returned && isAdmin && (
-                            <button
-                              type="button"
-                              onClick={() => setQuitando(item)}
-                              aria-label="Quitar equipo de la entrega"
-                              title="Quitar (se agregó por error)"
-                              className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-error-container hover:text-on-error-container active:scale-[0.90] transition-transform"
-                            >
-                              <Trash2 className="h-4 w-4" strokeWidth={2} />
-                            </button>
+                          {isAdmin && (
+                            <div className="-my-1 flex shrink-0 items-center gap-1">
+                              <BotonFicha item={item} ficha={ficha} />
+                              {item.returned && <span aria-hidden="true" className="h-8 w-8 shrink-0" />}
+                              {!item.returned && (
+                                <button
+                                  type="button"
+                                  onClick={() => setQuitando(item)}
+                                  aria-label="Quitar equipo de la entrega"
+                                  title="Quitar (se agregó por error)"
+                                  className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-on-surface-variant transition-colors hover:bg-error-container hover:text-on-error-container active:scale-[0.90] transition-transform"
+                                >
+                                  <Trash2 className="h-4 w-4" strokeWidth={2} />
+                                </button>
+                              )}
+                            </div>
                           )}
                         </div>
 
@@ -626,7 +663,7 @@ function HistorialEntregaView() {
                             <label className="font-label-bold text-label-bold text-on-surface">Equipo</label>
                             <SearchableSelect
                               options={opcionesEquipo}
-                                onVerDetalle={setEquipoDetalleId}
+                                onVerDetalle={ficha.setEquipoId}
                               value={nuevoEquipoId}
                               onChange={setNuevoEquipoId}
                               disabled={guardandoEquipo}
@@ -807,8 +844,8 @@ function HistorialEntregaView() {
       />
 
       <EquipoDetalleModal
-        equipoId={equipoDetalleId}
-        onCerrar={() => setEquipoDetalleId('')}
+        equipoId={ficha.equipoId}
+        onCerrar={ficha.cerrar}
         editable
         onActualizado={refrescarTrasEditarEquipo}
       />

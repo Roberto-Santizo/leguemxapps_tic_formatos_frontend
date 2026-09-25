@@ -315,7 +315,7 @@ function HistorialEntregaList({ departamento } = {}) {
                           {documento.employee_department || '—'}
                         </td>
                       )}
-                      <td className="px-4 py-4 text-on-surface-variant">
+                      <td className="whitespace-nowrap px-4 py-4 text-on-surface-variant">
                         {nombrePlanta(documento.location)}
                       </td>
                       <td className="px-4 py-4 font-mono text-meta text-on-surface-variant tabular-nums whitespace-nowrap">
