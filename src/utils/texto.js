@@ -16,3 +16,19 @@ export function normalizarBusqueda(texto) {
     .toLowerCase()
     .replace(/[\s\-_.]/g, '')
 }
+
+/**
+ * Nombre comparable: sin acentos, sin espacios de sobra y en minúsculas. Lo
+ * usa el historial por departamento para emparejar el nombre del
+ * departamento con `employee_department` de cada acta, que el backend manda
+ * como texto (no como id): así "Tecnologías de la Información" y
+ * "tecnologias de la informacion " se reconocen como el mismo.
+ */
+export function normalizarNombre(texto) {
+  return String(texto ?? '')
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase()
+}

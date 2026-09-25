@@ -82,7 +82,15 @@ export function usePaginaUrl() {
     [escribir],
   )
 
-  return { pagina, limite, busqueda, irAPagina, setBusqueda, parametro, setParametro }
+  // Varios filtros a la vez en UNA sola escritura de la URL (p. ej. "Limpiar
+  // filtros"). Llamar setParametro varias veces seguidas no sirve: cada
+  // llamada parte de la URL actual y la última pisa a las anteriores.
+  const setParametros = useCallback(
+    (valores) => escribir(1, { replace: true, extras: valores }),
+    [escribir],
+  )
+
+  return { pagina, limite, busqueda, irAPagina, setBusqueda, parametro, setParametro, setParametros }
 }
 
 /**
@@ -235,6 +243,10 @@ export function useListaPaginada({ token, listar, filtrar, mensajeError, filtroE
 
   return {
     registros,
+    // Todos los registros que cumplen la búsqueda y el filtro (no solo la
+    // página): lo usa la exportación a CSV "de todo". En modo página (sin
+    // búsqueda ni filtro) es la página actual, porque es lo único cargado.
+    todosFiltrados: modo === 'todos' ? filtrados : registros,
     total,
     pagina,
     limite,

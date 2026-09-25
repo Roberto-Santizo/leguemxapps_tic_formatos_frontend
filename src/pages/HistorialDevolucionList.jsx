@@ -9,21 +9,7 @@ import { SkeletonTabla, SkeletonTarjetas } from '../components/Skeleton.jsx'
 import { FORMATOS } from '../config/formatos.js'
 import { listarDocumentosDevolucion } from '../services/api.js'
 import { formatearFecha } from '../utils/fecha.js'
-
-function nombreEstado(status) {
-  if (status === 'devuelto') return 'Devuelto'
-  if (status === 'parcial') return 'Parcial'
-  if (status === 'pendiente') return 'Pendiente'
-  return '—'
-}
-
-// Punto de color del chip de estado (solo decorativo): devuelto = salvia,
-// parcial = ocre, el resto gris -- los mismos acentos apagados de Equipos.
-function puntoEstado(status) {
-  if (status === 'devuelto') return 'bg-available'
-  if (status === 'parcial') return 'bg-assigned'
-  return 'bg-outline'
-}
+import { nombreEstado, puntoEstado } from '../utils/estadoEntrega.js'
 
 /**
  * Lista de Documentos de Devolución (GET /return_documents). Mismo patrón
