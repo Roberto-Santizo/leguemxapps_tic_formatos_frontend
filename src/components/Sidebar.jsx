@@ -76,7 +76,7 @@ function Sidebar({ abierto, onCerrar }) {
         data-no-print
         className={[
           'flex flex-col gap-7 overflow-y-auto overscroll-contain',
-          'fixed left-0 top-0 bottom-0 z-50 w-[min(304px,86%)] bg-background px-3 pb-5 pt-5 shadow-cajon',
+          'fixed left-0 top-0 bottom-0 z-50 w-[min(19rem,86%)] bg-background px-3 pb-5 pt-5 shadow-cajon',
           'transition-[transform,visibility] duration-300 ease-salida',
           abierto ? 'visible translate-x-0' : 'invisible -translate-x-[106%]',
           'md:visible md:relative md:z-auto md:h-full md:w-drawer-width md:shrink-0 md:translate-x-0 md:bg-transparent md:pb-5 md:pt-6 md:shadow-none md:transition-none',

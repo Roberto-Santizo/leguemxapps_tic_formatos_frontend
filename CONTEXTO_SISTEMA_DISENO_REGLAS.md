@@ -368,7 +368,9 @@ nunca escribir un componente de página nuevo para eso.
 - Patrón repetido en TODO el sistema para listas: **escritorio** = tabla con íconos de
   acción (ojo=ver, lápiz=editar, basura=eliminar); **móvil** = tarjetas apiladas, sin
   botones visibles, tocar la tarjeta entera navega al detalle. El punto de quiebre entre
-  "móvil" y "escritorio" en el layout general es **768px** (`md:` de Tailwind).
+  "móvil" y "escritorio" en el layout general es **768px** (`md:` de Tailwind), y desde
+  el 2026-09-25 **solo con mouse o trackpad**: las pantallas táctiles (teléfono y tablet)
+  reciben siempre el diseño móvil (ver "Tablet").
 - Patrón repetido para filas repetibles de un formulario (características de un equipo,
   equipos de una entrega, etc.): en escritorio pueden ir en tabla; en móvil siempre van
   como tarjetas apiladas con cada campo etiquetado arriba, más un botón punteado "Agregar
@@ -480,6 +482,35 @@ nunca escribir un componente de página nuevo para eso.
   `equipment_id` si viene y, si no, busca el equipo por serie en `GET /equipments`
   (una vez, se reutiliza; se olvida al editar un equipo). En la tabla de entrega, un
   renglón devuelto deja el hueco del bote para que los ojos queden en una columna.
+
+## Tablet (2026-09-25)
+
+- **Detección por dispositivo, no solo por ancho**: `sm`/`md`/`lg`/`xl`/`2xl` de
+  `tailwind.config.js` son `(min-width: N) and (hover: hover) and (pointer: fine)`. Una
+  pantalla táctil recibe el diseño móvil aunque mida 1024 o 1366px (un iPad Pro horizontal
+  mide lo mismo que una laptop; lo que las distingue es el puntero). Las media queries de
+  `index.css` usan la misma condición. Laptop o PC con mouse: igual que siempre (se
+  comparó captura por captura contra `main`: idénticas salvo la cordillera animada y el
+  saludo del día).
+- **`tablet:`** = táctil con 600px o más de ancho **y** de alto (un teléfono horizontal,
+  844×390, sigue siendo teléfono). En tablet `index.css` sube la letra base de 16 a
+  **19px**: los tamaños del sistema (`fontSize`, `spacing` y `borderRadius` del config)
+  están en `rem` -- a 16px son exactamente los mismos píxeles de antes --, así que el
+  diseño móvil crece ×1.19 (letra, botones, tarjetas, radios) en vez de quedarse del
+  tamaño del teléfono. Los contenedores de página llevan `tablet:px-8 tablet:pt-8`.
+  El cajón del menú mide `min(19rem, 86%)` (antes 304px) para que crezca igual.
+- **`tablet-h:`** = tablet horizontal (desde 1000px): las listas de tarjetas (Historial,
+  Equipos, Empleados, Marcas, Departamentos, Usuarios) van a **dos columnas**; un único
+  hijo (esqueleto o estado vacío) ocupa las dos. Datos del equipo a 3 columnas.
+- Firmas en tablet: una debajo de otra (el `sm:grid-cols-2` ya no aplica en táctil).
+- `movil:` reemplaza a `max-sm:` (Tailwind no genera `max-*`/`min-[...]` con breakpoints
+  con condición). Para un límite puro de ancho usar variante arbitraria:
+  `[@media(max-width:359px)]:`.
+- `future.hoverOnlyWhenSupported`: `hover:` solo con mouse; en táctil el hover se
+  quedaba "pegado" tras tocar una tarjeta.
+- No se usa `zoom` de CSS: descuadraría la captura del PDF (html2canvas) y el trazo de la
+  firma en Safari del iPad.
+- Probado en 820×1180, 1180×820, 1366×1024 (táctil), 1366×768 (mouse), 390×844 y 844×390.
 
 ## PDF de las actas: identidad Sierra y peso (2026-09-25)
 

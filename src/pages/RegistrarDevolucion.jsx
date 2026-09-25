@@ -202,7 +202,7 @@ function RegistrarDevolucion() {
 
   return (
     <div className="flex-1 [&+footer]:pb-[calc(114px+env(safe-area-inset-bottom))] md:[&+footer]:pb-[88px]">
-      <div className="px-4 pt-6 pb-10 md:px-8 md:pt-10">
+      <div className="px-4 pt-6 pb-10 tablet:px-8 tablet:pt-8 md:px-8 md:pt-10">
         <div className="mx-auto max-w-4xl animate-view-in space-y-stack-lg">
           <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-5">
             <Link
@@ -567,7 +567,7 @@ function RegistrarDevolucion() {
                 disabled={guardando || pendientes.length === 0}
                 className="inline-flex flex-1 sm:flex-none h-10 items-center justify-center gap-2 rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-toast transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {guardando && <IsotipoCarga className="h-3 max-sm:!hidden" />}
+                {guardando && <IsotipoCarga className="h-3 movil:!hidden" />}
                 {formato.textoAccion}
               </button>
             </div>

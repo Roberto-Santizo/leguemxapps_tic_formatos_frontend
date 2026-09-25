@@ -50,6 +50,11 @@ en español; mantener ese idioma.
 ## Arquitectura (src/)
 
 - `main.jsx` → `AuthProvider` + `BrowserRouter` → `App.jsx` (todas las rutas).
+- Responsive por dispositivo: `sm`/`md`/`lg`/`xl` solo aplican con mouse o trackpad;
+  teléfono y tablet (táctil) reciben el diseño móvil, y en tablet (`tablet:`, táctil
+  ≥600px de ancho y alto) la letra base sube a 19px y todo crece porque los tamaños del
+  config están en `rem`. `tablet-h:` = tablet horizontal (listas a dos columnas).
+  No usar `max-sm:`/`min-[..]:` (usar `movil:` o `[@media(...)]:`).
 - `routes/RequireAuth.jsx` (redirige a `/login`) y `routes/RequireAdmin.jsx` (redirige a
   `/historial`). Roles: solo `admin` y `user`. **`user` solo accede a Historial**; todo lo
   demás (`/`, `/actas/*`, `/catalogo/*`, `/usuarios/*`) va envuelto en `RequireAdmin`.

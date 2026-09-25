@@ -272,7 +272,7 @@ function HistorialDevolucionView() {
 
   return (
     <div className="flex-1 [&+footer]:pb-[calc(88px+env(safe-area-inset-bottom))] md:[&+footer]:pb-[88px]">
-      <div className="px-4 pt-6 pb-10 md:px-8 md:pt-10">
+      <div className="px-4 pt-6 pb-10 tablet:px-8 tablet:pt-8 md:px-8 md:pt-10">
         <div className="mx-auto max-w-4xl animate-view-in space-y-stack-lg">
           <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-5">
             <Link

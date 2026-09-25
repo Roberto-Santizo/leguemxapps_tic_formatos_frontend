@@ -51,7 +51,7 @@ function CatalogoRegistroView({ textos, onObtener, rutaBase, extra }) {
   }, [id, token, onObtener, intento])
 
   return (
-    <div className="animate-view-in flex-1 px-4 pt-6 pb-10 md:px-8 md:pt-10">
+    <div className="animate-view-in flex-1 px-4 pt-6 pb-10 tablet:px-8 tablet:pt-8 md:px-8 md:pt-10">
       {/* Mismo carril de 1200px que la lista y que su formulario
           (CatalogoFormPage): ver, editar y la lista no cambian de ancho al
           pasar de una a otra, y no queda media pantalla vacía. */}

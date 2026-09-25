@@ -63,7 +63,7 @@ function DepartamentoHistorial() {
   }
 
   return (
-    <div className="flex-1 animate-view-in px-4 pt-6 pb-10 md:px-8 md:pt-10">
+    <div className="flex-1 animate-view-in px-4 pt-6 pb-10 tablet:px-8 tablet:pt-8 md:px-8 md:pt-10">
       <div className="mx-auto flex max-w-[1200px] flex-col gap-stack-lg">
         <Link to={`/catalogo/departamentos/${id}/ver`} className={botonVolver}>
           <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={1.75} />

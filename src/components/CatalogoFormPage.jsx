@@ -77,7 +77,7 @@ function CatalogoFormPage({ textos, onObtener, onCrear, onActualizar, rutaBase }
   }
 
   return (
-    <div className="animate-view-in flex-1 px-4 pt-6 pb-10 md:px-8 md:pt-10">
+    <div className="animate-view-in flex-1 px-4 pt-6 pb-10 tablet:px-8 tablet:pt-8 md:px-8 md:pt-10">
       {/* Mismo carril de 1200px que la lista: ver, editar y la lista de un
           catálogo no cambian de ancho al pasar de una a otra. */}
       <div className="mx-auto flex max-w-[1200px] flex-col gap-stack-lg">

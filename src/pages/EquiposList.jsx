@@ -469,7 +469,7 @@ function EquiposList() {
     'inline-flex h-9 w-9 items-center justify-center rounded-boton text-on-surface-variant transition duration-fast ease-standard hover:bg-surface-container hover:text-on-surface active:scale-[0.90]'
 
   return (
-    <div className="animate-view-in flex-1 px-4 pt-6 pb-10 md:px-8 md:pt-10">
+    <div className="animate-view-in flex-1 px-4 pt-6 pb-10 tablet:px-8 tablet:pt-8 md:px-8 md:pt-10">
       <div className="max-w-[1200px] mx-auto flex flex-col gap-stack-lg">
         <Link to="/catalogo" className={botonVolver}>
           <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={1.75} />
@@ -724,7 +724,7 @@ function EquiposList() {
         </div>
 
         {/* ---- Móvil: tarjetas apiladas; se toca la tarjeta completa ---- */}
-        <div className="md:hidden flex flex-col gap-stack-sm">
+        <div className="md:hidden flex flex-col gap-stack-sm tablet-h:grid tablet-h:grid-cols-2 tablet-h:items-start tablet-h:[&>:only-child]:col-span-2">
           {cargandoLista ? (
             <SkeletonTarjetas filas={4} />
           ) : sinContenido ? (

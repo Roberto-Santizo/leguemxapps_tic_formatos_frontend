@@ -1,8 +1,45 @@
+/*
+  Breakpoints por DISPOSITIVO, no solo por ancho: el diseño de escritorio
+  (sidebar, tablas, dos columnas) es para mouse o trackpad (puntero fino con
+  hover). Toda pantalla táctil -- teléfono o tablet, vertical u horizontal --
+  recibe el diseño móvil (menú hamburguesa, tarjetas, firmas una debajo de
+  otra), aunque mida 1024 o 1366px como una laptop. Solo el ancho no las
+  distingue: un iPad Pro horizontal mide lo mismo que una laptop de 1366.
+  `tablet:` es el diseño móvil agrandado para una tablet (táctil, 600px o más
+  de ancho Y de alto):
+  mismas pantallas, con el tamaño de la tablet en vez del de un teléfono.
+  `tablet-h:` es la tablet horizontal (táctil desde 1000px): las listas de
+  tarjetas pasan a dos columnas.
+  Las media queries de index.css usan la misma condición (ESCRITORIO).
+*/
+const ESCRITORIO = '(hover: hover) and (pointer: fine)'
+const desde = (px) => ({ raw: `(min-width: ${px}px) and ${ESCRITORIO}` })
+
+// Tamaños del sistema (letra, espacios, radios) en rem: a 16px de base son
+// EXACTAMENTE los mismos píxeles de siempre en escritorio y teléfono; en
+// tablet index.css sube la base y todo el diseño móvil crece en proporción.
+const rem = (px) => `${px / 16}rem`
+
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ['./index.html', './src/**/*.{js,jsx}'],
   darkMode: 'class',
+  // `hover:` solo donde hay hover de verdad (mouse/trackpad): en teléfono y
+  // tablet el estado hover se quedaba "pegado" después de tocar una tarjeta.
+  future: { hoverOnlyWhenSupported: true },
   theme: {
+    screens: {
+      sm: desde(640),
+      md: desde(768),
+      lg: desde(1024),
+      xl: desde(1280),
+      '2xl': desde(1536),
+      // Tablet = táctil y de al menos 600px en AMBOS lados: un teléfono
+      // horizontal (844×390) es ancho pero no alto, y sigue siendo teléfono.
+      tablet: { raw: '(min-width: 600px) and (min-height: 600px) and (hover: none) and (pointer: coarse)' },
+      // Tablet horizontal: hay ancho para dos columnas de tarjetas.
+      'tablet-h': { raw: '(min-width: 1000px) and (min-height: 600px) and (hover: none) and (pointer: coarse)' },
+    },
     extend: {
       colors: {
         /*
@@ -114,11 +151,11 @@ export default {
         lg: '0.875rem',
         xl: '1rem',
         full: '9999px',
-        boton: '8px', // botones e inputs del mockup
-        tarjeta: '16px', // tarjetas y paneles blancos
-        menu: '10px', // ítems del menú lateral y botón de la barra móvil
-        aviso: '22px', // pastilla del Toast
-        casilla: '4px', // checkbox (ConfirmDialog "no volver a preguntar")
+        boton: rem(8), // botones e inputs del mockup
+        tarjeta: rem(16), // tarjetas y paneles blancos
+        menu: rem(10), // ítems del menú lateral y botón de la barra móvil
+        aviso: rem(22), // pastilla del Toast
+        casilla: rem(4), // checkbox (ConfirmDialog "no volver a preguntar")
       },
       boxShadow: {
         sm: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
@@ -140,14 +177,14 @@ export default {
         'barra-inferior': '0 -1px 0 #e5e5e5',
       },
       spacing: {
-        'stack-xs': '4px',
-        'container-padding': '16px',
-        'stack-md': '16px',
-        'column-gap': '20px',
-        'stack-lg': '24px',
-        'drawer-width': '240px',
-        'stack-sm': '8px',
-        'barra-movil': '56px',
+        'stack-xs': rem(4),
+        'container-padding': rem(16),
+        'stack-md': rem(16),
+        'column-gap': rem(20),
+        'stack-lg': rem(24),
+        'drawer-width': rem(240),
+        'stack-sm': rem(8),
+        'barra-movil': rem(56),
         4.5: '1.125rem',
       },
       fontFamily: {
@@ -167,35 +204,35 @@ export default {
         papel: ['Manrope', 'Inter', 'sans-serif'],
       },
       fontSize: {
-        'body-lg': ['16px', { lineHeight: '24px', fontWeight: '400' }],
-        'headline-md': ['18px', { lineHeight: '24px', letterSpacing: '-0.02em', fontWeight: '700' }],
-        'body-md': ['14px', { lineHeight: '20px', fontWeight: '400' }],
-        'headline-lg': ['24px', { lineHeight: '30px', letterSpacing: '-0.03em', fontWeight: '700' }],
+        'body-lg': [rem(16), { lineHeight: rem(24), fontWeight: '400' }],
+        'headline-md': [rem(18), { lineHeight: rem(24), letterSpacing: '-0.02em', fontWeight: '700' }],
+        'body-md': [rem(14), { lineHeight: rem(20), fontWeight: '400' }],
+        'headline-lg': [rem(24), { lineHeight: rem(30), letterSpacing: '-0.03em', fontWeight: '700' }],
         // Título de pantalla del mockup (32px, 800, tracking -0.04em).
-        'display-lg': ['32px', { lineHeight: '38px', letterSpacing: '-0.04em', fontWeight: '800' }],
-        'label-sm': ['11px', { lineHeight: '14px', fontWeight: '500' }],
-        'label-bold': ['12px', { lineHeight: '16px', fontWeight: '700' }],
+        'display-lg': [rem(32), { lineHeight: rem(38), letterSpacing: '-0.04em', fontWeight: '800' }],
+        'label-sm': [rem(11), { lineHeight: rem(14), fontWeight: '500' }],
+        'label-bold': [rem(12), { lineHeight: rem(16), fontWeight: '700' }],
         // Eyebrow / encabezado de tabla / contador: mono 11px en mayúsculas.
-        eyebrow: ['11px', { lineHeight: '16px', letterSpacing: '0.12em', fontWeight: '400' }],
+        eyebrow: [rem(11), { lineHeight: rem(16), letterSpacing: '0.12em', fontWeight: '400' }],
         // Tamaños sueltos que antes iban como text-[12px] / text-[11px] / text-[26px]:
         //  - meta: metadatos, labels de formulario, códigos en tabla (12px).
         //  - micro: etiquetas mono de tabla/paginador/chips (11px); el tracking se
         //    combina aparte: `font-mono text-micro tracking-[0.1em] uppercase`.
         //  - titulo-movil: título de pantalla en móvil (26px / 800 / -0.04em);
         //    en escritorio sigue `md:text-display-lg`.
-        meta: ['12px', { lineHeight: '16px' }],
-        micro: ['11px', { lineHeight: '14px' }],
+        meta: [rem(12), { lineHeight: rem(16) }],
+        micro: [rem(11), { lineHeight: rem(14) }],
         // Inputs en móvil: 16px evita el zoom automático de iOS al enfocar.
-        'input-movil': ['16px', { lineHeight: '24px' }],
-        'titulo-movil': ['26px', { lineHeight: '30px', letterSpacing: '-0.04em', fontWeight: '800' }],
+        'input-movil': [rem(16), { lineHeight: rem(24) }],
+        'titulo-movil': [rem(26), { lineHeight: rem(30), letterSpacing: '-0.04em', fontWeight: '800' }],
         //  - nano: marca del menú, pie y chip "Corregida aquí" (mono 10px).
         //  - titulo-modal: título de ConfirmDialog y EquipoDetalleModal.
         //  - titulo-papel: título del papel ("Hoja de Entrega de Equipo"...),
         //    idéntico al `headline-lg` de origin/main + font-extrabold que
         //    aprobó el cliente; va con `font-papel` (Manrope).
-        nano: ['10px', { lineHeight: '16px' }],
-        'titulo-modal': ['20px', { lineHeight: '28px', letterSpacing: '-0.02em', fontWeight: '600' }],
-        'titulo-papel': ['24px', { lineHeight: '32px', letterSpacing: '-0.02em', fontWeight: '800' }],
+        nano: [rem(10), { lineHeight: rem(16) }],
+        'titulo-modal': [rem(20), { lineHeight: rem(28), letterSpacing: '-0.02em', fontWeight: '600' }],
+        'titulo-papel': [rem(24), { lineHeight: rem(32), letterSpacing: '-0.02em', fontWeight: '800' }],
       },
       transitionDuration: {
         fast: '150ms',
@@ -245,5 +282,12 @@ export default {
       },
     },
   },
-  plugins: [require('@tailwindcss/forms'), require('@tailwindcss/container-queries')],
+  plugins: [
+    require('@tailwindcss/forms'),
+    require('@tailwindcss/container-queries'),
+    // `movil:` = todo lo que no es `sm:` (teléfono, tablet, o ventana de
+    // escritorio de menos de 640px). Reemplaza a `max-sm:`, que Tailwind no
+    // genera cuando los breakpoints llevan condición de dispositivo.
+    ({ addVariant }) => addVariant('movil', `@media not all and (min-width: 640px) and ${ESCRITORIO}`),
+  ],
 }

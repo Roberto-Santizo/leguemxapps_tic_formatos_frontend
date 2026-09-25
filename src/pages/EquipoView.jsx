@@ -84,7 +84,7 @@ function EquipoView() {
   )
 
   return (
-    <div className="animate-view-in flex-1 px-4 pt-6 pb-10 md:px-8 md:pt-10">
+    <div className="animate-view-in flex-1 px-4 pt-6 pb-10 tablet:px-8 tablet:pt-8 md:px-8 md:pt-10">
       {/* Mismo ancho que su formulario (EquipoForm, 900px): ver y editar de
           una misma entidad no deben cambiar de ancho al pasar de una a otra. */}
       {/* Mismo carril de 1200px que la lista del catálogo (ver y editar no
@@ -149,7 +149,7 @@ function EquipoView() {
               <h2 className={tituloSeccion}>Datos del equipo</h2>
               {/* Seis datos: 3 × 2 en escritorio y 2 × 3 en móvil, sin una
                   baldosa huérfana en la última fila. */}
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6 tablet-h:grid-cols-3">
                 {campo('Marca', marca?.name ?? '—')}
                 {campo('Modelo', equipo.model ?? '—')}
                 {campo('Serie', equipo.serie ?? '—')}

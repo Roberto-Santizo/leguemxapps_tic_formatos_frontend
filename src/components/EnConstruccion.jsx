@@ -14,7 +14,7 @@
  */
 function EnConstruccion({ icon: Icon, titulo, descripcion, migas = '' }) {
   return (
-    <div className="flex-1 animate-view-in px-4 pt-6 pb-10 md:px-8 md:pt-10">
+    <div className="flex-1 animate-view-in px-4 pt-6 pb-10 tablet:px-8 tablet:pt-8 md:px-8 md:pt-10">
       <div className="max-w-[1200px] mx-auto flex flex-col gap-stack-lg">
         <div className="min-w-0">
           {migas && (

@@ -137,7 +137,7 @@ function Usuarios() {
   }
 
   return (
-    <div className="animate-view-in flex-1 px-4 pt-6 pb-10 md:px-8 md:pt-10">
+    <div className="animate-view-in flex-1 px-4 pt-6 pb-10 tablet:px-8 tablet:pt-8 md:px-8 md:pt-10">
       <div className="max-w-[1200px] mx-auto flex flex-col gap-stack-lg">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
           <div className="min-w-0">
@@ -232,7 +232,7 @@ function Usuarios() {
         </div>
 
         {/* ---- Móvil: tarjetas apiladas, sin botones -- toda la tarjeta lleva al detalle ---- */}
-        <div className="md:hidden flex flex-col gap-stack-sm">
+        <div className="md:hidden flex flex-col gap-stack-sm tablet-h:grid tablet-h:grid-cols-2 tablet-h:items-start tablet-h:[&>:only-child]:col-span-2">
           {cargando ? (
             <SkeletonTarjetas filas={4} />
           ) : sinContenido ? (

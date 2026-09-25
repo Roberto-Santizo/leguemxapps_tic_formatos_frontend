@@ -50,7 +50,8 @@ export function SkeletonTabla({ columnas = 4, filas = 5 }) {
  */
 export function SkeletonTarjetas({ filas = 4 }) {
   return (
-    <div className="flex flex-col gap-stack-sm" aria-hidden="true">
+    // En tablet horizontal las listas van a dos columnas: el esqueleto también.
+    <div className="flex flex-col gap-stack-sm tablet-h:grid tablet-h:grid-cols-2" aria-hidden="true">
       {Array.from({ length: filas }).map((_, fila) => (
         <div
           key={fila}

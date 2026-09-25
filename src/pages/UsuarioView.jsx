@@ -67,7 +67,7 @@ function UsuarioView() {
     : null
 
   return (
-    <div className="animate-view-in flex-1 px-4 pt-6 pb-10 md:px-8 md:pt-10">
+    <div className="animate-view-in flex-1 px-4 pt-6 pb-10 tablet:px-8 tablet:pt-8 md:px-8 md:pt-10">
       {/* Mismo ancho que su formulario (UsuarioForm, 600px): ver y editar de
           una misma entidad no deben cambiar de ancho al pasar de una a otra. */}
       <div className="max-w-[600px] ml-[max(0px,calc((100%_-_1200px)/2))] flex flex-col gap-stack-lg">
