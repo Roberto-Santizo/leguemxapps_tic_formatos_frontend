@@ -713,13 +713,13 @@ function HistorialDevolucionView() {
       </div>
 
       {!cargando && !error && documento && (
-        <div data-barra-inferior className="fixed inset-x-0 bottom-0 z-30 bg-papel px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-barra-inferior md:left-drawer-width md:overflow-hidden md:px-8 md:pb-3 md:[scrollbar-gutter:stable]">
-          <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-end gap-3">
+        <div data-barra-inferior className="pointer-events-none fixed inset-x-0 bottom-0 z-30 px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] md:left-drawer-width md:overflow-hidden md:px-8 md:pb-3 md:[scrollbar-gutter:stable]">
+          <div className="[&>*]:pointer-events-auto mx-auto flex max-w-4xl flex-wrap items-center justify-end gap-3">
             <button
               type="button"
               onClick={handleDescargarPdf}
               disabled={generandoPdf}
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover disabled:opacity-50 active:scale-[0.97]"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-toast transition duration-fast ease-standard hover:bg-tinta-hover disabled:opacity-50 active:scale-[0.97]"
             >
               {generandoPdf ? (
                 <IsotipoCarga className="h-3" />

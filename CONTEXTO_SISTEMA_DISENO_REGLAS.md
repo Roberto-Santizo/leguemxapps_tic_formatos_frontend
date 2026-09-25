@@ -178,9 +178,11 @@ nunca escribir un componente de página nuevo para eso.
     mismo contenedor `px-4 pt-6 pb-10 md:px-8 md:pt-10` con su `max-w` de siempre.
     Formularios y vistas "ver" alinean su tarjeta a la IZQUIERDA del mismo carril de 1200px
     que las listas, para que su borde izquierdo coincida con el de ellas en cualquier ancho:
-    `max-w-[600px]` (o 900) + `ml-[max(0px,calc((100%_-_1200px)/2))]` (el 1200 debe ser el
+    `max-w-[600px]` + `ml-[max(0px,calc((100%_-_1200px)/2))]` (el 1200 debe ser el
     mismo `max-w` de las listas), o un envoltorio `mx-auto max-w-[1200px]` con la tarjeta
-    dentro sin `mx-auto`. Solo el papel de las hojas va centrado.
+    dentro sin `mx-auto`. Solo el papel de las hojas va centrado. (Desde el 2026-09-25 las
+    vistas y formularios del **Catálogo** ocupan el carril completo; ver "Ancho de ver y
+    editar".)
   - Orden de botones: el de siempre (Cancelar a la izquierda, primario a la derecha,
     alineados a la derecha en escritorio); el rediseño no mueve ni cambia de tipo ningún
     botón. La hamburguesa del `MobileHeader` va a la izquierda, del lado del que entra el
@@ -224,8 +226,13 @@ nunca escribir un componente de página nuevo para eso.
     bottom-0 md:left-drawer-width z-30` con el atributo **`data-barra-inferior`** (lo usa el
     Toast en `index.css`), de borde a borde del área de contenido y por encima del canal del
     scroll (una barra sticky dentro del `<main>` quedaba 8px corta y, al final del scroll,
-    suelta sobre la montaña). Fondo `bg-papel` opaco + `shadow-barra-inferior`,
-    sin blur. En escritorio lleva `md:overflow-hidden md:[scrollbar-gutter:stable]`: reserva
+    suelta sobre la montaña). **Transparente** desde el 2026-09-25 (la franja de papel con
+    filete se veía como una línea blanca sobre la cordillera): la barra lleva
+    `pointer-events-none` y su contenedor `[&>*]:pointer-events-auto`, así el hueco entre
+    botones no bloquea clics ni scroll. Los botones flotan con `shadow-toast` y el texto de
+    estado ("Complete los datos…") va en pastilla `bg-papel` opaca con filete (regla de
+    contraste: nada de texto suelto sobre la montaña ni sobre el contenido); el error de
+    validación, en `bg-error-container` opaco. En escritorio lleva `md:overflow-hidden md:[scrollbar-gutter:stable]`: reserva
     el mismo canal de 8px que el `<main>`, así su contenido (`mx-auto max-w-4xl`) queda
     alineado con la hoja. Costo aceptado: tapa los últimos ~64px del riel de scroll del
     `<main>`. El espacio para que nada quede debajo NO va en la hoja sino en el `<footer>`
@@ -352,10 +359,12 @@ nunca escribir un componente de página nuevo para eso.
   tarjeta `headline-md` (el título de la pantalla es `display-lg`). Hasta el 2026-09-11
   cada una tenía los suyos.
 - **Ancho de "ver" y "editar"**: la vista de detalle y el formulario de una misma entidad
-  usan el mismo ancho, para que el contenido no salte al pasar de una a otra: 600px en
-  Marcas, Departamentos, Empleados y Usuarios (una columna), 900px en Equipos (formulario
-  a dos columnas y tablas de características e historial). Las listas van a 1200px.
-  Desde el rediseño Sierra esas tarjetas van alineadas a la izquierda (sin `mx-auto`).
+  usan el mismo ancho, para que el contenido no salte al pasar de una a otra. **Catálogo**
+  (Marcas, Departamentos, Empleados, Equipos; 2026-09-25): el mismo carril que su lista,
+  `mx-auto max-w-[1200px]`, y los campos se reparten para no quedar estirados: Equipos
+  4 columnas desde `xl:` (Nombre ×2 · Modelo · Marca / Serie · Tipo · Original · Usado) y
+  datos de la vista en 6 desde `xl:`; Empleados Código · Nombre · Departamento en una fila
+  desde `lg:`. Usuarios sigue a 600px alineado a la izquierda.
 - Patrón repetido en TODO el sistema para listas: **escritorio** = tabla con íconos de
   acción (ojo=ver, lápiz=editar, basura=eliminar); **móvil** = tarjetas apiladas, sin
   botones visibles, tocar la tarjeta entera navega al detalle. El punto de quiebre entre
@@ -432,9 +441,7 @@ nunca escribir un componente de página nuevo para eso.
   (`normalizarNombre`: sin acentos ni mayúsculas). Mientras el departamento carga, el
   filtro no deja pasar nada (nunca se ve un instante el historial de todos). Si el backend
   agrega un filtro por departamento, el cambio va en `DepartamentoHistorial.jsx`.
-  La vista del departamento usa el ancho de las pantallas de tarjetas (1200px) en vez de
-  los 600px de su formulario: `CatalogoRegistroView` se ensancha solo cuando recibe
-  `extra` (Marcas sigue igual).
+  La vista del departamento usa el carril de 1200px, como todo el Catálogo.
 - **Filtros de actas** (`hooks/useFiltrosActas.js` + `components/FiltrosActas.jsx`): estado
   (**En posesión** / Parcial / Devuelto -- el valor del backend sigue siendo `pendiente`,
   solo cambia la etiqueta, también en el CSV; `status` en entregas, `delivery_document_status` en

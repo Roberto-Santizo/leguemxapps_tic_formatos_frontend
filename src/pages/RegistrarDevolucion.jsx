@@ -543,21 +543,21 @@ function RegistrarDevolucion() {
       </div>
 
       {!cargando && !error && entrega && (
-        <div data-barra-inferior className="fixed inset-x-0 bottom-0 z-30 bg-papel px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-barra-inferior md:left-drawer-width md:overflow-hidden md:px-8 md:pb-3 md:[scrollbar-gutter:stable]">
-          <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-3">
+        <div data-barra-inferior className="pointer-events-none fixed inset-x-0 bottom-0 z-30 px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] md:left-drawer-width md:overflow-hidden md:px-8 md:pb-3 md:[scrollbar-gutter:stable]">
+          <div className="[&>*]:pointer-events-auto mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-3">
             {errorGuardar ? (
-              <p className="animate-pop-in rounded-boton border border-error/30 bg-error-container/60 px-3 py-2 font-label-sm text-label-sm text-error">
+              <p className="animate-pop-in rounded-boton border border-error/30 bg-error-container px-3 py-2 font-label-sm text-label-sm text-error">
                 {errorGuardar}
               </p>
             ) : (
-              <span className="font-mono text-micro uppercase tracking-[0.1em] text-on-surface-variant">
+              <span className="rounded-full border border-outline-variant bg-papel px-3 py-1 font-mono text-micro uppercase tracking-[0.1em] text-on-surface-variant">
                 Complete los datos para guardar
               </span>
             )}
             <div className="flex w-full items-center gap-3 sm:ml-auto sm:w-auto">
               <Link
                 to={`/historial/entrega/${id}`}
-                className="inline-flex flex-1 sm:flex-none h-10 items-center justify-center rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface shadow-sm transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
+                className="inline-flex flex-1 sm:flex-none h-10 items-center justify-center rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface shadow-toast transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
               >
                 Cancelar
               </Link>
@@ -565,7 +565,7 @@ function RegistrarDevolucion() {
                 type="button"
                 onClick={handleClicFinalizarDevolucion}
                 disabled={guardando || pendientes.length === 0}
-                className="inline-flex flex-1 sm:flex-none h-10 items-center justify-center gap-2 rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex flex-1 sm:flex-none h-10 items-center justify-center gap-2 rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-toast transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {guardando && <IsotipoCarga className="h-3 max-sm:!hidden" />}
                 {formato.textoAccion}

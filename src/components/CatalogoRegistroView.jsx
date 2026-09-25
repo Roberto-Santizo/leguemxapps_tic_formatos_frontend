@@ -52,16 +52,10 @@ function CatalogoRegistroView({ textos, onObtener, rutaBase, extra }) {
 
   return (
     <div className="animate-view-in flex-1 px-4 pt-6 pb-10 md:px-8 md:pt-10">
-      {/* Mismo ancho que su formulario (CatalogoFormPage, 600px): ver y editar
-          de una misma entidad no deben cambiar de ancho al pasar de una a otra.
-          Con `extra` (Departamentos: tarjetas de historial) la vista es algo más
-          que los datos del formulario y usa el ancho de las pantallas de
-          tarjetas (1200px), para no dejar media pantalla vacía. */}
-      <div
-        className={`${
-          extra ? 'mx-auto max-w-[1200px]' : 'max-w-[600px] ml-[max(0px,calc((100%_-_1200px)/2))]'
-        } flex flex-col gap-stack-lg`}
-      >
+      {/* Mismo carril de 1200px que la lista y que su formulario
+          (CatalogoFormPage): ver, editar y la lista no cambian de ancho al
+          pasar de una a otra, y no queda media pantalla vacía. */}
+      <div className="mx-auto flex max-w-[1200px] flex-col gap-stack-lg">
         <Link to={rutaBase} className={botonVolver}>
           <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={1.75} />
           {textos.titulo}

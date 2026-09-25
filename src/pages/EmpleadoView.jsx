@@ -95,7 +95,9 @@ function EmpleadoView() {
 
   return (
     <div className="animate-view-in flex-1 px-4 pt-6 pb-10 md:px-8 md:pt-10">
-      <div className="max-w-[600px] ml-[max(0px,calc((100%_-_1200px)/2))] flex flex-col gap-stack-lg">
+      {/* Mismo carril de 1200px que la lista del catálogo (ver y editar no
+          cambian de ancho respecto a ella). */}
+      <div className="mx-auto flex max-w-[1200px] flex-col gap-stack-lg">
         <Link to="/catalogo/empleados" className={botonVolver}>
           <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={1.75} />
           Empleados
