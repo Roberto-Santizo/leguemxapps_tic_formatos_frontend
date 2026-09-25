@@ -417,6 +417,50 @@ nunca escribir un componente de página nuevo para eso.
   de la pantalla (junto al título), no solo cuando la lista está vacía -- patrón consistente
   entre `HistorialEntregaList.jsx` y `HistorialDevolucionList.jsx`.
 
+## Historial por departamento, filtros, CSV y edición en la ficha (2026-09-25)
+
+- **Historial por departamento**: Catálogo → Departamentos → ver muestra dos tarjetas
+  ("Historial de entregas" / "Historial de devoluciones") que llevan a
+  `/catalogo/departamentos/:id/historial/:tipo` (`DepartamentoHistorial.jsx`, solo admin).
+  Esa página carga el departamento y **reutiliza las mismas listas del Historial**
+  (`HistorialEntregaList` / `HistorialDevolucionList`) con la prop `departamento`: misma
+  tabla y tarjetas, cabecera y volver propios, sin columna Departamento, sin "Registrar", y
+  con **Exportar CSV de todas las actas que cumplen los filtros** (no solo la página).
+  El backend **no filtra actas por departamento** y los filtros documentados de
+  `/delivery_documents` fallan (nota en `api.js`), así que se trae el listado completo y se
+  compara en el cliente el nombre del departamento con `employee_department`
+  (`normalizarNombre`: sin acentos ni mayúsculas). Mientras el departamento carga, el
+  filtro no deja pasar nada (nunca se ve un instante el historial de todos). Si el backend
+  agrega un filtro por departamento, el cambio va en `DepartamentoHistorial.jsx`.
+- **Filtros de actas** (`hooks/useFiltrosActas.js` + `components/FiltrosActas.jsx`): estado
+  (Pendiente / Parcial / Devuelto; `status` en entregas, `delivery_document_status` en
+  devoluciones), planta (solo entregas) y rango de fechas, en la URL (`?estado=&planta=&
+  desde=&hasta=`), filtrados en el cliente vía `filtroExtra`. La lista de entregas tiene
+  ahora columna **Estado** (mismo chip que devoluciones; `utils/estadoEntrega.js`).
+  `usePaginaUrl` expone `setParametros({...})` para cambiar varios filtros en una sola
+  escritura (varias llamadas a `setParametro` seguidas se pisan).
+- **Equipos**: filtro por **marca** (junto al de estado). No hay filtro por tipo ni por
+  nuevo/usado porque `GET /equipments` es reducido (id, name, brand, serie, registeredBy):
+  esos campos solo vienen en la ficha. Pedirlos al backend en el listado permitiría
+  agregarlos. **Exportar CSV** exporta solo la página actual; mientras dice "Generando CSV"
+  pide la ficha de cada equipo de la página (máx. `limit`, en paralelo) para incluir
+  modelo, tipo, original y uso.
+- **CSV** (`utils/csv.js` + `hooks/useExportacionCsv.js`): separador `;`, BOM UTF-8 y CRLF
+  (Excel en español lo abre bien), valores que empiezan con `= + - @` neutralizados con un
+  apóstrofo (inyección de fórmulas). Señal de carga del sistema: isotipo en el botón +
+  `IndicadorGuardando` "Generando CSV" + aviso negro "CSV descargado · N registros"; la
+  pausa mínima de 650 ms es solo para que la señal se vea.
+- **Serie al agregar equipo a un acta ya registrada**: los selectores de "Agregar equipo"
+  de `HistorialEntregaView` y `HistorialDevolucionView` usan `codigo` (serie visible y
+  buscable ignorando espacios/guiones), igual que la hoja de entrega.
+- **Editar el equipo desde su ficha** (`EquipoDetalleModal` con `editable`, solo admin): en
+  la hoja de entrega y en las vistas de entrega y devolución, el ojo del selector abre la
+  ficha con **Editar**; se editan nombre, modelo, marca, serie, tipo, original y usado con
+  el mismo `PUT /equipments/{id}` y la misma validación que `EquipoForm`, sin salir de la
+  página. **Excepción documentada** a "Editar es una página dedicada": quien la usa está a
+  mitad de un acta. Mientras se edita, el clic fuera no cierra y Escape solo sale del modo
+  edición. Las características se siguen editando en Catálogo → Equipos.
+
 ## Paginación de listados (2026-09-14)
 
 Las cinco listas con tabla (Marcas y Departamentos vía `CatalogoLista.jsx`, `EquiposList`,

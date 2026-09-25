@@ -1,9 +1,13 @@
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Eye, Pencil, Plus, ChevronDown, HardDrive } from 'lucide-react'
+import { ArrowLeft, Download, Eye, Pencil, Plus, ChevronDown, HardDrive, X } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 import { useListaPaginada, usePaginaUrl } from '../hooks/usePaginacion.js'
-import { normalizarBusqueda } from '../utils/texto.js'
+import { normalizarBusqueda, normalizarNombre } from '../utils/texto.js'
+import useExportacionCsv from '../hooks/useExportacionCsv.js'
+import IsotipoCarga from '../components/IsotipoCarga.jsx'
+import { IndicadorGuardando } from '../components/Toast.jsx'
+import { etiquetaTipoEquipo } from './EquipoForm.jsx'
 import Buscador from '../components/Buscador.jsx'
 import ConfirmDialog from '../components/ConfirmDialog.jsx'
 import EstadoVacio from '../components/EstadoVacio.jsx'
@@ -13,6 +17,8 @@ import { CaracteristicasDeEquipo } from '../components/CaracteristicasEditor.jsx
 import {
   listarEquipos,
   listarEquiposDisponibles,
+  listarMarcas,
+  obtenerEquipo,
   listarCaracteristicas,
   obtenerCaracteristicasDeEquipo,
   crearCaracteristica,
@@ -83,9 +89,20 @@ const FILTROS_ESTADO = [
   },
 ]
 
+// Filtro por marca. Igual que el de estado, filtra en el cliente:
+// /equipments no tiene filtros propios (paginacion.md §4). No hay filtro por
+// tipo ni por nuevo/usado porque el listado es REDUCIDO (id, name, brand,
+// serie, registeredBy -- ver api.js): esos datos solo vienen en la ficha de
+// cada equipo. Si el backend los agrega al listado, se suman aquí.
+const etiquetaFiltro = 'font-mono text-micro uppercase tracking-[0.1em] text-on-surface-variant'
+const selectFiltro =
+  'h-8 max-w-[180px] rounded-boton border border-outline-variant bg-white py-0 pl-2.5 pr-8 text-meta font-medium text-on-surface transition hover:[&:not(:focus)]:border-outline'
+
 // Recetas visuales "Sierra" (BRIEF, ola 2), repetidas a propósito.
 const botonVolver =
   'inline-flex h-9 items-center gap-2 self-start rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]'
+const botonSecundarioCabecera =
+  'inline-flex h-10 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface shadow-sm transition duration-fast ease-standard hover:bg-surface-container disabled:opacity-50 active:scale-[0.97]'
 const botonPrimario =
   'inline-flex h-10 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97]'
 const celdaEncabezado =
@@ -114,7 +131,7 @@ function EquiposList() {
   // El estado elegido vive en la URL, igual que la página y la búsqueda, para
   // que refrescar o compartir el enlace conserve lo que se está viendo. Un
   // valor inventado a mano en la barra de direcciones se ignora.
-  const { parametro, setParametro } = usePaginaUrl()
+  const { parametro, setParametro, setParametros } = usePaginaUrl()
   const estadoUrl = parametro('estado')
   const estadoFiltro = FILTROS_ESTADO.some((f) => f.valor === estadoUrl) ? estadoUrl : ''
 
@@ -126,6 +143,34 @@ function EquiposList() {
     return (equipo) =>
       estadoFiltro === 'disponible' ? disponibles.has(equipo.id) : !disponibles.has(equipo.id)
   }, [estadoFiltro, disponibles])
+
+  // Marcas para el filtro: listado completo de apoyo. Si falla, el filtro de
+  // marca simplemente no se ofrece.
+  const [marcas, setMarcas] = useState([])
+  useEffect(() => {
+    let vivo = true
+    listarMarcas(token)
+      .then((data) => vivo && setMarcas(Array.isArray(data) ? data : []))
+      .catch(() => vivo && setMarcas([]))
+    return () => {
+      vivo = false
+    }
+  }, [token])
+
+  const marcaFiltro = parametro('marca')
+  const hayOtrosFiltros = Boolean(marcaFiltro)
+
+  // Estado + marca se acumulan. La marca se compara por nombre (`brand` del
+  // listado), normalizado, porque es lo que trae cada fila.
+  const filtroEquipos = useMemo(() => {
+    const partes = []
+    if (filtroEstado) partes.push(filtroEstado)
+    if (marcaFiltro) {
+      const buscada = normalizarNombre(marcaFiltro)
+      partes.push((e) => normalizarNombre(e.brand) === buscada)
+    }
+    return partes.length ? (e) => partes.every((p) => p(e)) : null
+  }, [filtroEstado, marcaFiltro])
 
   const {
     registros: visibles,
@@ -145,8 +190,43 @@ function EquiposList() {
     listar: listarEquipos,
     filtrar: filtrarEquipo,
     mensajeError: 'No se pudo obtener la lista de equipos',
-    filtroExtra: filtroEstado,
+    filtroExtra: filtroEquipos,
   })
+
+  // CSV de lo que se ve: solo la página actual (con los filtros aplicados).
+  // El listado es reducido, así que mientras se muestra "Generando CSV" se
+  // pide la ficha completa de cada equipo de la página (a lo sumo `limite`,
+  // en paralelo) para que el archivo lleve modelo, tipo, original y uso. Si
+  // una ficha falla, esa fila sale con lo que trae el listado.
+  const { exportando, exportar } = useExportacionCsv()
+  function exportarCsv() {
+    const pagina_ = visibles
+    exportar({
+      nombre: `equipos-pagina-${pagina}`,
+      filas: () =>
+        Promise.all(
+          pagina_.map((e) =>
+            obtenerEquipo(token, e.id)
+              .then((ficha) => ({ ...e, ...ficha, brand: e.brand || ficha?.brand }))
+              .catch(() => e),
+          ),
+        ),
+      columnas: [
+        { titulo: 'ID', valor: (e) => e.id },
+        { titulo: 'Equipo', valor: (e) => e.name || '' },
+        { titulo: 'Marca', valor: (e) => e.brand || '' },
+        { titulo: 'Modelo', valor: (e) => e.model || '' },
+        { titulo: 'Serie', valor: (e) => e.serie || '' },
+        { titulo: 'Tipo', valor: (e) => (e.type ? etiquetaTipoEquipo(e.type) : '') },
+        { titulo: 'Original', valor: (e) => (e.original === undefined ? '' : e.original ? 'Sí' : 'No') },
+        { titulo: 'Nuevo / Usado', valor: (e) => (e.is_used === undefined ? '' : e.is_used ? 'Usado' : 'Nuevo') },
+        {
+          titulo: 'Estado',
+          valor: (e) => (disponibles ? (disponibles.has(e.id) ? 'Disponible' : 'En posesión') : ''),
+        },
+      ],
+    })
+  }
 
   // Fila desplegada: solo para el alta ("+"); el ojo ahora navega a
   // /catalogo/equipos/:id/ver, la vista completa del equipo.
@@ -267,6 +347,21 @@ function EquiposList() {
         </button>
       }
     />
+  ) : hayOtrosFiltros ? (
+    <EstadoVacio
+      variante="busqueda"
+      titulo="No hay equipos con estos filtros"
+      descripcion="Cambia la marca o el estado para ver más resultados."
+      accion={
+        <button
+          type="button"
+          onClick={() => setParametros({ estado: '', marca: '' })}
+          className={botonSecundario}
+        >
+          Limpiar filtros
+        </button>
+      }
+    />
   ) : estadoFiltro ? (
     <EstadoVacio
       icon={HardDrive}
@@ -378,10 +473,23 @@ function EquiposList() {
             </p>
           </div>
 
-          <Link to="/catalogo/equipos/nuevo" className={botonPrimario}>
-            <Plus className="h-4 w-4" strokeWidth={1.75} />
-            Nuevo equipo
-          </Link>
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+            <button
+              type="button"
+              onClick={exportarCsv}
+              disabled={exportando || cargandoLista || Boolean(errorCarga) || !hayRegistros}
+              aria-busy={exportando}
+              title="Exporta los equipos de esta página"
+              className={botonSecundarioCabecera}
+            >
+              {exportando ? <IsotipoCarga tono="tinta" className="h-3" /> : <Download className="h-4 w-4" strokeWidth={1.75} />}
+              Exportar CSV
+            </button>
+            <Link to="/catalogo/equipos/nuevo" className={botonPrimario}>
+              <Plus className="h-4 w-4" strokeWidth={1.75} />
+              Nuevo equipo
+            </Link>
+          </div>
         </div>
 
         <div className="flex flex-col gap-stack-sm">
@@ -424,6 +532,34 @@ function EquiposList() {
                   </button>
                 )
               })}
+            </div>
+          )}
+
+          {marcas.length > 0 && (
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+              <label className="flex items-center gap-2">
+                <span className={etiquetaFiltro}>Marca</span>
+                <select value={marcaFiltro} onChange={(e) => setParametro('marca', e.target.value)} className={selectFiltro}>
+                  <option value="">Todas</option>
+                  {[...marcas]
+                    .sort((a, b) => String(a.name).localeCompare(String(b.name), 'es'))
+                    .map((m) => (
+                      <option key={m.id} value={m.name}>
+                        {m.name}
+                      </option>
+                    ))}
+                </select>
+              </label>
+              {(hayOtrosFiltros || estadoFiltro) && (
+                <button
+                  type="button"
+                  onClick={() => setParametros({ estado: '', marca: '' })}
+                  className="inline-flex h-8 items-center gap-1.5 rounded-full px-2 text-meta font-medium text-on-surface-variant transition duration-fast ease-standard hover:bg-surface-container hover:text-on-surface active:scale-[0.97]"
+                >
+                  <X className="h-3.5 w-3.5" strokeWidth={1.75} />
+                  Limpiar filtros
+                </button>
+              )}
             </div>
           )}
         </div>
@@ -652,6 +788,8 @@ function EquiposList() {
         onCancelar={() => setConfirmando(null)}
         onConfirmar={() => navigate(`/catalogo/equipos/${confirmando.id}`)}
       />
+
+      <IndicadorGuardando activo={exportando} texto="Generando CSV" />
     </div>
   )
 }

@@ -169,7 +169,9 @@ function HistorialDevolucionList({ departamento } = {}) {
         </Link>
 
         <div className="-mt-1 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end md:mt-0">
-          <div className="min-w-0">
+          {/* w-full en móvil: en columna, sin ancho propio el bloque crecía al
+              ancho del texto y un nombre de departamento largo desbordaba. */}
+          <div className="w-full min-w-0 sm:w-auto">
             <div className="flex items-center gap-3 font-eyebrow text-eyebrow uppercase text-on-surface-variant">
               <span aria-hidden="true" className="h-px w-7 shrink-0 bg-outline" />
               <span className="min-w-0 truncate">{enDepto ? `Catálogo / Departamentos / ${departamento?.name || ''}` : 'Historial / Devolución'}</span>

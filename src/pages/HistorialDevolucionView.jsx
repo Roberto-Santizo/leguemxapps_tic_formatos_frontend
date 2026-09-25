@@ -18,6 +18,7 @@ import EstadoVacio from '../components/EstadoVacio.jsx'
 import InlineEditableText from '../components/InlineEditableText.jsx'
 import EditorFechaLocal from '../components/EditorFechaLocal.jsx'
 import SearchableSelect from '../components/SearchableSelect.jsx'
+import EquipoDetalleModal from '../components/EquipoDetalleModal.jsx'
 import { IndicadorGuardando, mostrarToast } from '../components/Toast.jsx'
 import { SkeletonDetalle } from '../components/Skeleton.jsx'
 import { SeccionCard, Campo } from './FormatoActa.jsx'
@@ -87,6 +88,9 @@ function HistorialDevolucionView() {
   // --- Completar una devolución ya firmada: agregar un equipo pendiente de
   // la misma entrega que se quedó fuera (POST /return_document_details) ---
   const [agregandoEquipo, setAgregandoEquipo] = useState(false)
+  // Ficha del equipo (ojo del selector de "Agregar equipo"): ver y corregir
+  // sus datos sin salir de la devolución.
+  const [equipoDetalleId, setEquipoDetalleId] = useState('')
   const [pendientes, setPendientes] = useState([])
   const [nuevoDetalleId, setNuevoDetalleId] = useState('')
   const [nuevoDetalleObs, setNuevoDetalleObs] = useState('')
@@ -127,6 +131,34 @@ function HistorialDevolucionView() {
     setAgregandoEquipo(false)
     setNuevoDetalleId('')
     setNuevoDetalleObs('')
+  }
+
+  // Opciones del equipo pendiente con la serie en `codigo` (visible y
+  // buscable ignorando espacios y guiones), igual que la hoja de entrega.
+  const opcionesPendientes = pendientes
+    .map((it) => ({
+      id: it.id,
+      name: it.equipment_brand ? `${it.equipment_name} — ${it.equipment_brand}` : it.equipment_name,
+      codigo: it.equipment_serie ? String(it.equipment_serie).toUpperCase() : '',
+    }))
+    .sort((a, b) => String(a.name).localeCompare(String(b.name), 'es') || a.codigo.localeCompare(b.codigo, 'es'))
+
+  // El ojo solo se ofrece si el detalle trae el id del equipo (la opción es el
+  // detalle de la entrega, no el equipo).
+  const verDetallePendiente = pendientes.some((it) => it.equipment_id)
+    ? (detalleId) => {
+        const it = pendientes.find((p) => String(p.id) === String(detalleId))
+        if (it?.equipment_id) setEquipoDetalleId(it.equipment_id)
+      }
+    : undefined
+
+  function refrescarTrasEditarEquipo() {
+    recargar().catch(() => {})
+    if (documento?.delivery_document_id) {
+      listarDetallesEntrega(token, { deliveryDocumentId: documento.delivery_document_id, pending: true })
+        .then((data) => setPendientes(Array.isArray(data) ? data : []))
+        .catch(() => {})
+    }
   }
 
   async function confirmarAgregarEquipo() {
@@ -400,10 +432,8 @@ function HistorialDevolucionView() {
                                 una columna fantasma y se desalineaba del encabezado. */}
                             <td className="py-2 pr-3" colSpan={2}>
                               <SearchableSelect
-                                options={pendientes.map((it) => ({
-                                  id: it.id,
-                                  name: it.equipment_brand ? `${it.equipment_name} — ${it.equipment_brand}` : it.equipment_name,
-                                }))}
+                                options={opcionesPendientes}
+                                onVerDetalle={verDetallePendiente}
                                 value={nuevoDetalleId}
                                 onChange={setNuevoDetalleId}
                                 disabled={guardandoEquipo}
@@ -533,10 +563,8 @@ function HistorialDevolucionView() {
                           <div className="flex flex-col gap-1.5">
                             <label className="font-label-bold text-label-bold text-on-surface">Equipo</label>
                             <SearchableSelect
-                              options={pendientes.map((it) => ({
-                                id: it.id,
-                                name: it.equipment_brand ? `${it.equipment_name} — ${it.equipment_brand}` : it.equipment_name,
-                              }))}
+                              options={opcionesPendientes}
+                              onVerDetalle={verDetallePendiente}
                               value={nuevoDetalleId}
                               onChange={setNuevoDetalleId}
                               disabled={guardandoEquipo}
@@ -665,6 +693,12 @@ function HistorialDevolucionView() {
         </div>
       )}
 
+      <EquipoDetalleModal
+        equipoId={equipoDetalleId}
+        onCerrar={() => setEquipoDetalleId('')}
+        editable
+        onActualizado={refrescarTrasEditarEquipo}
+      />
       <EsperaLogo activa={generandoPdf} mensaje="Generando PDF…" />
       <IndicadorGuardando activo={guardandoEquipo || corrigiendo > 0} />
     </div>

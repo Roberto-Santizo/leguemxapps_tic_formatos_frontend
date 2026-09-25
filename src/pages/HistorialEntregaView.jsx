@@ -20,6 +20,7 @@ import EstadoVacio from '../components/EstadoVacio.jsx'
 import InlineEditableText from '../components/InlineEditableText.jsx'
 import EditorFechaLocal from '../components/EditorFechaLocal.jsx'
 import SearchableSelect from '../components/SearchableSelect.jsx'
+import EquipoDetalleModal from '../components/EquipoDetalleModal.jsx'
 import { IndicadorGuardando, mostrarToast } from '../components/Toast.jsx'
 import { SkeletonDetalle } from '../components/Skeleton.jsx'
 import { SeccionCard, Campo } from './FormatoActa.jsx'
@@ -109,6 +110,9 @@ function HistorialEntregaView() {
   // fuera, corregir la observación de uno, o quitarlo (delivery_document_details) ---
   const [equipos, setEquipos] = useState([])
   const [agregandoEquipo, setAgregandoEquipo] = useState(false)
+  // Ficha del equipo (ojo del selector de "Agregar equipo"): ver y, si hace
+  // falta, corregir sus datos sin salir de la entrega.
+  const [equipoDetalleId, setEquipoDetalleId] = useState('')
   const [nuevoEquipoId, setNuevoEquipoId] = useState('')
   const [nuevoEquipoObs, setNuevoEquipoObs] = useState('')
   const [guardandoEquipo, setGuardandoEquipo] = useState(false)
@@ -149,6 +153,25 @@ function HistorialEntregaView() {
     setAgregandoEquipo(false)
     setNuevoEquipoId('')
     setNuevoEquipoObs('')
+  }
+
+  // Mismas opciones que el selector de la hoja de entrega (FormatoActa): la
+  // serie va en `codigo` -- se ve en su propia línea y se busca ignorando
+  // espacios y guiones --, ordenadas por nombre y luego serie para que los
+  // equipos iguales queden juntos.
+  const opcionesEquipo = equipos
+    .map((e) => ({
+      id: e.id,
+      name: e.brand ? `${e.name} — ${e.brand}` : e.name,
+      codigo: e.serie ? String(e.serie).toUpperCase() : '',
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name, 'es') || a.codigo.localeCompare(b.codigo, 'es'))
+
+  function refrescarTrasEditarEquipo() {
+    listarEquiposDisponibles(token)
+      .then((data) => setEquipos(Array.isArray(data) ? data : []))
+      .catch(() => {})
+    recargar().catch(() => {})
   }
 
   async function confirmarAgregarEquipo() {
@@ -456,7 +479,8 @@ function HistorialEntregaView() {
                             <td className="py-2 pl-5 pr-3" />
                             <td className="py-2 pr-3" colSpan={4}>
                               <SearchableSelect
-                                options={equipos.map((e) => ({ id: e.id, name: e.brand ? `${e.name} — ${e.brand}` : e.name }))}
+                                options={opcionesEquipo}
+                                onVerDetalle={setEquipoDetalleId}
                                 value={nuevoEquipoId}
                                 onChange={setNuevoEquipoId}
                                 disabled={guardandoEquipo}
@@ -601,7 +625,8 @@ function HistorialEntregaView() {
                           <div className="flex flex-col gap-1.5">
                             <label className="font-label-bold text-label-bold text-on-surface">Equipo</label>
                             <SearchableSelect
-                              options={equipos.map((e) => ({ id: e.id, name: e.brand ? `${e.name} — ${e.brand}` : e.name }))}
+                              options={opcionesEquipo}
+                                onVerDetalle={setEquipoDetalleId}
                               value={nuevoEquipoId}
                               onChange={setNuevoEquipoId}
                               disabled={guardandoEquipo}
@@ -781,6 +806,12 @@ function HistorialEntregaView() {
         onConfirmar={confirmarQuitarEquipo}
       />
 
+      <EquipoDetalleModal
+        equipoId={equipoDetalleId}
+        onCerrar={() => setEquipoDetalleId('')}
+        editable
+        onActualizado={refrescarTrasEditarEquipo}
+      />
       <EsperaLogo activa={generandoPdf} mensaje="Generando PDF…" />
       <IndicadorGuardando activo={borrando} texto="Eliminando" />
       <IndicadorGuardando activo={guardandoEquipo || corrigiendo > 0} />

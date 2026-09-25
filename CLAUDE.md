@@ -75,6 +75,8 @@ en español; mantener ese idioma.
   botones), `IndicadorGuardando` (pastilla de "guardando", en `Toast.jsx`), `EsperaLogo`
   (espera a pantalla completa, solo actas y PDF), `ActaRegistrada` (momento de éxito) y `SaludoDelDia`
   ("Buenos días, {nombre}." una vez al día en Nueva Acta / Historial).
+  Además `FiltrosActas` (barra de filtros de actas). Hooks: `useFiltrosActas`,
+  `useExportacionCsv`; utilidades `utils/csv.js`, `utils/estadoEntrega.js`.
 - Listas paginadas: `hooks/usePaginacion.js` (`useListaPaginada`, estado `?page=&q=` en la
   URL, búsqueda híbrida porque el backend no filtra por texto) + `components/Paginador.jsx`.
   Contrato del backend en `paginacion.md`; `listar*(token, { limit, page })` en `api.js`.
@@ -87,7 +89,8 @@ en español; mantener ese idioma.
 - No crear componentes compartidos nuevos (ej. `<Button>` genérico) sin autorización;
   el estilo es Tailwind repetido por elemento, a propósito.
 - Vistas "ver" cargan por ID contra la API (funcionan con URL directa / refresh).
-- "Nuevo" y "Editar" son páginas dedicadas, nunca modales.
+- "Nuevo" y "Editar" son páginas dedicadas, nunca modales. Única excepción: editar un equipo
+  desde su ficha (`EquipoDetalleModal editable`) a mitad de un acta.
 - No inventar endpoints ni comportamiento del backend; preguntar si no está confirmado.
 - Pantallas de tarjetas: `max-w-[1200px]` y la misma grilla que Catálogo / Nueva Acta /
   Historial.

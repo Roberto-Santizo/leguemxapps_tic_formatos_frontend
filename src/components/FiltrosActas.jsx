@@ -15,7 +15,9 @@ import { X } from 'lucide-react'
  *  desde / hasta: 'aaaa-mm-dd' o ''  ·  onDesde / onHasta(valor)
  *  hayFiltros: muestra "Limpiar filtros"  ·  onLimpiar()
  */
-const etiquetaGrupo = 'font-mono text-micro uppercase tracking-[0.1em] text-on-surface-variant'
+// En móvil la etiqueta va en su propia línea (w-full) y los chips debajo,
+// alineados al borde; desde sm: vuelve a ir a la izquierda de sus chips.
+const etiquetaGrupo = 'w-full font-mono text-micro uppercase tracking-[0.1em] text-on-surface-variant sm:w-auto'
 const chip =
   'inline-flex h-8 items-center gap-1.5 rounded-full border px-3 text-meta font-medium leading-4 whitespace-nowrap transition duration-fast ease-standard active:scale-[0.97]'
 const inputFecha =

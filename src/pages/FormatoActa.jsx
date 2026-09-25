@@ -1255,7 +1255,20 @@ function FormatoActa() {
         />
       )}
 
-      {esEntrega && <EquipoDetalleModal equipoId={equipoDetalleId} onCerrar={() => setEquipoDetalleId('')} />}
+      {esEntrega && (
+        <EquipoDetalleModal
+          equipoId={equipoDetalleId}
+          onCerrar={() => setEquipoDetalleId('')}
+          editable
+          // Tras editar un equipo desde su ficha se vuelve a pedir la lista de
+          // disponibles, para que el selector muestre el nombre y la serie nuevos.
+          onActualizado={() =>
+            listarEquiposDisponibles(token)
+              .then((eq) => setEquipos(Array.isArray(eq) ? eq : []))
+              .catch(() => {})
+          }
+        />
+      )}
 
       {esEntrega && !entregaLista && <EsperaLogo activa={guardando} mensaje="Guardando entrega…" />}
       {entregaLista && (

@@ -1,9 +1,17 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { X } from 'lucide-react'
-import { obtenerEquipo, obtenerMarca, obtenerCaracteristicasDeEquipo } from '../services/api.js'
-import { etiquetaTipoEquipo } from '../pages/EquipoForm.jsx'
+import { Pencil, X } from 'lucide-react'
+import {
+  obtenerEquipo,
+  obtenerMarca,
+  obtenerCaracteristicasDeEquipo,
+  actualizarEquipo,
+  listarMarcas,
+} from '../services/api.js'
+import { etiquetaTipoEquipo, TIPOS_EQUIPO } from '../pages/EquipoForm.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
+import IsotipoCarga from './IsotipoCarga.jsx'
+import { IndicadorGuardando, mostrarToast } from './Toast.jsx'
 
 /**
  * Ficha del equipo en ventana emergente. La abre el ojo del buscador de
@@ -11,10 +19,21 @@ import { useAuth } from '../context/AuthContext.jsx'
  * `onVerDetalle`) para revisar modelo, serie y características ANTES de
  * dejarlo en el acta, sin salir del formulario a mitad de llenado.
  *
- * Es una vista de solo lectura: nunca edita ni sustituye a Catálogo →
- * Equipos → Ver, que sigue siendo la página completa (con historial y botón
- * de editar). Por eso tampoco carga el historial de asignaciones: lo que se
- * elige aquí siempre es un equipo disponible.
+ * No sustituye a Catálogo → Equipos → Ver, que sigue siendo la página
+ * completa (con historial). Por eso tampoco carga el historial de
+ * asignaciones.
+ *
+ * Edición en la misma ficha (`editable`, solo admin): botón "Editar" que
+ * vuelve editables nombre, modelo, marca, serie, tipo, original y usado, y
+ * guarda con el mismo PUT /equipments/{id} de EquipoForm, con la misma
+ * validación (los cinco campos obligatorios) y los errores 422 bajo cada
+ * campo. EXCEPCIÓN documentada a la regla "Editar es una página dedicada":
+ * se edita aquí porque quien la abre está a mitad de un acta y salir de la
+ * página le haría perder lo que lleva. Las características se siguen
+ * editando en Catálogo → Equipos. Mientras se edita, el clic fuera no cierra
+ * la ficha y Escape solo sale del modo edición (no se pierde lo escrito por
+ * accidente). Al guardar se avisa con `onActualizado(equipo)` para que la
+ * pantalla refresque sus listas.
  *
  * Carga por ID contra la API (obtenerEquipo + obtenerMarca +
  * obtenerCaracteristicasDeEquipo, la misma composición que EquipoView) en
@@ -26,9 +45,23 @@ import { useAuth } from '../context/AuthContext.jsx'
  * fondo oscuro, 200ms de opacidad + escala, Escape y clic fuera cierran).
  *
  * `equipoId`: id del equipo a mostrar; null/'' = cerrado.  ·  `onCerrar()`
+ * `editable` (opcional): ofrece "Editar" (solo si el usuario es admin).
+ * `onActualizado(equipo)` (opcional): se llama tras guardar cambios.
  */
-function EquipoDetalleModal({ equipoId, onCerrar }) {
-  const { token } = useAuth()
+const inputClasses =
+  'h-11 w-full rounded-boton border border-outline-variant bg-white px-3 font-body-md text-input-movil text-on-surface placeholder:text-on-surface-subtle transition duration-fast ease-standard hover:[&:not(:focus)]:border-outline disabled:opacity-60 md:text-body-md'
+const labelClasses = 'mb-1.5 block text-meta font-semibold leading-4 text-on-surface'
+const errorCampo = 'mt-1 text-meta leading-4 text-error'
+
+function EquipoDetalleModal({ equipoId, onCerrar, editable = false, onActualizado }) {
+  const { token, isAdmin } = useAuth()
+  const puedeEditar = editable && isAdmin
+  const [editando, setEditando] = useState(false)
+  const [form, setForm] = useState(null)
+  const [marcas, setMarcas] = useState(null) // null = sin pedir todavía
+  const [guardando, setGuardando] = useState(false)
+  const [errorEdicion, setErrorEdicion] = useState('')
+  const [erroresCampo, setErroresCampo] = useState(null)
   const abierto = Boolean(equipoId)
   const cajaRef = useRef(null)
   const cerrarRef = useRef(null)
@@ -62,14 +95,85 @@ function EquipoDetalleModal({ equipoId, onCerrar }) {
     return () => cancelAnimationFrame(frame)
   }, [montado, abierto])
 
+  // Al cerrar (o cambiar de equipo) se sale siempre del modo edición.
+  useEffect(() => {
+    if (!abierto) {
+      setEditando(false)
+      setErrorEdicion('')
+      setErroresCampo(null)
+    }
+  }, [abierto, equipoId])
+
   useEffect(() => {
     if (!abierto) return
     function onKey(e) {
-      if (e.key === 'Escape') onCerrar?.()
+      if (e.key !== 'Escape' || guardando) return
+      if (editando) setEditando(false)
+      else onCerrar?.()
     }
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
-  }, [abierto, onCerrar])
+  }, [abierto, onCerrar, editando, guardando])
+
+  function empezarEdicion() {
+    setForm({
+      name: equipo?.name ?? '',
+      model: equipo?.model ?? '',
+      brand_id: equipo?.brand_id ? String(equipo.brand_id) : '',
+      serie: equipo?.serie ?? '',
+      type: equipo?.type ?? '',
+      original: Boolean(equipo?.original),
+      is_used: Boolean(equipo?.is_used),
+    })
+    setErrorEdicion('')
+    setErroresCampo(null)
+    setEditando(true)
+    if (marcas === null) {
+      listarMarcas(token)
+        .then((data) => setMarcas(Array.isArray(data) ? data : []))
+        .catch(() => setMarcas([]))
+    }
+  }
+
+  const completo =
+    form && form.name.trim() && form.model.trim() && form.brand_id && form.serie.trim() && form.type.trim()
+
+  async function guardarEdicion(e) {
+    e.preventDefault()
+    if (!completo || guardando) return
+    setGuardando(true)
+    setErrorEdicion('')
+    setErroresCampo(null)
+    const payload = {
+      name: form.name.trim(),
+      model: form.model.trim(),
+      brand_id: Number(form.brand_id),
+      serie: form.serie.trim(),
+      type: form.type.trim(),
+      original: Boolean(form.original),
+      is_used: Boolean(form.is_used),
+    }
+    try {
+      await actualizarEquipo(token, Number(equipoId), payload)
+      const actualizado = { ...equipo, ...payload }
+      setEquipo(actualizado)
+      const marcaElegida = (marcas || []).find((m) => String(m.id) === String(payload.brand_id))
+      if (marcaElegida) setMarca(marcaElegida)
+      setEditando(false)
+      mostrarToast('Equipo actualizado')
+      onActualizado?.(actualizado)
+    } catch (err) {
+      setErrorEdicion(err.message || 'No se pudo guardar el equipo')
+      setErroresCampo(err.errors || null)
+    } finally {
+      setGuardando(false)
+    }
+  }
+
+  const errorDe = (campo) => erroresCampo?.[campo]?.[0]
+  const erroresVisibles = ['name', 'model', 'brand_id', 'serie', 'type'].map(errorDe).filter(Boolean)
+  const errorGeneral = errorEdicion && !erroresVisibles.includes(errorEdicion) ? errorEdicion : ''
+  const actualizarCampo = (campo, valor) => setForm((f) => ({ ...f, [campo]: valor }))
 
   useEffect(() => {
     if (!abierto) return
@@ -126,7 +230,7 @@ function EquipoDetalleModal({ equipoId, onCerrar }) {
       className={`fixed inset-0 z-50 flex items-center justify-center bg-tinta/40 p-4 transition-opacity ease-standard sm:p-6 ${
         visible ? 'opacity-100 duration-base' : 'opacity-0 duration-fast'
       }`}
-      onClick={onCerrar}
+      onClick={editando || guardando ? undefined : onCerrar}
     >
       <div
         ref={cajaRef}
@@ -144,7 +248,7 @@ function EquipoDetalleModal({ equipoId, onCerrar }) {
           <div className="min-w-0 flex-1">
             <p className="mb-1.5 flex items-center gap-3 font-eyebrow text-eyebrow uppercase text-on-surface-variant">
               <span aria-hidden="true" className="h-px w-7 bg-outline" />
-              Ficha del equipo
+              {editando ? 'Editar equipo' : 'Ficha del equipo'}
             </p>
             {cargando ? (
               <>
@@ -171,8 +275,9 @@ function EquipoDetalleModal({ equipoId, onCerrar }) {
             ref={cerrarRef}
             type="button"
             onClick={onCerrar}
+            disabled={guardando}
             aria-label="Cerrar"
-            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-boton text-on-surface-variant transition duration-fast ease-standard hover:bg-surface-container hover:text-on-surface active:scale-[0.90]"
+            className="inline-flex h-9 w-9 disabled:opacity-50 shrink-0 items-center justify-center rounded-boton text-on-surface-variant transition duration-fast ease-standard hover:bg-surface-container hover:text-on-surface active:scale-[0.90]"
           >
             <X className="h-4 w-4" strokeWidth={1.75} />
           </button>
@@ -203,6 +308,97 @@ function EquipoDetalleModal({ equipoId, onCerrar }) {
               <div className={`${barra} h-3.5 w-2/3`} />
               <div className={`${barra} h-3.5 w-1/2`} />
             </div>
+          ) : editando && form ? (
+            <form id="equipo-edicion" onSubmit={guardarEdicion} className="flex flex-col gap-4 px-6 py-5" noValidate>
+              <div>
+                <label htmlFor="eq-nombre" className={labelClasses}>Nombre</label>
+                <input id="eq-nombre" value={form.name} onChange={(e) => actualizarCampo('name', e.target.value)} disabled={guardando} className={inputClasses} />
+                {errorDe('name') && <p className={errorCampo}>{errorDe('name')}</p>}
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="eq-modelo" className={labelClasses}>Modelo</label>
+                  <input id="eq-modelo" value={form.model} onChange={(e) => actualizarCampo('model', e.target.value)} disabled={guardando} className={inputClasses} />
+                  {errorDe('model') && <p className={errorCampo}>{errorDe('model')}</p>}
+                </div>
+                <div>
+                  <label htmlFor="eq-marca" className={labelClasses}>Marca</label>
+                  <select
+                    id="eq-marca"
+                    value={form.brand_id}
+                    onChange={(e) => actualizarCampo('brand_id', e.target.value)}
+                    disabled={guardando || marcas === null}
+                    className={`${inputClasses} pr-9`}
+                  >
+                    <option value="">{marcas === null ? 'Cargando marcas…' : 'Selecciona una marca'}</option>
+                    {(marcas || []).map((m) => (
+                      <option key={m.id} value={String(m.id)}>
+                        {m.name}
+                      </option>
+                    ))}
+                  </select>
+                  {errorDe('brand_id') && <p className={errorCampo}>{errorDe('brand_id')}</p>}
+                </div>
+                <div>
+                  <label htmlFor="eq-serie" className={labelClasses}>Serie</label>
+                  <input id="eq-serie" value={form.serie} onChange={(e) => actualizarCampo('serie', e.target.value)} disabled={guardando} className={`${inputClasses} font-mono uppercase tracking-[0.04em]`} />
+                  {errorDe('serie') && <p className={errorCampo}>{errorDe('serie')}</p>}
+                </div>
+                <div>
+                  <label htmlFor="eq-tipo" className={labelClasses}>Tipo</label>
+                  <select id="eq-tipo" value={form.type} onChange={(e) => actualizarCampo('type', e.target.value)} disabled={guardando} className={`${inputClasses} pr-9`}>
+                    <option value="">Selecciona un tipo</option>
+                    {TIPOS_EQUIPO.map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.name}
+                      </option>
+                    ))}
+                  </select>
+                  {errorDe('type') && <p className={errorCampo}>{errorDe('type')}</p>}
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                {[
+                  ['original', '¿Es original?'],
+                  ['is_used', '¿Está usado?'],
+                ].map(([campo, etiqueta]) => (
+                  <div key={campo} role="group" aria-label={etiqueta}>
+                    <p className={labelClasses}>{etiqueta}</p>
+                    <div className="flex gap-2">
+                      {[
+                        [true, 'Sí'],
+                        [false, 'No'],
+                      ].map(([valor, texto]) => {
+                        const puesto = form[campo] === valor
+                        return (
+                          <button
+                            key={texto}
+                            type="button"
+                            onClick={() => actualizarCampo(campo, valor)}
+                            aria-pressed={puesto}
+                            disabled={guardando}
+                            className={[
+                              'inline-flex h-10 flex-1 items-center justify-center rounded-boton border font-body-md text-body-md font-medium transition duration-fast ease-standard active:scale-[0.97] disabled:opacity-60',
+                              puesto
+                                ? 'border-transparent bg-tinta text-white'
+                                : 'border-outline-variant bg-white text-on-surface hover:bg-surface-container',
+                            ].join(' ')}
+                          >
+                            {texto}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <p className="text-meta leading-4 text-on-surface-subtle">Las características se editan en Catálogo → Equipos.</p>
+              {errorGeneral && (
+                <p role="alert" className="rounded-boton border border-error/30 bg-error-container/40 px-3 py-2 font-label-sm text-label-sm text-error">
+                  {errorGeneral}
+                </p>
+              )}
+            </form>
           ) : (
             equipo && (
               <>
@@ -248,16 +444,52 @@ function EquipoDetalleModal({ equipoId, onCerrar }) {
           )}
         </div>
 
-        <div className="flex justify-end border-t border-outline-variant px-6 py-4">
-          <button
-            type="button"
-            onClick={onCerrar}
-            className="inline-flex h-10 items-center justify-center rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
-          >
-            Cerrar
-          </button>
+        <div className="flex justify-end gap-2 border-t border-outline-variant px-6 py-4">
+          {editando ? (
+            <>
+              <button
+                type="button"
+                onClick={() => setEditando(false)}
+                disabled={guardando}
+                className="inline-flex h-10 items-center justify-center rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container disabled:opacity-60 active:scale-[0.97]"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                form="equipo-edicion"
+                disabled={!completo || guardando}
+                aria-busy={guardando}
+                className="inline-flex h-10 items-center justify-center gap-2 rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover disabled:opacity-50 active:scale-[0.97]"
+              >
+                {guardando && <IsotipoCarga className="h-3" />}
+                Guardar cambios
+              </button>
+            </>
+          ) : (
+            <>
+              {puedeEditar && equipo && !cargando && !error && (
+                <button
+                  type="button"
+                  onClick={empezarEdicion}
+                  className="inline-flex h-10 items-center justify-center gap-2 rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
+                >
+                  <Pencil className="h-4 w-4" strokeWidth={1.75} />
+                  Editar
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={onCerrar}
+                className="inline-flex h-10 items-center justify-center rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
+              >
+                Cerrar
+              </button>
+            </>
+          )}
         </div>
       </div>
+      <IndicadorGuardando activo={guardando} />
     </div>,
     document.body,
   )
