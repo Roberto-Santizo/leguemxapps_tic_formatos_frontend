@@ -40,6 +40,10 @@ en español; mantener ese idioma.
 - CI: `.github/workflows/*` construye y publica la imagen a Docker Hub en cada push a
   `main` (tags `latest`, sha corto, fecha). Requiere secrets `DOCKERHUB_USERNAME` /
   `DOCKERHUB_TOKEN`.
+- `/storage/` (firmas) se pasa al backend desde el propio servidor del frontend: proxy de
+  Vite en dev (`vite.config.js`) y de nginx en Docker (`entrypoint.sh` genera
+  `/etc/nginx/storage-proxy.conf`). Lo necesita el PDF para incrustar las firmas
+  (`src/pdf/datosPdf.js`). El contenedor debe poder alcanzar la URL del backend.
 - `GUIA_DESPLIEGUE_UBUNTU.md`: checklist del backend (APP_URL, `storage:link`, permisos)
   para que las firmas se vean en producción.
 

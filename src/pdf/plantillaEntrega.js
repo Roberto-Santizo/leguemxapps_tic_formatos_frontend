@@ -5,7 +5,7 @@
 // no repetir textos que ya viven en config/formatos.js.
 // ============================================================================
 
-import { mast, title, sec, fld, clause, observaciones, signs, foot, page, esc } from './designSystemPdf.js'
+import { mast, title, sec, fld, clause, observaciones, signs, foot, page, esc, filaCaracteristicas } from './designSystemPdf.js'
 import { leerVigenciaDocumentos } from '../config/formatos.js'
 import { formatearFecha } from '../utils/fecha.js'
 
@@ -14,9 +14,10 @@ function nombrePlanta(location) {
   return Number(location) === 1 ? 'Planta Tejar' : 'Planta Parramos'
 }
 
-function filaEquipo(item, indice) {
+function filaEquipo(item, indice, caract) {
+  const sub = filaCaracteristicas(caract, 7)
   return `
-  <tr>
+  <tr${sub ? ' class="con-caract"' : ''}>
     <td class="num">${String(indice + 1).padStart(2, '0')}</td>
     <td>${esc(item.equipment_name)}${item.returned ? ' <span class="badge">(Devuelto)</span>' : ''}</td>
     <td>${esc(item.equipment_brand) || '&mdash;'}</td>
@@ -24,18 +25,19 @@ function filaEquipo(item, indice) {
     <td>${esc(item.equipment_serie) || '&mdash;'}</td>
     <td>${esc(item.is_used) || '&mdash;'}</td>
     <td>${esc(item.observations) || '&mdash;'}</td>
-  </tr>`
+  </tr>${sub}`
 }
 
 /**
  * @param {object} documento  Respuesta de GET /delivery_documents/{id}
  * @param {object} formato    FORMATOS.entrega (config/formatos.js)
- * @param {{responsable: string|null, it: string|null}} firmaUrls  URLs ya resueltas (urlArchivoPublico)
+ * @param {{responsable: string|null, it: string|null}} firmaUrls  Firmas ya incrustadas (firmaParaPdf) o null
+ * @param {object} [caractPorRenglon]  { [item.id]: características } (caracteristicasDeRenglones)
  */
-export function construirHtmlEntrega(documento, formato, firmaUrls) {
+export function construirHtmlEntrega(documento, formato, firmaUrls, caractPorRenglon = {}) {
   const items = documento.items || []
   const filas = items.length
-    ? items.map(filaEquipo).join('')
+    ? items.map((item, i) => filaEquipo(item, i, caractPorRenglon[item.id])).join('')
     : `<tr><td colspan="7" class="tabla-vacia">Sin equipo registrado.</td></tr>`
 
   // Formato de 2 hojas (igual que el papel físico): membrete repetido en

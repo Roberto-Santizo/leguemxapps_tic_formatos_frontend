@@ -7,7 +7,7 @@
 // varios equipos según la devolución sea parcial o completa.
 // ============================================================================
 
-import { mast, title, sec, fld, clause, observaciones, signs, foot, page, esc } from './designSystemPdf.js'
+import { mast, title, sec, fld, clause, observaciones, signs, foot, page, esc, filaCaracteristicas } from './designSystemPdf.js'
 import { leerVigenciaDocumentos } from '../config/formatos.js'
 import { formatearFecha, constanciaDevolucion } from '../utils/fecha.js'
 import { esExtravio, textoSinPrefijoExtravio } from '../utils/extravio.js'
@@ -17,29 +17,32 @@ function nombrePlanta(location) {
   return Number(location) === 1 ? 'Planta Tejar' : 'Planta Parramos'
 }
 
-function filaEquipo(item, indice) {
+function filaEquipo(item, indice, caract) {
   const extravio = esExtravio(item.observations)
   const observaciones = extravio ? textoSinPrefijoExtravio(item.observations) : item.observations
+  const sub = filaCaracteristicas(caract, 6, extravio ? 'extravio' : '')
+  const clases = [extravio && 'extravio', sub && 'con-caract'].filter(Boolean).join(' ')
   return `
-  <tr${extravio ? ' class="extravio"' : ''}>
+  <tr${clases ? ` class="${clases}"` : ''}>
     <td class="num">${String(indice + 1).padStart(2, '0')}</td>
     <td>${esc(item.equipment_name)}${extravio ? ' <span class="badge-extravio">Extravío</span>' : ''}</td>
     <td>${esc(item.equipment_brand) || '&mdash;'}</td>
     <td>${esc(item.equipment_model) || '&mdash;'}</td>
     <td>${esc(item.equipment_serie) || '&mdash;'}</td>
     <td>${esc(observaciones) || '&mdash;'}</td>
-  </tr>`
+  </tr>${sub}`
 }
 
 /**
  * @param {object} documento  Respuesta de GET /return_documents/{id}
  * @param {object} formato    FORMATOS.devolucion (config/formatos.js)
- * @param {{entrega: string|null, recibe: string|null}} firmaUrls  URLs ya resueltas (urlArchivoPublico)
+ * @param {{entrega: string|null, recibe: string|null}} firmaUrls  Firmas ya incrustadas (firmaParaPdf) o null
+ * @param {object} [caractPorRenglon]  { [item.id]: características } (caracteristicasDeRenglones)
  */
-export function construirHtmlDevolucion(documento, formato, firmaUrls) {
+export function construirHtmlDevolucion(documento, formato, firmaUrls, caractPorRenglon = {}) {
   const items = documento.items || []
   const filas = items.length
-    ? items.map(filaEquipo).join('')
+    ? items.map((item, i) => filaEquipo(item, i, caractPorRenglon[item.id])).join('')
     : `<tr><td colspan="6" class="tabla-vacia">Sin equipo registrado.</td></tr>`
 
   const body = `

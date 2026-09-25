@@ -1,12 +1,7 @@
 import { useCallback, useRef, useState } from 'react'
 import { listarEquipos } from '../services/api.js'
 import { mostrarToast } from '../components/Toast.jsx'
-
-// Serie comparable: sin espacios ni guiones y en mayúsculas, igual que la
-// búsqueda por serie del selector de equipo.
-function serieComparable(valor) {
-  return String(valor ?? '').replace(/[\s-]+/g, '').toUpperCase()
-}
+import { equipoPorSerie, idDirectoDelRenglon, serieComparable } from '../utils/equipoDeRenglon.js'
 
 /**
  * Ficha del equipo (EquipoDetalleModal) desde un renglón de un acta ya
@@ -32,7 +27,7 @@ export default function useFichaEquipo(token) {
 
   const abrirDeItem = useCallback(
     async (item) => {
-      const directo = item?.equipment_id ?? item?.equipment?.id
+      const directo = idDirectoDelRenglon(item)
       if (directo) {
         setEquipoId(String(directo))
         return
@@ -48,10 +43,7 @@ export default function useFichaEquipo(token) {
           const lista = await listarEquipos(token)
           catalogo.current = Array.isArray(lista) ? lista : []
         }
-        const mismos = catalogo.current.filter((e) => serieComparable(e.serie) === serie)
-        const nombre = String(item.equipment_name ?? '').trim().toLowerCase()
-        const equipo =
-          mismos.length === 1 ? mismos[0] : mismos.find((e) => String(e.name ?? '').trim().toLowerCase() === nombre)
+        const equipo = equipoPorSerie(catalogo.current, item)
         if (equipo) setEquipoId(String(equipo.id))
         else mostrarToast('No se encontró la ficha de este equipo en el catálogo', { tipo: 'error' })
       } catch (err) {

@@ -39,6 +39,7 @@ import {
 import { generarPdfPapelFisico } from '../utils/generatePdfPapelFisico.js'
 import useFechaLocal from '../hooks/useFechaLocal.js'
 import { construirHtmlEntrega } from '../pdf/plantillaEntrega.js'
+import { caracteristicasDeRenglones, firmaParaPdf } from '../pdf/datosPdf.js'
 import IsotipoCarga from '../components/IsotipoCarga.jsx'
 import EsperaLogo from '../components/EsperaLogo.jsx'
 const formato = FORMATOS.entrega
@@ -254,29 +255,22 @@ function HistorialEntregaView() {
     }
   }
 
-  // TEMPORAL -- segunda prueba pedida: ahora con la ruta corta que documenta
-  // el swagger (en vez del link completo de S3), para confirmar que
-  // urlArchivoPublico() arma bien el link local (STORAGE_BASE_URL +
-  // /storage/ + ruta). Si estos dos archivos de ejemplo no existen de
-  // verdad en el servidor, la imagen no cargará (se verá "Sin firma") --
-  // eso sería normal, no un bug: son solo los nombres de ejemplo del
-  // swagger. Quitar este bloque y volver a usar
-  // urlArchivoPublico(documento.responsable_signature/administrador_signature)
-  // en cuanto se confirme que el mecanismo funciona con firmas reales.
-  const RUTA_PRUEBA_FIRMA_RESPONSABLE = 'signatures/9f8a1c2e-4b7d-4c1a-9d2e-3f5a6b7c8d90.png'
-  const RUTA_PRUEBA_FIRMA_ADMINISTRADOR = 'signatures/2b7d4e6f-1a3c-4e5b-8d9f-0a1b2c3d4e5f.png'
-
+  // Las mismas firmas que se ven en pantalla, incrustadas en el PDF (ver
+  // firmaParaPdf), y las características de cada equipo bajo su nombre.
   async function handleDescargarPdf() {
     if (!documento) return
     setGenerandoPdf(true)
     try {
+      const [responsable, it, caract] = await Promise.all([
+        firmaParaPdf(documento.responsable_signature),
+        firmaParaPdf(documento.administrador_signature),
+        caracteristicasDeRenglones(token, documento.items),
+      ])
       const html = construirHtmlEntrega(
         { ...documento, delivery_date: fechaEntrega.valor },
         formato,
-        {
-          responsable: urlArchivoPublico(RUTA_PRUEBA_FIRMA_RESPONSABLE),
-          it: urlArchivoPublico(RUTA_PRUEBA_FIRMA_ADMINISTRADOR),
-        },
+        { responsable, it },
+        caract,
       )
       await generarPdfPapelFisico(html, `entrega-equipo-${id}.pdf`)
     } catch {

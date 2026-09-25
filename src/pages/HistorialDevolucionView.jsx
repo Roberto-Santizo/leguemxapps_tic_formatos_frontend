@@ -38,6 +38,7 @@ import { constanciaDevolucion } from '../utils/fecha.js'
 import useFechaLocal from '../hooks/useFechaLocal.js'
 import { esExtravio, textoSinPrefijoExtravio, marcarExtravio } from '../utils/extravio.js'
 import { construirHtmlDevolucion } from '../pdf/plantillaDevolucion.js'
+import { caracteristicasDeRenglones, firmaParaPdf } from '../pdf/datosPdf.js'
 import IsotipoCarga from '../components/IsotipoCarga.jsx'
 import EsperaLogo from '../components/EsperaLogo.jsx'
 const formato = FORMATOS.devolucion
@@ -243,13 +244,18 @@ function HistorialDevolucionView() {
     if (!documento) return
     setGenerandoPdf(true)
     try {
+      // Las mismas firmas que se ven en pantalla, incrustadas en el PDF (ver
+      // firmaParaPdf), y las características de cada equipo bajo su nombre.
+      const [entrega, recibe, caract] = await Promise.all([
+        firmaParaPdf(documento.responsable_signature),
+        firmaParaPdf(documento.administrador_signature),
+        caracteristicasDeRenglones(token, documento.items),
+      ])
       const html = construirHtmlDevolucion(
         { ...documento, return_date: fechaDevolucion.valor },
         formato,
-        {
-          entrega: urlArchivoPublico(documento.responsable_signature),
-          recibe: urlArchivoPublico(documento.administrador_signature),
-        },
+        { entrega, recibe },
+        caract,
       )
       await generarPdfPapelFisico(html, `devolucion-equipo-${id}.pdf`)
     } catch {

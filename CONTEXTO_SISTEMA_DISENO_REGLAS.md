@@ -497,6 +497,28 @@ nunca escribir un componente de página nuevo para eso.
   completa y se descartó: ensuciaba campos y tabla y gastaba mucha tinta.
 - **Cresta bajo el título**: el perfil de montaña del logo en línea fina entre dos filetes
   (`.cresta` en `title()`).
+- **Firmas reales en el PDF**: en pantalla la firma es un `<img>` con el link del backend,
+  pero html2canvas solo puede capturar imágenes de otro origen si el servidor manda CORS,
+  y el `/storage` de Laravel no lo hace. `pdf/datosPdf.js` (`firmaParaPdf`) descarga la
+  firma antes de armar el HTML y la incrusta como data URL, pidiéndola primero a
+  `/storage/<ruta>` del MISMO servidor del frontend, que la pasa al backend: **proxy de
+  Vite** en desarrollo (`vite.config.js`, misma base que `STORAGE_BASE_URL`) y **de nginx**
+  en Docker (`docker/entrypoint.sh` genera `/etc/nginx/storage-proxy.conf`, incluido con
+  comodín en `nginx.conf` para que nginx arranque aunque no exista; `proxy_pass` con
+  variable para que un DNS caído no impida el arranque). Si no hay proxy, prueba el link
+  directo; si nada devuelve una imagen, queda "Sin firma". Se quitaron las rutas de firma
+  de prueba que usaba la entrega. Requisito en producción: el contenedor del frontend
+  debe poder llegar al backend en la URL de `VITE_AUTH_API_URL` / `VITE_STORAGE_URL`
+  (con `localhost` apuntaría al propio contenedor).
+- **Características en el PDF**: `caracteristicasDeRenglones` (mismo `datosPdf.js`) pide
+  las de cada equipo (id del renglón o, si no viene, por serie en el catálogo;
+  `utils/equipoDeRenglon.js`, compartido con `useFichaEquipo`), de 4 en 4. Van en una
+  fila propia bajo la del equipo, a lo ancho (`filaCaracteristicas`), y el reparto en
+  hojas nunca la deja separada de su equipo. Un equipo que falla queda sin
+  características; nunca impide el PDF.
+- **Muchos equipos**: probado con 10 (el máximo que ha tenido alguien), textos largos y
+  una serie de 31 caracteres: las celdas parten palabras largas (`overflow-wrap`) y la
+  tabla sigue en una hoja "(continuación)" con su encabezado. ~690 KB con 3 hojas.
 - El membrete, los textos y el orden de las secciones no cambiaron.
 
 ## Paginación de listados (2026-09-14)

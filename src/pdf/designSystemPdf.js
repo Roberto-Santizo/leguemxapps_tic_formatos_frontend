@@ -85,7 +85,17 @@ export const CSS_PAPEL_FISICO = `
 /* TABLA -- alto de fila fijo NO se usa: crece con el contenido real */
 .lgx-pdf table{width:100%;border-collapse:collapse;margin-top:16px}
 .lgx-pdf thead th{background:#F0EDE1;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#1A1A17;text-align:left;padding:7px 10px;border-bottom:1.3px solid #1A1A17}
-.lgx-pdf tbody td{font-family:Georgia,'Bitstream Charter',Charter,serif;font-size:12px;color:#3B3934;padding:7px 10px;border-bottom:.9px solid #D5D1C4;vertical-align:top}
+.lgx-pdf tbody td{font-family:Georgia,'Bitstream Charter',Charter,serif;font-size:12px;color:#3B3934;padding:7px 10px;border-bottom:.9px solid #D5D1C4;vertical-align:top;overflow-wrap:anywhere}
+/* Características del equipo en una fila propia bajo la suya, a lo ancho de
+   la tabla (desde la columna Equipo): letra de sistema pequeña y en gris,
+   "Nombre: valor" separados por puntos medios. La fila del equipo pierde su
+   filete inferior para que ambas se lean como un solo renglón.
+   overflow-wrap en las celdas: una serie o una observación larga sin
+   espacios parte la línea en vez de salirse de su columna. */
+.lgx-pdf tbody tr.con-caract td{border-bottom:none;padding-bottom:3px}
+.lgx-pdf tbody tr.caract-fila td{padding-top:0;padding-bottom:8px}
+.lgx-pdf .caract{display:block;font-family:Carlito,'Segoe UI',sans-serif;font-size:9.5px;line-height:1.45;color:#5A574F}
+.lgx-pdf .caract b{font-weight:700;color:#3B3934}
 .lgx-pdf tbody td.num{font-variant-numeric:tabular-nums;color:#1A1A17}
 .lgx-pdf tbody td.badge{font-family:Carlito,'Segoe UI',sans-serif;font-size:9.5px;text-transform:uppercase;letter-spacing:.06em;color:#5A574F}
 .lgx-pdf tbody tr:last-child td{border-bottom:1px solid #A9A598}
@@ -167,6 +177,19 @@ export function mast({ codigo, emision, vigencia, pagina, totalPaginas }) {
     </div>
   </header>
   <div class="rule2"></div>`
+}
+
+/**
+ * Fila de características bajo la fila de un equipo ("Procesador: i7 · RAM:
+ * 16 GB"), desde la columna Equipo hasta el final. Vacío si no tiene.
+ * `columnas` = total de columnas de la tabla; `clase` se suma a la fila (p. ej.
+ * "extravio", para que el fondo siga al renglón). generatePdfPapelFisico.js
+ * nunca deja esta fila separada de la de su equipo al partir la tabla.
+ */
+export function filaCaracteristicas(lista, columnas, clase = '') {
+  if (!Array.isArray(lista) || lista.length === 0) return ''
+  const partes = lista.map((c) => (c.name && c.description ? `<b>${esc(c.name)}:</b> ${esc(c.description)}` : `<b>${esc(c.name || c.description)}</b>`))
+  return `<tr class="caract-fila${clase ? ` ${clase}` : ''}"><td></td><td colspan="${columnas - 1}"><span class="caract">${partes.join(' &middot; ')}</span></td></tr>`
 }
 
 export function title(t) {

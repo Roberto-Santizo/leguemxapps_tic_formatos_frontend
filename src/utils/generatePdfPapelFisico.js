@@ -163,9 +163,12 @@ async function partirHoja(hoja) {
     tablaNueva.appendChild(tbodyNuevo)
     nueva.insertBefore(tablaNueva, ref)
 
-    while (!cabeEnUnaHoja(hoja) && tbody.rows.length > 1) {
-      tbodyNuevo.insertBefore(tbody.rows[tbody.rows.length - 1], tbodyNuevo.firstChild)
-    }
+    const moverUltimaFila = () => tbodyNuevo.insertBefore(tbody.rows[tbody.rows.length - 1], tbodyNuevo.firstChild)
+    while (!cabeEnUnaHoja(hoja) && tbody.rows.length > 1) moverUltimaFila()
+    // La fila de características de un equipo (designSystemPdf.js,
+    // filaCaracteristicas) no empieza la hoja nueva sola: se lleva también la
+    // fila de su equipo.
+    while (tbodyNuevo.rows[0]?.classList.contains('caract-fila') && tbody.rows.length > 1) moverUltimaFila()
   }
 
   // Si no se pudo mover nada, la hoja nueva sobra.
