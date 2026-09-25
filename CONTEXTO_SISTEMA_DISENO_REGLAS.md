@@ -506,7 +506,14 @@ nunca escribir un componente de página nuevo para eso.
   en Docker (`docker/entrypoint.sh` genera `/etc/nginx/storage-proxy.conf`, incluido con
   comodín en `nginx.conf` para que nginx arranque aunque no exista; `proxy_pass` con
   variable para que un DNS caído no impida el arranque). Si no hay proxy, prueba el link
-  directo; si nada devuelve una imagen, queda "Sin firma". Se quitaron las rutas de firma
+  directo; si nada devuelve una imagen, queda "Sin firma", se avisa con un toast ("No se
+  pudieron incluir las firmas en el PDF") y la consola muestra `[PDF] No se pudo incluir la
+  firma` con cada dirección probada y su respuesta. Firmas en **S3** (link completo
+  `https://…amazonaws.com/…`, posible según `api.js`): van por `/firma-remota/<host>/<ruta>`,
+  middleware en `vite.config.js` y `location` regex en nginx, **solo** hosts
+  `*.amazonaws.com`, solo GET y solo imágenes (no es un proxy abierto). Un hook
+  `configureServer` de Vite NO debe devolver nada (si devuelve el `use()`, el dev server no
+  arranca). Se quitaron las rutas de firma
   de prueba que usaba la entrega. Requisito en producción: el contenedor del frontend
   debe poder llegar al backend en la URL de `VITE_AUTH_API_URL` / `VITE_STORAGE_URL`
   (con `localhost` apuntaría al propio contenedor).

@@ -23,6 +23,18 @@ function rutaEnStorage(path) {
   return String(path).replace(/^\/?(storage\/)?/, '')
 }
 
+// Link completo a un bucket de S3 -> mismo origen vía /firma-remota/ (proxy
+// de Vite en desarrollo y de nginx en Docker, limitado a *.amazonaws.com).
+function rutaRemotaS3(path) {
+  if (!/^https:\/\//i.test(path)) return null
+  try {
+    const u = new URL(path)
+    return /\.amazonaws\.com$/i.test(u.hostname) ? `/firma-remota/${u.hostname}${u.pathname}${u.search}` : null
+  } catch {
+    return null
+  }
+}
+
 function comoDataUrl(blob) {
   return new Promise((resolver, rechazar) => {
     const lector = new FileReader()
@@ -40,27 +52,33 @@ function comoDataUrl(blob) {
  * navegador solo deja capturar una imagen de OTRO servidor si ese servidor lo
  * permite (CORS) -- los archivos de /storage de Laravel no lo hacen. Por eso
  * la firma se descarga antes y se incrusta como data URL:
- *   1. `/storage/<ruta>` en el MISMO servidor del frontend, que la pasa al
- *      backend (proxy de Vite en desarrollo, de nginx en Docker): mismo
- *      origen, no necesita CORS.
- *   2. Si no hay proxy, el link directo del backend (funciona si algún día
- *      Laravel sirve /storage con CORS).
- * Si ninguno responde con una imagen, queda "Sin firma" en vez de fallar.
+ *   1. Del MISMO servidor del frontend, que la trae de donde esté (proxy de
+ *      Vite en desarrollo, de nginx en Docker): `/storage/<ruta>` si está en
+ *      el disco public de Laravel, `/firma-remota/<bucket>/<ruta>` si es un
+ *      link de S3. Mismo origen: no necesita CORS.
+ *   2. Si no hay proxy, el link directo (funciona si el servidor de la firma
+ *      manda CORS).
+ * Si ninguno responde con una imagen devuelve null; quien llama avisa y el
+ * PDF sale con "Sin firma" en vez de fallar. Cada intento fallido queda en la
+ * consola del navegador (qué dirección y por qué) para poder diagnosticarlo.
  */
 export async function firmaParaPdf(path) {
   if (!path) return null
   const ruta = rutaEnStorage(path)
-  const candidatos = [ruta ? `/storage/${ruta}` : null, urlArchivoPublico(path)].filter(Boolean)
+  const candidatos = [ruta ? `/storage/${ruta}` : null, rutaRemotaS3(path), urlArchivoPublico(path)].filter(Boolean)
+  const intentos = []
   for (const url of candidatos) {
     try {
       const res = await fetch(url, { credentials: 'omit' })
+      const tipo = res.headers.get('content-type') || ''
       // Sin proxy, /storage/... cae en el index.html de la SPA: solo vale una imagen.
-      if (!res.ok || !(res.headers.get('content-type') || '').startsWith('image/')) continue
-      return await comoDataUrl(await res.blob())
-    } catch {
-      // siguiente candidato
+      if (res.ok && tipo.startsWith('image/')) return await comoDataUrl(await res.blob())
+      intentos.push(`${url} -> ${res.status} ${tipo || 'sin tipo'}`)
+    } catch (err) {
+      intentos.push(`${url} -> ${err?.message || 'error de red / CORS'}`)
     }
   }
+  console.warn('[PDF] No se pudo incluir la firma', path, intentos)
   return null
 }
 

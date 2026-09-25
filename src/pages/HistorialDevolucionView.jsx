@@ -258,6 +258,11 @@ function HistorialDevolucionView() {
         caract,
       )
       await generarPdfPapelFisico(html, `devolucion-equipo-${id}.pdf`)
+      // Hay firma guardada pero no se pudo traer (ver firmaParaPdf): el PDF
+      // sale igual, con "Sin firma", pero se avisa en vez de callarlo.
+      if ((documento.responsable_signature && !entrega) || (documento.administrador_signature && !recibe)) {
+        mostrarToast('No se pudieron incluir las firmas en el PDF', { tipo: 'error' })
+      }
     } catch {
       mostrarToast('No se pudo generar el PDF', { tipo: 'error' })
     } finally {
