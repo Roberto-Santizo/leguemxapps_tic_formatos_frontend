@@ -438,12 +438,15 @@ nunca escribir un componente de página nuevo para eso.
   desde=&hasta=`), filtrados en el cliente vía `filtroExtra`. La lista de entregas tiene
   ahora columna **Estado** (mismo chip que devoluciones; `utils/estadoEntrega.js`).
   `usePaginaUrl` expone `setParametros({...})` para cambiar varios filtros en una sola
-  escritura (varias llamadas a `setParametro` seguidas se pisan).
-- **Equipos**: filtro por **marca** (junto al de estado). No hay filtro por tipo ni por
+  escritura (varias llamadas a `setParametro` seguidas se pisan). En móvil (< sm) los
+  filtros van plegados tras un botón "Filtros" con la cantidad puesta; desde sm siempre
+  visibles. Valores inválidos en la URL (fecha inexistente, estado desconocido) se ignoran.
+- **Equipos**: filtro por **marca** (junto al de estado); `?marca=` solo se aplica si existe
+  entre las marcas cargadas. No hay filtro por tipo ni por
   nuevo/usado porque `GET /equipments` es reducido (id, name, brand, serie, registeredBy):
   esos campos solo vienen en la ficha. Pedirlos al backend en el listado permitiría
   agregarlos. **Exportar CSV** exporta solo la página actual; mientras dice "Generando CSV"
-  pide la ficha de cada equipo de la página (máx. `limit`, en paralelo) para incluir
+  pide la ficha de cada equipo de la página (en tandas de 6) para incluir
   modelo, tipo, original y uso.
 - **CSV** (`utils/csv.js` + `hooks/useExportacionCsv.js`): separador `;`, BOM UTF-8 y CRLF
   (Excel en español lo abre bien), valores que empiezan con `= + - @` neutralizados con un
@@ -458,8 +461,8 @@ nunca escribir un componente de página nuevo para eso.
   ficha con **Editar**; se editan nombre, modelo, marca, serie, tipo, original y usado con
   el mismo `PUT /equipments/{id}` y la misma validación que `EquipoForm`, sin salir de la
   página. **Excepción documentada** a "Editar es una página dedicada": quien la usa está a
-  mitad de un acta. Mientras se edita, el clic fuera no cierra y Escape solo sale del modo
-  edición. Las características se siguen editando en Catálogo → Equipos.
+  mitad de un acta. Mientras se edita, el clic fuera no cierra y Escape / la X solo salen del
+  modo edición (el foco vuelve a "Editar"; Tab queda dentro del diálogo). Las características se siguen editando en Catálogo → Equipos.
 
 ## Paginación de listados (2026-09-14)
 

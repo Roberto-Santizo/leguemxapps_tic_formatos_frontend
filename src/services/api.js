@@ -339,9 +339,10 @@ export async function actualizarDepartamento(token, id, { name }) {
 // solo exigen jwt.auth, sin rol. Se usa el mismo helper `laravelRequest`.
 //
 // Ojo con dos detalles de la API documentada:
-//  1. GET /equipments devuelve una vista REDUCIDA: { id, name, brand, registeredBy }.
-//     No trae model / serie / type / brand_id, así que para editar hay que
-//     pedir GET /equipments/{id}.
+//  1. GET /equipments devuelve una vista REDUCIDA: { id, name, brand, serie,
+//     registeredBy } (la serie se agregó para buscar por serie en Equipos).
+//     No trae model / type / brand_id / original / is_used, así que para
+//     editar (o exportar esos datos) hay que pedir GET /equipments/{id}.
 //  2. GET /caracteristics también es reducido: { id, name, equipment } -- sin
 //     `description`. Para mostrar "Nombre: Descripción" hay que pedir el
 //     detalle de cada una. Eso hace `obtenerCaracteristicasDeEquipo`.

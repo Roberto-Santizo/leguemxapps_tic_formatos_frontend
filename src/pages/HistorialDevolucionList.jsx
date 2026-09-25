@@ -162,10 +162,10 @@ function HistorialDevolucionList({ departamento } = {}) {
       <div className="max-w-[1200px] mx-auto flex flex-col gap-stack-lg">
         <Link
           to={enDepto ? `/catalogo/departamentos/${departamento?.id}/ver` : '/historial'}
-          className="inline-flex h-9 items-center gap-2 self-start rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
+          className="inline-flex h-9 max-w-full items-center gap-2 self-start rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
         >
           <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={1.75} />
-          {enDepto ? departamento?.name || 'Departamento' : 'Historial de Actas'}
+          <span className="min-w-0 truncate">{enDepto ? departamento?.name || 'Departamento' : 'Historial de Actas'}</span>
         </Link>
 
         <div className="-mt-1 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end md:mt-0">
@@ -189,9 +189,10 @@ function HistorialDevolucionList({ departamento } = {}) {
             <button
               type="button"
               onClick={exportarCsv}
-              disabled={exportando || cargando || Boolean(errorCarga)}
+              disabled={exportando || cargando || Boolean(errorCarga) || todosFiltrados.length === 0}
               aria-busy={exportando}
-              className="inline-flex h-10 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover disabled:opacity-50 active:scale-[0.97]"
+              title={todosFiltrados.length === 0 && !cargando ? 'No hay registros para exportar' : undefined}
+              className="inline-flex h-10 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover disabled:opacity-50 aria-busy:opacity-100 active:scale-[0.97]"
             >
               {exportando ? <IsotipoCarga className="h-3" /> : <Download className="h-4 w-4" strokeWidth={1.75} />}
               Exportar CSV

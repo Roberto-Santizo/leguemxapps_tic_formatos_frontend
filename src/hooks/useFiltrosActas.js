@@ -4,7 +4,14 @@ import { fechaInputValue } from '../utils/fecha.js'
 import { normalizarNombre } from '../utils/texto.js'
 import { OPCIONES_ESTADO_ENTREGA } from '../utils/estadoEntrega.js'
 
-const FECHA_VALIDA = /^\d{4}-\d{2}-\d{2}$/
+// 'aaaa-mm-dd' que además exista en el calendario: "2026-13-45" (a mano en
+// la URL) se ignora en vez de filtrar con un campo de fecha que se ve vacío.
+function fechaValida(valor) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(valor)) return false
+  const [a, m, d] = valor.split('-').map(Number)
+  const f = new Date(Date.UTC(a, m - 1, d))
+  return f.getUTCFullYear() === a && f.getUTCMonth() === m - 1 && f.getUTCDate() === d
+}
 
 export const OPCIONES_PLANTA = [
   { valor: '', etiqueta: 'Todas' },
@@ -43,8 +50,8 @@ export default function useFiltrosActas({ campoEstado, campoFecha, conPlanta = f
   const estado = OPCIONES_ESTADO_ENTREGA.some((o) => o.valor === estadoUrl) ? estadoUrl : ''
   const plantaUrl = parametro('planta')
   const planta = conPlanta && OPCIONES_PLANTA.some((o) => o.valor === plantaUrl) ? plantaUrl : ''
-  const desde = FECHA_VALIDA.test(parametro('desde')) ? parametro('desde') : ''
-  const hasta = FECHA_VALIDA.test(parametro('hasta')) ? parametro('hasta') : ''
+  const desde = fechaValida(parametro('desde')) ? parametro('desde') : ''
+  const hasta = fechaValida(parametro('hasta')) ? parametro('hasta') : ''
 
   const enDepartamento = departamento !== undefined
   const nombreDepto = departamento ? normalizarNombre(departamento.name) : ''

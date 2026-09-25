@@ -102,7 +102,7 @@ const selectFiltro =
 const botonVolver =
   'inline-flex h-9 items-center gap-2 self-start rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]'
 const botonSecundarioCabecera =
-  'inline-flex h-10 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface shadow-sm transition duration-fast ease-standard hover:bg-surface-container disabled:opacity-50 active:scale-[0.97]'
+  'inline-flex h-10 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface shadow-sm transition duration-fast ease-standard hover:bg-surface-container disabled:opacity-50 aria-busy:opacity-100 active:scale-[0.97]'
 const botonPrimario =
   'inline-flex h-10 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97]'
 const celdaEncabezado =
@@ -147,17 +147,23 @@ function EquiposList() {
   // Marcas para el filtro: listado completo de apoyo. Si falla, el filtro de
   // marca simplemente no se ofrece.
   const [marcas, setMarcas] = useState([])
+  const [marcasListas, setMarcasListas] = useState(false)
   useEffect(() => {
     let vivo = true
     listarMarcas(token)
       .then((data) => vivo && setMarcas(Array.isArray(data) ? data : []))
       .catch(() => vivo && setMarcas([]))
+      .finally(() => vivo && setMarcasListas(true))
     return () => {
       vivo = false
     }
   }, [token])
 
-  const marcaFiltro = parametro('marca')
+  // Una marca que no existe (escrita a mano en la URL) se ignora: si no, la
+  // lista quedaría vacía con el desplegable mostrando "Todas".
+  const marcaUrl = parametro('marca')
+  const marcaFiltro =
+    marcaUrl && marcas.some((m) => normalizarNombre(m.name) === normalizarNombre(marcaUrl)) ? marcaUrl : ''
   const hayOtrosFiltros = Boolean(marcaFiltro)
 
   // Estado + marca se acumulan. La marca se compara por nombre (`brand` del
@@ -203,14 +209,22 @@ function EquiposList() {
     const pagina_ = visibles
     exportar({
       nombre: `equipos-pagina-${pagina}`,
-      filas: () =>
-        Promise.all(
-          pagina_.map((e) =>
-            obtenerEquipo(token, e.id)
-              .then((ficha) => ({ ...e, ...ficha, brand: e.brand || ficha?.brand }))
-              .catch(() => e),
-          ),
-        ),
+      // De a 6 peticiones a la vez: `limit` viene de la URL y alguien podría
+      // pedir una página de cientos de equipos.
+      filas: async () => {
+        const completas = []
+        for (let i = 0; i < pagina_.length; i += 6) {
+          const lote = await Promise.all(
+            pagina_.slice(i, i + 6).map((e) =>
+              obtenerEquipo(token, e.id)
+                .then((ficha) => ({ ...e, ...ficha, brand: e.brand || ficha?.brand }))
+                .catch(() => e),
+            ),
+          )
+          completas.push(...lote)
+        }
+        return completas
+      },
       columnas: [
         { titulo: 'ID', valor: (e) => e.id },
         { titulo: 'Equipo', valor: (e) => e.name || '' },
@@ -311,7 +325,10 @@ function EquiposList() {
   // Con un filtro de estado puesto no se puede pintar nada hasta saber quién
   // está libre: si no, se vería un instante el inventario completo sin filtrar
   // y luego daría un salto. Se sigue mostrando el esqueleto hasta entonces.
-  const cargandoLista = cargando || (Boolean(estadoFiltro) && !apoyoListo)
+  // Igual con una marca en la URL: hasta saber si existe, no se pinta la lista
+  // (se vería un instante el inventario completo).
+  const cargandoLista =
+    cargando || (Boolean(estadoFiltro) && !apoyoListo) || (Boolean(marcaUrl) && !marcasListas)
   // La carga tiene sus propios esqueletos (misma forma que la tabla y las
   // tarjetas), así que se separa de los estados "sin contenido".
   const sinContenido = !cargandoLista && (Boolean(errorCarga) || !hayRegistros)

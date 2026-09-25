@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { Fragment, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Pencil, X } from 'lucide-react'
 import {
@@ -65,6 +65,45 @@ function EquipoDetalleModal({ equipoId, onCerrar, editable = false, onActualizad
   const abierto = Boolean(equipoId)
   const cajaRef = useRef(null)
   const cerrarRef = useRef(null)
+  const nombreRef = useRef(null)
+  const editarRef = useRef(null)
+  const estabaEditando = useRef(false)
+
+  // Foco al cambiar de modo: al entrar a editar, al campo Nombre; al salir
+  // (Guardar, Cancelar, Escape o la X), de vuelta al botón Editar -- antes
+  // caía en <body> y el teclado quedaba fuera de la ficha.
+  useEffect(() => {
+    if (editando) {
+      estabaEditando.current = true
+      const t = setTimeout(() => nombreRef.current?.focus(), 0)
+      return () => clearTimeout(t)
+    }
+    if (estabaEditando.current) {
+      estabaEditando.current = false
+      const t = setTimeout(() => (editarRef.current ?? cerrarRef.current)?.focus(), 0)
+      return () => clearTimeout(t)
+    }
+    return undefined
+  }, [editando])
+
+  // Tab y Shift+Tab dan la vuelta dentro de la ficha (no se escapan a la
+  // página de atrás mientras está abierta).
+  function retenerFoco(e) {
+    if (e.key !== 'Tab' || !cajaRef.current) return
+    const enfocables = [...cajaRef.current.querySelectorAll('button, input, select, textarea, [href], [tabindex]:not([tabindex="-1"])')].filter(
+      (el) => !el.disabled && el.offsetParent !== null,
+    )
+    if (enfocables.length === 0) return
+    const primero = enfocables[0]
+    const ultimo = enfocables[enfocables.length - 1]
+    if (e.shiftKey && document.activeElement === primero) {
+      e.preventDefault()
+      ultimo.focus()
+    } else if (!e.shiftKey && document.activeElement === ultimo) {
+      e.preventDefault()
+      primero.focus()
+    }
+  }
 
   const [montado, setMontado] = useState(abierto)
   const [visible, setVisible] = useState(false)
@@ -238,6 +277,7 @@ function EquipoDetalleModal({ equipoId, onCerrar, editable = false, onActualizad
         aria-modal="true"
         aria-labelledby="equipo-detalle-titulo"
         onClick={(e) => e.stopPropagation()}
+        onKeyDown={retenerFoco}
         className={`flex max-h-[85vh] w-full max-w-md flex-col overflow-hidden rounded-tarjeta bg-white shadow-modal transition-[opacity,transform] ease-standard ${
           visible ? 'scale-100 opacity-100 duration-base' : 'scale-95 opacity-0 duration-fast'
         }`}
@@ -274,9 +314,12 @@ function EquipoDetalleModal({ equipoId, onCerrar, editable = false, onActualizad
           <button
             ref={cerrarRef}
             type="button"
-            onClick={onCerrar}
+            // En modo edición la X hace lo mismo que Escape: sale de la edición
+            // sin cerrar la ficha, para no perder lo escrito por accidente.
+            onClick={editando ? () => setEditando(false) : onCerrar}
             disabled={guardando}
-            aria-label="Cerrar"
+            aria-label={editando ? 'Cancelar edición' : 'Cerrar'}
+            title={editando ? 'Cancelar edición' : 'Cerrar'}
             className="inline-flex h-9 w-9 disabled:opacity-50 shrink-0 items-center justify-center rounded-boton text-on-surface-variant transition duration-fast ease-standard hover:bg-surface-container hover:text-on-surface active:scale-[0.90]"
           >
             <X className="h-4 w-4" strokeWidth={1.75} />
@@ -312,19 +355,20 @@ function EquipoDetalleModal({ equipoId, onCerrar, editable = false, onActualizad
             <form id="equipo-edicion" onSubmit={guardarEdicion} className="flex flex-col gap-4 px-6 py-5" noValidate>
               <div>
                 <label htmlFor="eq-nombre" className={labelClasses}>Nombre</label>
-                <input id="eq-nombre" value={form.name} onChange={(e) => actualizarCampo('name', e.target.value)} disabled={guardando} className={inputClasses} />
+                <input ref={nombreRef} id="eq-nombre" aria-invalid={Boolean(errorDe('name'))} value={form.name} onChange={(e) => actualizarCampo('name', e.target.value)} disabled={guardando} className={inputClasses} />
                 {errorDe('name') && <p className={errorCampo}>{errorDe('name')}</p>}
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label htmlFor="eq-modelo" className={labelClasses}>Modelo</label>
-                  <input id="eq-modelo" value={form.model} onChange={(e) => actualizarCampo('model', e.target.value)} disabled={guardando} className={inputClasses} />
+                  <input id="eq-modelo" aria-invalid={Boolean(errorDe('model'))} value={form.model} onChange={(e) => actualizarCampo('model', e.target.value)} disabled={guardando} className={inputClasses} />
                   {errorDe('model') && <p className={errorCampo}>{errorDe('model')}</p>}
                 </div>
                 <div>
                   <label htmlFor="eq-marca" className={labelClasses}>Marca</label>
                   <select
                     id="eq-marca"
+                    aria-invalid={Boolean(errorDe('brand_id'))}
                     value={form.brand_id}
                     onChange={(e) => actualizarCampo('brand_id', e.target.value)}
                     disabled={guardando || marcas === null}
@@ -341,12 +385,12 @@ function EquipoDetalleModal({ equipoId, onCerrar, editable = false, onActualizad
                 </div>
                 <div>
                   <label htmlFor="eq-serie" className={labelClasses}>Serie</label>
-                  <input id="eq-serie" value={form.serie} onChange={(e) => actualizarCampo('serie', e.target.value)} disabled={guardando} className={`${inputClasses} font-mono uppercase tracking-[0.04em]`} />
+                  <input id="eq-serie" aria-invalid={Boolean(errorDe('serie'))} value={form.serie} onChange={(e) => actualizarCampo('serie', e.target.value)} disabled={guardando} className={`${inputClasses} font-mono tracking-[0.04em]`} />
                   {errorDe('serie') && <p className={errorCampo}>{errorDe('serie')}</p>}
                 </div>
                 <div>
                   <label htmlFor="eq-tipo" className={labelClasses}>Tipo</label>
-                  <select id="eq-tipo" value={form.type} onChange={(e) => actualizarCampo('type', e.target.value)} disabled={guardando} className={`${inputClasses} pr-9`}>
+                  <select id="eq-tipo" aria-invalid={Boolean(errorDe('type'))} value={form.type} onChange={(e) => actualizarCampo('type', e.target.value)} disabled={guardando} className={`${inputClasses} pr-9`}>
                     <option value="">Selecciona un tipo</option>
                     {TIPOS_EQUIPO.map((t) => (
                       <option key={t.id} value={t.id}>
@@ -445,8 +489,10 @@ function EquipoDetalleModal({ equipoId, onCerrar, editable = false, onActualizad
         </div>
 
         <div className="flex justify-end gap-2 border-t border-outline-variant px-6 py-4">
+          {/* key distinta en cada modo: si React reutilizara el mismo botón,
+              el segundo Enter sobre "Editar" caería en "Cancelar". */}
           {editando ? (
-            <>
+            <Fragment key="pie-edicion">
               <button
                 type="button"
                 onClick={() => setEditando(false)}
@@ -465,11 +511,12 @@ function EquipoDetalleModal({ equipoId, onCerrar, editable = false, onActualizad
                 {guardando && <IsotipoCarga className="h-3" />}
                 Guardar cambios
               </button>
-            </>
+            </Fragment>
           ) : (
-            <>
+            <Fragment key="pie-ficha">
               {puedeEditar && equipo && !cargando && !error && (
                 <button
+                  ref={editarRef}
                   type="button"
                   onClick={empezarEdicion}
                   className="inline-flex h-10 items-center justify-center gap-2 rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
@@ -485,7 +532,7 @@ function EquipoDetalleModal({ equipoId, onCerrar, editable = false, onActualizad
               >
                 Cerrar
               </button>
-            </>
+            </Fragment>
           )}
         </div>
       </div>

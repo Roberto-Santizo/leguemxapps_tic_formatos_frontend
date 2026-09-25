@@ -162,10 +162,10 @@ function HistorialEntregaView() {
   const opcionesEquipo = equipos
     .map((e) => ({
       id: e.id,
-      name: e.brand ? `${e.name} — ${e.brand}` : e.name,
+      name: e.brand ? `${e.name} — ${e.brand}` : e.name || '',
       codigo: e.serie ? String(e.serie).toUpperCase() : '',
     }))
-    .sort((a, b) => a.name.localeCompare(b.name, 'es') || a.codigo.localeCompare(b.codigo, 'es'))
+    .sort((a, b) => String(a.name ?? '').localeCompare(String(b.name ?? ''), 'es') || a.codigo.localeCompare(b.codigo, 'es'))
 
   function refrescarTrasEditarEquipo() {
     listarEquiposDisponibles(token)
