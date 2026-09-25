@@ -18,7 +18,7 @@ import EstadoVacio from '../components/EstadoVacio.jsx'
 import InlineEditableText from '../components/InlineEditableText.jsx'
 import EditorFechaLocal from '../components/EditorFechaLocal.jsx'
 import SearchableSelect from '../components/SearchableSelect.jsx'
-import { mostrarToast } from '../components/Toast.jsx'
+import { IndicadorGuardando, mostrarToast } from '../components/Toast.jsx'
 import { SkeletonDetalle } from '../components/Skeleton.jsx'
 import { SeccionCard, Campo } from './FormatoActa.jsx'
 import { FORMATOS } from '../config/formatos.js'
@@ -91,6 +91,9 @@ function HistorialDevolucionView() {
   const [nuevoDetalleId, setNuevoDetalleId] = useState('')
   const [nuevoDetalleObs, setNuevoDetalleObs] = useState('')
   const [guardandoEquipo, setGuardandoEquipo] = useState(false)
+  // Solo presentación: cuántas correcciones de observación siguen en curso
+  // (para la pastilla de "guardando"); no cambia qué se envía.
+  const [corrigiendo, setCorrigiendo] = useState(0)
 
   useEffect(() => {
     let vivo = true
@@ -150,17 +153,21 @@ function HistorialDevolucionView() {
   // marcarExtravio() siempre deja el prefijo y un texto por defecto.
   async function corregirObservacionGeneral(texto) {
     const observations = texto || null
+    setCorrigiendo((n) => n + 1)
     try {
       await actualizarDocumentoDevolucion(token, id, { observations })
       setDocumento((doc) => ({ ...doc, observations }))
       mostrarToast('Observación actualizada')
     } catch (err) {
       mostrarToast(err.message || 'No se pudo corregir la observación', { tipo: 'error' })
+    } finally {
+      setCorrigiendo((n) => n - 1)
     }
   }
 
   async function corregirObservacionItem(itemId, texto) {
     const observations = texto || null
+    setCorrigiendo((n) => n + 1)
     try {
       await actualizarDetalleDevolucion(token, itemId, { observations })
       setDocumento((doc) => ({
@@ -170,6 +177,8 @@ function HistorialDevolucionView() {
       mostrarToast('Observación actualizada')
     } catch (err) {
       mostrarToast(err.message || 'No se pudo corregir la observación', { tipo: 'error' })
+    } finally {
+      setCorrigiendo((n) => n - 1)
     }
   }
 
@@ -657,6 +666,7 @@ function HistorialDevolucionView() {
       )}
 
       <EsperaLogo activa={generandoPdf} mensaje="Generando PDF…" />
+      <IndicadorGuardando activo={guardandoEquipo || corrigiendo > 0} />
     </div>
   )
 }

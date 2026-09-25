@@ -280,18 +280,21 @@ nunca escribir un componente de página nuevo para eso.
     sobre botón negro, `tono="tinta"` sobre fondo claro; alto `h-3` en botones y `h-2.5` en
     botones de solo ícono. En las barras de las hojas se oculta bajo `sm` (`max-sm:!hidden`)
     porque partía el texto del botón; ahí la espera con logo ya da la señal.
+  - `IndicadorGuardando` (exportado de `Toast.jsx`, `<IndicadorGuardando activo={estado}
+    texto="Guardando" />`): pastilla blanca con el isotipo que se llena y texto mono, dentro
+    del mismo contenedor del Toast. Así hereda su posición (arriba a la derecha en
+    escritorio, abajo en móvil, sobre la barra de las hojas) y el aviso negro de "ya quedó"
+    aparece en el mismo lugar cuando termina. Entra a los 150ms: una respuesta instantánea
+    no parpadea. **Es la señal de todas las escrituras del CRUD**: crear/editar marca,
+    departamento, equipo, empleado y usuario, características, eliminar una entrega, y en
+    el historial agregar/quitar equipo y corregir observaciones (para estas últimas cada
+    vista tiene un contador `corrigiendo`, solo visual, alrededor de la llamada).
   - `EsperaLogo.jsx` (`<EsperaLogo activa={estado} mensaje="…" />`): espera de pantalla
     completa, con las montañas del isotipo en silueta negra de fondo y el isotipo a color
-    llenándose de abajo arriba, mensaje mono y barra. Recibe el estado que la página ya
-    tenía (`guardando`, `generandoPdf`, `borrando`); bloquea los clics desde el inicio, se
-    ve a los 250ms (una respuesta rápida no parpadea) y, una vez visible, dura al menos
-    600ms. **No se agregan retrasos a las operaciones.** Dónde va: acciones que guardan o
-    borran un registro completo — crear/editar marca, departamento, equipo, empleado y
-    usuario, guardar entrega o devolución, eliminar una entrega, generar el PDF. Las
-    ediciones pequeñas dentro de una pantalla (agregar/quitar equipo de una entrega,
-    características, fechas, observaciones) llevan solo el `IsotipoCarga` del botón: una
-    pantalla completa ahí interrumpiría más de lo que ayuda. Las listas y vistas siguen
-    con esqueletos (`Skeleton`) al cargar.
+    llenándose de abajo arriba, mensaje mono y barra. **Solo para lo pesado**: guardar una
+    entrega o una devolución y generar el PDF. Bloquea los clics desde el inicio, se ve a
+    los 250ms y, una vez visible, dura al menos 600ms. **No se agregan retrasos a las
+    operaciones.** Las listas y vistas siguen con esqueletos (`Skeleton`) al cargar.
   - `ActaRegistrada.jsx`: al guardar una entrega o devolución, tarjeta con check que se
     dibuja, dos anillos y chispas (1,5 s; 0,5 s con movimiento reducido). Después se muestra
     el Toast y se navega igual que antes (mismo destino); el temporizador se limpia si la

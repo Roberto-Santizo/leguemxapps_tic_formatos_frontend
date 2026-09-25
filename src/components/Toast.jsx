@@ -59,6 +59,26 @@ export function cerrarToast(id) {
 }
 
 /**
+ * Pastilla blanca de "guardando" (mockup Sierra): isotipo que se llena y texto
+ * mono, en el mismo lugar donde después aparece el aviso negro de "ya quedó".
+ * Es solo presentación: la pantalla la monta con el estado de "guardando" que
+ * ya tenía, sin cambiar su lógica ni su llamada al backend.
+ *   <IndicadorGuardando activo={guardando} texto="Guardando" />
+ * Aparece a los 150ms (index.css), así una respuesta instantánea no parpadea.
+ */
+export function IndicadorGuardando({ activo, texto = 'Guardando' }) {
+  useEffect(() => {
+    if (!activo) return undefined
+    const id = idSiguiente
+    idSiguiente += 1
+    avisos = [...avisos, { id, mensaje: texto, tipo: 'guardando' }]
+    emitir()
+    return () => quitarAviso(id)
+  }, [activo, texto])
+  return null
+}
+
+/**
  * Contenedor visual. Se monta UNA sola vez, en AppLayout.
  *
  * Posición (sistema Sierra): arriba a la derecha desde `sm:` (como el
@@ -151,6 +171,17 @@ export function Toaster() {
       className="pointer-events-none fixed inset-x-3 bottom-[calc(16px+env(safe-area-inset-bottom))] z-[70] flex flex-col items-stretch gap-2 sm:inset-x-auto sm:bottom-auto sm:right-4 sm:top-[calc(theme(spacing.barra-movil)+12px)] sm:items-end md:right-[max(42px,calc(50vw_-_715px))] md:top-10"
     >
       {lista.map((aviso) => {
+        if (aviso.tipo === 'guardando') {
+          return (
+            <div key={aviso.id} role="status" aria-live="polite" className="guardando-pastilla">
+              <span aria-hidden="true" className="isotipo-carga isotipo-carga--guardando h-4">
+                <img src="/logo-legumex-icon.png" alt="" />
+                <img src="/logo-legumex-icon.png" alt="" />
+              </span>
+              {aviso.mensaje}
+            </div>
+          )
+        }
         const esError = aviso.tipo === 'error'
         const Icono = esError ? AlertTriangle : CheckCircle2
         return (

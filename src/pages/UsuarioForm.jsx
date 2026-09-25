@@ -2,11 +2,10 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, Eye, EyeOff, Save } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
-import { mostrarToast } from '../components/Toast.jsx'
+import { IndicadorGuardando, mostrarToast } from '../components/Toast.jsx'
 import { SkeletonFormulario } from '../components/Skeleton.jsx'
 import { obtenerUsuario, crearUsuario, editarUsuario } from '../services/api.js'
 import IsotipoCarga from '../components/IsotipoCarga.jsx'
-import EsperaLogo from '../components/EsperaLogo.jsx'
 /**
  * Alta y edición de un usuario (POST /users, PUT /users/{id}), mismo patrón
  * que EmpleadoForm.jsx: un solo formulario para ambos casos, según si hay
@@ -289,7 +288,7 @@ function UsuarioForm() {
         )}
       </div>
 
-      <EsperaLogo activa={guardando} mensaje={esEdicion ? 'Guardando cambios…' : 'Creando registro…'} />
+      <IndicadorGuardando activo={guardando} />
     </div>
   )
 }

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, Save } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
-import { mostrarToast } from '../components/Toast.jsx'
+import { IndicadorGuardando, mostrarToast } from '../components/Toast.jsx'
 import SearchableSelect from '../components/SearchableSelect.jsx'
 import { SkeletonFormulario } from '../components/Skeleton.jsx'
 import {
@@ -20,7 +20,6 @@ import {
   hayNombreRepetido,
 } from '../components/CaracteristicasEditor.jsx'
 import IsotipoCarga from '../components/IsotipoCarga.jsx'
-import EsperaLogo from '../components/EsperaLogo.jsx'
 /**
  * Alta y edición de un equipo (POST /equipments, PUT /equipments/{id}).
  *
@@ -484,7 +483,7 @@ function EquipoForm() {
         )}
       </div>
 
-      <EsperaLogo activa={guardando} mensaje={esEdicion ? 'Guardando cambios…' : 'Creando registro…'} />
+      <IndicadorGuardando activo={guardando} />
     </div>
   )
 }

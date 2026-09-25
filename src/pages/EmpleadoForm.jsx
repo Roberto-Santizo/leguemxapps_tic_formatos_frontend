@@ -2,12 +2,11 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, Save } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
-import { mostrarToast } from '../components/Toast.jsx'
+import { IndicadorGuardando, mostrarToast } from '../components/Toast.jsx'
 import SearchableSelect from '../components/SearchableSelect.jsx'
 import { SkeletonFormulario } from '../components/Skeleton.jsx'
 import { listarDepartamentos, obtenerEmpleado, crearEmpleado, actualizarEmpleado } from '../services/api.js'
 import IsotipoCarga from '../components/IsotipoCarga.jsx'
-import EsperaLogo from '../components/EsperaLogo.jsx'
 /**
  * Alta y edición de un empleado (POST /employees, PUT /employees/{id}).
  * Un solo formulario simple, sin pasos condicionales -- código, nombre y
@@ -200,7 +199,7 @@ function EmpleadoForm() {
         )}
       </div>
 
-      <EsperaLogo activa={guardando} mensaje={esEdicion ? 'Guardando cambios…' : 'Creando registro…'} />
+      <IndicadorGuardando activo={guardando} />
     </div>
   )
 }

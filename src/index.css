@@ -948,3 +948,36 @@ main[data-sheet] > .bg-background {
   30% { opacity: 1; }
   100% { transform: translateY(-46px) scale(0.4); opacity: 0; }
 }
+
+/* Pastilla blanca de "guardando" dentro del contenedor de avisos (Toast.jsx,
+   IndicadorGuardando): isotipo con base en silueta negra que se llena a color
+   y texto mono. Entra a los 150ms para no parpadear en respuestas instantáneas. */
+.guardando-pastilla {
+  pointer-events: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  align-self: flex-end;
+  border-radius: 9999px;
+  border: 1px solid #e5e5e5;
+  background: #ffffff;
+  padding: 8px 16px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 11px;
+  line-height: 16px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: #525252;
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.08);
+  animation: guardandoEntra 200ms cubic-bezier(0.4, 0, 0.2, 1) 150ms backwards;
+}
+@media (max-width: 639px) {
+  .guardando-pastilla { align-self: center; }
+}
+.isotipo-carga--guardando img:first-child { filter: brightness(0); opacity: 0.2; }
+@keyframes guardandoEntra {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: none; }
+}

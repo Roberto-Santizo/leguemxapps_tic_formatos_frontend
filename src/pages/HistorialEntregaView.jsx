@@ -20,7 +20,7 @@ import EstadoVacio from '../components/EstadoVacio.jsx'
 import InlineEditableText from '../components/InlineEditableText.jsx'
 import EditorFechaLocal from '../components/EditorFechaLocal.jsx'
 import SearchableSelect from '../components/SearchableSelect.jsx'
-import { mostrarToast } from '../components/Toast.jsx'
+import { IndicadorGuardando, mostrarToast } from '../components/Toast.jsx'
 import { SkeletonDetalle } from '../components/Skeleton.jsx'
 import { SeccionCard, Campo } from './FormatoActa.jsx'
 import { FORMATOS } from '../config/formatos.js'
@@ -112,6 +112,9 @@ function HistorialEntregaView() {
   const [nuevoEquipoId, setNuevoEquipoId] = useState('')
   const [nuevoEquipoObs, setNuevoEquipoObs] = useState('')
   const [guardandoEquipo, setGuardandoEquipo] = useState(false)
+  // Solo presentación: cuántas correcciones de observación siguen en curso
+  // (para la pastilla de "guardando"); no cambia qué se envía.
+  const [corrigiendo, setCorrigiendo] = useState(0)
   const [quitando, setQuitando] = useState(null) // item o null
   const [quitandoEnCurso, setQuitandoEnCurso] = useState(false)
   const [errorQuitar, setErrorQuitar] = useState('')
@@ -172,6 +175,7 @@ function HistorialEntregaView() {
   // observaciones" de siempre.
   async function corregirObservacion(itemId, texto) {
     const observations = texto || null
+    setCorrigiendo((n) => n + 1)
     try {
       await actualizarDetalleEntrega(token, itemId, { observations })
       setDocumento((doc) => ({
@@ -181,6 +185,8 @@ function HistorialEntregaView() {
       mostrarToast('Observación actualizada')
     } catch (err) {
       mostrarToast(err.message || 'No se pudo corregir la observación', { tipo: 'error' })
+    } finally {
+      setCorrigiendo((n) => n - 1)
     }
   }
 
@@ -776,7 +782,9 @@ function HistorialEntregaView() {
       />
 
       <EsperaLogo activa={generandoPdf} mensaje="Generando PDF…" />
-      <EsperaLogo activa={borrando} mensaje="Eliminando entrega…" />
+      <IndicadorGuardando activo={borrando} texto="Eliminando" />
+      <IndicadorGuardando activo={guardandoEquipo || corrigiendo > 0} />
+      <IndicadorGuardando activo={quitandoEnCurso} texto="Quitando" />
     </div>
   )
 }

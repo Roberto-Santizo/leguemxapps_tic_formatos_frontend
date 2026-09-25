@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Plus, Trash2, Check, X } from 'lucide-react'
 import InlineEditableText from './InlineEditableText.jsx'
-import { mostrarToast } from './Toast.jsx'
+import { IndicadorGuardando, mostrarToast } from './Toast.jsx'
 import { SkeletonTabla } from './Skeleton.jsx'
 import IsotipoCarga from './IsotipoCarga.jsx'
 /**
@@ -318,6 +318,8 @@ export function CaracteristicasDeEquipo({
           )}
         </>
       )}
+
+      <IndicadorGuardando activo={guardando} />
     </div>
   )
 }

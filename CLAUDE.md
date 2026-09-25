@@ -72,7 +72,8 @@ en español; mantener ese idioma.
   `EstadoVacio`, `SearchableSelect`, `InlineEditableText`, `Buscador`, `Skeleton`,
   `FirmaPad`, `CaracteristicasEditor`, `EditorFechaLocal`, `Paginador`, `EquipoDetalleModal`,
   `SierraFondo` (cordillera decorativa del fondo y del 404), `IsotipoCarga` (carga en
-  botones), `EsperaLogo` (espera a pantalla completa) y `ActaRegistrada` (momento de éxito).
+  botones), `IndicadorGuardando` (pastilla de "guardando", en `Toast.jsx`), `EsperaLogo`
+  (espera a pantalla completa, solo actas y PDF) y `ActaRegistrada` (momento de éxito).
 - Listas paginadas: `hooks/usePaginacion.js` (`useListaPaginada`, estado `?page=&q=` en la
   URL, búsqueda híbrida porque el backend no filtra por texto) + `components/Paginador.jsx`.
   Contrato del backend en `paginacion.md`; `listar*(token, { limit, page })` en `api.js`.
