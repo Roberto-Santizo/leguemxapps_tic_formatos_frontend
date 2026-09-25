@@ -278,7 +278,9 @@ nunca escribir un componente de página nuevo para eso.
   - `IsotipoCarga.jsx`: isotipo que se llena de izquierda a derecha. Reemplaza al círculo
     que gira (`Loader2`, ya no se usa) en todo botón que guarda o genera algo. `tono="claro"`
     sobre botón negro, `tono="tinta"` sobre fondo claro; alto `h-3` en botones y `h-2.5` en
-    botones de solo ícono. En las barras de las hojas se oculta bajo `sm` (`max-sm:!hidden`)
+    botones de solo ícono. También en el botón de confirmar de `ConfirmDialog` cuando
+    `procesando` (junto al texto de siempre, antes decía "Procesando..."; lleva `aria-busy`).
+    En las barras de las hojas se oculta bajo `sm` (`max-sm:!hidden`)
     porque partía el texto del botón; ahí la espera con logo ya da la señal.
   - `IndicadorGuardando` (exportado de `Toast.jsx`, `<IndicadorGuardando activo={estado}
     texto="Guardando" />`): pastilla blanca con el isotipo que se llena y texto mono, dentro

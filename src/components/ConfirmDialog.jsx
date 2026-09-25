@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { AlertTriangle } from 'lucide-react'
 
+import IsotipoCarga from './IsotipoCarga.jsx'
 /**
  * Único diálogo de confirmación del sistema -- antes existían dos
  * (ConfirmDialog y ConfirmModal) con distinto radio, z-index, animación y
@@ -208,14 +209,18 @@ function ConfirmDialog({
           <button
             type="submit"
             disabled={procesando}
+            aria-busy={procesando}
             className={[
-              'inline-flex h-10 items-center justify-center rounded-boton px-4 font-body-md text-body-md font-medium transition-[transform,background-color,filter] duration-fast ease-standard active:scale-[0.97] disabled:opacity-60',
+              'inline-flex h-10 items-center justify-center gap-2 rounded-boton px-4 font-body-md text-body-md font-medium transition-[transform,background-color,filter] duration-fast ease-standard active:scale-[0.97] disabled:opacity-60',
               peligro
                 ? 'bg-error text-on-error hover:brightness-110 active:brightness-95'
                 : 'bg-tinta text-on-primary hover:bg-tinta-hover',
             ].join(' ')}
           >
-            {procesando ? 'Procesando...' : textoConfirmar}
+            {/* Mismo formato que "Crear" en los formularios: isotipo que se llena
+                junto al texto de siempre, sobre el botón negro o rojo. */}
+            {procesando && <IsotipoCarga className="h-3" />}
+            {textoConfirmar}
           </button>
         </div>
       </form>
