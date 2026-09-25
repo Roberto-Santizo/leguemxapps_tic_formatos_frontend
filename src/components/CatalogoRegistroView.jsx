@@ -13,6 +13,9 @@ import EstadoVacio from './EstadoVacio.jsx'
  * URL directa o al recargar la página, no solo llegando desde la lista.
  * "Editar" pide confirmación y lleva a `rutaBase/:id`, la página de edición
  * (mismo patrón que Equipos: página aparte, no un modal).
+ *
+ * `extra(registro)` (opcional): contenido propio de un catálogo debajo de los
+ * datos -- hoy, las tarjetas de historial de Departamentos.
  */
 // Recetas visuales "Sierra" (BRIEF, ola 2), repetidas a propósito.
 const botonVolver =
@@ -22,7 +25,7 @@ const botonSecundario =
 const etiquetaDato = 'mb-1 font-mono text-micro uppercase leading-4 tracking-[0.1em] text-on-surface-variant'
 const panelDato = 'min-w-0 rounded-xl bg-surface-container-high px-4 py-3'
 
-function CatalogoRegistroView({ textos, onObtener, rutaBase }) {
+function CatalogoRegistroView({ textos, onObtener, rutaBase, extra }) {
   const { id } = useParams()
   const { token } = useAuth()
   const navigate = useNavigate()
@@ -120,6 +123,8 @@ function CatalogoRegistroView({ textos, onObtener, rutaBase }) {
                 </div>
               </div>
             </section>
+
+            {extra && extra(registro)}
           </>
         )}
       </div>

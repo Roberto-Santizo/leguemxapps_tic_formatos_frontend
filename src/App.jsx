@@ -10,6 +10,7 @@ import MarcasView from './pages/MarcasView.jsx'
 import DepartamentosList from './pages/DepartamentosList.jsx'
 import DepartamentosForm from './pages/DepartamentosForm.jsx'
 import DepartamentosView from './pages/DepartamentosView.jsx'
+import DepartamentoHistorial from './pages/DepartamentoHistorial.jsx'
 import EquiposList from './pages/EquiposList.jsx'
 import EquipoForm from './pages/EquipoForm.jsx'
 import EquipoView from './pages/EquipoView.jsx'
@@ -139,6 +140,14 @@ function App() {
           element={
             <RequireAdmin>
               <DepartamentosView />
+            </RequireAdmin>
+          }
+        />
+        <Route
+          path="catalogo/departamentos/:id/historial/:tipo"
+          element={
+            <RequireAdmin>
+              <DepartamentoHistorial />
             </RequireAdmin>
           }
         />

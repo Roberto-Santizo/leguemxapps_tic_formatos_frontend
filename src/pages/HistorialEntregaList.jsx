@@ -1,17 +1,22 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Eye, Plus, Trash2 } from 'lucide-react'
+import { ArrowLeft, Download, Eye, Plus, Trash2 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 import { useListaPaginada } from '../hooks/usePaginacion.js'
+import useFiltrosActas from '../hooks/useFiltrosActas.js'
+import useExportacionCsv from '../hooks/useExportacionCsv.js'
 import Buscador from '../components/Buscador.jsx'
 import ConfirmDialog from '../components/ConfirmDialog.jsx'
 import EstadoVacio from '../components/EstadoVacio.jsx'
+import FiltrosActas from '../components/FiltrosActas.jsx'
+import IsotipoCarga from '../components/IsotipoCarga.jsx'
 import Paginador from '../components/Paginador.jsx'
 import { SkeletonTabla, SkeletonTarjetas } from '../components/Skeleton.jsx'
 import { IndicadorGuardando, mostrarToast } from '../components/Toast.jsx'
 import { FORMATOS } from '../config/formatos.js'
 import { listarDocumentosEntrega, eliminarDocumentoEntrega } from '../services/api.js'
 import { formatearFecha } from '../utils/fecha.js'
+import { nombreEstado, puntoEstado } from '../utils/estadoEntrega.js'
 
 function nombrePlanta(location) {
   if (location === 'Planta Tejar' || location === 'Planta Parramos') return location
@@ -26,7 +31,15 @@ function nombrePlanta(location) {
  *
  * Paginación y búsqueda en la URL (`?page=2&limit=20&q=juan`) vía useListaPaginada:
  * /delivery_documents se pide por página; la búsqueda trae todo una vez y
- * filtra en el cliente.
+ * filtra en el cliente. Filtros de estado, planta y fecha (useFiltrosActas),
+ * también en la URL y también en el cliente.
+ *
+ * `departamento` (opcional, { id, name }): la misma lista, pero solo con las
+ * entregas de ese departamento, para Catálogo → Departamentos → ver →
+ * "Historial de entregas" (DepartamentoHistorial.jsx). En ese modo cambian la
+ * cabecera y el botón de volver, no se ofrece "Registrar entrega", la columna
+ * Departamento sobra y aparece "Exportar CSV" con TODAS las entregas que
+ * cumplen los filtros (no solo la página).
  */
 function filtrarEntrega(d, filtro) {
   return (
@@ -36,12 +49,22 @@ function filtrarEntrega(d, filtro) {
   )
 }
 
-function HistorialEntregaList() {
+function HistorialEntregaList({ departamento } = {}) {
   const { token, isAdmin } = useAuth()
   const navigate = useNavigate()
+  const enDepto = departamento !== undefined
+
+  const { filtroExtra, hayFiltros, propsFiltros, limpiarFiltros } = useFiltrosActas({
+    campoEstado: 'status',
+    campoFecha: 'delivery_date',
+    conPlanta: true,
+    departamento,
+  })
+  const { exportando, exportar } = useExportacionCsv()
 
   const {
     registros: visibles,
+    todosFiltrados,
     total,
     pagina,
     limite,
@@ -58,7 +81,24 @@ function HistorialEntregaList() {
     listar: listarDocumentosEntrega,
     filtrar: filtrarEntrega,
     mensajeError: 'No se pudo obtener la lista de entregas',
+    filtroExtra,
   })
+
+  function exportarCsv() {
+    exportar({
+      nombre: `entregas-${departamento?.name || 'departamento'}`,
+      filas: todosFiltrados,
+      columnas: [
+        { titulo: 'No. entrega', valor: (d) => d.id },
+        { titulo: 'Fecha', valor: (d) => formatearFecha(d.delivery_date) },
+        { titulo: 'Colaborador', valor: (d) => d.employee_name || '' },
+        { titulo: 'Departamento', valor: (d) => d.employee_department || '' },
+        { titulo: 'Planta', valor: (d) => nombrePlanta(d.location) },
+        { titulo: 'Equipos', valor: (d) => (Array.isArray(d.items) ? d.items.length : 0) },
+        { titulo: 'Estado', valor: (d) => nombreEstado(d.status) },
+      ],
+    })
+  }
 
   const [eliminando, setEliminando] = useState(null) // documento o null
   const [borrando, setBorrando] = useState(false)
@@ -113,6 +153,23 @@ function HistorialEntregaList() {
         </button>
       }
     />
+  ) : hayFiltros ? (
+    <EstadoVacio
+      variante="busqueda"
+      titulo="No hay entregas con estos filtros"
+      descripcion="Cambia el estado, la planta o las fechas para ver más resultados."
+      accion={
+        <button type="button" onClick={limpiarFiltros} className={botonSecundario}>
+          Limpiar filtros
+        </button>
+      }
+    />
+  ) : enDepto ? (
+    <EstadoVacio
+      icon={FORMATOS.entrega.icon}
+      titulo={`Todavía no hay entregas de ${departamento?.name || 'este departamento'}`}
+      descripcion="Cuando se registre una entrega a un colaborador de este departamento, aparecerá aquí."
+    />
   ) : (
     <EstadoVacio
       icon={FORMATOS.entrega.icon}
@@ -147,38 +204,60 @@ function HistorialEntregaList() {
     <div className="flex-1 animate-view-in px-4 pt-6 pb-10 md:px-8 md:pt-10">
       <div className="max-w-[1200px] mx-auto flex flex-col gap-stack-lg">
         <Link
-          to="/historial"
+          to={enDepto ? `/catalogo/departamentos/${departamento?.id}/ver` : '/historial'}
           className="inline-flex h-9 items-center gap-2 self-start rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
         >
           <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={1.75} />
-          Historial de Actas
+          {enDepto ? departamento?.name || 'Departamento' : 'Historial de Actas'}
         </Link>
 
         <div className="-mt-1 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end md:mt-0">
           <div className="min-w-0">
             <div className="flex items-center gap-3 font-eyebrow text-eyebrow uppercase text-on-surface-variant">
-              <span aria-hidden="true" className="h-px w-7 bg-outline" />
-              Historial / Entrega
+              <span aria-hidden="true" className="h-px w-7 shrink-0 bg-outline" />
+              <span className="min-w-0 truncate">{enDepto ? `Catálogo / Departamentos / ${departamento?.name || ''}` : 'Historial / Entrega'}</span>
             </div>
-            <h1 className="mt-1.5 font-display-lg text-titulo-movil text-on-surface md:text-display-lg">
-              Entrega de Equipo
+            <h1 className="mt-1.5 break-words font-display-lg text-titulo-movil text-on-surface md:text-display-lg">
+              {enDepto ? `Entregas de ${departamento?.name || ''}` : 'Entrega de Equipo'}
             </h1>
             <p className="mt-1 font-body-lg text-body-lg text-on-surface-variant">
-              Documentos de entrega registrados, con el equipo incluido en cada uno.
+              {enDepto
+                ? 'Documentos de entrega a colaboradores de este departamento.'
+                : 'Documentos de entrega registrados, con el equipo incluido en cada uno.'}
             </p>
           </div>
-          {isAdmin && (
-            <Link
-              to="/actas/entrega/nueva"
-              className="inline-flex h-10 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97]"
+          {enDepto ? (
+            <button
+              type="button"
+              onClick={exportarCsv}
+              disabled={exportando || cargando || Boolean(errorCarga)}
+              aria-busy={exportando}
+              className="inline-flex h-10 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover disabled:opacity-50 active:scale-[0.97]"
             >
-              <Plus className="h-4 w-4" strokeWidth={1.75} />
-              Registrar entrega
-            </Link>
+              {exportando ? <IsotipoCarga className="h-3" /> : <Download className="h-4 w-4" strokeWidth={1.75} />}
+              Exportar CSV
+            </button>
+          ) : (
+            isAdmin && (
+              <Link
+                to="/actas/entrega/nueva"
+                className="inline-flex h-10 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97]"
+              >
+                <Plus className="h-4 w-4" strokeWidth={1.75} />
+                Registrar entrega
+              </Link>
+            )
           )}
         </div>
 
-        <Buscador value={busqueda} onChange={setBusqueda} placeholder="Buscar por colaborador, departamento o planta..." />
+        <div className="flex flex-col gap-stack-sm">
+          <Buscador
+            value={busqueda}
+            onChange={setBusqueda}
+            placeholder={enDepto ? 'Buscar por colaborador o planta...' : 'Buscar por colaborador, departamento o planta...'}
+          />
+          <FiltrosActas {...propsFiltros} />
+        </div>
 
         {/* Tabla + paginador en una sola tarjeta en escritorio (el paginador
             queda de pie de tabla, como en el mockup); en móvil el envoltorio
@@ -187,7 +266,7 @@ function HistorialEntregaList() {
           {/* ---- Escritorio y tablet: tabla, ojo (ver) + basura (eliminar con confirmación) ---- */}
           <div className="hidden md:block overflow-x-auto">
             {cargando ? (
-              <SkeletonTabla columnas={6} filas={5} />
+              <SkeletonTabla columnas={enDepto ? 6 : 7} filas={5} />
             ) : sinContenido ? (
               estado
             ) : (
@@ -200,14 +279,19 @@ function HistorialEntregaList() {
                     <th className="min-w-[160px] h-11 px-4 font-mono text-micro font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap">
                       Colaborador
                     </th>
-                    <th className="min-w-[150px] h-11 px-4 font-mono text-micro font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap">
-                      Departamento
-                    </th>
+                    {!enDepto && (
+                      <th className="min-w-[150px] h-11 px-4 font-mono text-micro font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap">
+                        Departamento
+                      </th>
+                    )}
                     <th className="h-11 px-4 font-mono text-micro font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap">
                       Planta
                     </th>
                     <th className="w-24 h-11 px-4 font-mono text-micro font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap">
                       Equipos
+                    </th>
+                    <th className="w-28 h-11 px-4 font-mono text-micro font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap">
+                      Estado
                     </th>
                     <th className="w-28 h-11 px-4 font-mono text-micro font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap text-right">
                       Acciones
@@ -223,14 +307,22 @@ function HistorialEntregaList() {
                       <td className="px-4 py-4 font-medium text-on-surface break-words">
                         {documento.employee_name || '—'}
                       </td>
-                      <td className="px-4 py-4 text-on-surface-variant break-words">
-                        {documento.employee_department || '—'}
-                      </td>
+                      {!enDepto && (
+                        <td className="px-4 py-4 text-on-surface-variant break-words">
+                          {documento.employee_department || '—'}
+                        </td>
+                      )}
                       <td className="px-4 py-4 text-on-surface-variant">
                         {nombrePlanta(documento.location)}
                       </td>
                       <td className="px-4 py-4 font-mono text-meta text-on-surface-variant tabular-nums whitespace-nowrap">
                         {Array.isArray(documento.items) ? documento.items.length : 0}
+                      </td>
+                      <td className="px-4 py-4">
+                        <span className="inline-flex h-6 items-center gap-1.5 rounded-full border border-outline-variant bg-white px-2.5 text-meta font-medium text-on-surface whitespace-nowrap">
+                          <span aria-hidden="true" className={`h-1.5 w-1.5 rounded-full ${puntoEstado(documento.status)}`} />
+                          {nombreEstado(documento.status)}
+                        </span>
                       </td>
                       <td className="px-4 py-4">
                         <div className="flex items-center justify-end gap-1">
@@ -285,6 +377,10 @@ function HistorialEntregaList() {
                       {nombrePlanta(documento.location)} · {Array.isArray(documento.items) ? documento.items.length : 0} equipo(s)
                     </p>
                   </div>
+                  <span className="inline-flex h-6 shrink-0 items-center gap-1.5 rounded-full border border-outline-variant bg-white px-2.5 text-meta font-medium text-on-surface">
+                    <span aria-hidden="true" className={`h-1.5 w-1.5 rounded-full ${puntoEstado(documento.status)}`} />
+                    {nombreEstado(documento.status)}
+                  </span>
                 </button>
               ))
             )}
@@ -327,6 +423,7 @@ function HistorialEntregaList() {
       />
 
       <IndicadorGuardando activo={borrando} texto="Eliminando" />
+      <IndicadorGuardando activo={exportando} texto="Generando CSV" />
     </div>
   )
 }

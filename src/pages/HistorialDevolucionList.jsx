@@ -1,9 +1,14 @@
 import { Link, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Eye, Plus } from 'lucide-react'
+import { ArrowLeft, Download, Eye, Plus } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 import { useListaPaginada } from '../hooks/usePaginacion.js'
+import useFiltrosActas from '../hooks/useFiltrosActas.js'
+import useExportacionCsv from '../hooks/useExportacionCsv.js'
 import Buscador from '../components/Buscador.jsx'
 import EstadoVacio from '../components/EstadoVacio.jsx'
+import FiltrosActas from '../components/FiltrosActas.jsx'
+import IsotipoCarga from '../components/IsotipoCarga.jsx'
+import { IndicadorGuardando } from '../components/Toast.jsx'
 import Paginador from '../components/Paginador.jsx'
 import { SkeletonTabla, SkeletonTarjetas } from '../components/Skeleton.jsx'
 import { FORMATOS } from '../config/formatos.js'
@@ -19,7 +24,13 @@ import { nombreEstado, puntoEstado } from '../utils/estadoEntrega.js'
  *
  * Paginación y búsqueda en la URL (`?page=2&limit=20&q=juan`) vía useListaPaginada:
  * /return_documents se pide por página; la búsqueda trae todo una vez y
- * filtra en el cliente.
+ * filtra en el cliente. Filtros de estado de la entrega y fecha
+ * (useFiltrosActas), también en la URL y en el cliente.
+ *
+ * `departamento` (opcional, { id, name }): la misma lista, solo con las
+ * devoluciones de ese departamento (DepartamentoHistorial.jsx). Cambian la
+ * cabecera y el botón de volver, sobra la columna Departamento y aparece
+ * "Exportar CSV" con TODAS las devoluciones que cumplen los filtros.
  */
 function filtrarDevolucion(d, filtro) {
   return (
@@ -28,12 +39,21 @@ function filtrarDevolucion(d, filtro) {
   )
 }
 
-function HistorialDevolucionList() {
+function HistorialDevolucionList({ departamento } = {}) {
   const { token, isAdmin } = useAuth()
   const navigate = useNavigate()
+  const enDepto = departamento !== undefined
+
+  const { filtroExtra, hayFiltros, propsFiltros, limpiarFiltros } = useFiltrosActas({
+    campoEstado: 'delivery_document_status',
+    campoFecha: 'return_date',
+    departamento,
+  })
+  const { exportando, exportar } = useExportacionCsv()
 
   const {
     registros: visibles,
+    todosFiltrados,
     total,
     pagina,
     limite,
@@ -50,7 +70,23 @@ function HistorialDevolucionList() {
     listar: listarDocumentosDevolucion,
     filtrar: filtrarDevolucion,
     mensajeError: 'No se pudo obtener la lista de devoluciones',
+    filtroExtra,
   })
+
+  function exportarCsv() {
+    exportar({
+      nombre: `devoluciones-${departamento?.name || 'departamento'}`,
+      filas: todosFiltrados,
+      columnas: [
+        { titulo: 'No. devolución', valor: (d) => d.id },
+        { titulo: 'Fecha', valor: (d) => formatearFecha(d.return_date) },
+        { titulo: 'Colaborador', valor: (d) => d.employee_name || '' },
+        { titulo: 'Departamento', valor: (d) => d.employee_department || '' },
+        { titulo: 'No. entrega', valor: (d) => d.delivery_document_id },
+        { titulo: 'Estado de la entrega', valor: (d) => nombreEstado(d.delivery_document_status) },
+      ],
+    })
+  }
 
   const hayRegistros = visibles.length > 0
   const sinContenido = !cargando && (Boolean(errorCarga) || !hayRegistros)
@@ -80,6 +116,23 @@ function HistorialDevolucionList() {
         </button>
       }
     />
+  ) : hayFiltros ? (
+    <EstadoVacio
+      variante="busqueda"
+      titulo="No hay devoluciones con estos filtros"
+      descripcion="Cambia el estado o las fechas para ver más resultados."
+      accion={
+        <button type="button" onClick={limpiarFiltros} className={botonSecundario}>
+          Limpiar filtros
+        </button>
+      }
+    />
+  ) : enDepto ? (
+    <EstadoVacio
+      icon={FORMATOS.devolucion.icon}
+      titulo={`Todavía no hay devoluciones de ${departamento?.name || 'este departamento'}`}
+      descripcion="Cuando un colaborador de este departamento devuelva equipo, aparecerá aquí."
+    />
   ) : (
     <EstadoVacio
       icon={FORMATOS.devolucion.icon}
@@ -108,38 +161,60 @@ function HistorialDevolucionList() {
     <div className="flex-1 animate-view-in px-4 pt-6 pb-10 md:px-8 md:pt-10">
       <div className="max-w-[1200px] mx-auto flex flex-col gap-stack-lg">
         <Link
-          to="/historial"
+          to={enDepto ? `/catalogo/departamentos/${departamento?.id}/ver` : '/historial'}
           className="inline-flex h-9 items-center gap-2 self-start rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
         >
           <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={1.75} />
-          Historial de Actas
+          {enDepto ? departamento?.name || 'Departamento' : 'Historial de Actas'}
         </Link>
 
         <div className="-mt-1 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end md:mt-0">
           <div className="min-w-0">
             <div className="flex items-center gap-3 font-eyebrow text-eyebrow uppercase text-on-surface-variant">
-              <span aria-hidden="true" className="h-px w-7 bg-outline" />
-              Historial / Devolución
+              <span aria-hidden="true" className="h-px w-7 shrink-0 bg-outline" />
+              <span className="min-w-0 truncate">{enDepto ? `Catálogo / Departamentos / ${departamento?.name || ''}` : 'Historial / Devolución'}</span>
             </div>
-            <h1 className="mt-1.5 font-display-lg text-titulo-movil text-on-surface md:text-display-lg">
-              Devolución de Equipo
+            <h1 className="mt-1.5 break-words font-display-lg text-titulo-movil text-on-surface md:text-display-lg">
+              {enDepto ? `Devoluciones de ${departamento?.name || ''}` : 'Devolución de Equipo'}
             </h1>
             <p className="mt-1 font-body-lg text-body-lg text-on-surface-variant">
-              Devoluciones registradas, parciales o completas, con la entrega de la que provienen.
+              {enDepto
+                ? 'Devoluciones de equipo de colaboradores de este departamento.'
+                : 'Devoluciones registradas, parciales o completas, con la entrega de la que provienen.'}
             </p>
           </div>
-          {isAdmin && (
-            <Link
-              to="/historial/devolucion/nueva"
-              className="inline-flex h-10 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97]"
+          {enDepto ? (
+            <button
+              type="button"
+              onClick={exportarCsv}
+              disabled={exportando || cargando || Boolean(errorCarga)}
+              aria-busy={exportando}
+              className="inline-flex h-10 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover disabled:opacity-50 active:scale-[0.97]"
             >
-              <Plus className="h-4 w-4" strokeWidth={1.75} />
-              Registrar devolución
-            </Link>
+              {exportando ? <IsotipoCarga className="h-3" /> : <Download className="h-4 w-4" strokeWidth={1.75} />}
+              Exportar CSV
+            </button>
+          ) : (
+            isAdmin && (
+              <Link
+                to="/historial/devolucion/nueva"
+                className="inline-flex h-10 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97]"
+              >
+                <Plus className="h-4 w-4" strokeWidth={1.75} />
+                Registrar devolución
+              </Link>
+            )
           )}
         </div>
 
-        <Buscador value={busqueda} onChange={setBusqueda} placeholder="Buscar por colaborador o departamento..." />
+        <div className="flex flex-col gap-stack-sm">
+          <Buscador
+            value={busqueda}
+            onChange={setBusqueda}
+            placeholder={enDepto ? 'Buscar por colaborador...' : 'Buscar por colaborador o departamento...'}
+          />
+          <FiltrosActas {...propsFiltros} />
+        </div>
 
         {/* Tabla + paginador en una sola tarjeta en escritorio (el paginador
             queda de pie de tabla, como en el mockup); en móvil el envoltorio
@@ -148,7 +223,7 @@ function HistorialDevolucionList() {
           {/* ---- Escritorio y tablet: tabla, ojo (ver) ---- */}
           <div className="hidden md:block overflow-x-auto">
             {cargando ? (
-              <SkeletonTabla columnas={6} filas={5} />
+              <SkeletonTabla columnas={enDepto ? 5 : 6} filas={5} />
             ) : sinContenido ? (
               estado
             ) : (
@@ -161,9 +236,11 @@ function HistorialDevolucionList() {
                     <th className="min-w-[160px] h-11 px-4 font-mono text-micro font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap">
                       Colaborador
                     </th>
-                    <th className="min-w-[150px] h-11 px-4 font-mono text-micro font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap">
-                      Departamento
-                    </th>
+                    {!enDepto && (
+                      <th className="min-w-[150px] h-11 px-4 font-mono text-micro font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap">
+                        Departamento
+                      </th>
+                    )}
                     <th className="w-24 h-11 px-4 font-mono text-micro font-medium tracking-[0.1em] uppercase text-on-surface-variant whitespace-nowrap">
                       Entrega
                     </th>
@@ -184,9 +261,11 @@ function HistorialDevolucionList() {
                       <td className="px-4 py-4 font-medium text-on-surface break-words">
                         {documento.employee_name || '—'}
                       </td>
-                      <td className="px-4 py-4 text-on-surface-variant break-words">
-                        {documento.employee_department || '—'}
-                      </td>
+                      {!enDepto && (
+                        <td className="px-4 py-4 text-on-surface-variant break-words">
+                          {documento.employee_department || '—'}
+                        </td>
+                      )}
                       <td className="px-4 py-4 font-mono text-meta text-on-surface-variant tabular-nums whitespace-nowrap">
                         #{documento.delivery_document_id}
                       </td>
@@ -233,7 +312,7 @@ function HistorialDevolucionList() {
                       {documento.employee_name || '—'}
                     </p>
                     <p className="mt-1 font-mono text-micro leading-4 text-on-surface-variant break-words">
-                      {documento.employee_department || '—'} · Entrega #{documento.delivery_document_id}
+                      {enDepto ? `Entrega #${documento.delivery_document_id}` : `${documento.employee_department || '—'} · Entrega #${documento.delivery_document_id}`}
                     </p>
                   </div>
                   <span className="inline-flex h-6 shrink-0 items-center gap-1.5 rounded-full border border-outline-variant bg-white px-2.5 text-meta font-medium text-on-surface">
@@ -260,6 +339,8 @@ function HistorialDevolucionList() {
           )}
         </div>
       </div>
+
+      <IndicadorGuardando activo={exportando} texto="Generando CSV" />
     </div>
   )
 }
