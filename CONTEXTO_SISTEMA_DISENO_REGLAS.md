@@ -487,11 +487,14 @@ nunca escribir un componente de página nuevo para eso.
   jsPDF guardaba casi sin comprimir: ~11 MB por hoja, 22 MB un acta de 2 hojas; ahora
   ~210 KB por hoja) con `compress: true` y alias por captura. Misma escala 2, el texto
   se ve igual de nítido.
-- **Cordillera al pie de cada hoja**: las tres capas de `SierraFondo` en verde bosque con
-  opacidades muy bajas (0.06 / 0.10 / 0.16), como **fondo** de `.lgx-pdf.page` en
-  `pdf/designSystemPdf.js` (no un hijo ni un `::after`: el reparto en hojas no la mueve
-  y html2canvas corría el pseudo-elemento). El SVG lleva `width`/`height` propios (816×96)
-  porque sin tamaño html2canvas lo recortaba.
+- **Cordillera como fondo de cada hoja**: las tres capas de `SierraFondo` en verde bosque
+  muy tenue (opacidades 0.03 / 0.05 / 0.075) ocupando el 40% inferior de la hoja, detrás
+  de firmas, observaciones y pie. Es el **fondo** de `.lgx-pdf.page` en
+  `pdf/designSystemPdf.js` (no un hijo ni un `::after`: el reparto en hojas no la mueve y
+  html2canvas corría el pseudo-elemento). El SVG mide la hoja entera (816×1154, montañas
+  abajo) y se pinta a 100%×100%: con una franja más baja html2canvas dejaba un filete en
+  el borde de la imagen, y sin `width`/`height` propios la recortaba. Se probó a hoja
+  completa y se descartó: ensuciaba campos y tabla y gastaba mucha tinta.
 - **Cresta bajo el título**: el perfil de montaña del logo en línea fina entre dos filetes
   (`.cresta` en `title()`).
 - El membrete, los textos y el orden de las secciones no cambiaron.

@@ -11,17 +11,21 @@
 // ============================================================================
 
 // Cordillera del sistema (mismas tres capas que SierraFondo.jsx, un solo
-// ciclo del perfil) al pie de cada hoja: la identidad "Sierra" también en el
-// papel. Va en verde bosque con opacidades muy bajas -- es un fondo, no una
-// ilustración: al imprimir casi no gasta tinta y nunca compite con el texto.
-// Lleva width/height iguales al tamaño con que se pinta (ancho de la hoja ×
-// 96px): sin tamaño propio, html2canvas la dibujaba recortada.
+// ciclo del perfil) como FONDO de cada hoja: ocupa el 40% inferior (470 de
+// 1154px) y pasa por detrás de firmas, observaciones y pie -- la identidad
+// "Sierra" también en el papel. Verde bosque con opacidades muy bajas para
+// que el texto encima se lea igual y al imprimir gaste poca tinta.
+// El SVG mide la hoja entera (816×1154, montañas en su parte baja) y se pinta
+// a 100% × 100%: así su borde superior coincide con el de la hoja. Con una
+// franja más baja, html2canvas dejaba un filete visible en el borde de la
+// imagen, y sin width/height propios la dibujaba recortada.
 const SIERRA_PAPEL = encodeURIComponent(
-  '<svg xmlns="http://www.w3.org/2000/svg" width="816" height="96" viewBox="0 0 1280 240" preserveAspectRatio="none">' +
-    '<polygon fill="#0b2a1e" fill-opacity="0.06" points="0,240 0,60 170,10 340,50 520,0 700,45 870,4 1050,40 1190,12 1280,60 1280,240"/>' +
-    '<polygon fill="#0b2a1e" fill-opacity="0.10" points="0,240 0,120 210,75 400,110 610,60 830,115 1020,80 1280,120 1280,240"/>' +
-    '<polygon fill="#0b2a1e" fill-opacity="0.16" points="0,240 0,180 250,140 460,175 680,130 900,172 1100,145 1280,180 1280,240"/>' +
-    '</svg>',
+  '<svg xmlns="http://www.w3.org/2000/svg" width="816" height="1154" viewBox="0 0 816 1154" preserveAspectRatio="none">' +
+    '<g transform="translate(0 684) scale(0.6375 1.9583)">' +
+    '<polygon fill="#0b2a1e" fill-opacity="0.03" points="0,240 0,60 170,10 340,50 520,0 700,45 870,4 1050,40 1190,12 1280,60 1280,240"/>' +
+    '<polygon fill="#0b2a1e" fill-opacity="0.05" points="0,240 0,120 210,75 400,110 610,60 830,115 1020,80 1280,120 1280,240"/>' +
+    '<polygon fill="#0b2a1e" fill-opacity="0.075" points="0,240 0,180 250,140 460,175 680,130 900,172 1100,145 1280,180 1280,240"/>' +
+    '</g></svg>',
 )
 
 export const CSS_PAPEL_FISICO = `
@@ -31,13 +35,11 @@ export const CSS_PAPEL_FISICO = `
   width:816px;min-height:1154px;color:#3B3934;
   padding:56px 91px 56px 96px;font-family:Carlito,'Segoe UI',sans-serif;
   -webkit-font-smoothing:antialiased;
-  /* Cordillera al pie como FONDO de la hoja (no un hijo ni un ::after): el
-     reparto en hojas de generatePdfPapelFisico.js no la mueve, siempre queda
-     detrás del texto, y html2canvas la dibuja en su lugar (con un ::after la
-     corría hacia arriba y dejaba una franja lisa al pie). Ocupa el margen
-     inferior y un poco más; si una hoja llena llega hasta abajo, el texto
-     queda sobre un tono apenas visible. */
-  background:url("data:image/svg+xml,${SIERRA_PAPEL}") no-repeat left bottom / 100% 96px, #FCFBF7;
+  /* Cordillera como FONDO de la hoja (no un hijo ni un ::after): el reparto
+     en hojas de generatePdfPapelFisico.js no la mueve, siempre queda detrás
+     del texto, y html2canvas la dibuja en su lugar (un ::after lo corría
+     hacia arriba). */
+  background:url("data:image/svg+xml,${SIERRA_PAPEL}") no-repeat left top / 100% 100%, #FCFBF7;
   background-origin:border-box;
 }
 
