@@ -481,6 +481,21 @@ nunca escribir un componente de página nuevo para eso.
   (una vez, se reutiliza; se olvida al editar un equipo). En la tabla de entrega, un
   renglón devuelto deja el hueco del bote para que los ojos queden en una columna.
 
+## PDF de las actas: identidad Sierra y peso (2026-09-25)
+
+- **Peso**: `utils/generatePdf.js` captura cada hoja en **JPEG al 92%** (antes PNG, que
+  jsPDF guardaba casi sin comprimir: ~11 MB por hoja, 22 MB un acta de 2 hojas; ahora
+  ~210 KB por hoja) con `compress: true` y alias por captura. Misma escala 2, el texto
+  se ve igual de nítido.
+- **Cordillera al pie de cada hoja**: las tres capas de `SierraFondo` en verde bosque con
+  opacidades muy bajas (0.06 / 0.10 / 0.16), como **fondo** de `.lgx-pdf.page` en
+  `pdf/designSystemPdf.js` (no un hijo ni un `::after`: el reparto en hojas no la mueve
+  y html2canvas corría el pseudo-elemento). El SVG lleva `width`/`height` propios (816×96)
+  porque sin tamaño html2canvas lo recortaba.
+- **Cresta bajo el título**: el perfil de montaña del logo en línea fina entre dos filetes
+  (`.cresta` en `title()`).
+- El membrete, los textos y el orden de las secciones no cambiaron.
+
 ## Paginación de listados (2026-09-14)
 
 Las cinco listas con tabla (Marcas y Departamentos vía `CatalogoLista.jsx`, `EquiposList`,

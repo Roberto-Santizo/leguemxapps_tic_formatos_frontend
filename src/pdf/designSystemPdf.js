@@ -10,13 +10,35 @@
 // de la app mientras el nodo está montado (aunque sea fuera de pantalla).
 // ============================================================================
 
+// Cordillera del sistema (mismas tres capas que SierraFondo.jsx, un solo
+// ciclo del perfil) al pie de cada hoja: la identidad "Sierra" también en el
+// papel. Va en verde bosque con opacidades muy bajas -- es un fondo, no una
+// ilustración: al imprimir casi no gasta tinta y nunca compite con el texto.
+// Lleva width/height iguales al tamaño con que se pinta (ancho de la hoja ×
+// 96px): sin tamaño propio, html2canvas la dibujaba recortada.
+const SIERRA_PAPEL = encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" width="816" height="96" viewBox="0 0 1280 240" preserveAspectRatio="none">' +
+    '<polygon fill="#0b2a1e" fill-opacity="0.06" points="0,240 0,60 170,10 340,50 520,0 700,45 870,4 1050,40 1190,12 1280,60 1280,240"/>' +
+    '<polygon fill="#0b2a1e" fill-opacity="0.10" points="0,240 0,120 210,75 400,110 610,60 830,115 1020,80 1280,120 1280,240"/>' +
+    '<polygon fill="#0b2a1e" fill-opacity="0.16" points="0,240 0,180 250,140 460,175 680,130 900,172 1100,145 1280,180 1280,240"/>' +
+    '</svg>',
+)
+
 export const CSS_PAPEL_FISICO = `
 .lgx-pdf, .lgx-pdf *{box-sizing:border-box;margin:0;padding:0}
 .lgx-pdf{background:#FCFBF7}
 .lgx-pdf.page{
-  width:816px;min-height:1154px;background:#FCFBF7;color:#3B3934;
+  width:816px;min-height:1154px;color:#3B3934;
   padding:56px 91px 56px 96px;font-family:Carlito,'Segoe UI',sans-serif;
   -webkit-font-smoothing:antialiased;
+  /* Cordillera al pie como FONDO de la hoja (no un hijo ni un ::after): el
+     reparto en hojas de generatePdfPapelFisico.js no la mueve, siempre queda
+     detrás del texto, y html2canvas la dibuja en su lugar (con un ::after la
+     corría hacia arriba y dejaba una franja lisa al pie). Ocupa el margen
+     inferior y un poco más; si una hoja llena llega hasta abajo, el texto
+     queda sobre un tono apenas visible. */
+  background:url("data:image/svg+xml,${SIERRA_PAPEL}") no-repeat left bottom / 100% 96px, #FCFBF7;
+  background-origin:border-box;
 }
 
 /* MEMBRETE -- sin tocar: misma estructura y texto del maquetado original */
@@ -38,6 +60,11 @@ export const CSS_PAPEL_FISICO = `
 .lgx-pdf .titleblock{text-align:center;margin-top:22px}
 .lgx-pdf .eyebrow{font-size:7.5px;font-weight:700;letter-spacing:.32em;text-transform:uppercase;color:#5A574F}
 .lgx-pdf .titleblock h1{font-family:Georgia,'Bitstream Charter',Charter,serif;font-weight:600;color:#1A1A17;font-size:26px;line-height:1.2;margin-top:7px}
+/* Cresta bajo el título: el perfil de montaña del logo en una línea fina,
+   entre dos filetes -- la firma visual del formato. */
+.lgx-pdf .cresta{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:18px}
+.lgx-pdf .cresta i{width:64px;height:.9px;background:#BEBAAD}
+.lgx-pdf .cresta svg{display:block;width:34px;height:12px}
 
 /* SECCIONES */
 .lgx-pdf .sec{display:flex;align-items:baseline;gap:14px;margin:26px 0 0;height:13px}
@@ -141,7 +168,8 @@ export function mast({ codigo, emision, vigencia, pagina, totalPaginas }) {
 }
 
 export function title(t) {
-  return `<div class="titleblock"><div class="eyebrow">Formato Oficial</div><h1>${esc(t)}</h1></div>`
+  return `<div class="titleblock"><div class="eyebrow">Formato Oficial</div><h1>${esc(t)}</h1>
+  <div class="cresta"><i></i><svg viewBox="0 0 34 12" width="34" height="12"><polyline points="1,11 10,3.5 15,7.5 22,1 33,11" fill="none" stroke="#2C4A2E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/></svg><i></i></div></div>`
 }
 
 export function sec(name) {

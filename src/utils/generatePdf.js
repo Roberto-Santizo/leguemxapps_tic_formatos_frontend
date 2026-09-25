@@ -5,6 +5,9 @@
 // generaba una página extra casi en blanco solo para ese sobrante.
 const MIN_CONTENIDO_MM = 12
 
+const CALIDAD_JPEG = 0.92
+let contadorCapturas = 0
+
 // Agrega la captura de UN elemento al pdf ya abierto, en la posición actual
 // (heightLeft/position en mm), paginando automáticamente si ese elemento por
 // sí solo es más alto que una hoja física. `esPrimero` evita un salto de
@@ -16,7 +19,11 @@ async function agregarElementoAlPdf(pdf, element, html2canvas, esPrimero) {
     backgroundColor: '#ffffff',
   })
 
-  const imgData = canvas.toDataURL('image/png')
+  // JPEG y no PNG: jsPDF guarda el PNG de la captura prácticamente sin
+  // comprimir (~11 MB por hoja a escala 2, un acta de 2 hojas pesaba 22 MB).
+  // En JPEG al 92% el texto se ve igual de nítido a la misma escala y la hoja
+  // pesa unos cientos de KB.
+  const imgData = canvas.toDataURL('image/jpeg', CALIDAD_JPEG)
   const pageWidth = pdf.internal.pageSize.getWidth()
   const pageHeight = pdf.internal.pageSize.getHeight()
   const imgWidth = pageWidth
@@ -26,13 +33,16 @@ async function agregarElementoAlPdf(pdf, element, html2canvas, esPrimero) {
   let position = 0
 
   if (!esPrimero) pdf.addPage()
-  pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
+  // Mismo alias para la misma captura: si un elemento ocupa varias hojas,
+  // la imagen se guarda una sola vez en el PDF y se reutiliza.
+  const alias = `hoja-${++contadorCapturas}`
+  pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight, alias, 'FAST')
   heightLeft -= pageHeight
 
   while (heightLeft > MIN_CONTENIDO_MM) {
     position = heightLeft - imgHeight
     pdf.addPage()
-    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
+    pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight, alias, 'FAST')
     heightLeft -= pageHeight
   }
 }
@@ -62,7 +72,7 @@ export async function generatePdfFromElements(elements, filename = 'documento.pd
     import('html2canvas'),
   ])
 
-  const pdf = new jsPDF('p', 'mm', 'a4')
+  const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4', compress: true })
   for (let indice = 0; indice < elements.length; indice += 1) {
     await agregarElementoAlPdf(pdf, elements[indice], html2canvas, indice === 0)
   }
