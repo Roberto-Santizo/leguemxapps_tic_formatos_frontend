@@ -7,6 +7,12 @@ import ConfirmDialog from '../components/ConfirmDialog.jsx'
 import EstadoVacio from '../components/EstadoVacio.jsx'
 import { SkeletonTabla, SkeletonTarjetas } from '../components/Skeleton.jsx'
 import { listarUsuarios } from '../services/api.js'
+import { guardarVistaLista, leerVistaLista } from '../utils/memoriaListas.js'
+
+// Esta lista no pagina ni lleva la búsqueda en la URL; igual se recuerda (misma
+// memoria que las demás listas) para que ver/editar un usuario y volver no la
+// borre.
+const RUTA = '/usuarios'
 
 function iniciales(nombre) {
   if (!nombre) return '—'
@@ -40,7 +46,10 @@ function Usuarios() {
   const [usuarios, setUsuarios] = useState([])
   const [cargando, setCargando] = useState(true)
   const [errorCarga, setErrorCarga] = useState('')
-  const [busqueda, setBusqueda] = useState('')
+  const [busqueda, setBusqueda] = useState(() => new URLSearchParams(leerVistaLista(RUTA)).get('q') || '')
+  useEffect(() => {
+    guardarVistaLista(RUTA, busqueda ? new URLSearchParams({ q: busqueda }).toString() : '')
+  }, [busqueda])
 
   const [confirmando, setConfirmando] = useState(null) // usuario o null
 

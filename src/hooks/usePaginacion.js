@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useLocation, useSearchParams } from 'react-router-dom'
+import { guardarVistaLista, leerVistaLista } from '../utils/memoriaListas.js'
 
 // Tamaño de página por defecto de todas las listas (paginacion.md §5:
 // mantener `limit` constante mientras se navega; cambiarlo invalida
@@ -31,9 +32,20 @@ function leerEntero(valor, porDefecto) {
  *    cada lista (p. ej. `estado` en Equipos): se guarda en la URL junto a los
  *    demás y vuelve a la página 1 por la misma razón. Valor vacío lo borra,
  *    para no dejar `?estado=` colgando.
+ *  - La vista (búsqueda, filtros y página) se recuerda por ruta
+ *    (utils/memoriaListas.js): si la lista se abre SIN parámetros -- el botón
+ *    "volver" de ver/editar, el menú, la redirección tras guardar -- se
+ *    restaura la última. Mientras tanto `restaurando` es true y la lista no
+ *    pide nada, para no cargar ni mostrar un instante la lista sin filtrar.
+ *    Pulsar el menú de la misma lista ya abierta no la vuelve a montar: sigue
+ *    limpiando la búsqueda como antes.
  */
 export function usePaginaUrl() {
   const [searchParams, setSearchParams] = useSearchParams()
+  const { pathname, search } = useLocation()
+  // Solo se decide al montar: una URL sin parámetros más adelante (el enlace
+  // del menú a esta misma lista) es una orden de limpiar, no de restaurar.
+  const [pendiente, setPendiente] = useState(() => (search ? '' : leerVistaLista(pathname)))
   const pagina = leerEntero(searchParams.get('page'), 1)
   const limite = leerEntero(searchParams.get('limit'), TAMANO_PAGINA)
   const busqueda = searchParams.get('q') || ''
@@ -68,8 +80,18 @@ export function usePaginaUrl() {
   const urlCompleta =
     searchParams.get('page') === String(pagina) && searchParams.get('limit') === String(limite)
   useEffect(() => {
+    if (pendiente) {
+      if (search) setPendiente('')
+      else setSearchParams(new URLSearchParams(pendiente), { replace: true })
+      return
+    }
     if (!urlCompleta) escribir(pagina, { replace: true })
-  }, [urlCompleta, pagina, escribir])
+  }, [pendiente, search, setSearchParams, urlCompleta, pagina, escribir])
+
+  // Cada cambio de búsqueda, filtro o página queda recordado para esta ruta.
+  useEffect(() => {
+    if (!pendiente && urlCompleta) guardarVistaLista(pathname, searchParams.toString())
+  }, [pendiente, urlCompleta, pathname, searchParams])
 
   const irAPagina = useCallback((n, opciones) => escribir(n, opciones), [escribir])
 
@@ -90,7 +112,17 @@ export function usePaginaUrl() {
     [escribir],
   )
 
-  return { pagina, limite, busqueda, irAPagina, setBusqueda, parametro, setParametro, setParametros }
+  return {
+    pagina,
+    limite,
+    busqueda,
+    irAPagina,
+    setBusqueda,
+    parametro,
+    setParametro,
+    setParametros,
+    restaurando: Boolean(pendiente),
+  }
 }
 
 /**
@@ -124,7 +156,7 @@ export function usePaginaUrl() {
  * arreglo completo.
  */
 export function useListaPaginada({ token, listar, filtrar, mensajeError, filtroExtra = null }) {
-  const { pagina, limite, busqueda: busquedaUrl, irAPagina, setBusqueda } = usePaginaUrl()
+  const { pagina, limite, busqueda: busquedaUrl, irAPagina, setBusqueda, restaurando } = usePaginaUrl()
   const filtro = busquedaUrl.trim().toLowerCase()
   const modo = filtro || filtroExtra ? 'todos' : 'pagina'
 
@@ -166,6 +198,7 @@ export function useListaPaginada({ token, listar, filtrar, mensajeError, filtroE
   const [version, setVersion] = useState(0)
 
   useEffect(() => {
+    if (restaurando) return undefined
     if (modo === 'todos' && todos !== null) return undefined
     let vivo = true
     setCargando(true)
@@ -198,7 +231,7 @@ export function useListaPaginada({ token, listar, filtrar, mensajeError, filtroE
     }
     // `todos` entra en las dependencias solo para que, al llenarse, el efecto
     // vuelva a correr y salga por el `return` de arriba (sin repetir la carga).
-  }, [token, listar, modo, pagina, limite, todos, version])
+  }, [token, listar, modo, pagina, limite, todos, version, restaurando])
 
   // Los dos filtros se acumulan: buscar "dell" con el chip "Disponible" puesto
   // deja solo los Dell que además están libres.
@@ -257,7 +290,7 @@ export function useListaPaginada({ token, listar, filtrar, mensajeError, filtroE
     irAPagina,
     // Mientras se corrige una página fuera de rango se sigue mostrando el
     // esqueleto, para que no parpadee un "no hay registros" falso.
-    cargando: cargando || fueraDeRango,
+    cargando: cargando || fueraDeRango || restaurando,
     error,
     recargar,
   }

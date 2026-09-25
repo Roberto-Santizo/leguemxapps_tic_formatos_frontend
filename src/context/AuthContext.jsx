@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { login as loginRequest, EVENTO_SESION_EXPIRADA } from '../services/api.js'
+import { olvidarVistasListas } from '../utils/memoriaListas.js'
 
 const AuthContext = createContext(null)
 const STORAGE_KEY = 'legumex_session'
@@ -57,9 +58,13 @@ export function AuthProvider({ children }) {
     return result.user
   }
 
+  // Cerrar sesión a mano olvida también las búsquedas y filtros recordados de
+  // las listas (otra cuenta en este navegador no los hereda). Al vencer el
+  // token no: quien vuelve a entrar suele ser la misma persona.
   function logout() {
     setSession(null)
     setOmitirConfirmacion({})
+    olvidarVistasListas()
   }
 
   function marcarOmitirConfirmacion(clave) {

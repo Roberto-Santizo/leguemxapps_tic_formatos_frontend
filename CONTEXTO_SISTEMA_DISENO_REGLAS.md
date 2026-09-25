@@ -477,6 +477,14 @@ Sin librería externa: el estado vive en la URL con `useSearchParams` de React R
   `/catalogo/marcas?page=1&limit=20`) (2026-09-17). Cambiar de página agrega entrada al
   historial, escribir en el buscador reemplaza (y vuelve a página 1). Refrescar, "atrás" y
   enlaces directos conservan página, tamaño y búsqueda.
+- **Memoria de la vista** (`utils/memoriaListas.js`, 2026-09-25): cada lista recuerda su
+  última query (búsqueda, filtros y página) por ruta en `sessionStorage`. Si se abre SIN
+  parámetros (botón "volver" de ver/editar, menú, redirección tras guardar) se restaura;
+  mientras tanto `usePaginaUrl` devuelve `restaurando` y `useListaPaginada` no pide nada
+  (no se ve un instante la lista sin filtrar). Pulsar el enlace de la misma lista ya abierta
+  sigue limpiando. Usuarios (sin URL) usa la misma memoria para su buscador. "Cerrar sesión"
+  la borra; el vencimiento del token no. `BuscarDevolucion` queda fuera a propósito: con
+  una sola entrega salta sola a la hoja y restaurar el responsable impediría volver.
 - `hooks/usePaginacion.js`: `TAMANO_PAGINA = 20` es el `limit` por defecto que se escribe
   en la URL; el que se usa realmente es el `limit` de la URL (`limite`), y se mantiene
   constante al navegar (cambiarlo invalida `lastPage`). `usePaginaUrl()` (solo URL) y

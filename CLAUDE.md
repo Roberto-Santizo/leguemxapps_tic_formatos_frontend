@@ -79,6 +79,7 @@ en español; mantener ese idioma.
   `useExportacionCsv`; utilidades `utils/csv.js`, `utils/estadoEntrega.js`.
 - Listas paginadas: `hooks/usePaginacion.js` (`useListaPaginada`, estado `?page=&q=` en la
   URL, búsqueda híbrida porque el backend no filtra por texto) + `components/Paginador.jsx`.
+  `utils/memoriaListas.js` recuerda la última vista de cada lista y la restaura al volver.
   Contrato del backend en `paginacion.md`; `listar*(token, { limit, page })` en `api.js`.
 
 ## Reglas de código (resumen; detalle en CONTEXTO_SISTEMA_DISENO_REGLAS.md)
