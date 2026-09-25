@@ -73,7 +73,8 @@ en español; mantener ese idioma.
   `FirmaPad`, `CaracteristicasEditor`, `EditorFechaLocal`, `Paginador`, `EquipoDetalleModal`,
   `SierraFondo` (cordillera decorativa del fondo y del 404), `IsotipoCarga` (carga en
   botones), `IndicadorGuardando` (pastilla de "guardando", en `Toast.jsx`), `EsperaLogo`
-  (espera a pantalla completa, solo actas y PDF) y `ActaRegistrada` (momento de éxito).
+  (espera a pantalla completa, solo actas y PDF), `ActaRegistrada` (momento de éxito) y `SaludoDelDia`
+  ("Buenos días, {nombre}." una vez al día en Nueva Acta / Historial).
 - Listas paginadas: `hooks/usePaginacion.js` (`useListaPaginada`, estado `?page=&q=` en la
   URL, búsqueda híbrida porque el backend no filtra por texto) + `components/Paginador.jsx`.
   Contrato del backend en `paginacion.md`; `listar*(token, { limit, page })` en `api.js`.

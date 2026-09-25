@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { ChevronRight } from 'lucide-react'
 import { LISTA_FORMATOS } from '../config/formatos.js'
+import SaludoDelDia from '../components/SaludoDelDia.jsx'
 
 // "Devolución de Equipo" ya no se llena desde una hoja en blanco: una
 // devolución siempre nace de una entrega real, así que su tarjeta lleva a
@@ -23,6 +24,7 @@ function NuevaActa() {
     <div className="flex-1 animate-view-in px-4 pt-6 pb-10 md:px-8 md:pt-10">
       <div className="max-w-[1200px] mx-auto flex flex-col gap-stack-lg">
         <div>
+          <SaludoDelDia />
           <div className="flex items-center gap-3 font-eyebrow text-eyebrow uppercase text-on-surface-variant">
             <span aria-hidden="true" className="h-px w-7 bg-outline" />
             Actas / Nueva
