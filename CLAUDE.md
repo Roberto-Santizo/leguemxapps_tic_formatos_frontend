@@ -3,7 +3,7 @@
 Guía para Claude Code al trabajar en este repositorio (frontend de **Legumex TIC Formatos**).
 
 **Leer primero `CONTEXTO_SISTEMA_DISENO_REGLAS.md`**: es el documento de contexto permanente
-(qué es el sistema, estado de los 6 formatos, diseño visual, reglas de trabajo). Este
+(qué es el sistema, estado de los 5 formatos, diseño visual, reglas de trabajo). Este
 CLAUDE.md no lo duplica; solo resume lo operativo y lo que ese archivo no cubre.
 
 ## Comandos
@@ -56,7 +56,7 @@ en español; mantener ese idioma.
   `{ statusCode, message, data }` y lanza `Error` con `.status` y `.errors` (422). Las
   funciones `request`/`authRequest` contra `API_URL` son restos de Auditoría (backend
   Node ya inexistente) -- no tocar sin que se pida.
-- `config/formatos.js`: objeto `FORMATOS` con los 6 formatos físicos; `ORDEN_FORMATOS`
+- `config/formatos.js`: objeto `FORMATOS` con los 5 formatos físicos; `ORDEN_FORMATOS`
   (`['entrega','devolucion']`) decide cuáles se muestran. `pages/FormatoActa.jsx` es el
   motor único que renderiza cualquier formato desde esa config.
 - Flujo de devolución: nace siempre de una entrega existente

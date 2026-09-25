@@ -6,11 +6,11 @@ import useLocalStorageState from '../hooks/useLocalStorageState.js'
 import SaludoDelDia from '../components/SaludoDelDia.jsx'
 
 /**
- * Landing de Historial de Actas: una tarjeta por cada uno de los seis
- * formatos físicos, igual patrón que Catalogo.jsx. Cada una lleva a
+ * Landing de Historial de Actas: una tarjeta por cada formato físico activo
+ * (ORDEN_FORMATOS), igual patrón que Catalogo.jsx. Cada una lleva a
  * /historial/:tipo -- "Entrega de Equipo" y "Devolución de Equipo" ya
- * tienen datos reales; las otras cuatro muestran "Próximamente" hasta que
- * el backend exponga sus endpoints.
+ * tienen datos reales; los formatos inactivos, abiertos por URL, muestran
+ * "Próximamente" hasta que el backend exponga sus endpoints.
  */
 function Historial() {
   // Vigencia editorial de los formatos (Emisión/Vigencia del membrete) --

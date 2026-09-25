@@ -45,7 +45,7 @@ function App() {
         }
       >
         {/* El inicio ya no es un formato concreto: es el selector de los
-            seis formatos físicos del Departamento de TIC. El rol "user"
+            formatos físicos del Departamento de TIC. El rol "user"
             queda restringido a Historial (solo ver + corregir fechas), así
             que no puede crear actas nuevas. */}
         <Route
@@ -57,7 +57,7 @@ function App() {
           }
         />
 
-        {/* Un solo motor de formularios para los seis formatos. */}
+        {/* Un solo motor de formularios para todos los formatos. */}
         <Route
           path="actas/:tipo/nueva"
           element={

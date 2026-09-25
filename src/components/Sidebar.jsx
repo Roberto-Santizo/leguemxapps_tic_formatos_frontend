@@ -112,7 +112,7 @@ function Sidebar({ abierto, onCerrar }) {
         <div className="flex flex-col gap-1">
           {/*
             El primer ítem ya no es un formato concreto: ahora abre el
-            selector de los seis formatos. Se deja SIN "end" para que quede
+            selector de los formatos. Se deja SIN "end" para que quede
             marcado como activo también mientras se llena un formulario en
             /actas/:tipo/nueva -- el usuario nunca pierde la referencia de
             dónde está en la navegación.

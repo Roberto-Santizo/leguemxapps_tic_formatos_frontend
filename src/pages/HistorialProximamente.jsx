@@ -17,7 +17,7 @@ function HistorialProximamente() {
     <EnConstruccion
       icon={formato?.icon ?? ClipboardList}
       titulo={formato ? formato.tituloCorto : 'Historial de Actas'}
-      // Solo el eyebrow: "Historial / Préstamo" (sin el "de Equipo" que
+      // Solo el eyebrow: "Historial / Desecho" (sin el "de Equipo" que
       // repiten casi todos los formatos, igual que "Historial / Entrega").
       migas={formato ? `Historial / ${formato.tituloCorto.replace(/ de Equipo$/, '')}` : 'Historial'}
       descripcion={

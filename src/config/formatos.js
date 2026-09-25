@@ -2,7 +2,6 @@ import {
   Box,
   PackagePlus,
   ShieldCheck,
-  ArrowLeftRight,
   Smartphone,
   Trash2,
 } from 'lucide-react'
@@ -10,7 +9,7 @@ import {
 /**
  * Un objeto por formato físico del Departamento de TIC.
  *
- * Los seis formatos comparten la misma gramática (membrete, datos del
+ * Los cinco formatos comparten la misma gramática (membrete, datos del
  * usuario, tabla de equipo, cláusula fija, observaciones, firmas), así que
  * NO existe una página por formato: existe <FormatoActa /> que lee esta
  * configuración desde la URL. Agregar un séptimo formato = agregar una
@@ -20,13 +19,7 @@ import {
 const ACC_DEVOL = ['Monitor', 'Mouse', 'UPS', 'Laptop', 'Cargador', 'Teclado', 'Impresora', 'Disco Externo', 'Otro', 'Celular']
 const ACC_ENTREGA = ['PC', 'Monitor', 'Mouse', 'Teclado', 'UPS', 'Laptop', 'Cargador', 'Celular', 'Tablet', 'Otros']
 const ACC_RESP = ['Monitor', 'Mouse', 'Teclado', 'UPS', 'Laptop', 'Cargador', 'Impresora', 'Disco Externo', 'Otro']
-const ACC_PRESTAMO = ['PC', 'Monitor', 'Mouse', 'Teclado', 'UPS', 'Laptop', 'Cargador', 'Celular', 'Disco Externo', 'Otros']
 const ACC_DESECHO = ['Monitor', 'Mouse', 'Teclado', 'UPS', 'Laptop', 'Cargador', 'Impresora', 'Disco Duro', 'Celular', 'Otro']
-
-const CL_PRESTAMO = [
-  'El usuario deberá responder por cualquier daño o pérdida parcial o total, será el único responsable en devolver los accesorios en buenas condiciones, el cual pertenece a la empresa AGROINDUSTRIA LEGUMEX S.A, esto para que pueda tener un mejor desarrollo de mis funciones, en el cual me comprometo a resguardarlo y darle un uso estrictamente laboral. Asimismo, hacemos de su conocimiento que no podrán sustituir ningún otro accesorio ni remplazarlos.',
-  'En caso de daño o perjuicio a los equipos se estará notificando a RRHH y ellos tomaran las medidas necesarias.',
-]
 
 const CL_RESP = [
   'El usuario al cual se le hace entrega del equipo de cómputo será responsable del uso del mismo, el cual es exclusivo únicamente para desempeñar labores de trabajo, deberá responder por cualquier daño o pérdida parcial o total, será el único responsable en devolver el equipo de cómputo o accesorios en buenas condiciones o en el estado que se le hace entrega, el cual pertenece a la empresa AGROINDUSTRIA LEGUMEX S.A.',
@@ -155,37 +148,6 @@ export const FORMATOS = {
     textoAccion: 'Finalizar Resguardo',
   },
 
-  prestamo: {
-    id: 'prestamo',
-    icon: ArrowLeftRight,
-    codigo: 'PR-E-EQUIPO',
-    titulo: 'Préstamo de Equipo',
-    tituloCorto: 'Préstamo de Equipo',
-    descripcion: 'Equipo cedido temporalmente a un colaborador, con detalle de artículos y compromiso de devolución.',
-    meta: '1 página · Original IT, copia RRHH',
-    labelFecha: 'Fecha',
-    labelResponsable: 'Responsable',
-    tieneDepartamento: true,
-    tienePuesto: false,
-    tieneRecibiDe: true,
-    tieneModalidad: false,
-    tieneTabla: true,
-    accesorios: ACC_PRESTAMO,
-    colFinal: 'Nuevo/Usado',
-    colFinalTipo: 'select',
-    tituloTablaCorta: 'Equipo / Accesorios',
-    vacioTitulo: 'Todavía no hay artículos en el acta',
-    clausulas: CL_PRESTAMO,
-    tituloClausula: 'Cláusula de Responsabilidad',
-    tituloFirmas: 'Constancia y Firmas',
-    firmas: [
-      { key: 'responsable', titulo: 'Firma Responsable', subtitulo: 'Colaborador que recibe el préstamo' },
-      { key: 'it', titulo: 'Encargado IT', subtitulo: 'Soporte TI' },
-    ],
-    placeholderObs: 'Anote plazo de devolución, estado del equipo u otro detalle relevante...',
-    textoAccion: 'Finalizar Préstamo',
-  },
-
   telefonos: {
     id: 'telefonos',
     icon: Smartphone,
@@ -252,9 +214,9 @@ export const FORMATOS = {
 }
 
 /**
- * Vigencia editorial de los 6 formatos, para control de documentos /
+ * Vigencia editorial de los formatos, para control de documentos /
  * auditoría: cuándo se emitió esta versión y hasta cuándo es válida antes de
- * tener que renovarla. Es la MISMA para los 6 formatos hoy (así ya lo maneja
+ * tener que renovarla. Es la MISMA para todos los formatos hoy (así ya lo maneja
  * el sistema). Todavía no hay endpoint en el backend para esto (ver el TODO
  * en hooks/useLocalStorageState.js), así que por ahora se guarda con ese
  * mismo hook en localStorage -- editable con un clic directamente en el
@@ -286,7 +248,7 @@ export function leerVigenciaDocumentos() {
 // Devolución); Entrega de Teléfonos se quitó de estas dos pantallas porque
 // su botón de guardar no está conectado a ningún endpoint todavía (el
 // formulario se llenaba y se perdía sin ningún aviso). Responsabilidad,
-// Préstamo, Desecho y Teléfonos se quedan definidos en FORMATOS (por si
+// Desecho y Teléfonos se quedan definidos en FORMATOS (por si
 // algún registro histórico del backend todavía los referencia) pero ya no
 // aparecen en ninguna de las dos pantallas.
 export const ORDEN_FORMATOS = ['entrega', 'devolucion']

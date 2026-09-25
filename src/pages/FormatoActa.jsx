@@ -40,7 +40,7 @@ function dataUrlToBlob(dataUrl) {
 /*
   Motor único de actas.
 
-  Los seis formatos físicos comparten estructura, así que en vez de seis
+  Los formatos físicos comparten estructura, así que en vez de una página por
   páginas casi idénticas hay una sola que se configura desde
   config/formatos.js según el :tipo de la URL. Todo el formulario vive en una
   misma pantalla (sin navegador de páginas): la hoja de responsabilidad es de

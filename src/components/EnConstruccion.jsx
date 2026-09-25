@@ -8,7 +8,7 @@
  * página vuelve a construirse contra la API real.
  *
  * `migas` (opcional, solo texto del eyebrow): ruta de la pantalla en formato
- * "Sección / Subsección" (p. ej. "Historial / Préstamo"); se pinta en
+ * "Sección / Subsección" (p. ej. "Historial / Desecho"); se pinta en
  * mayúsculas como en el resto de cabeceras. Sin `migas` no se pinta eyebrow
  * (nunca "LEGUMEX / X": el primer nivel es la sección).
  */

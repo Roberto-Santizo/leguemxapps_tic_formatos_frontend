@@ -15,8 +15,8 @@ function rutaDeFormato(formato) {
 /**
  * Pantalla de inicio del sistema (ruta "/").
  *
- * Antes esta ruta abría directamente la Hoja de Devolución. Ahora los seis
- * formatos físicos existen en el sistema, así que el inicio es el selector:
+ * Antes esta ruta abría directamente la Hoja de Devolución. Ahora los formatos
+ * físicos existen en el sistema, así que el inicio es el selector:
  * una tarjeta por formato.
  */
 function NuevaActa() {

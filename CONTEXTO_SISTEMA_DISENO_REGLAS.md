@@ -11,7 +11,7 @@
 ## Qué es
 
 Sistema interno de Agroindustria Legumex, S.A. para digitalizar las hojas de control del
-Departamento de TIC (entrega y devolución de equipo, responsabilidad, préstamo, desecho,
+Departamento de TIC (entrega y devolución de equipo, responsabilidad, desecho,
 teléfonos) y llevar un catálogo de datos maestros (empleados, equipos, marcas,
 departamentos). Antes esas hojas se llenaban en papel; ahora se llenan en pantalla y, para
 los formatos activos, quedan guardadas en el backend con historial consultable.
@@ -27,9 +27,9 @@ los formatos activos, quedan guardadas en el backend con historial consultable.
   persona -- este frontend solo lo consume; no se inventan endpoints ni comportamientos del
   backend, si no está documentado o confirmado se pregunta antes de asumir.
 
-## Estado de los 6 formatos físicos (importante, cambió)
+## Estado de los 5 formatos físicos (importante, cambió)
 
-Los seis formatos están definidos en `src/config/formatos.js` (objeto `FORMATOS`), pero
+Los cinco formatos están definidos en `src/config/formatos.js` (objeto `FORMATOS`), pero
 **hoy solo 2 están activos y visibles** en las pantallas de "Nueva Acta" e "Historial de
 Actas": **Entrega de Equipo** y **Devolución de Equipo**. Esto lo controla el array
 `ORDEN_FORMATOS` (`['entrega', 'devolucion']`) del mismo archivo -- es la única fuente de
@@ -37,13 +37,18 @@ verdad para qué tarjetas se muestran en ambas pantallas (`NuevaActa.jsx` y
 `Historial.jsx` simplemente mapean sobre `LISTA_FORMATOS`, que se deriva de
 `ORDEN_FORMATOS`).
 
-Los otros cuatro (`responsabilidad`, `prestamo`, `desecho`, `telefonos`) siguen definidos
+Los otros tres (`responsabilidad`, `desecho`, `telefonos`) siguen definidos
 dentro de `FORMATOS` -- por si algún registro histórico del backend todavía los
 referencia -- pero **no aparecen en ninguna pantalla**. En particular, "Entrega de
 Teléfonos" se quitó explícitamente de Nueva Acta e Historial porque su botón "Finalizar
 Entrega" no está conectado a ningún endpoint del backend (el formulario se llenaba y se
-perdía sin aviso). Si en el futuro se conecta un backend real para alguno de estos cuatro,
+perdía sin aviso). Si en el futuro se conecta un backend real para alguno de estos tres,
 el cambio es agregarlo de nuevo a `ORDEN_FORMATOS` -- no hace falta tocar componentes.
+
+"Préstamo de Equipo" **se eliminó** de `FORMATOS` (2026-09-25): ese formato nunca existió
+en la operación; solo estaba definido en la configuración y se abría por URL
+(`/historial/prestamo`, `/actas/prestamo/nueva`). Hoy esas URLs muestran "formato no
+encontrado" como cualquier otro id desconocido.
 
 De los 2 activos:
 - **Entrega de Equipo**: conectado a backend real (`listarDocumentosEntrega`,
@@ -59,11 +64,11 @@ De los 2 activos:
 
 ## Motor único de formularios
 
-Los seis formatos físicos comparten la misma gramática (membrete, datos del usuario, tabla
+Los cinco formatos físicos comparten la misma gramática (membrete, datos del usuario, tabla
 de equipo, cláusula fija, observaciones, firmas), así que **no existe una página por
 formato**: existe `FormatoActa.jsx`, que lee la configuración de `src/config/formatos.js`
-según el `id` de la URL y arma el formulario dinámicamente. Agregar un séptimo formato, o
-reactivar uno de los cuatro inactivos, es agregar/editar una entrada en `formatos.js` --
+según el `id` de la URL y arma el formulario dinámicamente. Agregar un formato nuevo, o
+reactivar uno de los tres inactivos, es agregar/editar una entrada en `formatos.js` --
 nunca escribir un componente de página nuevo para eso.
 
 ## Diseño visual
