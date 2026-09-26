@@ -52,7 +52,8 @@ const CAPAS = [
  * con descanso largo. `slice`: en pantallas angostas se recortan los lados en
  * vez de aplastar los remolinos.
  */
-const RAFAGAS = [
+// También las usa el login (Login.jsx), para que el viento sea el mismo.
+export const RAFAGAS = [
   { d: 'M -20 70 C 180 50, 360 88, 560 68 S 860 44, 980 60 c 36 5 44 -26 18 -33 c -20 -5 -31 14 -16 22', retraso: '0s' },
   { d: 'M 300 128 C 500 110, 680 142, 900 122 S 1180 100, 1290 114 c 30 4 36 -20 14 -26 c -16 -4 -25 11 -12 18', retraso: '2.2s' },
   { d: 'M 120 26 C 300 12, 470 40, 650 28 S 900 10, 1020 22', retraso: '4.6s' },

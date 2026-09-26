@@ -506,6 +506,10 @@ main[data-sheet] > .bg-background {
   position: absolute;
   inset: 0 -48px -12px -48px;
   overflow: hidden;
+  /* Recorta solo a los lados (la deriva mueve un SVG del doble de ancho) y
+     deja libre arriba, para que las cimas no se corten al agrandarse
+     (.lg-zoom). Navegadores sin `clip`: se quedan con `hidden`. */
+  overflow: clip visible;
   transition: translate 900ms var(--lg-salida);
   animation: lgSierraRise 1200ms var(--lg-salida) calc(1500ms - var(--lg-adelanto)) both;
 }
@@ -536,6 +540,36 @@ main[data-sheet] > .bg-background {
   animation-delay: calc(1740ms - var(--lg-adelanto));
 }
 .lg-capa-4 svg { fill-opacity: 1; animation: lgDrift 52s linear infinite; }
+
+/* Acercamiento de profundidad ("Ken Burns"): cada capa crece muy despacio
+   desde su base y vuelve (18s ida, 18s vuelta). La del frente crece más que
+   las de atrás, y esa diferencia da la sensación de acercarse a la sierra.
+   Usa la propiedad `scale` (no `transform`, que ya usan la subida inicial y
+   la deriva). Empieza cuando la cordillera terminó de subir. */
+.lg-zoom {
+  position: absolute;
+  inset: 0;
+  transform-origin: 50% 100%;
+  animation: lgZoom 18s cubic-bezier(0.45, 0, 0.55, 1) 2.6s infinite alternate both;
+}
+.lg-capa-1 .lg-zoom { --lg-zoom: 1.025; }
+.lg-capa-2 .lg-zoom { --lg-zoom: 1.04; }
+.lg-capa-3 .lg-zoom { --lg-zoom: 1.06; }
+.lg-capa-4 .lg-zoom { --lg-zoom: 1.08; }
+@keyframes lgZoom { from { scale: 1; } to { scale: var(--lg-zoom, 1.04); } }
+
+/* Ráfagas de viento sobre la cordillera (mismo trazo que la app, .sierra-viento). */
+.lg-viento {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -38%;
+  width: 100%;
+  height: 72%;
+  overflow: visible;
+  color: var(--lg-bosque);
+  pointer-events: none;
+}
 
 /* Pie mono sobre la capa más oscura */
 .lg-pie {
@@ -846,6 +880,7 @@ main[data-sheet] > .bg-background {
     transition-duration: 1ms !important;
   }
   .lg-raiz svg,
+  .lg-zoom,
   .lg-neblina,
   .lg-nubes { animation: none !important; }
   .lg-isotipo img + img { animation: none !important; clip-path: inset(0 0 0 0); }

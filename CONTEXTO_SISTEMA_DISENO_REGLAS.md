@@ -504,7 +504,15 @@ nunca escribir un componente de página nuevo para eso.
   `.sierra-viento` en `index.css`), escalonadas 0 / 2.2 / 4.6s en un ciclo de 14s.
   `preserveAspectRatio="xMidYMax slice"`: en pantallas angostas se recortan los lados
   en vez de aplastar los remolinos. Van detrás del contenido (solo se ven en los huecos);
-  con movimiento reducido no se ven. El login no las lleva (ya tiene neblina y nubes).
+  con movimiento reducido no se ven.
+- **Login**: lleva las mismas ráfagas (`RAFAGAS` exportado de `SierraFondo.jsx`,
+  `.lg-viento` a la altura de las cimas) y un **acercamiento de profundidad** ("Ken
+  Burns", `.lg-zoom` / `@keyframes lgZoom`): cada capa crece despacio desde su base y
+  vuelve (18s ida y 18s vuelta, desde que termina la subida inicial); la del frente crece
+  más (×1.08) que la de atrás (×1.025) y esa diferencia da profundidad. Va en su propio
+  contenedor y con la propiedad `scale`, para no pisar el paralaje (`translate`) ni la
+  subida/deriva (`transform`). `.lg-capa` recorta solo a los lados (`overflow: clip
+  visible`) para que las cimas no se corten al crecer. Sin movimiento reducido: quieto.
 
 ## Tablet (2026-09-25)
 

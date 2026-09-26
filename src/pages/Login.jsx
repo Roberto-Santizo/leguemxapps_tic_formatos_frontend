@@ -2,6 +2,7 @@ import { useEffect, useId, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Eye, EyeOff, LogIn, TriangleAlert } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
+import { RAFAGAS } from '../components/SierraFondo.jsx'
 
 // El telón verde solo se muestra la primera vez por sesión del navegador;
 // si vuelve al login (cerrar sesión, sesión vencida) entra directo.
@@ -208,10 +209,14 @@ function Login() {
       {/* Destello sobre cada capa (mismo efecto que SierraFondo: franja de
           luz recortada a la silueta, de izquierda a derecha, empezando por la
           capa del frente). fillOpacity="1" en el rect: si no, hereda la
-          opacidad de la capa (0.05 en la del fondo) y no se vería. */}
+          opacidad de la capa (0.05 en la del fondo) y no se vería.
+          .lg-zoom: acercamiento lento de profundidad (index.css); va en su
+          propio contenedor para no pisar el paralaje (translate) ni la subida
+          inicial (transform) de .lg-capa. */}
       <div aria-hidden="true" className="lg-sierra">
         {CAPAS_SIERRA.map((puntos, i) => (
           <div key={i} className={`lg-capa lg-capa-${i + 1}`}>
+            <div className="lg-zoom">
             <svg viewBox="0 0 2560 240" preserveAspectRatio="none">
               <defs>
                 <clipPath id={`${idSierra}-capa-${i}`}>
@@ -237,8 +242,15 @@ function Login() {
                 />
               </g>
             </svg>
+            </div>
           </div>
         ))}
+        {/* Ráfagas de viento: las mismas de la app (SierraFondo). */}
+        <svg className="lg-viento" viewBox="0 0 1440 240" preserveAspectRatio="xMidYMax slice">
+          {RAFAGAS.map((r) => (
+            <path key={r.retraso} className="sierra-viento" d={r.d} pathLength="1" style={{ animationDelay: r.retraso }} />
+          ))}
+        </svg>
       </div>
 
       <div className="lg-pie" aria-hidden="true">
