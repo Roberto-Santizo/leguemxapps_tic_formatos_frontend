@@ -177,6 +177,34 @@ main[data-sheet] > .bg-background {
   }
 }
 
+/* ── Destello de la cordillera (SierraFondo.jsx) ───────────────────────
+   Franja de luz que cruza cada capa de izquierda a derecha (translateX en
+   unidades del viewBox de 2560, desde fuera por la izquierda hasta fuera por
+   la derecha) inclinada con skewX: avanza primero por la base, así el brillo
+   sube desde abajo. El cruce ocupa el 40% de un ciclo de 11s (~1.5s sobre la
+   parte visible de la capa, que mide el doble de la pantalla); el resto
+   descansa fuera de vista.
+   Solo `transform` (lo compone la GPU), sin movimiento reducido: nada. */
+@keyframes sierraBrillo {
+  0% {
+    transform: translateX(0) skewX(24deg);
+  }
+  40%,
+  100% {
+    transform: translateX(3400px) skewX(24deg);
+  }
+}
+.sierra-brillo {
+  transform: translateX(0) skewX(24deg);
+  animation: sierraBrillo 11s cubic-bezier(0.45, 0, 0.25, 1) infinite backwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sierra-brillo {
+    animation: none;
+    visibility: hidden;
+  }
+}
+
 /* ── Cordillera de fondo (SierraFondo.jsx) ─────────────────────────────
    Tres capas con deriva lenta; en móvil quedan quietas (el mockup las
    detiene para no gastar batería ni distraer al hacer scroll). */

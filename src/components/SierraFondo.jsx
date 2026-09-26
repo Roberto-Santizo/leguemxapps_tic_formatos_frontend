@@ -1,3 +1,5 @@
+import { useId } from 'react'
+
 /**
  * Cordillera decorativa del sistema "Sierra": tres capas de montaña en verde
  * bosque, fijas al pie de la pantalla, con deriva horizontal lenta (120s,
@@ -22,6 +24,7 @@ const CAPAS = [
     opacidad: 0.08,
     deriva: 'animate-sierra-lenta',
     retraso: '0ms',
+    brillo: '1.2s', // la de atrás, la última en brillar
   },
   {
     puntos:
@@ -29,6 +32,7 @@ const CAPAS = [
     opacidad: 0.22,
     deriva: 'animate-sierra-media',
     retraso: '120ms',
+    brillo: '0.6s',
   },
   {
     puntos:
@@ -36,13 +40,23 @@ const CAPAS = [
     opacidad: 0.42,
     deriva: 'animate-sierra-rapida',
     retraso: '240ms',
+    brillo: '0s', // la del frente (abajo): el destello empieza aquí
   },
 ]
 
+/*
+ * Destello ("light sweep"): una franja de luz diagonal que cruza cada capa de
+ * izquierda a derecha, recortada a la silueta de esa capa (clipPath), como el
+ * sol reflejándose en la cordillera. Empieza en la capa del frente (abajo) y
+ * sube a la del medio y a la de atrás con un pequeño retraso; pasa en ~1.5s y
+ * descansa el resto del ciclo (index.css, .sierra-brillo). Va dentro del mismo
+ * SVG que deriva, así sigue a su montaña. Sin movimiento reducido: no se ve.
+ */
 function SierraFondo({ className = 'fixed inset-x-0 bottom-0 h-[clamp(240px,42vh,420px)]' }) {
+  const id = useId().replace(/:/g, '')
   return (
     <div aria-hidden="true" data-sierra data-no-print className={`pointer-events-none z-0 text-bosque ${className}`}>
-      {CAPAS.map((capa) => (
+      {CAPAS.map((capa, i) => (
         <div
           key={capa.deriva}
           className="absolute inset-0 overflow-hidden animate-sierra-rise"
@@ -53,7 +67,28 @@ function SierraFondo({ className = 'fixed inset-x-0 bottom-0 h-[clamp(240px,42vh
             preserveAspectRatio="none"
             className={`absolute left-0 top-0 block h-full w-[200%] ${capa.deriva}`}
           >
+            <defs>
+              <clipPath id={`${id}-capa-${i}`}>
+                <polygon points={capa.puntos} />
+              </clipPath>
+              <linearGradient id={`${id}-luz-${i}`} x1="0" x2="1" y1="0" y2="0">
+                <stop offset="0" stopColor="#fff" stopOpacity="0" />
+                <stop offset="0.5" stopColor="#fff" stopOpacity="0.7" />
+                <stop offset="1" stopColor="#fff" stopOpacity="0" />
+              </linearGradient>
+            </defs>
             <polygon points={capa.puntos} fill="currentColor" fillOpacity={capa.opacidad} />
+            <g clipPath={`url(#${id}-capa-${i})`}>
+              <rect
+                className="sierra-brillo"
+                style={{ animationDelay: capa.brillo }}
+                x="-600"
+                y="-40"
+                width="300"
+                height="320"
+                fill={`url(#${id}-luz-${i})`}
+              />
+            </g>
           </svg>
         </div>
       ))}

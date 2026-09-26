@@ -483,6 +483,21 @@ nunca escribir un componente de página nuevo para eso.
   (una vez, se reutiliza; se olvida al editar un equipo). En la tabla de entrega, un
   renglón devuelto deja el hueco del bote para que los ojos queden en una columna.
 
+## Destello de la cordillera (2026-09-26)
+
+- "Light sweep" sobre las montañas del fondo (`SierraFondo.jsx`) y del login
+  (`Login.jsx`): una franja de luz blanca diagonal (`linearGradient`) recortada a la
+  silueta de cada capa (`clipPath` con el mismo polígono), dentro del mismo SVG que
+  deriva, así sigue a su montaña y nunca sale al cielo.
+- Empieza en la capa del frente (abajo) y sube a las de atrás con retraso (0 / 0.6 /
+  1.2s en la app; 0.5s por capa en el login). Inclinada con `skewX(24deg)`: avanza
+  primero por la base. Cruza en ~1.5s visibles y descansa: ciclo de 11s, solo
+  `transform` (`.sierra-brillo` / `@keyframes sierraBrillo` en `index.css`).
+- En el login el `rect` lleva `fillOpacity="1"` (si no, hereda la opacidad de su capa)
+  y la capa del frente, opaca y oscura, usa un brillo más tenue (0.28).
+- Con `prefers-reduced-motion` no se ve. Corre también en teléfono y tablet (es
+  intermitente y solo `transform`; la deriva sí sigue quieta en táctil).
+
 ## Tablet (2026-09-25)
 
 - **Detección por dispositivo, no solo por ancho**: `sm`/`md`/`lg`/`xl`/`2xl` de

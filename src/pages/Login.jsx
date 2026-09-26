@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Eye, EyeOff, LogIn, TriangleAlert } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
@@ -74,6 +74,7 @@ const CAPAS_SIERRA = [
 ]
 
 function Login() {
+  const idSierra = useId().replace(/:/g, '')
   const { login } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
@@ -204,11 +205,37 @@ function Login() {
         <div className="lg-nubes" />
       </div>
 
+      {/* Destello sobre cada capa (mismo efecto que SierraFondo: franja de
+          luz recortada a la silueta, de izquierda a derecha, empezando por la
+          capa del frente). fillOpacity="1" en el rect: si no, hereda la
+          opacidad de la capa (0.05 en la del fondo) y no se vería. */}
       <div aria-hidden="true" className="lg-sierra">
         {CAPAS_SIERRA.map((puntos, i) => (
           <div key={i} className={`lg-capa lg-capa-${i + 1}`}>
             <svg viewBox="0 0 2560 240" preserveAspectRatio="none">
+              <defs>
+                <clipPath id={`${idSierra}-capa-${i}`}>
+                  <polygon points={puntos} />
+                </clipPath>
+                <linearGradient id={`${idSierra}-luz-${i}`} x1="0" x2="1" y1="0" y2="0">
+                  <stop offset="0" stopColor="#fff" stopOpacity="0" />
+                  <stop offset="0.5" stopColor="#fff" stopOpacity={i === CAPAS_SIERRA.length - 1 ? 0.28 : 0.7} />
+                  <stop offset="1" stopColor="#fff" stopOpacity="0" />
+                </linearGradient>
+              </defs>
               <polygon points={puntos} />
+              <g clipPath={`url(#${idSierra}-capa-${i})`}>
+                <rect
+                  className="sierra-brillo"
+                  style={{ animationDelay: `${(CAPAS_SIERRA.length - 1 - i) * 0.5}s` }}
+                  x="-600"
+                  y="-40"
+                  width="300"
+                  height="320"
+                  fill={`url(#${idSierra}-luz-${i})`}
+                  fillOpacity="1"
+                />
+              </g>
             </svg>
           </div>
         ))}
