@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
+import { conOrigen } from '../utils/origenNavegacion.js'
 import { ArrowLeft, History, Pencil } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 import ConfirmDialog from '../components/ConfirmDialog.jsx'
@@ -30,6 +31,7 @@ const tituloSeccion =
 
 function EquipoView() {
   const { id } = useParams()
+  const location = useLocation()
   const { token } = useAuth()
   const navigate = useNavigate()
 
@@ -230,7 +232,7 @@ function EquipoView() {
         mensaje={equipo ? `¿Desea editar "${equipo.name}"?` : ''}
         textoConfirmar="Sí, editar"
         onCancelar={() => setConfirmando(false)}
-        onConfirmar={() => navigate(`/catalogo/equipos/${id}`)}
+        onConfirmar={() => navigate(`/catalogo/equipos/${id}`, { state: conOrigen(location, equipo?.name || 'Equipo') })}
       />
     </div>
   )

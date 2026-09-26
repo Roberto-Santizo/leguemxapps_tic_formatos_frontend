@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
+import { conOrigen } from '../utils/origenNavegacion.js'
 import { ArrowLeft, Pencil } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 import ConfirmDialog from './ConfirmDialog.jsx'
@@ -27,6 +28,7 @@ const panelDato = 'min-w-0 rounded-xl bg-surface-container-high px-4 py-3'
 
 function CatalogoRegistroView({ textos, onObtener, rutaBase, extra }) {
   const { id } = useParams()
+  const location = useLocation()
   const { token } = useAuth()
   const navigate = useNavigate()
 
@@ -136,7 +138,7 @@ function CatalogoRegistroView({ textos, onObtener, rutaBase, extra }) {
         mensaje={registro ? `¿Desea editar "${registro.name}"?` : ''}
         textoConfirmar="Sí, editar"
         onCancelar={() => setConfirmando(false)}
-        onConfirmar={() => navigate(`${rutaBase}/${id}`)}
+        onConfirmar={() => navigate(`${rutaBase}/${id}`, { state: conOrigen(location, registro?.name || textos.titulo) })}
       />
     </div>
   )

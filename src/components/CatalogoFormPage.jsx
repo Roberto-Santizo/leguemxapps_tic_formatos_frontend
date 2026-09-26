@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import { useOrigen } from '../utils/origenNavegacion.js'
 import { ArrowLeft, Save } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 import { IndicadorGuardando, mostrarToast } from './Toast.jsx'
@@ -26,6 +27,9 @@ function CatalogoFormPage({ textos, onObtener, onCrear, onActualizar, rutaBase }
   const { id } = useParams()
   const esEdicion = Boolean(id)
   const navigate = useNavigate()
+  // Editar abierto desde la ficha ("ver") vuelve a la ficha; desde la lista
+  // o en "nuevo", a la lista como siempre.
+  const origen = useOrigen(rutaBase, textos.titulo)
   const { token } = useAuth()
 
   const [name, setName] = useState('')
@@ -67,7 +71,7 @@ function CatalogoFormPage({ textos, onObtener, onCrear, onActualizar, rutaBase }
       // Confirmación explícita: antes el guardado terminaba en un cambio de
       // pantalla silencioso y el usuario no sabía si había pasado algo.
       mostrarToast(esEdicion ? textos.avisoActualizado : textos.avisoCreado)
-      navigate(rutaBase)
+      navigate(origen.ruta, { replace: origen.propio })
     } catch (err) {
       setError(err.message || 'No se pudo guardar')
       setErroresCampo(err.errors || null)
@@ -81,9 +85,9 @@ function CatalogoFormPage({ textos, onObtener, onCrear, onActualizar, rutaBase }
       {/* Mismo carril de 1200px que la lista: ver, editar y la lista de un
           catálogo no cambian de ancho al pasar de una a otra. */}
       <div className="mx-auto flex max-w-[1200px] flex-col gap-stack-lg">
-        <Link to={rutaBase} className={botonVolver}>
+        <Link to={origen.ruta} className={botonVolver}>
           <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={1.75} />
-          {textos.titulo}
+          {origen.etiqueta}
         </Link>
 
         <div className="-mt-1 md:mt-0">
@@ -132,7 +136,7 @@ function CatalogoFormPage({ textos, onObtener, onCrear, onActualizar, rutaBase }
                 Cancelar + primario alineados a la derecha (en móvil el
                 primario queda arriba, a todo lo ancho). */}
             <div className="flex flex-col-reverse gap-3 border-t border-outline-variant pt-5 sm:flex-row sm:justify-end">
-              <Link to={rutaBase} className={botonSecundario}>
+              <Link to={origen.ruta} className={botonSecundario}>
                 Cancelar
               </Link>
               <button type="submit" disabled={guardando || !name.trim()} className={botonPrimario}>

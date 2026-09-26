@@ -84,8 +84,13 @@ en español; mantener ese idioma.
   botones), `IndicadorGuardando` (pastilla de "guardando", en `Toast.jsx`), `EsperaLogo`
   (espera a pantalla completa, solo actas y PDF), `ActaRegistrada` (momento de éxito) y `SaludoDelDia`
   ("Buenos días, {nombre}." una vez al día en Nueva Acta / Historial).
-  Además `FiltrosActas` (barra de filtros de actas). Hooks: `useFiltrosActas`,
-  `useExportacionCsv`; utilidades `utils/csv.js`, `utils/estadoEntrega.js`.
+  Además `FiltrosActas` (barra de filtros de actas) y `AvisoSesion` (cuenta regresiva de
+  la sesión, en `AppLayout`). Hooks: `useFiltrosActas`, `useExportacionCsv`,
+  `useBorradorActa` (borrador automático de entrega/devolución); utilidades `utils/csv.js`,
+  `utils/estadoEntrega.js`, `utils/origenNavegacion.js` (`conOrigen`/`useOrigen`: "volver"
+  regresa por donde se llegó).
+- Fechas corregidas (entrega/devolución y Emisión/Vigencia) viven solo en `localStorage`
+  por limitación del backend; pendiente pasarlas al backend (ver CONTEXTO).
 - Listas paginadas: `hooks/usePaginacion.js` (`useListaPaginada`, estado `?page=&q=` en la
   URL, búsqueda híbrida porque el backend no filtra por texto) + `components/Paginador.jsx`.
   `utils/memoriaListas.js` recuerda la última vista de cada lista y la restaura al volver.

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useLocation, useParams } from 'react-router-dom'
+import { conOrigen, useOrigen } from '../utils/origenNavegacion.js'
 import {
   ArrowLeft,
   Check,
@@ -97,6 +98,8 @@ function FirmaImagen({ url, alt }) {
  */
 function HistorialDevolucionView() {
   const { id } = useParams()
+  const location = useLocation()
+  const origen = useOrigen('/historial/devolucion', 'Devolución de Equipo')
   const { token, isAdmin } = useAuth()
   const hojaRef = useRef(null)
 
@@ -276,11 +279,11 @@ function HistorialDevolucionView() {
         <div className="mx-auto max-w-4xl animate-view-in space-y-stack-lg">
           <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-5">
             <Link
-              to="/historial/devolucion"
-              className="inline-flex h-9 items-center gap-2 rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
+              to={origen.ruta}
+              className="inline-flex h-9 max-w-full items-center gap-2 rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
             >
               <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={1.75} />
-              Devolución de Equipo
+              <span className="min-w-0 truncate">{origen.etiqueta}</span>
             </Link>
             <div className="flex items-center gap-3 font-eyebrow text-eyebrow uppercase text-on-surface-variant">
               <span aria-hidden="true" className="h-px w-7 bg-outline" />
@@ -298,10 +301,10 @@ function HistorialDevolucionView() {
                 descripcion={error || 'Es posible que esta devolución ya no exista.'}
                 accion={
                   <Link
-                    to="/historial/devolucion"
+                    to={origen.ruta}
                     className="inline-flex h-10 items-center justify-center gap-2 rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface shadow-sm transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
                   >
-                    Volver al historial
+                    {origen.propio ? 'Volver' : 'Volver al historial'}
                   </Link>
                 }
               />
@@ -371,6 +374,7 @@ function HistorialDevolucionView() {
                   <Campo label="Entrega de origen" span="col-span-12 sm:col-span-4">
                     <Link
                       to={`/historial/entrega/${documento.delivery_document_id}`}
+                      state={conOrigen(location, `Devolución #${documento.id ?? id}`)}
                       className="flex h-11 items-center justify-between gap-2 rounded-lg border border-outline-variant bg-surface-container-low px-3.5 font-body-md text-body-md text-on-surface transition-colors hover:bg-surface-container-high active:scale-[0.97] transition-transform"
                     >
                       Ver entrega #{documento.delivery_document_id}

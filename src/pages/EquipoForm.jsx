@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import { useOrigen } from '../utils/origenNavegacion.js'
 import { ArrowLeft, Save } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 import { IndicadorGuardando, mostrarToast } from '../components/Toast.jsx'
@@ -135,6 +136,9 @@ function EquipoForm() {
   const { id } = useParams()
   const esEdicion = Boolean(id)
   const navigate = useNavigate()
+  // Editar abierto desde la ficha ("ver") vuelve a la ficha; desde la lista
+  // o en "nuevo", a la lista como siempre.
+  const origen = useOrigen('/catalogo/equipos', 'Equipos')
   const { token } = useAuth()
 
   const [form, setForm] = useState(VACIO)
@@ -268,7 +272,7 @@ function EquipoForm() {
         }
       }
       mostrarToast(esEdicion ? 'Equipo actualizado' : 'Equipo creado')
-      navigate('/catalogo/equipos')
+      navigate(origen.ruta, { replace: origen.propio })
     } catch (err) {
       setError(err.message || 'No se pudo guardar el equipo')
       setErroresCampo(err.errors || null)
@@ -282,9 +286,9 @@ function EquipoForm() {
       {/* Mismo carril de 1200px que la lista del catálogo (ver y editar no
           cambian de ancho respecto a ella). */}
       <div className="mx-auto flex max-w-[1200px] flex-col gap-stack-lg">
-        <Link to="/catalogo/equipos" className={botonVolver}>
+        <Link to={origen.ruta} className={botonVolver}>
           <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={1.75} />
-          Equipos
+          {origen.etiqueta}
         </Link>
 
         <div className="-mt-1 md:mt-0">
@@ -468,7 +472,7 @@ function EquipoForm() {
                 Cancelar + primario alineados a la derecha (en móvil el
                 primario queda arriba, a todo lo ancho). */}
             <div className="flex flex-col-reverse gap-3 border-t border-outline-variant pt-5 sm:flex-row sm:justify-end">
-              <Link to="/catalogo/equipos" className={botonSecundario}>
+              <Link to={origen.ruta} className={botonSecundario}>
                 Cancelar
               </Link>
               <button

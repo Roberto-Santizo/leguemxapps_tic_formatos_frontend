@@ -310,9 +310,9 @@ nunca escribir un componente de página nuevo para eso.
     los 250ms y, una vez visible, dura al menos 600ms. **No se agregan retrasos a las
     operaciones.** Las listas y vistas siguen con esqueletos (`Skeleton`) al cargar.
   - `ActaRegistrada.jsx`: al guardar una entrega o devolución, tarjeta con check que se
-    dibuja, dos anillos y chispas (1,5 s; 0,5 s con movimiento reducido). Después se muestra
-    el Toast y se navega igual que antes (mismo destino); el temporizador se limpia si la
-    página se desmonta. Es el único cambio de tiempo en esos flujos, pedido por el cliente.
+    dibuja, dos anillos y chispas. Desde 2026-09-26 **no se va sola**: queda abierta con
+    "Ver acta" (abre el acta recién creada) y "Cerrar" (va a donde iba antes: historial de
+    entregas / la entrega de origen). Esc = Cerrar. Ver la sección de 2026-09-26.
 - **Movimiento**: `animate-view-in` (entrada de pantalla: 8px, 280 ms, curva estándar),
   `animate-pop-in` (filas/tarjetas nuevas), `animate-drop-in` (desplegables),
   `animate-badge-pop` (contadores), `animate-card-rise` (tarjeta del 404), `shimmer`
@@ -427,6 +427,58 @@ nunca escribir un componente de página nuevo para eso.
 - Botón de "registrar nuevo" en las listas de historial: siempre visible en el encabezado
   de la pantalla (junto al título), no solo cuando la lista está vacía -- patrón consistente
   entre `HistorialEntregaList.jsx` y `HistorialDevolucionList.jsx`.
+
+## Borrador, aviso de sesión, "Ver acta" y volver por origen (2026-09-26)
+
+Salió de la revisión de uso real (pérdida del acta si la sesión vencía al finalizar, textos
+engañosos para RRHH, "volver" que sacaba de la sección). Todo es frontend; el backend no cambió.
+
+- **Borrador automático** (`hooks/useBorradorActa.js`): la hoja de entrega (`FormatoActa`,
+  solo `entrega`) y la de devolución (`RegistrarDevolucion`, una por entrega) guardan lo que
+  se va llenando en `localStorage` (`legumex_borrador:<usuario>:entrega` /
+  `...:devolucion:<id>`), 500 ms después del último cambio y al salir de la hoja.
+  Incluye colaborador, equipos, observaciones, planta y **firmas** (si no hay espacio para
+  las imágenes se guarda lo demás). Al volver a la hoja se recupera solo, con un aviso
+  "Recuperamos el acta que estabas llenando" + "Descartar" (con confirmación) / "Continuar".
+  Se borra al registrar el acta, al pulsar "Cancelar" o con "Descartar". Al recuperar, se
+  sueltan equipos que ya no están disponibles (entregados en otra acta) y, en devolución,
+  equipos que ya no están pendientes. La clave lleva el usuario: otra cuenta no lo hereda.
+- **Aviso de sesión** (`components/AvisoSesion.jsx`, montado en `AppLayout`): `AuthContext`
+  lee el `exp` del JWT (`venceEn`); en los últimos 5 min aparece una tarjeta con cuenta
+  regresiva ("Entendido" la oculta). Al vencer cambia a "Tu sesión venció" + "Iniciar
+  sesión". **No cierra la sesión sola** (quien firma termina su trazo). Si el token no es un
+  JWT con `exp`, no hay aviso. No hay renovación de token: no existe endpoint confirmado.
+  El login muestra "Tu sesión venció…" cuando se llegó ahí por vencimiento (`sesionVencida`).
+  Tras volver a entrar, el login regresa a la ruta donde se estaba y el borrador se recupera.
+- **"Ver acta" / "Cerrar"** en `ActaRegistrada`. El id del acta nueva sale de la respuesta
+  del POST si la trae; si no, se busca la más reciente (entrega: mismo colaborador en
+  `GET /delivery_documents`; devolución: `GET /return_documents?deliveryDocumentId=`). Si
+  no se encuentra, "Ver acta" va a la lista / a la entrega. Navega con `replace`: "atrás"
+  del navegador no vuelve a la hoja ya enviada.
+- **Volver por donde se llegó** (`utils/origenNavegacion.js`): quien abre una pantalla le
+  pasa `state: conOrigen(location, etiqueta)` y la pantalla usa `useOrigen(rutaFija,
+  etiquetaFija)`. Sin state (URL directa, recarga, menú) se queda la ruta fija de siempre.
+  Aplicado a: detalle de entrega (desde historial de departamento, ficha de colaborador,
+  devolución), detalle de devolución, y los formularios de edición (Equipo, Empleado,
+  Usuario, Marcas/Departamentos): editar abierto desde la ficha vuelve a la ficha con
+  "volver", "Cancelar" y al guardar. Registrar devolución reenvía el state de la entrega.
+- **Textos por rol en Historial**: el rol `user` (RRHH) ve "ver, buscar y descargar en PDF"
+  y "Buscar · Ver · PDF" (`descripcionHistorialLectura` en `config/formatos.js`); antes leía
+  "elimina" aunque no puede eliminar. `index.html`: título "Legumex · Formatos TIC".
+
+### Pendiente para cuando el backend lo permita: fechas corregidas en localStorage
+
+La corrección de la **fecha de entrega/devolución** (`EditorFechaLocal` / `useFechaLocal`)
+y de **Emisión/Vigencia** del encabezado se guarda solo en `localStorage` porque el backend
+no acepta cambiarlas (el PUT no recibe la fecha y no hay endpoint de configuración). Fue la
+solución decidida con el cliente y funciona, con estas limitaciones conocidas:
+- solo la ve ese navegador: otra PC u otro usuario ven la fecha original;
+- se pierde si se borran los datos del navegador;
+- un PDF descargado desde otra PC sale con la fecha original.
+
+**A futuro debe pasar al backend**: un campo/endpoint para corregir `delivery_date` /
+`return_date` y otro para la vigencia de los formatos; entonces el frontend deja de usar
+`localStorage` para esto.
 
 ## Historial por departamento, filtros, CSV y edición en la ficha (2026-09-25)
 

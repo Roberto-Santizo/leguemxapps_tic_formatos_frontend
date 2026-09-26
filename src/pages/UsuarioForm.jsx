@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import { useOrigen } from '../utils/origenNavegacion.js'
 import { ArrowLeft, Eye, EyeOff, Save } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 import { IndicadorGuardando, mostrarToast } from '../components/Toast.jsx'
@@ -29,6 +30,9 @@ function UsuarioForm() {
   const { id } = useParams()
   const esEdicion = Boolean(id)
   const navigate = useNavigate()
+  // Editar abierto desde la ficha ("ver") vuelve a la ficha; desde la lista
+  // o en "nuevo", a la lista como siempre.
+  const origen = useOrigen('/usuarios', 'Usuarios')
   const { token } = useAuth()
 
   const [name, setName] = useState('')
@@ -101,7 +105,7 @@ function UsuarioForm() {
         await crearUsuario(token, payload)
       }
       mostrarToast(esEdicion ? 'Usuario actualizado' : 'Usuario creado')
-      navigate('/usuarios')
+      navigate(origen.ruta, { replace: origen.propio })
     } catch (err) {
       setError(err.message || 'No se pudo guardar el usuario')
       setErroresCampo(err.errors || null)
@@ -114,11 +118,11 @@ function UsuarioForm() {
     <div className="animate-view-in flex-1 px-4 pt-6 pb-10 tablet:px-8 tablet:pt-8 md:px-8 md:pt-10">
       <div className="max-w-[600px] ml-[max(0px,calc((100%_-_1200px)/2))] flex flex-col gap-stack-lg">
         <Link
-          to="/usuarios"
+          to={origen.ruta}
           className="inline-flex h-9 items-center gap-2 self-start rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
         >
           <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={1.75} />
-          Usuarios
+          {origen.etiqueta}
         </Link>
 
         <div className="-mt-1 md:mt-0 min-w-0">
@@ -270,7 +274,7 @@ function UsuarioForm() {
                 primario queda arriba, a todo lo ancho). */}
             <div className="flex flex-col-reverse gap-3 border-t border-outline-variant pt-5 sm:flex-row sm:justify-end">
               <Link
-                to="/usuarios"
+                to={origen.ruta}
                 className="inline-flex h-10 items-center justify-center gap-2 rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
               >
                 Cancelar

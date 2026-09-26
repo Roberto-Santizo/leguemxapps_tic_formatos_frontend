@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import { useOrigen } from '../utils/origenNavegacion.js'
 import {
   ArrowLeft,
   Check,
@@ -113,6 +114,9 @@ function HistorialEntregaView() {
   const { id } = useParams()
   const { token, isAdmin } = useAuth()
   const navigate = useNavigate()
+  // Volver por donde se llegó: la lista de entregas, el historial de un
+  // departamento, la ficha de un colaborador o una devolución.
+  const origen = useOrigen('/historial/entrega', 'Entrega de Equipo')
   const hojaRef = useRef(null)
 
   const [documento, setDocumento] = useState(null)
@@ -293,7 +297,7 @@ function HistorialEntregaView() {
     try {
       await eliminarDocumentoEntrega(token, id)
       mostrarToast('Entrega eliminada')
-      navigate('/historial/entrega', { replace: true })
+      navigate(origen.ruta, { replace: true })
     } catch (err) {
       setErrorBorrar(err.message || 'No se pudo eliminar el documento')
       setBorrando(false)
@@ -309,11 +313,11 @@ function HistorialEntregaView() {
         <div className="mx-auto max-w-4xl animate-view-in space-y-stack-lg">
           <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-5">
             <Link
-              to="/historial/entrega"
-              className="inline-flex h-9 items-center gap-2 rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
+              to={origen.ruta}
+              className="inline-flex h-9 max-w-full items-center gap-2 rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
             >
               <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={1.75} />
-              Entrega de Equipo
+              <span className="min-w-0 truncate">{origen.etiqueta}</span>
             </Link>
             <div className="flex items-center gap-3 font-eyebrow text-eyebrow uppercase text-on-surface-variant">
               <span aria-hidden="true" className="h-px w-7 bg-outline" />
@@ -333,10 +337,10 @@ function HistorialEntregaView() {
                 }
                 accion={
                   <Link
-                    to="/historial/entrega"
+                    to={origen.ruta}
                     className="inline-flex h-10 items-center justify-center gap-2 rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface shadow-sm transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
                   >
-                    Volver al historial
+                    {origen.propio ? 'Volver' : 'Volver al historial'}
                   </Link>
                 }
               />
@@ -772,7 +776,7 @@ function HistorialEntregaView() {
             {isAdmin && documento.items?.some((it) => !it.returned) && (
               <button
                 type="button"
-                onClick={() => navigate(`/historial/entrega/${id}/devolucion`)}
+                onClick={() => navigate(`/historial/entrega/${id}/devolucion`, { state: origen.estado })}
                 className="col-span-2 inline-flex h-10 w-full items-center justify-center gap-2 whitespace-nowrap rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface shadow-toast transition duration-fast ease-standard hover:bg-surface-container disabled:opacity-50 active:scale-[0.97] md:w-auto"
               >
                 <Undo2 className="h-4 w-4" strokeWidth={1.75} />

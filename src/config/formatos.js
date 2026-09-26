@@ -45,6 +45,8 @@ export const FORMATOS = {
     tituloCorto: 'Devolución de Equipo',
     descripcion: 'Devolución de equipo y accesorios al finalizar la relación laboral o al renovar el activo.',
     descripcionHistorial: 'Consulta las devoluciones de equipo ya registradas.',
+    // Rol usuario (RRHH): solo consulta y descarga el PDF.
+    descripcionHistorialLectura: 'Consulta las devoluciones de equipo ya registradas y descarga su PDF.',
     meta: '1 ó 2 páginas · Original IT, copia RRHH',
     labelFecha: 'Fecha de Devolución',
     labelResponsable: 'Responsable que Entrega',
@@ -85,6 +87,7 @@ export const FORMATOS = {
     tituloCorto: 'Entrega de Equipo',
     descripcion: 'Entrega de PC, laptop, periféricos o celular a un colaborador, con tabla de artículos y firma de conformidad.',
     descripcionHistorial: 'Consulta, revisa y elimina las entregas de equipo ya registradas.',
+    descripcionHistorialLectura: 'Consulta las entregas de equipo ya registradas y descarga su PDF.',
     meta: '2 páginas · Original IT, copia RRHH',
     labelFecha: 'Fecha de Entrega',
     labelResponsable: 'Responsable que Recibe',

@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, CircleUser, Lock, MessageSquareText, PenLine, Rows3 } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
+import { ArchiveRestore, ArrowLeft, CircleUser, Lock, MessageSquareText, PenLine, Rows3 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 import FirmaPad from '../components/FirmaPad.jsx'
 import EstadoVacio from '../components/EstadoVacio.jsx'
@@ -9,13 +9,37 @@ import ConfirmDialog from '../components/ConfirmDialog.jsx'
 import { mostrarToast } from '../components/Toast.jsx'
 import { SeccionCard, Campo } from './FormatoActa.jsx'
 import { FORMATOS } from '../config/formatos.js'
-import { obtenerDocumentoEntrega, listarDetallesEntrega, crearDocumentoDevolucion } from '../services/api.js'
-import { formatearFecha, constanciaDevolucion } from '../utils/fecha.js'
+import {
+  obtenerDocumentoEntrega,
+  listarDetallesEntrega,
+  crearDocumentoDevolucion,
+  listarDocumentosDevolucion,
+} from '../services/api.js'
+import { formatearFecha, formatearFechaHora, constanciaDevolucion } from '../utils/fecha.js'
+import useBorradorActa, { claveBorrador, leerBorrador } from '../hooks/useBorradorActa.js'
 import { marcarExtravio } from '../utils/extravio.js'
 import IsotipoCarga from '../components/IsotipoCarga.jsx'
 import EsperaLogo from '../components/EsperaLogo.jsx'
 import ActaRegistrada from '../components/ActaRegistrada.jsx'
 const formato = FORMATOS.devolucion
+
+// Id de la devolución recién creada, para "Ver acta". Si la respuesta del
+// POST no lo trae, es la más reciente de esa entrega (GET /return_documents
+// filtrado por entrega, el mismo que ya usa el historial). null si no se
+// encuentra: "Ver acta" lleva entonces a la entrega.
+async function idDevolucionCreada(token, respuesta, entregaId) {
+  const directo = respuesta?.id ?? respuesta?.data?.id ?? respuesta?.return_document?.id
+  if (directo) return directo
+  try {
+    const lista = await listarDocumentosDevolucion(token, { deliveryDocumentId: entregaId })
+    const deEsta = (Array.isArray(lista) ? lista : []).filter(
+      (d) => d.delivery_document_id == null || String(d.delivery_document_id) === String(entregaId),
+    )
+    return deEsta.reduce((max, d) => (Number(d.id) > Number(max ?? 0) ? d.id : max), null)
+  } catch {
+    return null
+  }
+}
 
 function nombrePlanta(location) {
   if (location === 'Planta Tejar' || location === 'Planta Parramos') return location
@@ -60,8 +84,19 @@ const celdaInputClass =
  */
 function RegistrarDevolucion() {
   const { id } = useParams()
-  const { token, omitirConfirmacion, marcarOmitirConfirmacion } = useAuth()
+  const { token, user, omitirConfirmacion, marcarOmitirConfirmacion } = useAuth()
   const navigate = useNavigate()
+  // Se reenvía al volver a la entrega, para que ella siga sabiendo a dónde
+  // regresar (utils/origenNavegacion.js).
+  const { state: estadoEntrega } = useLocation()
+
+  // Borrador automático (hooks/useBorradorActa.js), uno por entrega: equipos
+  // marcados, observaciones y firmas sobreviven a una sesión vencida.
+  const claveDelBorrador = claveBorrador(user?.username, 'devolucion', id)
+  const [borradorInicial] = useState(() => leerBorrador(claveDelBorrador))
+  const inicial = borradorInicial?.datos || {}
+  const [avisoBorrador, setAvisoBorrador] = useState(borradorInicial)
+  const [confirmandoDescartar, setConfirmandoDescartar] = useState(false)
 
   const [entrega, setEntrega] = useState(null)
   const [pendientes, setPendientes] = useState([])
@@ -69,14 +104,14 @@ function RegistrarDevolucion() {
   const [error, setError] = useState('')
 
   const [seleccion, setSeleccion] = useState({}) // { [detailId]: { marcado, observaciones } }
-  const [observacionesGenerales, setObservacionesGenerales] = useState('')
-  const [firmas, setFirmas] = useState({})
+  const [observacionesGenerales, setObservacionesGenerales] = useState(() =>
+    typeof inicial.observacionesGenerales === 'string' ? inicial.observacionesGenerales : '',
+  )
+  const [firmas, setFirmas] = useState(() => (inicial.firmas && typeof inicial.firmas === 'object' ? inicial.firmas : {}))
   const [guardando, setGuardando] = useState(false)
-  // Solo presentación: el momento de "devolución registrada" que se ve un
-  // instante antes de volver a la entrega (mockup Sierra). El guardado no cambia.
-  const [devolucionLista, setDevolucionLista] = useState(false)
-  const temporizadorLista = useRef(null)
-  useEffect(() => () => clearTimeout(temporizadorLista.current), [])
+  // Momento de "devolución registrada": queda abierto con "Ver acta" (la
+  // devolución recién creada) y "Cerrar" (vuelve a la entrega, como antes).
+  const [devolucionLista, setDevolucionLista] = useState(null)
   const [errorGuardar, setErrorGuardar] = useState('')
   // Igual que en FormatoActa.jsx: confirmación antes de guardar, con su
   // propio "no volver a preguntar en esta sesión".
@@ -95,8 +130,23 @@ function RegistrarDevolucion() {
         setEntrega(doc)
         const lista = Array.isArray(detalles) ? detalles : []
         setPendientes(lista)
+        // Lo marcado en el borrador se aplica solo a equipos que siguen
+        // pendientes (uno ya devuelto en otra acta no reaparece).
+        const previa = inicial.seleccion && typeof inicial.seleccion === 'object' ? inicial.seleccion : {}
         setSeleccion(
-          Object.fromEntries(lista.map((it) => [it.id, { marcado: false, observaciones: '', extravio: false }])),
+          Object.fromEntries(
+            lista.map((it) => {
+              const p = previa[it.id] || {}
+              return [
+                it.id,
+                {
+                  marcado: Boolean(p.marcado),
+                  observaciones: typeof p.observaciones === 'string' ? p.observaciones : '',
+                  extravio: Boolean(p.extravio),
+                },
+              ]
+            }),
+          ),
         )
       })
       .catch((err) => vivo && setError(err.message || 'No se pudo cargar la entrega'))
@@ -142,6 +192,33 @@ function RegistrarDevolucion() {
 
   const itemsMarcados = pendientes.filter((it) => seleccion[it.id]?.marcado)
 
+  const borrador = useBorradorActa(
+    claveDelBorrador,
+    { seleccion, observacionesGenerales, firmas },
+    {
+      // Mientras carga, `seleccion` aún está vacía: no se pisa el borrador.
+      activo: !cargando && !error && !devolucionLista,
+      conContenido: Boolean(
+        observacionesGenerales.trim() ||
+          firmas.entrega ||
+          firmas.recibe ||
+          Object.values(seleccion).some((v) => v?.marcado || v?.observaciones?.trim()),
+      ),
+    },
+  )
+
+  function descartarBorrador() {
+    borrador.descartar()
+    setSeleccion((prev) =>
+      Object.fromEntries(Object.keys(prev).map((k) => [k, { marcado: false, observaciones: '', extravio: false }])),
+    )
+    setObservacionesGenerales('')
+    setFirmas({})
+    setErrorGuardar('')
+    setAvisoBorrador(null)
+    setConfirmandoDescartar(false)
+  }
+
   function validarDevolucion() {
     setErrorGuardar('')
     if (itemsMarcados.length === 0) {
@@ -186,13 +263,10 @@ function RegistrarDevolucion() {
           : itemSeleccion?.observaciones?.trim()
         if (obs) formData.append(`items[${indice}][observations]`, obs)
       })
-      await crearDocumentoDevolucion(token, formData)
-      setDevolucionLista(true)
-      const reducido = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
-      temporizadorLista.current = setTimeout(() => {
-        mostrarToast('Devolución registrada')
-        navigate(`/historial/entrega/${id}`)
-      }, reducido ? 500 : 1500)
+      const respuesta = await crearDocumentoDevolucion(token, formData)
+      borrador.limpiar()
+      const nuevoId = await idDevolucionCreada(token, respuesta, id)
+      setDevolucionLista({ id: nuevoId })
     } catch (err) {
       setErrorGuardar(err.message || 'No se pudo guardar la devolución')
     } finally {
@@ -207,6 +281,7 @@ function RegistrarDevolucion() {
           <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-5">
             <Link
               to={`/historial/entrega/${id}`}
+              state={estadoEntrega}
               className="inline-flex h-9 items-center gap-2 rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
             >
               <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={1.75} />
@@ -217,6 +292,45 @@ function RegistrarDevolucion() {
               Historial / Devolución / Registrar
             </div>
           </div>
+
+          {/* Borrador recuperado (sesión vencida, pestaña cerrada, recarga). */}
+          {!cargando && !error && entrega && avisoBorrador && (
+            <div
+              role="status"
+              className="animate-pop-in flex flex-wrap items-center justify-between gap-x-4 gap-y-3 rounded-tarjeta border border-available/30 bg-white px-4 py-3 shadow-tarjeta md:px-5"
+            >
+              <div className="flex min-w-0 items-start gap-3">
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-available-container text-on-available-container">
+                  <ArchiveRestore className="h-4 w-4" strokeWidth={1.75} />
+                </span>
+                <div className="min-w-0">
+                  <p className="font-body-md text-body-md font-semibold text-on-surface">
+                    Recuperamos la devolución que estabas llenando
+                  </p>
+                  <p className="font-label-sm text-label-sm text-on-surface-variant">
+                    Guardada automáticamente
+                    {avisoBorrador.guardadoEn ? ` el ${formatearFechaHora(avisoBorrador.guardadoEn)}` : ''}. Revisa y finaliza cuando esté lista.
+                  </p>
+                </div>
+              </div>
+              <div className="flex w-full items-center gap-2 sm:w-auto">
+                <button
+                  type="button"
+                  onClick={() => setConfirmandoDescartar(true)}
+                  className="inline-flex h-9 flex-1 items-center justify-center rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97] sm:flex-none"
+                >
+                  Descartar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAvisoBorrador(null)}
+                  className="inline-flex h-9 flex-1 items-center justify-center rounded-boton bg-tinta px-3 font-body-md text-body-md font-medium text-white transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97] sm:flex-none"
+                >
+                  Continuar
+                </button>
+              </div>
+            </div>
+          )}
 
           {cargando ? (
             // Misma forma que la hoja que aparece al terminar de cargar (igual
@@ -557,6 +671,9 @@ function RegistrarDevolucion() {
             <div className="flex w-full items-center gap-3 sm:ml-auto sm:w-auto">
               <Link
                 to={`/historial/entrega/${id}`}
+                state={estadoEntrega}
+                // Cancelar es abandonar la hoja a propósito: sin borrador.
+                onClick={() => borrador.limpiar()}
                 className="inline-flex flex-1 sm:flex-none h-10 items-center justify-center rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface shadow-toast transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
               >
                 Cancelar
@@ -595,8 +712,30 @@ function RegistrarDevolucion() {
           codigo="DEV-EQ-01 · REGISTRADA"
           titulo="Devolución registrada"
           detalle={entrega?.employee_name}
+          acciones={{
+            ver: () =>
+              devolucionLista.id
+                ? navigate(`/historial/devolucion/${devolucionLista.id}`, {
+                    replace: true,
+                    state: { origen: { ruta: `/historial/entrega/${id}`, etiqueta: `Entrega #${id}` } },
+                  })
+                : navigate(`/historial/entrega/${id}`, { replace: true, state: estadoEntrega }),
+            cerrar: () => {
+              mostrarToast('Devolución registrada')
+              navigate(`/historial/entrega/${id}`, { replace: true, state: estadoEntrega })
+            },
+          }}
         />
       )}
+
+      <ConfirmDialog
+        abierto={confirmandoDescartar}
+        titulo="Descartar borrador"
+        mensaje="Se quitarán los equipos marcados, las observaciones y las firmas. ¿Deseas empezar de cero?"
+        textoConfirmar="Sí, descartar"
+        onCancelar={() => setConfirmandoDescartar(false)}
+        onConfirmar={descartarBorrador}
+      />
     </div>
   )
 }

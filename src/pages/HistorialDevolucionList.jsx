@@ -1,4 +1,5 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { conOrigen } from '../utils/origenNavegacion.js'
 import { ArrowLeft, Download, Eye, Plus } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 import { useListaPaginada } from '../hooks/usePaginacion.js'
@@ -43,6 +44,7 @@ function HistorialDevolucionList({ departamento } = {}) {
   const { token, isAdmin } = useAuth()
   const navigate = useNavigate()
   const enDepto = departamento !== undefined
+  const location = useLocation()
 
   const { filtroExtra, hayFiltros, propsFiltros, limpiarFiltros } = useFiltrosActas({
     campoEstado: 'delivery_document_status',
@@ -154,7 +156,12 @@ function HistorialDevolucionList({ departamento } = {}) {
     'inline-flex h-9 w-9 items-center justify-center rounded-boton text-on-surface-variant transition duration-fast ease-standard hover:bg-surface-container hover:text-on-surface active:scale-[0.90]'
 
   function verDocumento(documento) {
-    navigate(`/historial/devolucion/${documento.id}`)
+    // Con la lista como origen: al abrirla desde el historial de un
+    // departamento, "volver" regresa a ese departamento (antes caía siempre en
+    // Historial / Devolución).
+    navigate(`/historial/devolucion/${documento.id}`, {
+      state: conOrigen(location, enDepto ? `Devoluciones de ${departamento?.name || 'departamento'}` : 'Devolución de Equipo'),
+    })
   }
 
   return (

@@ -5,6 +5,7 @@ import MobileHeader from '../components/MobileHeader.jsx'
 import Footer from '../components/Footer.jsx'
 import SierraFondo from '../components/SierraFondo.jsx'
 import { Toaster } from '../components/Toast.jsx'
+import AvisoSesion from '../components/AvisoSesion.jsx'
 
 /*
   "Body" del sistema Sierra: papel cálido de fondo, la cordillera fija al pie
@@ -50,6 +51,8 @@ function AppLayout() {
       {/* Avisos de "ya quedó / no se pudo". Se monta una sola vez aquí; las
           pantallas solo llaman mostrarToast() -- no hay provider ni props. */}
       <Toaster />
+      {/* Cuenta regresiva de los últimos 5 minutos de la sesión. */}
+      <AvisoSesion />
     </div>
   )
 }

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import { useOrigen } from '../utils/origenNavegacion.js'
 import { ArrowLeft, Save } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 import { IndicadorGuardando, mostrarToast } from '../components/Toast.jsx'
@@ -30,6 +31,9 @@ function EmpleadoForm() {
   const { id } = useParams()
   const esEdicion = Boolean(id)
   const navigate = useNavigate()
+  // Editar abierto desde la ficha ("ver") vuelve a la ficha; desde la lista
+  // o en "nuevo", a la lista como siempre.
+  const origen = useOrigen('/catalogo/empleados', 'Empleados')
   const { token } = useAuth()
 
   const [code, setCode] = useState('')
@@ -85,7 +89,7 @@ function EmpleadoForm() {
         await crearEmpleado(token, payload)
       }
       mostrarToast(esEdicion ? 'Empleado actualizado' : 'Empleado creado')
-      navigate('/catalogo/empleados')
+      navigate(origen.ruta, { replace: origen.propio })
     } catch (err) {
       setError(err.message || 'No se pudo guardar el empleado')
       // Igual que EquipoForm: si la API señala el campo (p. ej. código
@@ -101,9 +105,9 @@ function EmpleadoForm() {
       {/* Mismo carril de 1200px que la lista del catálogo (ver y editar no
           cambian de ancho respecto a ella). */}
       <div className="mx-auto flex max-w-[1200px] flex-col gap-stack-lg">
-        <Link to="/catalogo/empleados" className={botonVolver}>
+        <Link to={origen.ruta} className={botonVolver}>
           <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={1.75} />
-          Empleados
+          {origen.etiqueta}
         </Link>
 
         <div className="-mt-1 md:mt-0">
@@ -191,7 +195,7 @@ function EmpleadoForm() {
                 Cancelar + primario alineados a la derecha (en móvil el
                 primario queda arriba, a todo lo ancho). */}
             <div className="flex flex-col-reverse gap-3 border-t border-outline-variant pt-5 sm:flex-row sm:justify-end">
-              <Link to="/catalogo/empleados" className={botonSecundario}>
+              <Link to={origen.ruta} className={botonSecundario}>
                 Cancelar
               </Link>
               <button type="submit" disabled={guardando || !completo} className={botonPrimario}>

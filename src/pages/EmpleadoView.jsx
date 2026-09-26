@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
+import { conOrigen } from '../utils/origenNavegacion.js'
 import { ArrowLeft, HardDrive, Pencil } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 import ConfirmDialog from '../components/ConfirmDialog.jsx'
@@ -39,6 +40,7 @@ function nombrePlanta(location) {
  */
 function EmpleadoView() {
   const { id } = useParams()
+  const location = useLocation()
   const { token } = useAuth()
   const navigate = useNavigate()
 
@@ -205,6 +207,7 @@ function EmpleadoView() {
                       </div>
                       <Link
                         to={`/historial/entrega/${eq.delivery_document_id}`}
+                        state={conOrigen(location, empleado.name || 'Colaborador')}
                         className="inline-flex h-7 shrink-0 items-center rounded-full border border-outline-variant bg-white px-2.5 text-meta font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.95]"
                       >
                         Ver entrega #{eq.delivery_document_id}
@@ -224,7 +227,7 @@ function EmpleadoView() {
         mensaje={empleado ? `¿Desea editar a "${empleado.name}"?` : ''}
         textoConfirmar="Sí, editar"
         onCancelar={() => setConfirmando(false)}
-        onConfirmar={() => navigate(`/catalogo/empleados/${id}`)}
+        onConfirmar={() => navigate(`/catalogo/empleados/${id}`, { state: conOrigen(location, empleado?.name || 'Empleado') })}
       />
     </div>
   )

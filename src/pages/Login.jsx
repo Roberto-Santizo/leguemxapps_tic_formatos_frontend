@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Eye, EyeOff, LogIn, TriangleAlert } from 'lucide-react'
+import { Clock3, Eye, EyeOff, LogIn, TriangleAlert } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 import { RAFAGAS } from '../components/SierraFondo.jsx'
 
@@ -76,7 +76,7 @@ const CAPAS_SIERRA = [
 
 function Login() {
   const idSierra = useId().replace(/:/g, '')
-  const { login } = useAuth()
+  const { login, sesionVencida } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -305,6 +305,19 @@ function Login() {
             <h1 className="lg-titulo">Iniciar sesión</h1>
           )}
           <p className="lg-saludo">{saludoSegunHora()}. Ingresa con tu usuario del sistema.</p>
+
+          {/* Llegó aquí porque la sesión venció (no cerró a mano). */}
+          {sesionVencida && !error && (
+            <div role="status" className="lg-aviso">
+              <Clock3 size={18} strokeWidth={1.75} aria-hidden="true" />
+              <div>
+                <div className="lg-aviso-titulo">Tu sesión venció</div>
+                <div className="lg-aviso-texto">
+                  Vuelve a entrar para seguir. Si estabas llenando un acta, se guardó como borrador y la recuperas al abrirla.
+                </div>
+              </div>
+            </div>
+          )}
 
           {error && (
             <div role="alert" className="lg-aviso">

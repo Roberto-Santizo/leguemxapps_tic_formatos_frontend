@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import {
   ArrowLeft,
+  ArchiveRestore,
   CircleUser,
   Laptop,
   Lock,
@@ -22,7 +23,15 @@ import EnConstruccion from '../components/EnConstruccion.jsx'
 import ConfirmDialog from '../components/ConfirmDialog.jsx'
 import EquipoDetalleModal from '../components/EquipoDetalleModal.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
-import { listarEmpleados, listarDepartamentos, listarEquiposDisponibles, crearDocumentoEntrega } from '../services/api.js'
+import {
+  listarEmpleados,
+  listarDepartamentos,
+  listarEquiposDisponibles,
+  crearDocumentoEntrega,
+  listarDocumentosEntrega,
+} from '../services/api.js'
+import useBorradorActa, { claveBorrador, leerBorrador } from '../hooks/useBorradorActa.js'
+import { formatearFechaHora } from '../utils/fecha.js'
 import IsotipoCarga from '../components/IsotipoCarga.jsx'
 import EsperaLogo from '../components/EsperaLogo.jsx'
 import ActaRegistrada from '../components/ActaRegistrada.jsx'
@@ -48,6 +57,26 @@ function dataUrlToBlob(dataUrl) {
 */
 
 const PLANTAS = ['Tejar', 'Parramos']
+
+// Id de la entrega recién creada, para "Ver acta". Si la respuesta del POST
+// no lo trae, se busca la entrega más reciente del mismo colaborador en la
+// lista (GET /delivery_documents, el mismo endpoint del historial). null si
+// tampoco se encuentra: "Ver acta" lleva entonces a la lista.
+async function idEntregaCreada(token, respuesta, empleado) {
+  const directo = respuesta?.id ?? respuesta?.data?.id ?? respuesta?.delivery_document?.id
+  if (directo) return directo
+  try {
+    const lista = await listarDocumentosEntrega(token)
+    const suyas = (Array.isArray(lista) ? lista : []).filter(
+      (d) =>
+        (d.employee_id != null && String(d.employee_id) === String(empleado?.id)) ||
+        (empleado?.name && d.employee_name === empleado.name),
+    )
+    return suyas.reduce((max, d) => (Number(d.id) > Number(max ?? 0) ? d.id : max), null)
+  } catch {
+    return null
+  }
+}
 
 // --- Piezas de UI compartidas -------------------------------------------
 
@@ -119,9 +148,18 @@ function FormatoActa() {
   const navigate = useNavigate()
   const formato = getFormato(tipo)
   const esEntrega = formato?.id === 'entrega'
-  const { token, omitirConfirmacion, marcarOmitirConfirmacion } = useAuth()
+  const { token, user, omitirConfirmacion, marcarOmitirConfirmacion } = useAuth()
 
   const hojaRef = useRef(null)
+
+  // Borrador automático (hooks/useBorradorActa.js): si la sesión vence, se
+  // cierra la pestaña o se recarga, al volver a esta hoja se recupera lo que
+  // se llevaba -- colaborador, equipos, observaciones y firmas.
+  const claveDelBorrador = esEntrega ? claveBorrador(user?.username, 'entrega') : null
+  const [borradorInicial] = useState(() => leerBorrador(claveDelBorrador))
+  const inicial = borradorInicial?.datos || {}
+  const [avisoBorrador, setAvisoBorrador] = useState(borradorInicial)
+  const [confirmandoDescartar, setConfirmandoDescartar] = useState(false)
 
   const [planta, setPlanta] = useLocalStorageState('acta:planta', 'Tejar')
   const [tipoEquipo, setTipoEquipo] = useState('Laptop')
@@ -131,8 +169,10 @@ function FormatoActa() {
   const [tipoEntregaTel, setTipoEntregaTel] = useState('Nueva')
   const [accesoriosSeleccionados, setAccesoriosSeleccionados] = useState([])
   const [filas, setFilas] = useState([])
-  const [observaciones, setObservaciones] = useState('')
-  const [firmas, setFirmas] = useState({})
+  const [observaciones, setObservaciones] = useState(() =>
+    typeof inicial.observaciones === 'string' ? inicial.observaciones : '',
+  )
+  const [firmas, setFirmas] = useState(() => (inicial.firmas && typeof inicial.firmas === 'object' ? inicial.firmas : {}))
 
   // --- Solo "Entrega de Equipo": es el único formato conectado hoy a la API
   // real (POST /delivery_documents). El resto sigue como borrador visual. ---
@@ -147,14 +187,52 @@ function FormatoActa() {
   const [departamentos, setDepartamentos] = useState([])
   const [equipos, setEquipos] = useState([])
   const [cargandoCatalogos, setCargandoCatalogos] = useState(esEntrega)
-  const [empleadoId, setEmpleadoId] = useState('')
-  const [filasEntrega, setFilasEntrega] = useState([])
+  const [empleadoId, setEmpleadoId] = useState(() => (inicial.empleadoId ? String(inicial.empleadoId) : ''))
+  const [filasEntrega, setFilasEntrega] = useState(() =>
+    Array.isArray(inicial.filasEntrega)
+      ? inicial.filasEntrega
+          .filter((f) => f && f.id)
+          .map((f) => ({ id: f.id, equipmentId: f.equipmentId || '', observaciones: f.observaciones || '' }))
+      : [],
+  )
   const [guardando, setGuardando] = useState(false)
-  // Solo presentación: el momento de "entrega registrada" que se ve un
-  // instante antes de ir al historial (mockup Sierra). El guardado no cambia.
-  const [entregaLista, setEntregaLista] = useState(false)
-  const temporizadorLista = useRef(null)
-  useEffect(() => () => clearTimeout(temporizadorLista.current), [])
+  // Momento de "entrega registrada": queda abierto con "Ver acta" (la entrega
+  // recién creada) y "Cerrar" (al historial de entregas, como antes).
+  // null = aún no se registra; { id } = registrada (id null si no se supo).
+  const [entregaLista, setEntregaLista] = useState(null)
+
+  const borrador = useBorradorActa(
+    claveDelBorrador,
+    { planta, empleadoId, filasEntrega, observaciones, firmas },
+    {
+      activo: !entregaLista,
+      conContenido: Boolean(
+        empleadoId ||
+          observaciones.trim() ||
+          firmas.responsable ||
+          firmas.it ||
+          filasEntrega.some((f) => f.equipmentId || f.observaciones.trim()),
+      ),
+    },
+  )
+
+  // La planta vive en su propio localStorage (acta:planta); la del borrador
+  // manda solo al recuperarlo.
+  useEffect(() => {
+    if (inicial.planta && PLANTAS.includes(inicial.planta)) setPlanta(inicial.planta)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  function descartarBorrador() {
+    borrador.descartar()
+    setEmpleadoId('')
+    setFilasEntrega([])
+    setObservaciones('')
+    setFirmas({})
+    setErrorGuardar('')
+    setAvisoBorrador(null)
+    setConfirmandoDescartar(false)
+  }
   const [errorGuardar, setErrorGuardar] = useState('')
   // Pide confirmación antes de guardar la entrega -- antes "Finalizar
   // Entrega" guardaba directo con un solo clic, sin preguntar. Trae su
@@ -174,9 +252,19 @@ function FormatoActa() {
     Promise.all([listarEmpleados(token), listarDepartamentos(token), listarEquiposDisponibles(token)])
       .then(([emp, dep, eq]) => {
         if (!vivo) return
-        setEmpleados(Array.isArray(emp) ? emp : [])
+        const listaEmp = Array.isArray(emp) ? emp : []
+        const listaEq = Array.isArray(eq) ? eq : []
+        setEmpleados(listaEmp)
         setDepartamentos(Array.isArray(dep) ? dep : [])
-        setEquipos(Array.isArray(eq) ? eq : [])
+        setEquipos(listaEq)
+        // Un borrador recuperado puede traer un equipo que mientras tanto se
+        // entregó en otra acta (ya no está disponible) o un colaborador que
+        // ya no existe: se sueltan para que no viajen ocultos al guardar.
+        const disponibles = new Set(listaEq.map((e) => String(e.id)))
+        setFilasEntrega((filas) =>
+          filas.map((f) => (f.equipmentId && !disponibles.has(String(f.equipmentId)) ? { ...f, equipmentId: '' } : f)),
+        )
+        setEmpleadoId((idActual) => (idActual && !listaEmp.some((e) => String(e.id) === String(idActual)) ? '' : idActual))
       })
       .catch((err) => vivo && setErrorGuardar(err.message || 'No se pudieron cargar los catálogos'))
       .finally(() => vivo && setCargandoCatalogos(false))
@@ -287,15 +375,11 @@ function FormatoActa() {
           formData.append(`items[${indice}][observations]`, fila.observaciones.trim())
         }
       })
-      await crearDocumentoEntrega(token, formData)
-      // Confirmación explícita: antes el único indicio de que se había
-      // guardado era el cambio de pantalla.
-      setEntregaLista(true)
-      const reducido = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
-      temporizadorLista.current = setTimeout(() => {
-        mostrarToast('Entrega registrada')
-        navigate('/historial/entrega')
-      }, reducido ? 500 : 1500)
+      const respuesta = await crearDocumentoEntrega(token, formData)
+      // Ya registrada: el borrador sobra.
+      borrador.limpiar()
+      const nuevoId = await idEntregaCreada(token, respuesta, empleadoSeleccionado)
+      setEntregaLista({ id: nuevoId })
     } catch (err) {
       setErrorGuardar(err.message || 'No se pudo guardar la entrega')
     } finally {
@@ -393,6 +477,45 @@ function FormatoActa() {
               Actas / Nueva / {formato.tituloCorto.replace(/ de Equipo$/, '')}
             </div>
           </div>
+
+          {/* Borrador recuperado (sesión vencida, pestaña cerrada, recarga). */}
+          {esEntrega && avisoBorrador && (
+            <div
+              role="status"
+              className="animate-pop-in flex flex-wrap items-center justify-between gap-x-4 gap-y-3 rounded-tarjeta border border-available/30 bg-white px-4 py-3 shadow-tarjeta md:px-5"
+            >
+              <div className="flex min-w-0 items-start gap-3">
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-available-container text-on-available-container">
+                  <ArchiveRestore className="h-4 w-4" strokeWidth={1.75} />
+                </span>
+                <div className="min-w-0">
+                  <p className="font-body-md text-body-md font-semibold text-on-surface">
+                    Recuperamos el acta que estabas llenando
+                  </p>
+                  <p className="font-label-sm text-label-sm text-on-surface-variant">
+                    Guardada automáticamente
+                    {avisoBorrador.guardadoEn ? ` el ${formatearFechaHora(avisoBorrador.guardadoEn)}` : ''}. Revisa y finaliza cuando esté lista.
+                  </p>
+                </div>
+              </div>
+              <div className="flex w-full items-center gap-2 sm:w-auto">
+                <button
+                  type="button"
+                  onClick={() => setConfirmandoDescartar(true)}
+                  className="inline-flex h-9 flex-1 items-center justify-center rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97] sm:flex-none"
+                >
+                  Descartar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAvisoBorrador(null)}
+                  className="inline-flex h-9 flex-1 items-center justify-center rounded-boton bg-tinta px-3 font-body-md text-body-md font-medium text-white transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97] sm:flex-none"
+                >
+                  Continuar
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Membrete */}
           <div className="overflow-hidden rounded-tarjeta bg-white shadow-tarjeta">
@@ -1220,7 +1343,11 @@ function FormatoActa() {
           <div className="flex w-full items-center gap-3 sm:ml-auto sm:w-auto">
             <button
               type="button"
-              onClick={() => navigate('/')}
+              onClick={() => {
+                // Cancelar es abandonar la hoja a propósito: sin borrador.
+                borrador.limpiar()
+                navigate('/')
+              }}
               disabled={esEntrega && guardando}
               className="inline-flex flex-1 sm:flex-none h-10 items-center justify-center rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface shadow-toast transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97] disabled:opacity-50"
             >
@@ -1276,6 +1403,27 @@ function FormatoActa() {
           codigo={`${formato.codigo || 'E-EQUIPO'} · REGISTRADA`}
           titulo="Entrega registrada"
           detalle={empleadoSeleccionado?.name}
+          acciones={{
+            ver: () =>
+              navigate(entregaLista.id ? `/historial/entrega/${entregaLista.id}` : '/historial/entrega', {
+                replace: true,
+              }),
+            cerrar: () => {
+              mostrarToast('Entrega registrada')
+              navigate('/historial/entrega', { replace: true })
+            },
+          }}
+        />
+      )}
+
+      {esEntrega && (
+        <ConfirmDialog
+          abierto={confirmandoDescartar}
+          titulo="Descartar borrador"
+          mensaje="Se vaciará la hoja: colaborador, equipos, observaciones y firmas. ¿Deseas empezar de cero?"
+          textoConfirmar="Sí, descartar"
+          onCancelar={() => setConfirmandoDescartar(false)}
+          onConfirmar={descartarBorrador}
         />
       )}
     </div>

@@ -4,6 +4,7 @@ import { LISTA_FORMATOS, VIGENCIA_DOCUMENTOS, VIGENCIA_DOCUMENTOS_STORAGE_KEY } 
 import InlineEditableText from '../components/InlineEditableText.jsx'
 import useLocalStorageState from '../hooks/useLocalStorageState.js'
 import SaludoDelDia from '../components/SaludoDelDia.jsx'
+import { useAuth } from '../context/AuthContext.jsx'
 
 /**
  * Landing de Historial de Actas: una tarjeta por cada formato físico activo
@@ -13,6 +14,9 @@ import SaludoDelDia from '../components/SaludoDelDia.jsx'
  * "Próximamente" hasta que el backend exponga sus endpoints.
  */
 function Historial() {
+  // El rol usuario (RRHH) no elimina ni edita: los textos de esta pantalla
+  // le dicen solo lo que sí puede hacer (ver, buscar y descargar el PDF).
+  const { isAdmin } = useAuth()
   // Vigencia editorial de los formatos (Emisión/Vigencia del membrete) --
   // el mismo campo que ya es editable en FormatoActa.jsx (Nueva Acta), pero
   // el rol "user" no entra ahí (queda restringido a Historial), así que
@@ -35,7 +39,9 @@ function Historial() {
             Historial de Actas
           </h1>
           <p className="mt-1 font-body-lg text-body-lg text-on-surface-variant">
-            Elige el formato para ver, buscar y eliminar las actas ya registradas.
+            {isAdmin
+              ? 'Elige el formato para ver, buscar y eliminar las actas ya registradas.'
+              : 'Elige el formato para ver, buscar y descargar en PDF las actas ya registradas.'}
           </p>
         </div>
 
@@ -97,17 +103,19 @@ function Historial() {
                     {formato.tituloCorto}
                   </h2>
                   <p className="font-body-md text-body-md text-on-surface-variant">
-                    {formato.descripcionHistorial || formato.descripcion}
+                    {(!isAdmin && formato.descripcionHistorialLectura) || formato.descripcionHistorial || formato.descripcion}
                   </p>
                 </div>
 
                 <div className="mt-auto flex items-center justify-between gap-2 border-t border-outline-variant pt-3">
                   <span className="font-mono text-micro uppercase tracking-[0.1em] text-on-surface-variant">
-                    {formato.id === 'entrega'
-                      ? 'Buscar · Ver · Eliminar'
-                      : formato.id === 'devolucion'
-                        ? 'Buscar · Ver'
-                        : 'Próximamente'}
+                    {formato.id !== 'entrega' && formato.id !== 'devolucion'
+                      ? 'Próximamente'
+                      : !isAdmin
+                        ? 'Buscar · Ver · PDF'
+                        : formato.id === 'entrega'
+                          ? 'Buscar · Ver · Eliminar'
+                          : 'Buscar · Ver'}
                   </span>
                   <ChevronRight
                     className="h-4 w-4 shrink-0 text-outline transition duration-base ease-standard group-hover:translate-x-0.5 group-hover:text-on-surface"

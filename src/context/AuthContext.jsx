@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { login as loginRequest, EVENTO_SESION_EXPIRADA } from '../services/api.js'
 import { olvidarVistasListas } from '../utils/memoriaListas.js'
 
@@ -14,8 +14,28 @@ function readStoredSession() {
   }
 }
 
+// Vencimiento del token (ms) leído de su `exp`, para avisar antes de que
+// caduque (components/AvisoSesion.jsx). Solo se lee: no se valida ni se
+// renueva (no hay endpoint de renovación confirmado). null si el token no es
+// un JWT legible o no trae `exp` -- entonces simplemente no hay aviso.
+function venceDelToken(token) {
+  try {
+    const parte = String(token).split('.')[1]
+    if (!parte) return null
+    const base64 = parte.replace(/-/g, '+').replace(/_/g, '/')
+    const datos = JSON.parse(atob(base64.padEnd(Math.ceil(base64.length / 4) * 4, '=')))
+    return Number.isFinite(datos?.exp) ? datos.exp * 1000 : null
+  } catch {
+    return null
+  }
+}
+
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(readStoredSession)
+  // La sesión se cerró porque venció (no a mano): el login lo explica y
+  // recuerda que el acta a medio llenar quedó como borrador.
+  const [sesionVencida, setSesionVencida] = useState(false)
+  const venceEn = useMemo(() => (session?.token ? venceDelToken(session.token) : null), [session])
 
   // Banderas de "no volver a preguntar en esta sesión" para confirmaciones
   // puntuales (hoy: Finalizar Entrega / Finalizar Devolución). A propósito
@@ -44,6 +64,7 @@ export function AuthProvider({ children }) {
     function alExpirar() {
       setSession(null)
       setOmitirConfirmacion({})
+      setSesionVencida(true)
     }
     window.addEventListener(EVENTO_SESION_EXPIRADA, alExpirar)
     return () => window.removeEventListener(EVENTO_SESION_EXPIRADA, alExpirar)
@@ -51,6 +72,7 @@ export function AuthProvider({ children }) {
 
   async function login(username, password) {
     const result = await loginRequest(username, password)
+    setSesionVencida(false)
     // result = { token, user: { username, name, role } }
     // (el backend Laravel no regresa id -- usa "username" como identificador
     // del lado del cliente si se necesita)
@@ -62,6 +84,7 @@ export function AuthProvider({ children }) {
   // las listas (otra cuenta en este navegador no los hereda). Al vencer el
   // token no: quien vuelve a entrar suele ser la misma persona.
   function logout() {
+    setSesionVencida(false)
     setSession(null)
     setOmitirConfirmacion({})
     olvidarVistasListas()
@@ -78,6 +101,8 @@ export function AuthProvider({ children }) {
     logout,
     isAuthenticated: Boolean(session?.token),
     isAdmin: session?.user?.role === 'admin',
+    venceEn,
+    sesionVencida,
     omitirConfirmacion,
     marcarOmitirConfirmacion,
   }
