@@ -205,6 +205,46 @@ main[data-sheet] > .bg-background {
   }
 }
 
+/* ── Ráfagas de viento (SierraFondo.jsx) ───────────────────────────────
+   Cada ráfaga es un segmento de 0.28 de su curva (pathLength=1) que entra por
+   la izquierda y sale por el remolino: el dashoffset va de 0.28 (aún fuera) a
+   -1 (ya pasó). Aparece y se desvanece en el 38% de un ciclo de 14s. */
+@keyframes sierraViento {
+  0% {
+    stroke-dashoffset: 0.28;
+    opacity: 0;
+  }
+  6% {
+    opacity: 1;
+  }
+  30% {
+    opacity: 1;
+  }
+  38%,
+  100% {
+    stroke-dashoffset: -1;
+    opacity: 0;
+  }
+}
+.sierra-viento {
+  fill: none;
+  stroke: currentColor;
+  stroke-opacity: 0.28;
+  stroke-width: 1.6px;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+  stroke-dasharray: 0.28 2;
+  stroke-dashoffset: 0.28;
+  opacity: 0;
+  animation: sierraViento 14s cubic-bezier(0.4, 0, 0.2, 1) infinite backwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sierra-viento {
+    animation: none;
+    visibility: hidden;
+  }
+}
+
 /* ── Cordillera de fondo (SierraFondo.jsx) ─────────────────────────────
    Tres capas con deriva lenta; en móvil quedan quietas (el mockup las
    detiene para no gastar batería ni distraer al hacer scroll). */

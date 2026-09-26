@@ -483,7 +483,7 @@ nunca escribir un componente de página nuevo para eso.
   (una vez, se reutiliza; se olvida al editar un equipo). En la tabla de entrega, un
   renglón devuelto deja el hueco del bote para que los ojos queden en una columna.
 
-## Destello de la cordillera (2026-09-26)
+## Destello y viento en la cordillera (2026-09-26)
 
 - "Light sweep" sobre las montañas del fondo (`SierraFondo.jsx`) y del login
   (`Login.jsx`): una franja de luz blanca diagonal (`linearGradient`) recortada a la
@@ -497,6 +497,14 @@ nunca escribir un componente de página nuevo para eso.
   y la capa del frente, opaca y oscura, usa un brillo más tenue (0.28).
 - Con `prefers-reduced-motion` no se ve. Corre también en teléfono y tablet (es
   intermitente y solo `transform`; la deriva sí sigue quieta en táctil).
+- **Ráfagas de viento** (mismo `SierraFondo.jsx`, `RAFAGAS`): tres trazos finos y curvos
+  en el verde de la marca muy tenue (`stroke-opacity` 0.28) que cruzan el cielo de la
+  cordillera de izquierda a derecha y cierran en un remolino. Cada una es un segmento
+  corto que recorre su curva (`pathLength=1` + `stroke-dasharray`/`dashoffset`,
+  `.sierra-viento` en `index.css`), escalonadas 0 / 2.2 / 4.6s en un ciclo de 14s.
+  `preserveAspectRatio="xMidYMax slice"`: en pantallas angostas se recortan los lados
+  en vez de aplastar los remolinos. Van detrás del contenido (solo se ven en los huecos);
+  con movimiento reducido no se ven. El login no las lleva (ya tiene neblina y nubes).
 
 ## Tablet (2026-09-25)
 
