@@ -21,8 +21,25 @@ npm run build            # genera dist/
 ```
 
 En producción corre en Docker (nginx); las variables se leen al arrancar el contenedor.
-Detalle en `CLAUDE.md`, y el contexto completo (diseño, reglas, decisiones) en
-`CONTEXTO_SISTEMA_DISENO_REGLAS.md`.
+Cada push a `main` publica la imagen en Docker Hub, así que se trabaja en ramas y se sube
+a `main` solo con aprobación.
+
+## Documentación
+
+| Archivo | Para qué |
+|---|---|
+| `CONTEXTO_SISTEMA_DISENO_REGLAS.md` | Qué es el sistema, roles, diseño, decisiones y reglas de trabajo. Empezar aquí. |
+| `CLAUDE.md` | Resumen operativo: comandos, entorno, Docker, arquitectura de `src/`. |
+| `GUIA_DESPLIEGUE_UBUNTU.md` | Checklist de servidor para que las firmas se vean en pantalla y en el PDF. |
+| `paginacion.md` | Copia del contrato de paginación y filtros del backend. |
+
+## Estado (2026-09-27)
+
+La rama `tablet` está lista y pendiente de subir a `main`. Trae el diseño para tablet, las
+animaciones de la cordillera, el borrador automático, el aviso de sesión, "Ver acta" /
+"Nueva entrega", el "volver" por origen, el filtro por departamento y el historial del
+colaborador. Probada con navegador automatizado en escritorio, teléfono y tablet; falta
+probarla en tablets reales con el backend real.
 
 ## Pendientes y mejoras sugeridas
 

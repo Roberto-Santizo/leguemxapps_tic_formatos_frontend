@@ -1,75 +1,84 @@
-# Guía rápida: que las firmas funcionen al lanzar en Ubuntu
+# Guía rápida: que las firmas se vean al lanzar en Ubuntu
 
-Esta guía es solo para el momento en que el backend (Laravel) se instale en
-el servidor Ubuntu real. El frontend **no necesita ningún cambio de código**
-para esto -- ya está preparado para apuntar a cualquier dirección del
-backend. Lo que hay que revisar es la configuración del propio servidor.
+Checklist de servidor para que las firmas se vean **en pantalla y en el PDF**. El frontend
+no necesita cambios de código: todo es configuración. Actualizada al 2026-09-27 contra el
+backend (`legumexapps_tic_formatos_backend`) y el Docker de este repositorio.
 
-## 1. El backend (Laravel, en el servidor Ubuntu)
+## 1. Backend (Laravel)
 
-**a) `APP_URL` en el `.env` del backend debe apuntar a la IP/dominio real
-del servidor**, no a `localhost` ni a `127.0.0.1`. Ejemplo:
+**a) Dónde se guardan las firmas: `SIGNATURES_DISK`.** El backend guarda cada firma en el
+disco `signatures` (`config/filesystems.php`), que **por defecto es S3**. Elegir uno:
+
+- **S3** (`SIGNATURES_DISK=s3`, el valor por defecto): llenar en el `.env` del backend
+  `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_DEFAULT_REGION` y `AWS_BUCKET` (o
+  `AWS_URL`). La API devuelve un link completo `https://<bucket>.s3.<región>.amazonaws.com/...`.
+  El servidor del frontend debe poder **salir a internet** hacia `*.amazonaws.com` (ver 2c).
+- **Disco local** (`SIGNATURES_DISK=public`): las firmas quedan en
+  `storage/app/public/signatures/` y se sirven por `/storage/`. Hace falta:
+
+  ```bash
+  php artisan storage:link      # una sola vez por servidor
+  ```
+
+  Sin este paso las firmas se guardan pero no se ven (ícono de imagen rota).
+
+**b) `APP_URL`** en el `.env` del backend debe ser la IP o dominio real del servidor, no
+`localhost` (con disco local, Laravel arma el link de cada firma con ese valor):
 
 ```
 APP_URL=http://192.168.10.209:8000
 ```
 
-Laravel usa este valor para armar el link de cada firma
-(`Storage::disk('public')->url(...)`). Si queda en `localhost`, el link que
-regresa la API funcionará en el propio servidor pero no en ninguna otra
-computadora de la red.
-
-**b) Crear el enlace público de archivos (una sola vez, por servidor):**
-
-```bash
-php artisan storage:link
-```
-
-Este comando crea un acceso directo (symlink) de `public/storage` hacia
-`storage/app/public`, que es donde Laravel guarda las firmas
-(`storage/app/public/signatures/...`). **Sin este paso, las firmas se
-guardan bien pero no se pueden ver** -- el navegador muestra el ícono de
-imagen rota. Es el error más común al mover un proyecto Laravel a un
-servidor nuevo.
-
-**c) Permisos de la carpeta `storage/`:**
-
-El usuario con el que corre el servidor web (`www-data` en la instalación
-típica de Ubuntu + Nginx/Apache) necesita permiso de escritura sobre
-`storage/` y `bootstrap/cache/`:
+**c) Permisos** de `storage/` y `bootstrap/cache/` para el usuario del servidor web
+(`www-data` en Ubuntu + Nginx/Apache). Si fallan, las firmas dan error 400/500 al subirse:
 
 ```bash
 sudo chown -R www-data:www-data storage bootstrap/cache
 sudo chmod -R 775 storage bootstrap/cache
 ```
 
-Si esto queda mal, las firmas fallan al subirse con un error 400 o 500 (no
-es un problema del frontend).
+**d) Sesión (opcional, recomendado).** El token dura `JWT_TTL` minutos (60 por defecto).
+Para jornadas largas de registro se puede subir en el `.env` (por ejemplo `JWT_TTL=480`).
+El frontend avisa 5 minutos antes de que venza y guarda el acta a medio llenar.
 
-## 2. El frontend (este proyecto)
+## 2. Frontend (este repositorio)
 
-Solo hay que apuntar el `.env` de este proyecto a la IP real del backend en
-Ubuntu, igual que ya se hace hoy con `192.168.10.209`:
+**a) En Docker** (producción; la imagen la publica GitHub Actions en Docker Hub como
+`<usuario>/legumex-tic-formatos-frontend` en cada push a `main`). Las variables se leen **al
+arrancar el contenedor**, no al compilar:
 
+```bash
+docker run -d -p 80:80 \
+  -e VITE_AUTH_API_URL=http://192.168.10.209:8000/api \
+  <usuario>/legumex-tic-formatos-frontend:latest
 ```
-VITE_AUTH_API_URL=http://<ip-del-servidor-ubuntu>:8000/api
-```
 
-`VITE_STORAGE_URL` se puede dejar sin definir -- por defecto el sistema
-arma el link de cada firma quitándole el `/api` final a
-`VITE_AUTH_API_URL`, que es exactamente como Laravel lo sirve. Solo hay que
-definir `VITE_STORAGE_URL` a mano si en el futuro los archivos se sirven
-desde un dominio o puerto distinto al de la API.
+`VITE_STORAGE_URL` se puede omitir: se deriva quitándole `/api` a `VITE_AUTH_API_URL`.
+Solo se define si los archivos se sirven desde otro dominio o puerto.
 
-## 3. Cómo comprobar que quedó bien (checklist de 2 minutos)
+**b) En desarrollo** (`npm run dev`): las mismas variables en el `.env` del proyecto.
 
-1. Crear una Entrega de prueba con firma desde el sistema.
-2. Abrir el detalle de esa entrega en Historial -- la firma debe verse ahí.
-3. Si NO se ve: copiar la ruta que trae la respuesta de la API (ej.
-   `signatures/9f8a1c2e....png`), pegarla después de `/storage/` en la URL
-   del servidor y abrirla directo en el navegador:
-   `http://<ip-del-servidor-ubuntu>:8000/storage/signatures/9f8a1c2e....png`
-   - Si tampoco carga así → falta el paso 1b (`storage:link`) o el 1c
-     (permisos).
-   - Si carga así pero no dentro del sistema → revisar que `APP_URL` (1a) o
-     `VITE_AUTH_API_URL` (2) tengan la IP correcta, no `localhost`.
+**c) Por qué importa la red del contenedor.** El PDF no puede "fotografiar" una imagen de
+otro servidor, así que el propio nginx del frontend trae las firmas: `/storage/...` al
+backend y `/firma-remota/...` a S3 (solo `*.amazonaws.com`, solo GET). Por eso:
+
+- `VITE_AUTH_API_URL` debe ser una dirección que **el contenedor** alcance (con
+  `localhost` apuntaría al propio contenedor, no al backend);
+- con S3, el contenedor debe tener salida a internet.
+
+Si no se puede, la firma se ve en pantalla pero el PDF sale con "Sin firma" y un aviso.
+
+## 3. Cómo comprobar que quedó bien (2 minutos)
+
+1. Crear una entrega de prueba con firma.
+2. Abrir su detalle en Historial: la firma debe verse.
+3. Pulsar "Descargar PDF": la firma debe salir en el PDF.
+4. Si falla el paso 2:
+   - con **S3**: abrir en el navegador el link de la firma que trae la API; si no carga,
+     revisar credenciales y permisos del bucket (1a);
+   - con **disco local**: abrir `http://<servidor>:8000/storage/signatures/<archivo>.png`;
+     si no carga, falta `storage:link` o permisos (1a, 1c); si carga ahí pero no en el
+     sistema, revisar `APP_URL` (1b) y `VITE_AUTH_API_URL` (2a).
+5. Si falla solo el paso 3 (PDF): el contenedor del frontend no alcanza el backend o S3
+   (2c). La consola del navegador muestra `[PDF] No se pudo incluir la firma` con cada
+   dirección probada y su respuesta.

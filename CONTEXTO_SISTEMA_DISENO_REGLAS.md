@@ -1,31 +1,60 @@
 # LEGUMEX — Qué es el sistema, cómo está diseñado, y reglas de trabajo
 
 > Este archivo es el punto de partida para cualquier agente de IA (o persona) que retome
-> este proyecto sin haber estado en las sesiones anteriores. No es una lista de mejoras
-> pendientes ni de tareas por hacer -- es una descripción de cómo está el sistema HOY y de
-> las reglas de trabajo que se han pedido explícitamente. Es el único archivo `.md` de
-> contexto del proyecto (los demás que existían -- `LEEME.md`, `AUDITORIA_VISUAL_UX.md`,
-> `PLAN_PENDIENTE_PROXIMA_SESION.md`, `RESUMEN_IMPLEMENTADO.md` -- se unificaron aquí y se
-> borraron el 2026-09-08 por estar desactualizados o ya resueltos).
+> este proyecto sin haber estado en las sesiones anteriores. Describe cómo está el sistema
+> HOY y las reglas de trabajo que se han pedido explícitamente. Actualizado al 2026-09-27.
+>
+> Documentos del repositorio y para qué sirve cada uno:
+> - `README.md`: presentación corta, cómo levantarlo y **pendientes / mejoras sugeridas**
+>   (frontend y backend) más las decisiones tomadas que no son errores.
+> - `CONTEXTO_SISTEMA_DISENO_REGLAS.md` (este): sistema, diseño, decisiones y reglas.
+> - `CLAUDE.md`: resumen operativo para Claude Code (comandos, entorno, arquitectura).
+> - `GUIA_DESPLIEGUE_UBUNTU.md`: checklist de servidor para que las firmas se vean en
+>   producción.
+> - `paginacion.md`: copia del contrato de paginación y filtros del backend (idéntica a la
+>   del repositorio del backend al 2026-09-27).
+>
+> (`LEEME.md`, `AUDITORIA_VISUAL_UX.md`, `PLAN_PENDIENTE_PROXIMA_SESION.md` y
+> `RESUMEN_IMPLEMENTADO.md` se unificaron aquí y se borraron el 2026-09-08.)
+>
+> Después de "Diseño visual" vienen las secciones con fecha (aproximadamente de la más
+> nueva a la más vieja):
+> 2026-09-27 (nueva entrega seguida, filtro por departamento, historial del colaborador),
+> 2026-09-26 (borrador, aviso de sesión, "Ver acta", volver por origen; destello y viento),
+> 2026-09-25 (historial por departamento, filtros, CSV; tablet; PDF), 2026-09-14
+> (paginación) y las de limpieza del 2026-09-08 / 09-11.
 
 ## Qué es
 
-Sistema interno de Agroindustria Legumex, S.A. para digitalizar las hojas de control del
-Departamento de TIC (entrega y devolución de equipo, responsabilidad, desecho,
-teléfonos) y llevar un catálogo de datos maestros (empleados, equipos, marcas,
-departamentos). Antes esas hojas se llenaban en papel; ahora se llenan en pantalla y, para
-los formatos activos, quedan guardadas en el backend con historial consultable.
+Sistema interno **a medida** de Agroindustria Legumex, S.A. (no es un producto para
+vender) para digitalizar las hojas de control del Departamento de TIC (entrega y
+devolución de equipo, responsabilidad, desecho, teléfonos) y llevar un catálogo de datos
+maestros (empleados, equipos, marcas, departamentos). Antes esas hojas se llenaban en
+papel; ahora se llenan en pantalla y, para los formatos activos, quedan guardadas en el
+backend con historial consultable por colaborador, por departamento y por equipo.
+
+Uso real: corre en un **servidor de la red local** (no está en internet). Lo usa TIC
+(rol `admin`) para registrar actas e inventario, y jefaturas y RRHH (rol `user`) para
+consultar y descargar actas, sobre todo desde **tablets**. El volumen normal es bajo (2 o
+3 actas por semana, más en renovaciones de equipo); la carga inicial del inventario fue
+el único periodo de mucho registro seguido.
 
 ## Stack técnico
 
-- **Frontend** (esta carpeta, `LEGUMEXFRONTENFORMATOS`): React 18 + Vite + React Router v7
-  + Tailwind CSS 3. Librerías puntuales: `lucide-react` (íconos), `jspdf` + `html2canvas`
+- **Frontend** (este repositorio, `Roberto-Santizo/leguemxapps_tic_formatos_frontend`):
+  React 18 + Vite + React Router v7 + Tailwind CSS 3. Librerías puntuales: `lucide-react` (íconos), `jspdf` + `html2canvas`
   (exportar actas a PDF), `react-signature-canvas` (captura de firma).
 - **Backend**: Laravel, API REST bajo el prefijo de `AUTH_API_URL` (`VITE_AUTH_API_URL` en
   `.env`), con autenticación JWT (`jwt.auth`) y respuesta siempre en el sobre
-  `{ statusCode, message, data }` (con `.errors` en validaciones 422). Lo administra otra
-  persona -- este frontend solo lo consume; no se inventan endpoints ni comportamientos del
-  backend, si no está documentado o confirmado se pregunta antes de asumir.
+  `{ statusCode, message, data }` (con `.errors` en validaciones 422). Repositorio
+  `Roberto-Santizo/legumexapps_tic_formatos_backend` (lo administra Roberto Santizo; trae
+  `flujo.md`, `reglas.md` y Swagger en `/api/documentation`). Este frontend solo lo
+  consume; no se inventan endpoints ni comportamientos del backend, si no está documentado
+  o confirmado se pregunta antes de asumir. JWT de `tymon/jwt-auth`, 60 min (`JWT_TTL`),
+  sin ruta de renovación. Firmas en el disco `signatures` (S3 por defecto,
+  `SIGNATURES_DISK`).
+- **Despliegue**: imagen Docker (build con node:20, servida por nginx:1.27) publicada a
+  Docker Hub por GitHub Actions en cada push a `main`. Detalle en `CLAUDE.md`.
 
 ## Estado de los 5 formatos físicos (importante, cambió)
 
@@ -62,6 +91,19 @@ De los 2 activos:
   datos completos (`RegistrarDevolucion.jsx`). Su historial (`HistorialDevolucionList.jsx`)
   permite buscar y ver, pero no eliminar.
 
+## Roles y permisos
+
+- **`admin`** (TIC): todo -- registrar y corregir actas, catálogo (marcas, departamentos,
+  equipos, empleados), usuarios.
+- **`user`** (jefaturas / RRHH): **solo Historial**. Puede ver y buscar actas, descargar
+  el PDF, corregir la fecha de entrega/devolución y la Emisión/Vigencia del encabezado
+  (correcciones locales, ver sección 2026-09-26) y nada más. Las rutas de admin van
+  envueltas en `RequireAdmin` (redirige a `/historial`); los botones de admin no se
+  pintan (`isAdmin`); los textos de Historial le hablan en lectura ("Buscar · Ver · PDF").
+- En el backend solo crear/editar/borrar **actas** exige `admin`; detalles de acta,
+  equipos y empleados solo piden sesión (anotado en `README.md` como pendiente del
+  backend; riesgo bajo en red local).
+
 ## Motor único de formularios
 
 Los cinco formatos físicos comparten la misma gramática (membrete, datos del usuario, tabla
@@ -73,7 +115,7 @@ nunca escribir un componente de página nuevo para eso.
 
 ## Diseño visual
 
-- **Sistema visual "Sierra"** (2026-09-24, rama `rediseno-ui`; referencia: mockup "Mesa TIC —
+- **Sistema visual "Sierra"** (2026-09-24; referencia: mockup "Mesa TIC —
   Propuesta sierra"). Solo modo claro. Se conservaron los nombres de token Material 3
   (`primary`, `surface`, `on-surface-variant`, `outline`, etc.) y cambiaron sus valores, así
   que el rediseño llegó a todo el sistema sin reescribir cada className:
@@ -131,13 +173,14 @@ nunca escribir un componente de página nuevo para eso.
     `EquipoDetalleModal`).
   - **Papel** (hoja de entrega/devolución en pantalla, aprobada por el cliente): su título
     usa `font-papel text-titulo-papel` (Manrope 24/32/800/−0.02em = el `headline-lg` de
-    origin/main + `font-extrabold`). Los tokens `headline-*` cambiaron a Inter en el
+    antes del rediseño + `font-extrabold`). Los tokens `headline-*` cambiaron a Inter en el
     rediseño; dentro del papel NO se usan para no alterar lo aprobado. Si un token global
-    que el papel usa cambia, comparar la hoja contra una captura de origin/main.
+    que el papel usa cambia, comparar la hoja contra una captura de la versión
+    anterior al rediseño (commit `ad5a5d5`, 2026-09-21).
   - Cada pantalla abre con **eyebrow de migas** (filete de 28px + ruta en mayúsculas) sobre
     el `h1`: `SECCIÓN / SUBSECCIÓN[ / ACCIÓN]`. Primer nivel: `ACTAS / NUEVA`, `HISTORIAL`,
     `CATÁLOGO`, `USUARIOS`; subpantallas p. ej. `CATÁLOGO / MARCAS / DETALLE`,
-    `HISTORIAL / PRÉSTAMO`; vistas de detalle `… / DETALLE` (`HISTORIAL / ENTREGA /
+    `CATÁLOGO / DEPARTAMENTOS / <nombre>`; vistas de detalle `… / DETALLE` (`HISTORIAL / ENTREGA /
     DETALLE`), hoja nueva `ACTAS / NUEVA / ENTREGA`, registrar `HISTORIAL / DEVOLUCIÓN /
     REGISTRAR`. Las migas no repiten texto crudo de la URL. `EnConstruccion` recibe la ruta
     en la prop de texto `migas` (sin `migas` no pinta eyebrow). Nada de "LEGUMEX / X".
@@ -175,7 +218,8 @@ nunca escribir un componente de página nuevo para eso.
     de formulario y de cabecera `h-10`; volver `h-9`; botones ícono `h-9 w-9`; `Buscador`
     `h-11`.
   - **Márgenes**: todas las pantallas (listas, formularios, vistas, hojas, búsqueda) usan el
-    mismo contenedor `px-4 pt-6 pb-10 md:px-8 md:pt-10` con su `max-w` de siempre.
+    mismo contenedor `px-4 pt-6 pb-10 tablet:px-8 tablet:pt-8 md:px-8 md:pt-10` con su
+    `max-w` de siempre.
     Formularios y vistas "ver" alinean su tarjeta a la IZQUIERDA del mismo carril de 1200px
     que las listas, para que su borde izquierdo coincida con el de ellas en cualquier ancho:
     `max-w-[600px]` + `ml-[max(0px,calc((100%_-_1200px)/2))]` (el 1200 debe ser el
@@ -202,8 +246,9 @@ nunca escribir un componente de página nuevo para eso.
   - La hoja de papel conserva sus clases de foco propias (ganan por ser utilidades).
 - **Cordillera de fondo** (`components/SierraFondo.jsx`, componente decorativo autorizado):
   tres capas SVG de montaña en `bosque` fijas al pie (`clamp(240px,42vh,420px)`, opacidades
-  8/22/42%) con deriva lenta (120s / 80s en contrasentido / 52s). Quieta en móvil, sin
-  animación con movimiento reducido, oculta al imprimir. La montan `AppLayout` (detrás del
+  8/22/42%) con deriva lenta (120s / 80s en contrasentido / 52s), más un destello de luz y
+  ráfagas de viento intermitentes (sección 2026-09-26). La deriva queda quieta en táctil
+  (teléfono y tablet); sin animación con movimiento reducido; oculta al imprimir. La montan `AppLayout` (detrás del
   shell, z-0) y `NotFound`. **Regla de contraste**: ningún texto a nivel de pantalla va
   directo sobre la montaña; va en tarjeta blanca o sobre papel. **Sin `backdrop-blur` en
   ningún tamaño** sobre la cordillera: la sierra deriva sin fin y un `backdrop-filter`
@@ -262,10 +307,10 @@ nunca escribir un componente de página nuevo para eso.
        las páginas. Regla: `[data-toaster][data-sobre-barra] { top:auto;
        bottom: calc(var(--alto-barra) + 12px) }` y desde `md:` `right: var(--derecha-barra)`.
        No usa `:has()`, así que vale en cualquier navegador.
-    2. **Cajón móvil abierto** (`<768`, el overlay lleva `data-cajon-abierto`):
-       `body:has([data-cajon-abierto]) [data-toaster]` → dentro del cajón (`left:12px`,
-       ancho `min(304px, 86%) − 24px`), a `bottom: 140px`, por encima de la tarjeta de
-       perfil / "Cerrar Sesión" (pie del cajón 20px + tarjeta 108px + 12px). Gana a la 1.
+    2. **Cajón móvil abierto** (diseño móvil, el overlay lleva `data-cajon-abierto`):
+       `body:has([data-cajon-abierto]) [data-toaster]` → dentro del cajón (`left: 0.75rem`,
+       ancho `min(19rem, 86%) − 1.5rem`), a `bottom: 8.75rem`, por encima de la tarjeta de
+       perfil / "Cerrar Sesión". En `rem` para que en tablet crezca con el cajón. Gana a la 1.
     3. **Sin `:has()`** (Firefox < 121, p. ej. ESR 115 en Windows 7/8): regla
        `@supports not selector(:has(*))` → en móvil (`<640`) el toast sin barra sube
        siempre a `140px + safe-area`, por encima de "Cerrar Sesión" con o sin cajón.
@@ -292,7 +337,7 @@ nunca escribir un componente de página nuevo para eso.
     sobre botón negro, `tono="tinta"` sobre fondo claro; alto `h-3` en botones y `h-2.5` en
     botones de solo ícono. También en el botón de confirmar de `ConfirmDialog` cuando
     `procesando` (junto al texto de siempre, antes decía "Procesando..."; lleva `aria-busy`).
-    En las barras de las hojas se oculta bajo `sm` (`max-sm:!hidden`)
+    En las barras de las hojas se oculta en el diseño móvil (`movil:!hidden`)
     porque partía el texto del botón; ahí la espera con logo ya da la señal.
   - `IndicadorGuardando` (exportado de `Toast.jsx`, `<IndicadorGuardando activo={estado}
     texto="Guardando" />`): pastilla blanca con el isotipo que se llena y texto mono, dentro
@@ -410,12 +455,14 @@ nunca escribir un componente de página nuevo para eso.
   `limit` y `q`.
 - **Ficha del equipo desde el acta** (`EquipoDetalleModal.jsx`, 2026-09-17): en Entrega de
   Equipo, el buscador de equipo muestra un ojo dentro del campo (prop `onVerDetalle` de
-  `SearchableSelect`, solo cuando ya hay equipo elegido) que abre una ventana emergente de
-  solo lectura con marca, modelo, serie, tipo, original/usado y características. Carga por
-  ID (`obtenerEquipo` + `obtenerMarca` + `obtenerCaracteristicasDeEquipo`, igual que
-  `EquipoView`), no del renglón del listado. No sustituye a Catálogo → Equipos → Ver ni
-  lleva historial de asignaciones. Solo vive en `FormatoActa`; la devolución queda fuera a
-  propósito (no elige equipo de un catálogo).
+  `SearchableSelect`, solo cuando ya hay equipo elegido) que abre una ventana emergente
+  con marca, modelo, serie, tipo, original/usado y características. Carga por ID
+  (`obtenerEquipo` + `obtenerMarca` + `obtenerCaracteristicasDeEquipo`, igual que
+  `EquipoView`), no del renglón del listado. Desde el 2026-09-25 es **editable** (solo
+  admin) y también se abre desde cada renglón de las vistas de entrega y devolución: ver
+  "Editar el equipo desde su ficha" en la sección de esa fecha. Corregir un equipo (serie,
+  nuevo/usado) corrige todas sus actas, porque el acta lee el equipo actual (decisión
+  tomada, ver `README.md`).
 - **Texto editable inline** (`InlineEditableText.jsx`, usado p. ej. en la vigencia del
   membrete de Nueva Acta): el ícono de lápiz que indica que el texto es editable queda
   siempre visible a baja opacidad (`opacity-40`), no solo con `group-hover`, porque en
@@ -507,7 +554,8 @@ solución decidida con el cliente y funciona, con estas limitaciones conocidas:
   tabla y tarjetas, cabecera y volver propios, sin columna Departamento, sin "Registrar", y
   con **Exportar CSV de todas las actas que cumplen los filtros** (no solo la página).
   El backend **no filtra actas por departamento** y los filtros documentados de
-  `/delivery_documents` fallan (nota en `api.js`), así que se trae el listado completo y se
+  `/delivery_documents` fallaron en una prueba (nota en `api.js` y en "Dar de baja
+  equipos"), así que se trae el listado completo y se
   compara en el cliente el nombre del departamento con `employee_department`
   (`normalizarNombre`: sin acentos ni mayúsculas). Mientras el departamento carga, el
   filtro no deja pasar nada (nunca se ve un instante el historial de todos). Si el backend
@@ -771,8 +819,12 @@ restaurar el equipo que ya se dio de baja (`deleted_at = NULL`) para levantar el
 Mientras eso no esté, no hay forma de retirar equipo del inventario desde el sistema.
 
 Los filtros del listado de entregas (`status`, `employeeId`, `location`) tampoco se usan por
-el mismo tipo de problema: `?location=1` responde con el mismo error de PHP. Ver el
-comentario en `listarDocumentosEntrega` (`src/services/api.js`).
+el mismo tipo de problema: `?location=1` respondió con el mismo error de PHP. Ver el
+comentario en `listarDocumentosEntrega` (`src/services/api.js`). Nota del 2026-09-27: el
+código actual del backend aplica esos filtros sin nada raro, y el error ("property 'name'
+on null") es justo el de un equipo dado de baja, probado el mismo día; lo más probable es
+que la causa fuera esa y no el filtro. Antes de usarlos (por ejemplo para que "Ver acta"
+pida solo la última entrega del colaborador), probarlos contra el backend real.
 
 ## Reglas de código del proyecto
 
@@ -824,26 +876,23 @@ Reglas relacionadas que se han repetido en las peticiones de trabajo:
   pantalla de referencia más parecida que ya exista (por ejemplo, comparar contra Catálogo
   al tocar Historial o Nueva Acta), no solo que "se vea bien" de forma aislada.
 
-## Flujo de trabajo técnico (cuando se edita desde un entorno con puente al dispositivo)
+## Flujo de trabajo técnico
 
-Cuando el trabajo se hace desde una sesión en la nube con acceso al equipo del usuario vía
-herramientas de "device bridge" (sin edición directa en el equipo del usuario), el flujo
-correcto es:
-1. Traer (stage) el/los archivo(s) reales del proyecto del usuario a un entorno de trabajo
-   local a la sesión.
-2. Editar esa copia local.
-3. **Verificar la sintaxis de cada archivo tocado (por ejemplo con esbuild, cargando JSX
-   con `loader: 'jsx', jsx: 'automatic'`) antes de darlo por bueno.**
-4. Copiar el archivo verificado a la carpeta de salida de la sesión.
-5. Confirmar (commit) ese archivo de vuelta a la ruta real del proyecto en el equipo del
-   usuario -- el trabajo no está terminado hasta que el archivo quede guardado ahí, no solo
-   entregado en el chat.
-
-No editar nunca "a ciegas" sin pasar por el paso de verificación de sintaxis, y no dar un
-cambio por completo sin haber hecho el commit al proyecto real del usuario.
+- El trabajo se hace en una **rama**, nunca directo en `main`: cada push a `main` publica
+  la imagen de producción (GitHub Actions → Docker Hub). Se sube a `main` solo con
+  aprobación explícita del usuario. (Al 2026-09-27 la rama `tablet` reúne tablet,
+  animaciones, borrador, aviso de sesión, "Ver acta", volver por origen, "Nueva entrega",
+  filtro por departamento e historial del colaborador, pendiente de subir a `main`.)
+- Antes de dar un cambio por bueno: `npm run build` (o `npx esbuild <archivo>
+  --loader:.jsx=jsx --jsx=automatic` por archivo) y probarlo en el navegador en los tres
+  diseños: escritorio (mouse), teléfono y tablet (táctil). Con Playwright: contexto con
+  `hasTouch`/`isMobile` para táctil, 390×844 teléfono, 820×1180 tablet.
+- Sin backend a la mano se prueba con un backend simulado que responda el mismo sobre
+  `{ statusCode, message, data }`; lo que no esté confirmado en el backend real se anota
+  como tal (no se da por hecho).
+- Commits en español, describiendo el cambio visible para el usuario.
 
 ---
 
-*Este archivo se debe mantener actualizado según el sistema evolucione -- a diferencia de
-`PLAN_PENDIENTE_PROXIMA_SESION.md` (que es bitácora desechable), este es el documento de
-contexto permanente del proyecto.*
+*Este archivo se debe mantener actualizado según el sistema evolucione: es el documento de
+contexto permanente del proyecto. Los pendientes viven en `README.md`.*

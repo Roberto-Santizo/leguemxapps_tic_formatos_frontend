@@ -3,8 +3,11 @@
 Guía para Claude Code al trabajar en este repositorio (frontend de **Legumex TIC Formatos**).
 
 **Leer primero `CONTEXTO_SISTEMA_DISENO_REGLAS.md`**: es el documento de contexto permanente
-(qué es el sistema, estado de los 5 formatos, diseño visual, reglas de trabajo). Este
+(qué es el sistema, roles, estado de los 5 formatos, diseño visual, reglas de trabajo). Este
 CLAUDE.md no lo duplica; solo resume lo operativo y lo que ese archivo no cubre.
+Pendientes y decisiones tomadas (lo que parece error pero es a propósito): `README.md`.
+Backend: `Roberto-Santizo/legumexapps_tic_formatos_backend` (Laravel; leer su código antes
+de suponer qué devuelve un endpoint).
 
 ## Comandos
 
@@ -40,12 +43,13 @@ en español; mantener ese idioma.
 - CI: `.github/workflows/*` construye y publica la imagen a Docker Hub en cada push a
   `main` (tags `latest`, sha corto, fecha). Requiere secrets `DOCKERHUB_USERNAME` /
   `DOCKERHUB_TOKEN`.
-- `/storage/` (firmas) se pasa al backend desde el propio servidor del frontend: proxy de
-  Vite en dev (`vite.config.js`) y de nginx en Docker (`entrypoint.sh` genera
-  `/etc/nginx/storage-proxy.conf`). Lo necesita el PDF para incrustar las firmas
-  (`src/pdf/datosPdf.js`). El contenedor debe poder alcanzar la URL del backend.
-- `GUIA_DESPLIEGUE_UBUNTU.md`: checklist del backend (APP_URL, `storage:link`, permisos)
-  para que las firmas se vean en producción.
+- `/storage/` (firmas en disco local) y `/firma-remota/<bucket>.amazonaws.com/...`
+  (firmas en S3, el disco por defecto del backend) se piden desde el propio servidor del
+  frontend: proxy de Vite en dev (`vite.config.js`) y de nginx en Docker (`entrypoint.sh`).
+  Lo necesita el PDF para incrustar las firmas (`src/pdf/datosPdf.js`). El contenedor debe
+  poder alcanzar la URL del backend y, con S3, salir a internet.
+- `GUIA_DESPLIEGUE_UBUNTU.md`: checklist de servidor (backend y frontend en Docker) para
+  que las firmas se vean en pantalla y en el PDF.
 
 ## Arquitectura (src/)
 
@@ -67,7 +71,8 @@ en español; mantener ese idioma.
   Node ya inexistente) -- no tocar sin que se pida.
 - `config/formatos.js`: objeto `FORMATOS` con los 5 formatos físicos; `ORDEN_FORMATOS`
   (`['entrega','devolucion']`) decide cuáles se muestran. `pages/FormatoActa.jsx` es el
-  motor único que renderiza cualquier formato desde esa config.
+  motor único que renderiza cualquier formato desde esa config (envoltorio que monta
+  `HojaActa` con `key={location.key}`: "Nueva entrega" la reinicia navegando a la misma ruta).
 - Flujo de devolución: nace siempre de una entrega existente
   (`BuscarDevolucion.jsx` → `RegistrarDevolucion.jsx`), no desde hoja en blanco.
 - `pdf/`: `designSystemPdf.js` (CSS del papel), `plantillaEntrega.js`,
@@ -84,7 +89,7 @@ en español; mantener ese idioma.
   botones), `IndicadorGuardando` (pastilla de "guardando", en `Toast.jsx`), `EsperaLogo`
   (espera a pantalla completa, solo actas y PDF), `ActaRegistrada` (momento de éxito) y `SaludoDelDia`
   ("Buenos días, {nombre}." una vez al día en Nueva Acta / Historial).
-  Además `FiltrosActas` (barra de filtros de actas) y `AvisoSesion` (cuenta regresiva de
+  Además `FiltrosActas` (barra de filtros de actas: chips + selector de departamento) y `AvisoSesion` (cuenta regresiva de
   la sesión, en `AppLayout`). Hooks: `useFiltrosActas`, `useExportacionCsv`,
   `useBorradorActa` (borrador automático de entrega/devolución); utilidades `utils/csv.js`,
   `utils/estadoEntrega.js`, `utils/origenNavegacion.js` (`conOrigen`/`useOrigen`: "volver"

@@ -1,5 +1,11 @@
 # Paginación de listados
 
+> Copia del documento del backend (`legumexapps_tic_formatos_backend/paginacion.md`),
+> idéntica al 2026-09-27. Si cambia allá, copiarlo aquí. Cómo lo usa este frontend:
+> sección "Paginación de listados" de `CONTEXTO_SISTEMA_DISENO_REGLAS.md`. Ojo con los
+> filtros de §4 en `/delivery_documents`: el frontend todavía no los usa (fallaron en una
+> prueba del 2026-09-11; ver esa misma sección del CONTEXTO).
+
 Guía de integración para consumir los listados (`GET`) de la API. La regla es una sola:
 
 > **Si la petición trae `limit`, el listado se pagina con ese tamaño. Si no lo trae, la respuesta devuelve todos los registros.**
