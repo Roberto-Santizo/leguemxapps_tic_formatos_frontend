@@ -59,11 +59,11 @@ function dataUrlToBlob(dataUrl) {
   return new Blob([bytes], { type: mime })
 }
 
-const valorClass =
-  'flex h-11 items-center rounded-lg border border-outline-variant bg-surface-container-low px-3.5 font-body-md text-body-md text-on-surface'
+// Valor dentro del recuadro de Campo `lectura` (el recuadro lo pone Campo).
+const valorClass = 'flex min-h-6 items-center'
 
 const inputClass =
-  'h-11 w-full rounded-lg border-outline-variant bg-surface-container-lowest px-3.5 font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/70 transition-colors hover:border-outline focus:border-primary focus:ring-2 focus:ring-primary/25'
+  'h-11 w-full rounded-boton border border-outline-variant bg-white px-3 font-body-md text-input-movil text-on-surface placeholder:text-on-surface-subtle transition duration-fast ease-standard hover:[&:not(:focus)]:border-outline disabled:opacity-60 md:text-body-md'
 
 const celdaInputClass =
   'w-full border-0 border-b border-transparent bg-transparent p-1 font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/70 focus:border-primary focus:ring-0'
@@ -278,7 +278,7 @@ function RegistrarDevolucion() {
     <div className="flex-1 [&+footer]:pb-[calc(114px+env(safe-area-inset-bottom))] md:[&+footer]:pb-[88px]">
       <div className="px-4 pt-6 pb-10 tablet:px-8 tablet:pt-8 md:px-8 md:pt-10">
         <div className="mx-auto max-w-4xl animate-view-in space-y-stack-lg">
-          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-5">
+          <div className="flex flex-col items-start gap-5 md:gap-6">
             <Link
               to={`/historial/entrega/${id}`}
               state={estadoEntrega}
@@ -394,16 +394,16 @@ function RegistrarDevolucion() {
               {/* Datos de la entrega -- solo lectura, viene de la entrega original */}
               <SeccionCard icon={CircleUser} titulo="Datos del Usuario">
                 <div className="grid grid-cols-12 gap-x-column-gap gap-y-stack-md p-5">
-                  <Campo label="Fecha de Entrega">
+                  <Campo lectura label="Fecha de Entrega">
                     <div className={valorClass}>{formatearFecha(entrega.delivery_date)}</div>
                   </Campo>
-                  <Campo label="Colaborador" span="col-span-12 sm:col-span-8">
+                  <Campo lectura label="Colaborador" span="col-span-12 sm:col-span-8">
                     <div className={valorClass}>{entrega.employee_name || '—'}</div>
                   </Campo>
-                  <Campo label="Departamento">
+                  <Campo lectura label="Departamento">
                     <div className={valorClass}>{entrega.employee_department || '—'}</div>
                   </Campo>
-                  <Campo label="Planta">
+                  <Campo lectura label="Planta">
                     <div className={valorClass}>{nombrePlanta(entrega.location)}</div>
                   </Campo>
                 </div>
@@ -439,17 +439,17 @@ function RegistrarDevolucion() {
                   <div className="hidden md:block w-full overflow-x-auto">
                     <table className="w-full min-w-[720px] border-collapse text-left">
                       <thead>
-                        <tr className="border-b border-outline-variant bg-surface-container-low">
+                        <tr className="bg-surface-container">
                           <th className="w-12 py-2.5 pl-5 pr-3" />
                           {['Equipo', 'Marca', 'Modelo', 'No. Serie', 'Observaciones de la devolución'].map((col) => (
                             <th
                               key={col}
-                              className="py-2.5 pr-3 font-label-sm text-label-sm font-bold uppercase tracking-wide text-on-surface-variant"
+                              className="py-2.5 pr-3 font-mono text-micro font-medium uppercase tracking-[0.1em] text-on-surface-variant whitespace-nowrap"
                             >
                               {col}
                             </th>
                           ))}
-                          <th className="py-2.5 pr-5 font-label-sm text-label-sm font-bold uppercase tracking-wide text-on-surface-variant">
+                          <th className="py-2.5 pr-5 font-mono text-micro font-medium uppercase tracking-[0.1em] text-on-surface-variant whitespace-nowrap">
                             Extravío
                           </th>
                         </tr>
@@ -625,7 +625,7 @@ function RegistrarDevolucion() {
                     maxLength={500}
                     onChange={(e) => setObservacionesGenerales(e.target.value)}
                     placeholder={formato.placeholderObs}
-                    className="min-h-24 w-full resize-y rounded-lg border-outline-variant bg-surface-container-lowest px-3.5 py-2.5 font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/70 transition-colors hover:border-outline focus:border-primary focus:ring-2 focus:ring-primary/25"
+                    className="min-h-24 w-full resize-y rounded-boton border border-outline-variant bg-white px-3 py-2.5 font-body-md text-input-movil text-on-surface placeholder:text-on-surface-subtle transition duration-fast ease-standard hover:[&:not(:focus)]:border-outline md:text-body-md"
                   />
                 </div>
               </SeccionCard>

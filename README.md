@@ -37,8 +37,8 @@ a `main` solo con aprobación.
 
 La rama `tablet` está lista y pendiente de subir a `main`. Trae el diseño para tablet, las
 animaciones de la cordillera, el borrador automático, el aviso de sesión, "Ver acta" /
-"Nueva entrega", el "volver" por origen, el filtro por departamento y el historial del
-colaborador. Probada con navegador automatizado en escritorio, teléfono y tablet; falta
+"Nueva entrega", el "volver" por origen, el filtro por departamento, el historial del
+colaborador y las actas con el mismo estilo que el resto del sistema. Probada con navegador automatizado en escritorio, teléfono y tablet; falta
 probarla en tablets reales con el backend real.
 
 ## Pendientes y mejoras sugeridas

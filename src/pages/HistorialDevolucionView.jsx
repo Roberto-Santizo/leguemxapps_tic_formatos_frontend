@@ -49,8 +49,8 @@ function nombrePlanta(location) {
   return Number(location) === 1 ? 'Planta Tejar' : 'Planta Parramos'
 }
 
-const valorClass =
-  'flex h-11 items-center rounded-lg border border-outline-variant bg-surface-container-low px-3.5 font-body-md text-body-md text-on-surface'
+// Valor dentro del recuadro de Campo `lectura` (el recuadro lo pone Campo).
+const valorClass = 'flex min-h-6 items-center'
 
 // Ojo de un renglón de equipo: abre su ficha (características y, para
 // admin, "Editar"), igual que el ojo del selector al armar el acta. Mientras
@@ -277,7 +277,7 @@ function HistorialDevolucionView() {
     <div className="flex-1 [&+footer]:pb-[calc(88px+env(safe-area-inset-bottom))] md:[&+footer]:pb-[88px]">
       <div className="px-4 pt-6 pb-10 tablet:px-8 tablet:pt-8 md:px-8 md:pt-10">
         <div className="mx-auto max-w-4xl animate-view-in space-y-stack-lg">
-          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-5">
+          <div className="flex flex-col items-start gap-5 md:gap-6">
             <Link
               to={origen.ruta}
               className="inline-flex h-9 max-w-full items-center gap-2 rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
@@ -351,7 +351,7 @@ function HistorialDevolucionView() {
               {/* Datos del usuario */}
               <SeccionCard icon={CircleUser} titulo="Datos del Usuario">
                 <div className="grid grid-cols-12 gap-x-column-gap gap-y-stack-md p-5">
-                  <Campo label="Fecha de Devolución">
+                  <Campo lectura label="Fecha de Devolución">
                     <div className={valorClass}>
                       <EditorFechaLocal
                         value={fechaDevolucion.valor}
@@ -362,23 +362,23 @@ function HistorialDevolucionView() {
                       />
                     </div>
                   </Campo>
-                  <Campo label="Colaborador" span="col-span-12 sm:col-span-8">
+                  <Campo lectura label="Colaborador" span="col-span-12 sm:col-span-8">
                     <div className={valorClass}>{documento.employee_name || '—'}</div>
                   </Campo>
-                  <Campo label="Departamento">
+                  <Campo lectura label="Departamento">
                     <div className={valorClass}>{documento.employee_department || '—'}</div>
                   </Campo>
-                  <Campo label="Planta">
+                  <Campo lectura label="Planta">
                     <div className={valorClass}>{nombrePlanta(documento.location)}</div>
                   </Campo>
-                  <Campo label="Entrega de origen" span="col-span-12 sm:col-span-4">
+                  <Campo lectura label="Entrega de origen" span="col-span-12 sm:col-span-4">
                     <Link
                       to={`/historial/entrega/${documento.delivery_document_id}`}
                       state={conOrigen(location, `Devolución #${documento.id ?? id}`)}
-                      className="flex h-11 items-center justify-between gap-2 rounded-lg border border-outline-variant bg-surface-container-low px-3.5 font-body-md text-body-md text-on-surface transition-colors hover:bg-surface-container-high active:scale-[0.97] transition-transform"
+                      className="inline-flex min-h-6 items-center gap-1.5 font-medium text-on-surface underline-offset-2 transition duration-fast ease-standard hover:underline active:scale-[0.97]"
                     >
                       Ver entrega #{documento.delivery_document_id}
-                      <ExternalLink className="h-4 w-4 shrink-0 text-on-surface-variant" strokeWidth={2} />
+                      <ExternalLink className="h-4 w-4 shrink-0 text-on-surface-variant" strokeWidth={1.75} />
                     </Link>
                   </Campo>
                 </div>
@@ -412,14 +412,14 @@ function HistorialDevolucionView() {
                   <div className="hidden md:block w-full overflow-x-auto">
                     <table className="w-full min-w-[640px] border-collapse text-left">
                       <thead>
-                        <tr className="border-b border-outline-variant bg-surface-container-low">
-                          <th className="w-14 py-2.5 pl-5 pr-3 text-right font-label-sm text-label-sm font-bold uppercase tracking-wide text-on-surface-variant">
+                        <tr className="bg-surface-container">
+                          <th className="w-14 py-2.5 pl-5 pr-3 text-right font-mono text-micro font-medium uppercase tracking-[0.1em] text-on-surface-variant whitespace-nowrap">
                             No.
                           </th>
                           {['Equipo', 'Marca', 'Modelo', 'No. Serie', 'Observaciones'].map((col) => (
                             <th
                               key={col}
-                              className="py-2.5 pr-3 font-label-sm text-label-sm font-bold uppercase tracking-wide text-on-surface-variant"
+                              className="py-2.5 pr-3 font-mono text-micro font-medium uppercase tracking-[0.1em] text-on-surface-variant whitespace-nowrap"
                             >
                               {col}
                             </th>
@@ -566,7 +566,7 @@ function HistorialDevolucionView() {
 
                         <div className="grid grid-cols-2 gap-3">
                           <div>
-                            <p className="font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider mb-0.5">
+                            <p className="mb-0.5 font-mono text-micro uppercase leading-4 tracking-[0.1em] text-on-surface-variant">
                               Marca
                             </p>
                             <p className="font-body-md text-body-md text-on-surface break-words">
@@ -574,7 +574,7 @@ function HistorialDevolucionView() {
                             </p>
                           </div>
                           <div>
-                            <p className="font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider mb-0.5">
+                            <p className="mb-0.5 font-mono text-micro uppercase leading-4 tracking-[0.1em] text-on-surface-variant">
                               Modelo
                             </p>
                             <p className="font-body-md text-body-md text-on-surface break-words">
@@ -582,7 +582,7 @@ function HistorialDevolucionView() {
                             </p>
                           </div>
                           <div className="col-span-2">
-                            <p className="font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider mb-0.5">
+                            <p className="mb-0.5 font-mono text-micro uppercase leading-4 tracking-[0.1em] text-on-surface-variant">
                               No. Serie
                             </p>
                             <p className="font-mono text-body-md uppercase text-on-surface">
@@ -592,7 +592,7 @@ function HistorialDevolucionView() {
                         </div>
 
                         <div className="mt-stack-sm">
-                          <p className="font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider mb-0.5">
+                          <p className="mb-0.5 font-mono text-micro uppercase leading-4 tracking-[0.1em] text-on-surface-variant">
                             Observaciones
                           </p>
                           {isAdmin ? (

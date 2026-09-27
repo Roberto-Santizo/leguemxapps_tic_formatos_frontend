@@ -50,8 +50,8 @@ function nombrePlanta(location) {
   return Number(location) === 1 ? 'Planta Tejar' : 'Planta Parramos'
 }
 
-const valorClass =
-  'flex h-11 items-center rounded-lg border border-outline-variant bg-surface-container-low px-3.5 font-body-md text-body-md text-on-surface'
+// Valor dentro del recuadro de Campo `lectura` (el recuadro lo pone Campo).
+const valorClass = 'flex min-h-6 items-center'
 
 // Ojo de un renglón de equipo: abre su ficha (características y, para
 // admin, "Editar"), igual que el ojo del selector al armar el acta. Mientras
@@ -311,7 +311,7 @@ function HistorialEntregaView() {
           impresa. Ahora arranca en el membrete. */}
       <div className="px-4 pt-6 pb-10 tablet:px-8 tablet:pt-8 md:px-8 md:pt-10">
         <div className="mx-auto max-w-4xl animate-view-in space-y-stack-lg">
-          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-5">
+          <div className="flex flex-col items-start gap-5 md:gap-6">
             <Link
               to={origen.ruta}
               className="inline-flex h-9 max-w-full items-center gap-2 rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
@@ -387,7 +387,7 @@ function HistorialEntregaView() {
               {/* Datos del usuario */}
               <SeccionCard icon={CircleUser} titulo="Datos del Usuario">
                 <div className="grid grid-cols-12 gap-x-column-gap gap-y-stack-md p-5">
-                  <Campo label="Fecha de Entrega">
+                  <Campo lectura label="Fecha de Entrega">
                     <div className={valorClass}>
                       <EditorFechaLocal
                         value={fechaEntrega.valor}
@@ -398,13 +398,13 @@ function HistorialEntregaView() {
                       />
                     </div>
                   </Campo>
-                  <Campo label="Responsable que Recibe" span="col-span-12 sm:col-span-8">
+                  <Campo lectura label="Responsable que Recibe" span="col-span-12 sm:col-span-8">
                     <div className={valorClass}>{documento.employee_name || '—'}</div>
                   </Campo>
-                  <Campo label="Departamento">
+                  <Campo lectura label="Departamento">
                     <div className={valorClass}>{documento.employee_department || '—'}</div>
                   </Campo>
-                  <Campo label="Planta">
+                  <Campo lectura label="Planta">
                     <div className={valorClass}>{nombrePlanta(documento.location)}</div>
                   </Campo>
                 </div>
@@ -438,14 +438,14 @@ function HistorialEntregaView() {
                   <div className="hidden md:block w-full overflow-x-auto">
                     <table className="w-full min-w-[760px] border-collapse text-left">
                       <thead>
-                        <tr className="border-b border-outline-variant bg-surface-container-low">
-                          <th className="w-14 py-2.5 pl-5 pr-3 text-right font-label-sm text-label-sm font-bold uppercase tracking-wide text-on-surface-variant">
+                        <tr className="bg-surface-container">
+                          <th className="w-14 py-2.5 pl-5 pr-3 text-right font-mono text-micro font-medium uppercase tracking-[0.1em] text-on-surface-variant whitespace-nowrap">
                             No.
                           </th>
                           {['Equipo', 'Marca', 'Modelo', 'No. Serie', 'Estado', 'Observaciones'].map((col) => (
                             <th
                               key={col}
-                              className="py-2.5 pr-3 font-label-sm text-label-sm font-bold uppercase tracking-wide text-on-surface-variant"
+                              className="py-2.5 pr-3 font-mono text-micro font-medium uppercase tracking-[0.1em] text-on-surface-variant whitespace-nowrap"
                             >
                               {col}
                             </th>
@@ -609,7 +609,7 @@ function HistorialEntregaView() {
 
                         <div className="grid grid-cols-2 gap-3">
                           <div>
-                            <p className="font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider mb-0.5">
+                            <p className="mb-0.5 font-mono text-micro uppercase leading-4 tracking-[0.1em] text-on-surface-variant">
                               Marca
                             </p>
                             <p className="font-body-md text-body-md text-on-surface break-words">
@@ -617,7 +617,7 @@ function HistorialEntregaView() {
                             </p>
                           </div>
                           <div>
-                            <p className="font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider mb-0.5">
+                            <p className="mb-0.5 font-mono text-micro uppercase leading-4 tracking-[0.1em] text-on-surface-variant">
                               Modelo
                             </p>
                             <p className="font-body-md text-body-md text-on-surface break-words">
@@ -625,7 +625,7 @@ function HistorialEntregaView() {
                             </p>
                           </div>
                           <div>
-                            <p className="font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider mb-0.5">
+                            <p className="mb-0.5 font-mono text-micro uppercase leading-4 tracking-[0.1em] text-on-surface-variant">
                               No. Serie
                             </p>
                             <p className="font-mono text-body-md uppercase text-on-surface">
@@ -633,7 +633,7 @@ function HistorialEntregaView() {
                             </p>
                           </div>
                           <div>
-                            <p className="font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider mb-0.5">
+                            <p className="mb-0.5 font-mono text-micro uppercase leading-4 tracking-[0.1em] text-on-surface-variant">
                               Estado
                             </p>
                             <p className="font-body-md text-body-md text-on-surface">{item.is_used || '—'}</p>
@@ -641,7 +641,7 @@ function HistorialEntregaView() {
                         </div>
 
                         <div className="mt-stack-sm">
-                          <p className="font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider mb-0.5">
+                          <p className="mb-0.5 font-mono text-micro uppercase leading-4 tracking-[0.1em] text-on-surface-variant">
                             Observaciones
                           </p>
                           {item.returned || !isAdmin ? (

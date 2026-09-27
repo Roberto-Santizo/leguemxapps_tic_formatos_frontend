@@ -80,17 +80,30 @@ async function idEntregaCreada(token, respuesta, empleado) {
 
 // --- Piezas de UI compartidas -------------------------------------------
 
-function Campo({ label, children, span = 'col-span-12 sm:col-span-4' }) {
+// Dos formas, las mismas del resto del sistema:
+//  - editable (hoja): etiqueta arriba como en los formularios del Catálogo;
+//  - `lectura` (vistas del acta): recuadro suave con la etiqueta mono dentro,
+//    igual que "Datos del equipo" en la ficha de un equipo.
+function Campo({ label, children, span = 'col-span-12 sm:col-span-4', lectura = false }) {
+  if (lectura) {
+    return (
+      <div className={`${span} min-w-0 rounded-xl bg-surface-container-high px-4 py-3`}>
+        <p className="mb-1 font-mono text-micro uppercase leading-4 tracking-[0.1em] text-on-surface-variant">{label}</p>
+        <div className="break-words font-body-md text-body-md text-on-surface">{children}</div>
+      </div>
+    )
+  }
   return (
-    <div className={`${span} flex flex-col gap-1.5`}>
-      <label className="font-label-bold text-label-bold text-on-surface">{label}</label>
+    <div className={`${span} flex flex-col gap-2`}>
+      <label className="text-meta font-semibold leading-4 text-on-surface">{label}</label>
       {children}
     </div>
   )
 }
 
+// Mismo campo que los formularios del Catálogo (EquipoForm).
 const inputClass =
-  'h-11 w-full rounded-lg border-outline-variant bg-surface-container-lowest px-3.5 font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/70 transition-colors hover:border-outline focus:border-primary focus:ring-2 focus:ring-primary/25'
+  'h-11 w-full rounded-boton border border-outline-variant bg-white px-3 font-body-md text-input-movil text-on-surface placeholder:text-on-surface-subtle transition duration-fast ease-standard hover:[&:not(:focus)]:border-outline disabled:opacity-60 md:text-body-md'
 
 const inputMonoClass = `${inputClass} font-mono uppercase`
 
@@ -99,15 +112,16 @@ const celdaInputClass =
 
 function SeccionCard({ icon: Icon, titulo, nota, acciones, children }) {
   return (
+    // Encabezado como el de las tarjetas del resto del sistema ("Datos del
+    // equipo", "Equipo en su poder"): título en negrita dentro de la tarjeta
+    // blanca, sin la franja gris del estilo anterior.
     <section className="overflow-hidden rounded-tarjeta bg-white shadow-tarjeta">
-      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant bg-surface-container-low px-5 py-3">
-        <div className="flex items-center gap-2.5">
-          {Icon && <Icon className="h-4.5 w-4.5 shrink-0 text-primary" strokeWidth={2} />}
-          <h3 className="font-label-bold text-label-bold uppercase tracking-wide text-on-surface">
-            {titulo}
-          </h3>
+      <header className="flex flex-wrap items-center justify-between gap-3 px-5 pt-5">
+        <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
+          {Icon && <Icon className="h-5 w-5 shrink-0 text-on-surface-variant" strokeWidth={1.75} />}
+          <h3 className="font-headline-md text-headline-md font-bold text-on-surface">{titulo}</h3>
           {nota && (
-            <span className="font-label-sm text-label-sm text-on-surface-variant">{nota}</span>
+            <span className="font-label-sm text-label-sm text-on-surface-subtle">{nota}</span>
           )}
         </div>
         {acciones}
@@ -473,7 +487,7 @@ function HojaActa() {
     <div className="flex-1 [&+footer]:pb-[calc(114px+env(safe-area-inset-bottom))] md:[&+footer]:pb-[88px]">
       <div ref={hojaRef} className="px-4 pt-6 pb-10 tablet:px-8 tablet:pt-8 md:px-8 md:pt-10">
         <div className="mx-auto max-w-4xl animate-view-in space-y-stack-lg">
-          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-5">
+          <div className="flex flex-col items-start gap-5 md:gap-6">
             <Link
               to="/"
               className="inline-flex h-9 items-center gap-2 rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
@@ -832,7 +846,7 @@ function HojaActa() {
                 </div>
 
                 <div className="border-t border-outline-variant p-5">
-                  <p className="mb-3 font-label-sm text-label-sm font-bold uppercase tracking-wide text-on-surface-variant">
+                  <p className="mb-3 font-mono text-micro font-medium uppercase tracking-[0.1em] text-on-surface-variant whitespace-nowrap">
                     Plan tarifario
                   </p>
                   <div className="grid grid-cols-2 gap-column-gap sm:grid-cols-4">
@@ -925,14 +939,14 @@ function HojaActa() {
                   <div className="hidden md:block w-full overflow-x-auto">
                     <table className="w-full min-w-[640px] border-collapse text-left">
                       <thead>
-                        <tr className="border-b border-outline-variant bg-surface-container-low">
-                          <th className="w-14 py-2.5 pl-5 pr-3 text-right font-label-sm text-label-sm font-bold uppercase tracking-wide text-on-surface-variant">
+                        <tr className="bg-surface-container">
+                          <th className="w-14 py-2.5 pl-5 pr-3 text-right font-mono text-micro font-medium uppercase tracking-[0.1em] text-on-surface-variant whitespace-nowrap">
                             No.
                           </th>
-                          <th className="py-2.5 pr-3 font-label-sm text-label-sm font-bold uppercase tracking-wide text-on-surface-variant">
+                          <th className="py-2.5 pr-3 font-mono text-micro font-medium uppercase tracking-[0.1em] text-on-surface-variant whitespace-nowrap">
                             Equipo
                           </th>
-                          <th className="py-2.5 pr-3 font-label-sm text-label-sm font-bold uppercase tracking-wide text-on-surface-variant">
+                          <th className="py-2.5 pr-3 font-mono text-micro font-medium uppercase tracking-[0.1em] text-on-surface-variant whitespace-nowrap">
                             Observaciones
                           </th>
                           <th className="w-12 py-2.5 pr-5" />
@@ -1088,7 +1102,7 @@ function HojaActa() {
               }
             >
               <div className="border-b border-outline-variant p-5">
-                <p className="mb-3 font-label-sm text-label-sm font-bold uppercase tracking-wide text-on-surface-variant">
+                <p className="mb-3 font-mono text-micro font-medium uppercase tracking-[0.1em] text-on-surface-variant whitespace-nowrap">
                   Verificación Rápida
                 </p>
                 <div className="flex flex-wrap gap-stack-sm">
@@ -1139,19 +1153,19 @@ function HojaActa() {
                 <div className="w-full overflow-x-auto">
                   <table className="w-full min-w-[640px] border-collapse text-left">
                     <thead>
-                      <tr className="border-b border-outline-variant bg-surface-container-low">
-                        <th className="w-14 py-2.5 pl-5 pr-3 text-right font-label-sm text-label-sm font-bold uppercase tracking-wide text-on-surface-variant">
+                      <tr className="bg-surface-container">
+                        <th className="w-14 py-2.5 pl-5 pr-3 text-right font-mono text-micro font-medium uppercase tracking-[0.1em] text-on-surface-variant whitespace-nowrap">
                           No.
                         </th>
                         {['Artículo', 'Marca', 'Modelo', 'No. Serie'].map((col) => (
                           <th
                             key={col}
-                            className="py-2.5 pr-3 font-label-sm text-label-sm font-bold uppercase tracking-wide text-on-surface-variant"
+                            className="py-2.5 pr-3 font-mono text-micro font-medium uppercase tracking-[0.1em] text-on-surface-variant whitespace-nowrap"
                           >
                             {col}
                           </th>
                         ))}
-                        <th className="w-40 py-2.5 pr-3 font-label-sm text-label-sm font-bold uppercase tracking-wide text-on-surface-variant">
+                        <th className="w-40 py-2.5 pr-3 font-mono text-micro font-medium uppercase tracking-[0.1em] text-on-surface-variant whitespace-nowrap">
                           {formato.colFinal}
                         </th>
                         <th className="w-12 py-2.5 pr-5" />
@@ -1285,7 +1299,7 @@ function HojaActa() {
                 maxLength={500}
                 onChange={(e) => setObservaciones(e.target.value)}
                 placeholder={formato.placeholderObs}
-                className="min-h-24 w-full resize-y rounded-lg border-outline-variant bg-surface-container-lowest px-3.5 py-2.5 font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/70 transition-colors hover:border-outline focus:border-primary focus:ring-2 focus:ring-primary/25"
+                className="min-h-24 w-full resize-y rounded-boton border border-outline-variant bg-white px-3 py-2.5 font-body-md text-input-movil text-on-surface placeholder:text-on-surface-subtle transition duration-fast ease-standard hover:[&:not(:focus)]:border-outline md:text-body-md"
               />
             </div>
           </SeccionCard>

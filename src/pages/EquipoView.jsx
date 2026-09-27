@@ -168,11 +168,13 @@ function EquipoView() {
               {caracteristicas.length === 0 ? (
                 <p className="font-body-md text-body-md text-on-surface-variant">No tiene características.</p>
               ) : (
-                <ul className="flex flex-col divide-y divide-outline-variant">
+                // Mismos recuadros que "Datos del equipo": el nombre de la
+                // característica hace de etiqueta y la descripción de valor.
+                <ul className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
                   {caracteristicas.map((c) => (
-                    <li key={c.id} className="flex flex-wrap items-baseline gap-x-1.5 gap-y-1 py-3">
-                      <span className="font-body-md text-body-md font-semibold text-on-surface">{c.name}:</span>
-                      <span className="font-body-md text-body-md text-on-surface-variant">{c.description}</span>
+                    <li key={c.id} className="min-w-0 rounded-xl bg-surface-container-high px-4 py-3">
+                      <p className="mb-1 break-words font-mono text-micro uppercase leading-4 tracking-[0.1em] text-on-surface-variant">{c.name}</p>
+                      <p className="break-words font-body-md text-body-md text-on-surface">{c.description}</p>
                     </li>
                   ))}
                 </ul>

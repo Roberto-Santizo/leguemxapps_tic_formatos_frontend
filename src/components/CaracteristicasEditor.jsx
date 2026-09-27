@@ -222,30 +222,33 @@ export function CaracteristicasDeEquipo({
           No tiene características.
         </p>
       ) : (
-        <ul className="flex flex-col divide-y divide-outline-variant">
+        // Recuadros como "Datos del equipo": nombre arriba (etiqueta mono) y
+        // descripción abajo; en edición, los dos se corrigen con un clic.
+        <ul className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
           {caracteristicas.map((c) => (
-            <li key={c.id} className="flex flex-wrap items-baseline gap-x-1.5 gap-y-1 py-2.5">
+            <li key={c.id} className="min-w-0 rounded-xl bg-surface-container-high px-4 py-3">
               {soloLectura ? (
                 <>
-                  <span className="font-body-md text-body-md font-semibold text-on-surface">{c.name}:</span>
-                  <span className="font-body-md text-body-md text-on-surface-variant break-words">
-                    {c.description}
-                  </span>
+                  <p className="mb-1 break-words font-mono text-micro uppercase leading-4 tracking-[0.1em] text-on-surface-variant">
+                    {c.name}
+                  </p>
+                  <p className="break-words font-body-md text-body-md text-on-surface">{c.description}</p>
                 </>
               ) : (
                 <>
-                  <InlineEditableText
-                    value={c.name}
-                    onChange={(v) => editarCampo(c, 'name', v)}
-                    title="Clic para editar el nombre"
-                    className="font-label-bold text-label-bold text-on-surface"
-                  />
-                  <span className="font-label-bold text-label-bold text-on-surface">:</span>
+                  <div className="mb-1">
+                    <InlineEditableText
+                      value={c.name}
+                      onChange={(v) => editarCampo(c, 'name', v)}
+                      title="Clic para editar el nombre"
+                      className="font-mono text-micro uppercase leading-4 tracking-[0.1em] text-on-surface-variant"
+                    />
+                  </div>
                   <InlineEditableText
                     value={c.description}
                     onChange={(v) => editarCampo(c, 'description', v)}
                     title="Clic para editar la descripción"
-                    className="font-body-md text-body-md text-on-surface-variant"
+                    className="font-body-md text-body-md text-on-surface"
                   />
                 </>
               )}

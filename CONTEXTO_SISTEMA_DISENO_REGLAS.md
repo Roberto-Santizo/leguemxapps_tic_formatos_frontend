@@ -19,7 +19,8 @@
 >
 > Después de "Diseño visual" vienen las secciones con fecha (aproximadamente de la más
 > nueva a la más vieja):
-> 2026-09-27 (nueva entrega seguida, filtro por departamento, historial del colaborador),
+> 2026-09-27 (actas con el estilo del sistema; nueva entrega seguida, filtro por
+> departamento, historial del colaborador),
 > 2026-09-26 (borrador, aviso de sesión, "Ver acta", volver por origen; destello y viento),
 > 2026-09-25 (historial por departamento, filtros, CSV; tablet; PDF), 2026-09-14
 > (paginación) y las de limpieza del 2026-09-08 / 09-11.
@@ -171,12 +172,11 @@ nunca escribir un componente de página nuevo para eso.
   - `text-nano` (10px/16px, mono: marca del menú, pie, chip "Corregida aquí") y
     `text-titulo-modal` (20/28/600/−0.02em: título de `ConfirmDialog` y
     `EquipoDetalleModal`).
-  - **Papel** (hoja de entrega/devolución en pantalla, aprobada por el cliente): su título
-    usa `font-papel text-titulo-papel` (Manrope 24/32/800/−0.02em = el `headline-lg` de
-    antes del rediseño + `font-extrabold`). Los tokens `headline-*` cambiaron a Inter en el
-    rediseño; dentro del papel NO se usan para no alterar lo aprobado. Si un token global
-    que el papel usa cambia, comparar la hoja contra una captura de la versión
-    anterior al rediseño (commit `ad5a5d5`, 2026-09-21).
+  - **Membrete del papel** (hoja de entrega/devolución en pantalla): su título usa
+    `font-papel text-titulo-papel` (Manrope 24/32/800/−0.02em). El membrete (logo,
+    título, código, emisión/vigencia) conserva su estilo de documento porque representa
+    el papel físico. El resto de la hoja se unificó con el sistema el 2026-09-27 (ver
+    "Actas con el estilo del sistema").
   - Cada pantalla abre con **eyebrow de migas** (filete de 28px + ruta en mayúsculas) sobre
     el `h1`: `SECCIÓN / SUBSECCIÓN[ / ACCIÓN]`. Primer nivel: `ACTAS / NUEVA`, `HISTORIAL`,
     `CATÁLOGO`, `USUARIOS`; subpantallas p. ej. `CATÁLOGO / MARCAS / DETALLE`,
@@ -474,6 +474,25 @@ nunca escribir un componente de página nuevo para eso.
 - Botón de "registrar nuevo" en las listas de historial: siempre visible en el encabezado
   de la pantalla (junto al título), no solo cuando la lista está vacía -- patrón consistente
   entre `HistorialEntregaList.jsx` y `HistorialDevolucionList.jsx`.
+
+## Actas con el estilo del sistema (2026-09-27)
+
+Las pantallas de actas (hoja de entrega, registrar devolución, detalle de entrega y de
+devolución) conservaban la apariencia anterior al rediseño. Se unificaron con el resto
+del sistema sin cambiar estructura, campos, funciones ni el PDF (aprobado por el PM con
+antes/después):
+- `SeccionCard` (en `FormatoActa.jsx`, compartida por las 4): título `headline-md` en
+  negrita dentro de la tarjeta blanca, ícono gris; sin la franja gris en mayúsculas.
+- `Campo` tiene dos formas: editable (etiqueta `text-meta font-semibold` arriba, como los
+  formularios del Catálogo) y **`lectura`** (recuadro `rounded-xl bg-surface-container-high`
+  con etiqueta mono adentro, como "Datos del equipo" en la ficha). Las vistas y los datos
+  de la entrega en registrar devolución usan `lectura`; su `valorClass` ya no dibuja caja.
+- Campos y observaciones de la hoja = `inputClasses` de `EquipoForm`.
+- Encabezados de tabla y etiquetas de las tarjetas de equipo en táctil: mono `text-micro`
+  con fondo `bg-surface-container`, como las listas (`whitespace-nowrap`).
+- Migas debajo del botón volver (columna), como las demás pantallas.
+- Características del equipo (ficha y `CaracteristicasEditor`): recuadros como "Datos del
+  equipo" (nombre = etiqueta mono, descripción = valor); en edición siguen con clic.
 
 ## Nueva entrega seguida, filtro por departamento e historial del colaborador (2026-09-27)
 
