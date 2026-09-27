@@ -13,6 +13,9 @@ import { ChevronDown, SlidersHorizontal, X } from 'lucide-react'
  * color), para que todos los filtros del sistema se vean igual.
  *
  *  grupos: [{ id, etiqueta, valor, onCambiar, opciones: [{ valor, etiqueta, punto? }] }]
+ *  selectores: lo mismo pero en lista desplegable, para cuando las opciones
+ *    son muchas (hoy: Departamento). Nativo a propósito: en tablet y teléfono
+ *    abre el selector del sistema, cómodo con el dedo.
  *  desde / hasta: 'aaaa-mm-dd' o ''  ·  onDesde / onHasta(valor)
  *  hayFiltros: muestra "Limpiar filtros"  ·  onLimpiar()
  *
@@ -25,12 +28,15 @@ import { ChevronDown, SlidersHorizontal, X } from 'lucide-react'
 const etiquetaGrupo = 'w-full font-mono text-micro uppercase tracking-[0.1em] text-on-surface-variant sm:w-auto'
 const chip =
   'inline-flex h-8 items-center gap-1.5 rounded-full border px-3 text-meta font-medium leading-4 whitespace-nowrap transition duration-fast ease-standard active:scale-[0.97]'
+const selector =
+  'h-8 max-w-[15rem] rounded-full border py-0 pl-3 pr-8 text-meta font-medium leading-4 transition duration-fast ease-standard focus:border-primary focus:ring-2 focus:ring-primary/25 disabled:opacity-60'
 const inputFecha =
   'h-8 w-[136px] rounded-boton border border-outline-variant bg-white px-2 font-mono text-meta tabular-nums text-on-surface transition hover:[&:not(:focus)]:border-outline'
 
-function FiltrosActas({ grupos, desde, hasta, onDesde, onHasta, hayFiltros, onLimpiar }) {
+function FiltrosActas({ grupos, selectores = [], desde, hasta, onDesde, onHasta, hayFiltros, onLimpiar }) {
   const [abiertoMovil, setAbiertoMovil] = useState(false)
-  const puestos = grupos.filter((g) => g.valor).length + (desde || hasta ? 1 : 0)
+  const puestos =
+    grupos.filter((g) => g.valor).length + selectores.filter((g) => g.valor).length + (desde || hasta ? 1 : 0)
 
   return (
     <div className="flex flex-col gap-3">
@@ -90,6 +96,38 @@ function FiltrosActas({ grupos, desde, hasta, onDesde, onHasta, hayFiltros, onLi
               </button>
             )
           })}
+        </div>
+      ))}
+
+      {selectores.map((sel) => (
+        <div key={sel.id} className="flex flex-wrap items-center gap-2">
+          <label htmlFor={`filtro-${sel.id}`} className={etiquetaGrupo}>
+            {sel.etiqueta}
+          </label>
+          <select
+            id={`filtro-${sel.id}`}
+            value={sel.valor}
+            disabled={sel.cargando}
+            onChange={(e) => sel.onCambiar(e.target.value)}
+            className={[
+              selector,
+              // Puesto: borde y texto en tinta (la flecha del select es gris
+              // y no se vería sobre el fondo negro de los chips).
+              sel.valor
+                ? 'border-tinta bg-white text-on-surface ring-1 ring-tinta'
+                : 'border-outline-variant bg-white text-on-surface-variant hover:[&:not(:focus)]:border-outline',
+            ].join(' ')}
+          >
+            {sel.cargando && !sel.valor ? (
+              <option value="">Cargando…</option>
+            ) : (
+              sel.opciones.map((o) => (
+                <option key={o.valor || 'todos'} value={o.valor} className="bg-white text-on-surface">
+                  {o.etiqueta}
+                </option>
+              ))
+            )}
+          </select>
         </div>
       ))}
 

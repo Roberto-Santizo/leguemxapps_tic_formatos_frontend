@@ -4,9 +4,11 @@ import { createPortal } from 'react-dom'
 // Momento de "acta registrada" (mockup Sierra, celebración al crear): check
 // que se dibuja, dos anillos que se expanden y chispas.
 //
-// Con `acciones` ({ ver, cerrar, textoVer }) deja de ser un instante que se
-// va solo: queda abierto con "Ver acta" (lleva al acta recién creada) y
-// "Cerrar" (sigue a donde la página iba antes). Esc también cierra.
+// Con `acciones` ({ ver, cerrar, textoVer, otra?, textoOtra? }) deja de ser un
+// instante que se va solo: queda abierto con "Ver acta" (lleva al acta recién
+// creada) y "Cerrar" (sigue a donde la página iba antes). Esc también cierra.
+// `otra` agrega "Nueva entrega": hoja en blanco al instante, para registrar
+// varias seguidas sin volver al menú.
 const CHISPAS = [0, 45, 90, 135, 180, 225, 270, 315].map((grados, i) => ({
   grados,
   color: ['#15803d', '#4d7c2a', '#9bc96a', '#0b2a1e'][i % 4],
@@ -62,22 +64,33 @@ function ActaRegistrada({ codigo, titulo, detalle, acciones }) {
         <p className="mt-2 font-body-lg text-titulo-modal text-on-surface">{titulo}</p>
         {detalle && <p className="mt-1.5 font-body-md text-body-md text-on-surface-variant">{detalle}</p>}
         {acciones && (
-          <div className="acta-lista__acciones mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-center sm:gap-3">
-            <button
-              type="button"
-              onClick={acciones.cerrar}
-              className="inline-flex h-10 items-center justify-center rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97] sm:min-w-[8.5rem]"
-            >
-              Cerrar
-            </button>
-            <button
-              ref={botonVer}
-              type="button"
-              onClick={acciones.ver}
-              className="inline-flex h-10 items-center justify-center rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97] sm:min-w-[8.5rem]"
-            >
-              {acciones.textoVer || 'Ver acta'}
-            </button>
+          <div className="acta-lista__acciones mt-6 flex flex-col gap-2">
+            <div className={`flex flex-col-reverse gap-2 sm:flex-row sm:justify-center ${acciones.otra ? '' : 'sm:gap-3'}`}>
+              <button
+                type="button"
+                onClick={acciones.otra || acciones.cerrar}
+                className="inline-flex h-10 items-center justify-center rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97] sm:min-w-[8.5rem] sm:flex-1"
+              >
+                {acciones.otra ? acciones.textoOtra || 'Nueva entrega' : 'Cerrar'}
+              </button>
+              <button
+                ref={botonVer}
+                type="button"
+                onClick={acciones.ver}
+                className="inline-flex h-10 items-center justify-center rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97] sm:min-w-[8.5rem] sm:flex-1"
+              >
+                {acciones.textoVer || 'Ver acta'}
+              </button>
+            </div>
+            {acciones.otra && (
+              <button
+                type="button"
+                onClick={acciones.cerrar}
+                className="inline-flex h-9 items-center justify-center rounded-boton px-4 font-body-md text-body-md font-medium text-on-surface-variant transition duration-fast ease-standard hover:bg-surface-container hover:text-on-surface active:scale-[0.97]"
+              >
+                Cerrar
+              </button>
+            )}
           </div>
         )}
       </div>

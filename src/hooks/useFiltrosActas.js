@@ -1,5 +1,7 @@
-import { useCallback, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { usePaginaUrl } from './usePaginacion.js'
+import { useAuth } from '../context/AuthContext.jsx'
+import { listarDepartamentos } from '../services/api.js'
 import { fechaInputValue } from '../utils/fecha.js'
 import { normalizarNombre } from '../utils/texto.js'
 import { OPCIONES_ESTADO_ENTREGA } from '../utils/estadoEntrega.js'
@@ -38,6 +40,10 @@ function plantaDe(location) {
  *  - departamento: undefined fuera del historial por departamento; null
  *    mientras el departamento se está cargando (no deja pasar nada, para que
  *    nunca se vea un instante el historial de todos); { name } ya cargado.
+ *    Fuera de ese historial la barra trae además un selector "Departamento"
+ *    (`?depto=<id>`). El backend no filtra actas por departamento, pero cada
+ *    acta trae `employee_department`: se compara por nombre, en el cliente,
+ *    igual que el historial por departamento.
  *
  * Devuelve `filtroExtra` listo para useListaPaginada (null si no hay ningún
  * filtro activo, así la lista sigue pidiéndose por página al servidor) y las
@@ -54,10 +60,37 @@ export default function useFiltrosActas({ campoEstado, campoFecha, conPlanta = f
   const hasta = fechaValida(parametro('hasta')) ? parametro('hasta') : ''
 
   const enDepartamento = departamento !== undefined
-  const nombreDepto = departamento ? normalizarNombre(departamento.name) : ''
+
+  // Selector de departamento (solo en el Historial general).
+  const { token } = useAuth()
+  const [departamentos, setDepartamentos] = useState(null) // null = cargando
+  useEffect(() => {
+    if (enDepartamento) return undefined
+    let vivo = true
+    listarDepartamentos(token)
+      .then((lista) => vivo && setDepartamentos(Array.isArray(lista) ? lista : []))
+      .catch(() => vivo && setDepartamentos([]))
+    return () => {
+      vivo = false
+    }
+  }, [enDepartamento, token])
+  const deptoUrl = enDepartamento ? '' : parametro('depto')
+  const deptoElegido = deptoUrl && departamentos ? departamentos.find((d) => String(d.id) === deptoUrl) : null
+  // Id en la URL que no existe (borrado, a mano): se ignora, como las fechas inválidas.
+  const depto = deptoElegido ? deptoUrl : ''
+  const esperandoDepto = Boolean(deptoUrl) && departamentos === null
+
+  const nombreDepto = departamento
+    ? normalizarNombre(departamento.name)
+    : deptoElegido
+      ? normalizarNombre(deptoElegido.name)
+      : ''
 
   const filtroExtra = useMemo(() => {
     if (enDepartamento && !departamento) return () => false
+    // Con ?depto= en la URL y la lista aún cargando: nada, para no mostrar
+    // un instante las actas de todos los departamentos.
+    if (esperandoDepto) return () => false
     const partes = []
     if (nombreDepto) partes.push((d) => normalizarNombre(d.employee_department) === nombreDepto)
     if (estado) partes.push((d) => d[campoEstado] === estado)
@@ -73,13 +106,32 @@ export default function useFiltrosActas({ campoEstado, campoFecha, conPlanta = f
       })
     }
     return partes.length ? (d) => partes.every((p) => p(d)) : null
-  }, [enDepartamento, departamento, nombreDepto, estado, planta, desde, hasta, campoEstado, campoFecha])
+  }, [enDepartamento, departamento, esperandoDepto, nombreDepto, estado, planta, desde, hasta, campoEstado, campoFecha])
 
-  const hayFiltros = Boolean(estado || planta || desde || hasta)
+  const hayFiltros = Boolean(estado || planta || desde || hasta || depto)
   const limpiar = useCallback(
-    () => setParametros({ estado: '', planta: '', desde: '', hasta: '' }),
+    () => setParametros({ estado: '', planta: '', desde: '', hasta: '', depto: '' }),
     [setParametros],
   )
+
+  const selectores = enDepartamento
+    ? []
+    : [
+        {
+          id: 'depto',
+          etiqueta: 'Departamento',
+          valor: depto,
+          cargando: departamentos === null,
+          opciones: [
+            { valor: '', etiqueta: 'Todos' },
+            ...(departamentos || [])
+              .slice()
+              .sort((a, b) => String(a.name).localeCompare(String(b.name), 'es'))
+              .map((d) => ({ valor: String(d.id), etiqueta: d.name })),
+          ],
+          onCambiar: (v) => setParametro('depto', v),
+        },
+      ]
 
   const grupos = [
     {
@@ -99,6 +151,7 @@ export default function useFiltrosActas({ campoEstado, campoFecha, conPlanta = f
     hayFiltros,
     propsFiltros: {
       grupos,
+      selectores,
       desde,
       hasta,
       onDesde: (v) => setParametro('desde', v),

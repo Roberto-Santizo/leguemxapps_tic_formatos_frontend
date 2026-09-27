@@ -428,6 +428,23 @@ nunca escribir un componente de página nuevo para eso.
   de la pantalla (junto al título), no solo cuando la lista está vacía -- patrón consistente
   entre `HistorialEntregaList.jsx` y `HistorialDevolucionList.jsx`.
 
+## Nueva entrega seguida, filtro por departamento e historial del colaborador (2026-09-27)
+
+- **"Nueva entrega"** en el momento de acta registrada (`ActaRegistrada`, acción `otra`):
+  abre una hoja en blanco al instante. `FormatoActa` es un envoltorio que monta la hoja
+  (`HojaActa`) con `key={location.key}`: navegar a la misma ruta la vuelve a montar desde
+  cero (colaborador, equipos, firmas y borrador limpios); la planta se conserva. Lleva el
+  scroll del `<main>` arriba (misma ruta: si no, se quedaba en las firmas).
+- **Filtro "Departamento"** en Historial / Entrega y Devolución (`useFiltrosActas`,
+  `?depto=<id>`, selector nativo en `FiltrosActas` vía `selectores`). El backend no filtra
+  actas por departamento: se compara `employee_department` por nombre en el cliente, igual
+  que el historial por departamento. No aparece dentro del historial de un departamento.
+- **Historial de actas en la ficha del colaborador** (`EmpleadoView`): entregas y
+  devoluciones, de la más nueva a la más vieja, con estado, extravíos y equipos; cada una
+  abre el acta y "volver" regresa al colaborador. Se filtra por `employee_id` en el
+  cliente (no se usa `?employeeId=` del backend: falló en una prueba del 2026-09-11).
+- Pendientes técnicos y de backend: sección "Pendientes y mejoras sugeridas" del `README.md`.
+
 ## Borrador, aviso de sesión, "Ver acta" y volver por origen (2026-09-26)
 
 Salió de la revisión de uso real (pérdida del acta si la sesión vencía al finalizar, textos

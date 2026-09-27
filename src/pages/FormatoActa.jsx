@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import {
   ArrowLeft,
   ArchiveRestore,
@@ -143,7 +143,16 @@ function Parrafo({ children }) {
 
 // --- Página --------------------------------------------------------------
 
+// "Nueva entrega" (al registrar) navega a esta misma ruta: la clave de la
+// navegación cambia y la hoja se vuelve a montar desde cero -- colaborador,
+// equipos, firmas y el borrador limpios --, sin copiar a mano cada reinicio.
+// La planta se conserva (vive en su propio localStorage).
 function FormatoActa() {
+  const { key } = useLocation()
+  return <HojaActa key={key} />
+}
+
+function HojaActa() {
   const { tipo } = useParams()
   const navigate = useNavigate()
   const formato = getFormato(tipo)
@@ -1412,6 +1421,14 @@ function FormatoActa() {
               mostrarToast('Entrega registrada')
               navigate('/historial/entrega', { replace: true })
             },
+            otra: () => {
+              mostrarToast('Entrega registrada')
+              navigate(`/actas/${tipo}/nueva`, { replace: true })
+              // Misma ruta: el <main> que scrollea no cambia y se quedaría
+              // abajo, en las firmas. La hoja nueva empieza arriba.
+              document.querySelector('main[data-sheet]')?.scrollTo({ top: 0 })
+            },
+            textoOtra: 'Nueva entrega',
           }}
         />
       )}
