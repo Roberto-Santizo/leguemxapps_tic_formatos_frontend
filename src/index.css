@@ -1321,6 +1321,16 @@ body {
 }
 @media print { .cielo-sistema { display: none; } body { background-image: none; } }
 
+/* Cielo del cajón del menú (Sidebar, teléfono y tablet). Va detrás del contenido del
+   cajón (z-index -1 dentro de su propio apilamiento, `isolate`). */
+.cajon-cielo { position: absolute; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; min-height: 100%;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--cielo-app) 74%, rgb(var(--c-background))) 0, rgb(var(--c-background)) 260px); }
+.cajon-astro { position: absolute; top: 26px; right: 76px; width: 26px; height: 26px; border-radius: 9999px;
+  background: radial-gradient(circle at 40% 38%, var(--sol-1), var(--sol-2));
+  box-shadow: 0 0 0 6px rgb(var(--sol-halo) / 0.14), 0 0 22px 6px rgb(var(--sol-halo) / 0.28); }
+:root[data-fase="noche"] .cajon-astro { background: transparent; box-shadow: inset -7px 4px 0 0 var(--luna), 0 0 18px 2px rgb(255 255 255 / 0.12); transform: rotate(-12deg); }
+.cajon-sierra { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: 260px; fill: rgb(var(--c-bosque)); }
+
 /* En oscuro el destello de la cordillera (SierraFondo) se aclara mucho sobre la montaña
    oscura: se atenúa. */
 @media (prefers-color-scheme: dark) { :root:not([data-tema="claro"]) .sierra-brillo { opacity: 0.18; } }
