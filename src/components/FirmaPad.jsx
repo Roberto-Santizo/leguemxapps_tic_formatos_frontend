@@ -2,8 +2,9 @@ import { useRef, useState } from 'react'
 import SignatureCanvas from 'react-signature-canvas'
 import { CheckCircle2, Upload } from 'lucide-react'
 
-// Los recuadros donde se dibuja o se ve la firma llevan data-claro: siempre en la paleta
-// clara, porque la firma es tinta negra y en modo oscuro no se vería.
+// Firmas en oscuro (index.css): el recuadro lleva data-firma-recuadro (más oscuro que la
+// tarjeta) y el trazo o la imagen data-firma-tinta (se ve blanco con un filtro). Lo que se
+// guarda y lo que va al PDF sigue siendo tinta negra: el filtro es solo de pantalla.
 
 // --- Firma "Registro histórico / firmado en papel" (Fase 1.3) ---
 // Sin campo de nota (se quitó a pedido -- solo se confirma, sin texto
@@ -104,8 +105,8 @@ function FirmaPad({ titulo, subtitulo, firmaUrl, onConfirmar, onReiniciar }) {
     return (
       <div className="flex flex-col rounded-xl border border-outline-variant bg-white p-3">
         <EncabezadoFirma titulo={titulo} subtitulo={subtitulo} />
-        <div data-claro className="grid aspect-[5/2] w-full animate-pop-in place-items-center rounded-boton border border-outline-variant bg-surface-container-low p-2">
-          <img src={firmaUrl} alt={`Firma de ${titulo}`} className="max-h-full max-w-full object-contain" />
+        <div data-firma-recuadro className="grid aspect-[5/2] w-full animate-pop-in place-items-center rounded-boton border border-outline-variant bg-surface-container-low p-2">
+          <img data-firma-tinta src={firmaUrl} alt={`Firma de ${titulo}`} className="max-h-full max-w-full object-contain" />
         </div>
         <div className="mt-3 flex items-center justify-between gap-2">
           <div className="flex items-center gap-1.5 font-mono text-micro uppercase tracking-[0.08em] text-on-surface-variant">
@@ -178,23 +179,24 @@ function FirmaPad({ titulo, subtitulo, firmaUrl, onConfirmar, onReiniciar }) {
         // touch-action: none evita que un trazo con el dedo se interprete
         // como scroll de la página en móvil (Fase 1.1).
         <div
-          data-claro
+          data-firma-recuadro
           className="grid aspect-[5/2] w-full place-items-center overflow-hidden rounded-boton border border-dashed border-outline bg-white"
           style={{ touchAction: 'none' }}
         >
           <SignatureCanvas
             ref={sigCanvasRef}
             penColor="black"
-            canvasProps={{ className: 'w-full h-full', style: { touchAction: 'none' } }}
+            canvasProps={{ className: 'w-full h-full', style: { touchAction: 'none' }, 'data-firma-tinta': '' }}
             onEnd={() => setVacio(sigCanvasRef.current?.isEmpty() ?? true)}
           />
         </div>
       )}
 
       {modo === 'subir' && (
-        <div data-claro className="grid aspect-[5/2] w-full place-items-center rounded-boton border border-dashed border-outline bg-white">
+        <div data-firma-recuadro className="grid aspect-[5/2] w-full place-items-center rounded-boton border border-dashed border-outline bg-white">
           {previewSubida ? (
             <img
+              data-firma-tinta
               src={previewSubida}
               alt="Firma subida"
               className="max-h-full max-w-full object-contain p-2"

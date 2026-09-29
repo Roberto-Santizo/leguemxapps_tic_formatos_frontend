@@ -93,6 +93,7 @@ function FirmaImagen({ url, alt }) {
 
   return (
     <img
+      data-firma-tinta
       src={url}
       alt={alt}
       onError={() => setFallo(true)}
@@ -757,7 +758,7 @@ function HistorialEntregaView() {
                             <p className="shrink-0 font-label-sm text-label-sm text-on-surface-variant">{firma.subtitulo}</p>
                           )}
                         </div>
-                        <div data-claro className="grid aspect-[5/2] w-full place-items-center rounded-lg border border-outline-variant bg-surface-container-low p-2">
+                        <div data-firma-recuadro className="grid aspect-[5/2] w-full place-items-center rounded-lg border border-outline-variant bg-surface-container-low p-2">
                           <FirmaImagen url={url} alt={`Firma de ${firma.titulo}`} />
                         </div>
                       </div>

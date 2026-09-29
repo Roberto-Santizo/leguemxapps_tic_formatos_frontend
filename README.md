@@ -46,7 +46,8 @@ Guatemala (día, amanecer, atardecer, noche) en el sistema, el login y el menú 
 teléfono; modo oscuro (Automático / Claro / Oscuro, botón junto al nombre); recorrido
 guiado "¿Cómo funciona?" por rol (la primera vez y con el botón **?**); ajustes para
 teclado y toque en iPhone, Android y tablet; y clases de botón. Las hojas de las actas
-también cambian a oscuro (las firmas quedan en recuadro claro); el PDF sale igual.
+también cambian a oscuro (la firma se ve blanca en un recuadro oscuro); el PDF sale
+igual, con la firma en negro.
 Probada con navegador automatizado; falta probarla en equipos reales.
 
 ## Pendientes y mejoras sugeridas

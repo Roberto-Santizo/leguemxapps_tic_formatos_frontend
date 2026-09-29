@@ -1188,13 +1188,21 @@ html[data-teclado] [data-sobre-teclado] {
 }
 
 /* ── Modo oscuro: excepciones ─────────────────────────────────────────────
-   Las hojas de las actas siguen el tema (el PDF no: tiene sus propios colores). Los
-   recuadros de firma ([data-claro]) conservan la paleta clara: la firma es tinta negra.
-   El logo verde se aclara en oscuro. */
+   Las hojas de las actas siguen el tema (el PDF no: tiene sus propios colores).
+   El logo verde se aclara en oscuro.
+   Firmas: la tinta es negra (el PNG guardado y el PDF). En oscuro se ve BLANCA con un
+   filtro solo de pantalla ([data-firma-tinta]: trazo del lienzo e imagen) y el recuadro
+   ([data-firma-recuadro]) queda más oscuro que la tarjeta, con filete visible. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-tema="claro"]) img[src*="logo-legumex"] { filter: brightness(0) invert(0.9); }
 }
 :root[data-tema="oscuro"] img[src*="logo-legumex"] { filter: brightness(0) invert(0.9); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) [data-firma-tinta] { filter: invert(1); }
+  :root:not([data-tema="claro"]) [data-firma-recuadro] { background-color: rgb(var(--c-background)); border-color: rgb(var(--c-outline)); }
+}
+:root[data-tema="oscuro"] [data-firma-tinta] { filter: invert(1); }
+:root[data-tema="oscuro"] [data-firma-recuadro] { background-color: rgb(var(--c-background)); border-color: rgb(var(--c-outline)); }
 
 /* ── Cielo según la hora (Tickets TIC, "Cielo según la hora" y "Sistema vivo") ──
    La hora de Guatemala (<html data-fase>, src/config/cielo.js) decide QUÉ hay en el

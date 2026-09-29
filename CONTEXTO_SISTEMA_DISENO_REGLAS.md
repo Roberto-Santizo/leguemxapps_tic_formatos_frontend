@@ -488,7 +488,7 @@ fuera del modo oscuro y del cielo (tiene sus propios colores, `src/pdf/`).
 - **Colores como variables** (`src/tema/paleta.js`): `CLARO` y `OSCURO` con todos los
   tokens; `tailwind.config.js` los registra como `rgb(var(--c-<token>) / <alpha-value>)`
   y su plugin escribe `:root` (claro), oscuro bajo `prefers-color-scheme` (si no se
-  eligió claro) y bajo `[data-tema="oscuro"]`, y `[data-claro]` de vuelta a claro. Las
+  eligió claro) y bajo `[data-tema="oscuro"]`. Las
   clases no cambiaron (`bg-white` = superficie; en oscuro es gris muy oscuro). Texto sobre
   `bg-tinta` = `text-on-tinta` (no `text-white`). Selección del menú: `sel-bg`,
   `sel-borde`; segmentados: `seg-on`, `seg-borde`. Sombras en `rgb(var(...))`.
@@ -500,9 +500,10 @@ fuera del modo oscuro y del cielo (tiene sus propios colores, `src/pdf/`).
   papel, destello de la sierra atenuado.
 - **Hojas de las actas en oscuro** (decisión del 2026-09-29, opción 2): las 4 pantallas
   de acta siguen el tema como el resto del sistema (con la hoja siempre clara se veía
-  una inconsistencia). Excepción: los recuadros donde se dibuja o se ve una firma llevan
-  `data-claro` (paleta clara), porque la firma es tinta negra sobre PNG transparente.
-  El PDF sale igual en cualquier tema.
+  una inconsistencia). Firmas en oscuro: el trazo y la imagen (`data-firma-tinta`) se ven
+  BLANCOS con un filtro solo de pantalla, sobre un recuadro (`data-firma-recuadro`) más
+  oscuro que la tarjeta y con filete visible. Lo que se guarda (PNG) y el PDF siguen en
+  tinta negra. El PDF sale igual en cualquier tema.
 - **Cielo según la hora de Guatemala** (`config/cielo.js`, UTC-6 fijo, no la hora del
   equipo): noche < 5:30, amanecer < 7:00, día < 17:15, atardecer < 18:45, noche. Se marca
   en `<html data-fase>` (script temprano en `index.html` con los mismos cortes + revisión

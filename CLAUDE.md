@@ -84,8 +84,9 @@ en español; mantener ese idioma.
   Un color nuevo va en las dos paletas; texto sobre `bg-tinta` = `text-on-tinta`.
   `<html data-tema>` (`utils/tema.js`, `BotonTema`) y `<html data-fase>` (hora de
   Guatemala, `config/cielo.js`) los ponen scripts tempranos de `index.html` y `main.jsx`.
-  Las hojas de acta siguen el tema; solo los recuadros de firma llevan `data-claro`
-  (paleta clara: la firma es tinta negra). El PDF usa sus propios colores.
+  Las hojas de acta siguen el tema; en oscuro la firma se ve blanca (`data-firma-tinta`,
+  filtro de pantalla) en un recuadro más oscuro (`data-firma-recuadro`); lo guardado y
+  el PDF siguen en tinta negra. El PDF usa sus propios colores.
 - `utils/tecladoMovil.js`: `--vv-alto/--vv-arriba/--vv-abajo` y `html[data-teclado]`;
   fijos abajo con `data-barra-inferior`, hojas/diálogos con `data-sobre-teclado`.
 - Recorrido guiado: `components/Recorrido.jsx` + pasos en `config/recorrido.js`; ilumina
