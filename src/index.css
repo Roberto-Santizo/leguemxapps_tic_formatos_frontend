@@ -1190,8 +1190,137 @@ html[data-teclado] [data-sobre-teclado] {
    paleta clara (plugin de tailwind.config.js) porque se imprime tal cual; en oscuro
    se ve como una hoja clara sobre la mesa oscura. El logo verde se aclara fuera del papel. */
 @media (prefers-color-scheme: dark) {
-  :root:not([data-tema="claro"]) [data-papel] { background: rgb(var(--c-papel)); border-radius: 1.5rem; padding: 1.25rem; color: rgb(var(--c-on-surface)); }
   :root:not([data-tema="claro"]) img[src*="logo-legumex"]:not([data-papel] img) { filter: brightness(0) invert(0.9); }
 }
-:root[data-tema="oscuro"] [data-papel] { background: rgb(var(--c-papel)); border-radius: 1.5rem; padding: 1.25rem; color: rgb(var(--c-on-surface)); }
 :root[data-tema="oscuro"] img[src*="logo-legumex"]:not([data-papel] img) { filter: brightness(0) invert(0.9); }
+
+/* ── Cielo según la hora (Tickets TIC, "Cielo según la hora" y "Sistema vivo") ──
+   La hora de Guatemala (<html data-fase>, src/config/cielo.js) decide QUÉ hay en el
+   cielo; el tema solo cambia la paleta. Sin data-fase (sin JS) queda el día. El papel
+   ([data-papel]) queda fuera: tiene su propio fondo de hoja. */
+:root {
+  --cielo-app: #b4d3ea;          /* tinte del fondo (celeste de día) */
+  --sol-1: #fff4c7;
+  --sol-2: #f8cd5c;
+  --sol-rayo: #f3c14e;
+  --sol-halo: 248 205 92;
+  --sol-tinte: 0.16;             /* brillo cálido arriba a la derecha */
+  --luna: #fbf8ec;
+  --nube: #ffffff;
+  --mota: 246 196 82;
+  --fugaz: #ffffff;
+  --aves: 11 42 30;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) {
+    --cielo-app: #132530; --sol-1: #f4e2a8; --sol-2: #d8a93e; --sol-rayo: #c99b3b; --sol-halo: 216 169 62;
+    --sol-tinte: 0.07; --luna: #f1edd8; --nube: #223033; --mota: 214 170 80; --fugaz: #f4f1e2; --aves: 214 236 222;
+  }
+}
+:root[data-tema="oscuro"] {
+  --cielo-app: #132530; --sol-1: #f4e2a8; --sol-2: #d8a93e; --sol-rayo: #c99b3b; --sol-halo: 216 169 62;
+  --sol-tinte: 0.07; --luna: #f1edd8; --nube: #223033; --mota: 214 170 80; --fugaz: #f4f1e2; --aves: 214 236 222;
+}
+/* Fases en claro: rosado al amanecer, cálido al atardecer, lila de noche. */
+@media (prefers-color-scheme: light) {
+  :root[data-fase="amanecer"]:not([data-tema="oscuro"]) { --cielo-app: #ead8e4; --sol-1: #fff0d8; --sol-2: #f6ad62; --sol-rayo: #f2a05a; --sol-halo: 246 173 98; --mota: 246 170 110; --nube: #f1dde2; }
+  :root[data-fase="atardecer"]:not([data-tema="oscuro"]) { --cielo-app: #f1cfb0; --sol-1: #ffd6a0; --sol-2: #ee7d3a; --sol-rayo: #e87332; --sol-halo: 238 125 58; --mota: 240 140 70; --nube: #f4d8c2; }
+  :root[data-fase="noche"]:not([data-tema="oscuro"]) { --cielo-app: #a9b2d2; --nube: #dfe3f1; --sol-tinte: 0; }
+}
+:root[data-fase="amanecer"][data-tema="claro"] { --cielo-app: #ead8e4; --sol-1: #fff0d8; --sol-2: #f6ad62; --sol-rayo: #f2a05a; --sol-halo: 246 173 98; --mota: 246 170 110; --nube: #f1dde2; }
+:root[data-fase="atardecer"][data-tema="claro"] { --cielo-app: #f1cfb0; --sol-1: #ffd6a0; --sol-2: #ee7d3a; --sol-rayo: #e87332; --sol-halo: 238 125 58; --mota: 240 140 70; --nube: #f4d8c2; }
+:root[data-fase="noche"][data-tema="claro"] { --cielo-app: #a9b2d2; --nube: #dfe3f1; --sol-tinte: 0; }
+/* Fases en oscuro. */
+@media (prefers-color-scheme: dark) {
+  :root[data-fase="amanecer"]:not([data-tema="claro"]) { --cielo-app: #17131a; --sol-1: #f6d2ae; --sol-2: #d8793f; --sol-rayo: #c96f3a; --sol-halo: 216 121 63; --mota: 216 140 90; }
+  :root[data-fase="atardecer"]:not([data-tema="claro"]) { --cielo-app: #1a1310; --sol-1: #f6b37c; --sol-2: #e0703a; --sol-rayo: #cf6a35; --sol-halo: 224 112 58; --mota: 224 120 60; }
+  :root[data-fase="noche"]:not([data-tema="claro"]) { --cielo-app: #0b1410; --sol-tinte: 0; }
+}
+:root[data-fase="amanecer"][data-tema="oscuro"] { --cielo-app: #17131a; --sol-1: #f6d2ae; --sol-2: #d8793f; --sol-rayo: #c96f3a; --sol-halo: 216 121 63; --mota: 216 140 90; }
+:root[data-fase="atardecer"][data-tema="oscuro"] { --cielo-app: #1a1310; --sol-1: #f6b37c; --sol-2: #e0703a; --sol-rayo: #cf6a35; --sol-halo: 224 112 58; --mota: 224 120 60; }
+:root[data-fase="noche"][data-tema="oscuro"] { --cielo-app: #0b1410; --sol-tinte: 0; }
+
+/* Tinte del cielo de la hora sobre el fondo, con un brillo cálido donde está el sol. */
+body {
+  background-image:
+    radial-gradient(ellipse 60% 38vh at 88% 0, rgb(var(--sol-halo) / var(--sol-tinte)), transparent 70%),
+    linear-gradient(180deg, color-mix(in srgb, var(--cielo-app) 74%, rgb(var(--c-background))) 0, rgb(var(--c-background)) 66vh);
+  background-attachment: fixed;
+}
+
+/* El papel queda fuera del cielo y del modo oscuro: una hoja propia sobre la mesa. */
+[data-papel] { background: rgb(var(--c-papel)); border-radius: 1.5rem; padding: 1.25rem; color: rgb(var(--c-on-surface)); }
+
+/* Escena del sistema (src/components/CieloSistema.jsx). */
+.cielo-sistema { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.cielo-estrellas {
+  display: none; position: absolute; left: 0; right: 0; top: 0; height: 60vh; opacity: 0.7;
+  -webkit-mask-image: linear-gradient(#000 35%, transparent); mask-image: linear-gradient(#000 35%, transparent);
+}
+.cielo-estrellas::before, .cielo-estrellas::after { content: ""; position: absolute; inset: 0; animation: cieloTitila 5s ease-in-out infinite alternate; }
+.cielo-estrellas::before {
+  background-image: radial-gradient(1.3px 1.3px at 11% 17%, #fff 60%, transparent), radial-gradient(1px 1px at 67% 41%, #fff 60%, transparent), radial-gradient(1.6px 1.6px at 38% 73%, #fff 60%, transparent), radial-gradient(1px 1px at 86% 12%, #fff 60%, transparent), radial-gradient(1.2px 1.2px at 23% 88%, #fff 60%, transparent), radial-gradient(1px 1px at 57% 5%, #fff 60%, transparent), radial-gradient(1.4px 1.4px at 93% 63%, #fff 60%, transparent), radial-gradient(1px 1px at 3% 46%, #fff 60%, transparent);
+  background-size: 317px 251px;
+}
+.cielo-estrellas::after {
+  background-image: radial-gradient(1px 1px at 52% 22%, #fff 60%, transparent), radial-gradient(1.5px 1.5px at 7% 58%, #fff 60%, transparent), radial-gradient(1.1px 1.1px at 79% 77%, #fff 60%, transparent), radial-gradient(1px 1px at 33% 39%, #fff 60%, transparent), radial-gradient(1.3px 1.3px at 64% 93%, #fff 60%, transparent), radial-gradient(1px 1px at 18% 8%, #fff 60%, transparent), radial-gradient(1.2px 1.2px at 97% 31%, #fff 60%, transparent);
+  background-size: 433px 307px; animation-delay: -2.5s; animation-duration: 7s;
+}
+@keyframes cieloTitila { from { opacity: 0.35; } to { opacity: 1; } }
+.cielo-fugaz { display: none; position: absolute; left: 30%; top: 4vh; width: 0; height: 0; transform: rotate(24deg); }
+.cielo-fugaz::before {
+  content: ""; position: absolute; left: 0; top: 0; width: 160px; height: 2px; border-radius: 2px; opacity: 0;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0), var(--fugaz));
+  animation: cieloFugaz 300s cubic-bezier(0.3, 0, 0.7, 1) 6s infinite;
+}
+@keyframes cieloFugaz { 0% { opacity: 0; transform: translateX(0) scaleX(0.3); } 0.15% { opacity: 1; transform: translateX(12vw) scaleX(1); } 0.6% { opacity: 0; transform: translateX(52vw) scaleX(0.6); } 100% { opacity: 0; transform: translateX(52vw); } }
+.cielo-motas {
+  position: absolute; left: 0; right: 0; top: 0; height: 62vh; opacity: 0.55;
+  -webkit-mask-image: linear-gradient(#000 40%, transparent); mask-image: linear-gradient(#000 40%, transparent);
+}
+.cielo-motas::before, .cielo-motas::after {
+  content: ""; position: absolute; inset: 0; filter: drop-shadow(0 0 3px rgb(var(--mota) / 0.9)); animation: cieloMotas 14s ease-in-out infinite;
+  background-image: radial-gradient(4.5px 4.5px at 14% 22%, rgb(var(--mota)), transparent), radial-gradient(3.5px 3.5px at 31% 64%, rgb(var(--mota)), transparent), radial-gradient(5px 5px at 58% 16%, rgb(var(--mota)), transparent), radial-gradient(3.5px 3.5px at 73% 48%, rgb(var(--mota)), transparent), radial-gradient(4.5px 4.5px at 88% 30%, rgb(var(--mota)), transparent), radial-gradient(4px 4px at 44% 38%, rgb(var(--mota)), transparent);
+}
+.cielo-motas::after {
+  background-image: radial-gradient(4px 4px at 22% 40%, rgb(var(--mota)), transparent), radial-gradient(3.5px 3.5px at 49% 70%, rgb(var(--mota)), transparent), radial-gradient(4.5px 4.5px at 66% 28%, rgb(var(--mota)), transparent), radial-gradient(3.5px 3.5px at 81% 66%, rgb(var(--mota)), transparent), radial-gradient(4.5px 4.5px at 37% 12%, rgb(var(--mota)), transparent);
+  animation-duration: 19s; animation-delay: -7s;
+}
+@keyframes cieloMotas { 0% { transform: translateY(12px); opacity: 0.15; } 50% { opacity: 1; } 100% { transform: translateY(-28px); opacity: 0.15; } }
+.cielo-astro { position: absolute; right: max(3%, 20px); top: 10px; width: 80px; aspect-ratio: 1; animation: cieloRespira 9s ease-in-out infinite; }
+.cielo-astro svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.cielo-rayos { stroke: var(--sol-rayo); stroke-width: 1.8; stroke-linecap: round; opacity: 0.7; transform-origin: 50px 50px; animation: cieloGira 90s linear infinite; }
+@keyframes cieloGira { to { transform: rotate(360deg); } }
+@keyframes cieloRespira { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.04); } }
+.cielo-luna { display: none; }
+.cielo-nubes { position: absolute; inset: 0; }
+.cielo-nubes svg { position: absolute; fill: var(--nube); opacity: 0.9; animation: cieloNube linear infinite; }
+.cielo-nubes .cielo-nube-lejos { opacity: 0.5; }
+@keyframes cieloNube { from { transform: translateX(-160px); } to { transform: translateX(calc(100vw + 40px)); } }
+.cielo-aves { position: absolute; left: 0; top: 21vh; width: 120px; height: 44px; opacity: 0; animation: cieloAves 170s linear 24s infinite; }
+.cielo-aves path { fill: none; stroke: rgb(var(--aves) / 0.55); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; transform-box: fill-box; transform-origin: center; animation: cieloAleteo 700ms ease-in-out infinite alternate; }
+.cielo-aves path:nth-child(2) { animation-delay: -250ms; } .cielo-aves path:nth-child(3) { animation-delay: -480ms; } .cielo-aves path:nth-child(4) { animation-delay: -120ms; }
+@keyframes cieloAves { 0% { opacity: 0; transform: translate(-140px, 24px); } 0.4% { opacity: 1; } 5.6% { opacity: 1; } 6% { opacity: 0; transform: translate(calc(100vw + 20px), -40px); } 100% { opacity: 0; transform: translate(calc(100vw + 20px), -40px); } }
+@keyframes cieloAleteo { from { transform: scaleY(1); } to { transform: scaleY(0.35); } }
+/* De noche: luna, estrellas y fugaz; sin sol, nubes, motas ni aves. Al amanecer y al
+   atardecer quedan las últimas (o primeras) estrellas, tenues. */
+:root[data-fase="noche"] .cielo-sol, :root[data-fase="noche"] .cielo-nubes,
+:root[data-fase="noche"] .cielo-motas, :root[data-fase="noche"] .cielo-aves { display: none; }
+:root[data-fase="noche"] .cielo-luna, :root[data-fase="noche"] .cielo-estrellas,
+:root[data-fase="noche"] .cielo-fugaz { display: block; }
+:root[data-fase="amanecer"] .cielo-estrellas, :root[data-fase="atardecer"] .cielo-estrellas { display: block; opacity: 0.28; }
+/* En claro de noche el cielo es lila: las estrellas y la luna llevan un poco de sombra. */
+/* Teléfono y tablet: el astro va a la esquina, bajo la barra superior. */
+@media not all and (min-width: 768px) and (hover: hover) and (pointer: fine) {
+  .cielo-astro { width: 52px; top: calc(3.5rem + 10px); right: 10px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cielo-sistema *, .cielo-sistema *::before, .cielo-sistema *::after { animation: none !important; }
+  .cielo-aves, .cielo-fugaz { display: none !important; }
+}
+@media print { .cielo-sistema { display: none; } body { background-image: none; } }
+
+/* En oscuro el destello de la cordillera (SierraFondo) se aclara mucho sobre la montaña
+   oscura: se atenúa. */
+@media (prefers-color-scheme: dark) { :root:not([data-tema="claro"]) .sierra-brillo { opacity: 0.18; } }
+:root[data-tema="oscuro"] .sierra-brillo { opacity: 0.18; }

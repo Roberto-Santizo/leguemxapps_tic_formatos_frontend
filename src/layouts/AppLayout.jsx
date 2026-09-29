@@ -4,6 +4,7 @@ import Sidebar from '../components/Sidebar.jsx'
 import MobileHeader from '../components/MobileHeader.jsx'
 import Footer from '../components/Footer.jsx'
 import SierraFondo from '../components/SierraFondo.jsx'
+import CieloSistema from '../components/CieloSistema.jsx'
 import { Toaster } from '../components/Toast.jsx'
 import AvisoSesion from '../components/AvisoSesion.jsx'
 
@@ -31,7 +32,8 @@ function AppLayout() {
   const [menuAbierto, setMenuAbierto] = useState(false)
 
   return (
-    <div className="h-full bg-background font-body-lg text-on-surface">
+    <div className="h-full font-body-lg text-on-surface">
+      <CieloSistema />
       <SierraFondo />
 
       <MobileHeader onAbrirMenu={() => setMenuAbierto(true)} />
