@@ -277,7 +277,7 @@ function RegistrarDevolucion() {
   return (
     <div className="flex-1 [&+footer]:pb-[calc(114px+env(safe-area-inset-bottom))] md:[&+footer]:pb-[88px]">
       <div className="px-4 pt-6 pb-10 tablet:px-8 tablet:pt-8 md:px-8 md:pt-10">
-        <div className="mx-auto max-w-4xl animate-view-in space-y-stack-lg">
+        <div data-papel className="mx-auto max-w-4xl animate-view-in space-y-stack-lg">
           <div className="flex flex-col items-start gap-5 md:gap-6">
             <Link
               to={`/historial/entrega/${id}`}

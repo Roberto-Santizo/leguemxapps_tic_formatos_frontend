@@ -11,9 +11,12 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Manrope:wght@700;800&display=swap"
       rel="stylesheet"
     />
-    <meta name="theme-color" content="#f4f5f1" />
+    <meta name="theme-color" content="#f4f5f1" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0e100e" media="(prefers-color-scheme: dark)" />
     <title>Legumex · Formatos TIC</title>
     <script src="/env.js"></script>
+    <!-- Tema guardado (claro u oscuro) antes de pintar, para que no parpadee (src/utils/tema.js) -->
+    <script>try{var t=localStorage.getItem('legumex_tema');if(t==='claro'||t==='oscuro')document.documentElement.setAttribute('data-tema',t)}catch(e){}</script>
   </head>
   <body>
     <div id="root"></div>

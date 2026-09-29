@@ -1,6 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import { FilePlus2, ClipboardList, BookOpen, Users, LogOut, X } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
+import BotonTema from './BotonTema.jsx'
 
 // Solo quedan dos roles: admin (todas las funciones) y user (restringido a
 // Historial: ver actas y corregir solo la fecha de encabezado y la fecha de
@@ -131,12 +132,13 @@ function Sidebar({ abierto, onCerrar }) {
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-outline bg-surface-container-lowest text-meta font-semibold uppercase text-on-surface">
               {user?.name?.charAt(0) ?? '?'}
             </div>
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <p className="truncate font-body-md text-body-md font-medium text-on-surface">{user?.name}</p>
               <p className="truncate font-label-sm text-label-sm font-normal text-on-surface-subtle">
                 {ETIQUETA_ROL[user?.role] ?? 'Usuario'}
               </p>
             </div>
+            <BotonTema />
           </div>
           <button
             onClick={handleLogout}
