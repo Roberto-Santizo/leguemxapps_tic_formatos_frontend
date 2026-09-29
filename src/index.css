@@ -1174,10 +1174,11 @@ html[data-teclado] [data-sobre-teclado] {
   /* Área de toque de al menos 40 px en botones chicos, sin cambiar su dibujo: un
      seudoelemento invisible 9 px más grande por lado. Los botones posicionados por su
      cuenta (absolute, fixed, sticky) o que ya usan ::before quedan como están. */
-  button:not(.absolute):not(.fixed):not(.sticky):not([class*="before:"]) { position: relative; }
+  /* :where() deja la regla sin peso: cualquier clase que posicione el botón gana. */
+  button:where(:not(.absolute):not(.fixed):not(.sticky):not([class*="before:"])) { position: relative; }
   button:not([class*="before:"])::before { content: ""; position: absolute; inset: -9px; }
   /* Enlaces con ícono y los botones "volver" (enlaces inline-flex de 36 px). */
-  a[href][aria-label]:not(.absolute):not(.fixed), a[href].inline-flex:not(.absolute):not(.fixed) { position: relative; }
+  a:where([href][aria-label], [href].inline-flex):where(:not(.absolute):not(.fixed)) { position: relative; }
   a[href][aria-label]::before, a[href].inline-flex::before { content: ""; position: absolute; inset: -9px; }
   /* Buscadores con tecla "Buscar" (type=search) sin la X del navegador. */
   input[type=search] { -webkit-appearance: none; appearance: none; }
@@ -1324,3 +1325,33 @@ body {
    oscura: se atenúa. */
 @media (prefers-color-scheme: dark) { :root:not([data-tema="claro"]) .sierra-brillo { opacity: 0.18; } }
 :root[data-tema="oscuro"] .sierra-brillo { opacity: 0.18; }
+
+/* ── Login según la hora ────────────────────────────────────────────────────
+   El login conserva su escena (telón, parallax, sol grande, neblina, sierra) y suma
+   el cielo de la hora (CieloSistema dentro de .lg-cielo-hora). El login se ve siempre
+   en claro (como el papel): la fase decide el cielo. */
+.lg-cielo-hora .cielo-sistema { position: fixed; z-index: 0; }
+/* de día el astro es el sol grande del login; el del sistema no se repite */
+.lg-cielo-hora .cielo-astro { display: none; }
+.lg-cielo { background: linear-gradient(180deg, var(--lg-cielo-alto, transparent), transparent 72%); }
+:root[data-fase="amanecer"] .lg-raiz { --lg-cielo-alto: #ead8e4; }
+:root[data-fase="atardecer"] .lg-raiz { --lg-cielo-alto: #f1cfb0; }
+:root[data-fase="noche"] .lg-raiz { --lg-cielo-alto: #a9b2d2; }
+/* amanecer y atardecer: el sol grande, cálido y bajo detrás de las montañas */
+:root[data-fase="amanecer"] .lg-sol, :root[data-fase="atardecer"] .lg-sol {
+  background: radial-gradient(circle at 50% 50%, #fff0d8 0%, #f6ad62 42%, rgba(246, 173, 98, 0) 70%);
+}
+:root[data-fase="atardecer"] .lg-sol { background: radial-gradient(circle at 50% 50%, #ffd6a0 0%, #ee7d3a 42%, rgba(238, 125, 58, 0) 70%); }
+:root[data-fase="amanecer"] .lg-sol { right: 40%; }
+/* de noche: sin sol; luna grande en su lugar, estrellas y fugaz; nubes lilas */
+:root[data-fase="noche"] .lg-sol { display: none; }
+:root[data-fase="noche"] .lg-cielo-hora .cielo-astro {
+  display: block; top: auto; right: 44%; bottom: calc(clamp(140px, 30vh, 280px) + 40px); width: clamp(90px, 9vw, 130px);
+}
+:root[data-fase="noche"] .lg-nubes { opacity: 0.45; }
+:root[data-fase="noche"] .lg-cielo-hora .cielo-estrellas { opacity: 0.95; }
+@media not all and (min-width: 768px) and (hover: hover) and (pointer: fine) {
+  :root[data-fase="noche"] .lg-cielo-hora .cielo-astro { right: 8%; top: 5vh; bottom: auto; width: 72px; }
+}
+/* el login siempre en claro: la paleta clara del cielo aunque el tema sea oscuro */
+.lg-raiz { --cielo-app: #b4d3ea; --nube: #ffffff; --mota: 246 196 82; --aves: 11 42 30; --luna: #fbf8ec; --fugaz: #ffffff; }

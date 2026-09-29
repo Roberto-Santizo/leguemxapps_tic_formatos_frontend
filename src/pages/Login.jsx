@@ -4,6 +4,7 @@ import { Clock3, Eye, EyeOff, LogIn, TriangleAlert } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 import { RAFAGAS } from '../components/SierraFondo.jsx'
 import { saludoHora } from '../config/cielo.js'
+import CieloSistema from '../components/CieloSistema.jsx'
 
 // El telón verde solo se muestra la primera vez por sesión del navegador;
 // si vuelve al login (cerrar sesión, sesión vencida) entra directo.
@@ -199,6 +200,11 @@ function Login() {
         <div className="lg-sol" />
         <div className="lg-neblina" />
         <div className="lg-nubes" />
+      </div>
+      {/* Cielo de la hora (el mismo del sistema): motas y bandada de día; luna,
+          estrellas y fugaz de noche. El sol grande del login se tiñe por fase. */}
+      <div className="lg-cielo-hora">
+        <CieloSistema />
       </div>
 
       {/* Destello sobre cada capa (mismo efecto que SierraFondo: franja de

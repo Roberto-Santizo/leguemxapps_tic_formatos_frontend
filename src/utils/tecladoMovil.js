@@ -8,8 +8,9 @@
 //   sistema, flotante, de terceros, con barra de sugerencias): nunca se asume un alto.
 //   En Android, con interactive-widget=resizes-content (index.html), la ventana ya se
 //   achica y --vv-abajo queda en 0.
-// - Al enfocar un campo en pantalla táctil, se centra en lo visible cuando el teclado
-//   ya subió.
+// - Al enfocar un campo TOCÁNDOLO (o con la tecla "siguiente") en pantalla táctil, se
+//   centra en lo visible cuando el teclado ya subió. El autofoco del código (login) no
+//   mueve la página: ahí el teléfono no abre el teclado.
 // Con zoom de pellizco no se toca nada: el alto visible cambia por el zoom, no por el
 // teclado.
 
@@ -37,9 +38,14 @@ export function iniciarTecladoMovil() {
   }
 
   let temporizador = null
+  let ultimoGesto = 0
+  const marcarGesto = () => { ultimoGesto = Date.now() }
+  document.addEventListener('pointerdown', marcarGesto, true)
+  document.addEventListener('keydown', marcarGesto, true)
   document.addEventListener('focusin', (e) => {
     const el = e.target
     if (!window.matchMedia?.(TACTIL).matches) return
+    if (Date.now() - ultimoGesto > 1000) return
     if (!el || !/^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName) || /^(checkbox|radio|file|range)$/.test(el.type)) return
     clearTimeout(temporizador)
     temporizador = setTimeout(() => {
