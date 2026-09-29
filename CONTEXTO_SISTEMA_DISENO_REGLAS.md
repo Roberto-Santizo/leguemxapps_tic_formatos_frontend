@@ -126,12 +126,13 @@ nunca escribir un componente de página nuevo para eso.
   - **Papel** `#f4f5f1` de fondo (`background` = `papel`); superficies **blancas** encima;
     paneles de solo lectura / activos suaves `#ebede7` (`surface-container-high`); gris de
     tabla/pie `#f5f5f5` (`surface-container`).
-  - **Tinta**: títulos `#171717` (`on-surface`), secundario `#525252` / `#737373`
+  - **Tinta**: títulos `#171717` (`on-surface`), secundario `#525252` / `#6b6b6b`
     (`on-surface-variant` / `on-surface-subtle`), bordes `#e5e5e5` (`outline-variant`),
     filete `#a3a3a3` (`outline`). CTA negro `bg-tinta` (`#0a0a0a`, hover `tinta-hover`).
-    - Contraste: `on-surface-subtle` (#737373) solo sobre blanco o `surface-container-low`
-      (4.74 / 4.54:1). Sobre papel, `surface-container` o `surface-container-high` no llega
-      a AA (4.33 / 4.35 / 4.02:1): ahí se usa `on-surface-variant` (#525252, 7.4:1).
+    - Contraste: `on-surface-subtle` (#6b6b6b desde el 2026-09-29; antes #737373, que no
+      llegaba a AA fuera del blanco) pasa AA sobre blanco, `surface-container-low`, papel,
+      `surface-container` y `surface-container-high` (5.33 / 5.11 / 4.87 / 4.89 / 4.52:1).
+      Para texto chico sobre fondos tintados se prefiere `on-surface-variant` (#525252, 7.4:1).
       `outline` (#a3a3a3, 2.5:1) nunca va en texto: solo filetes y chevrons decorativos.
   - **Foco y enlaces**: azul `foco` (`#2563eb`).
   - **Verde de marca** (`bosque #0b2a1e`, `brote`, `linea`, `exito`): SOLO en marca, login y

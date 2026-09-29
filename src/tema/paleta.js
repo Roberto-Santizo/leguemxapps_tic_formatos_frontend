@@ -29,7 +29,7 @@ export const CLARO = {
   'surface-tint': '#171717',
   'on-surface': '#171717',
   'on-surface-variant': '#525252',
-  'on-surface-subtle': '#737373',
+  'on-surface-subtle': '#6b6b6b',
   outline: '#a3a3a3',
   'outline-variant': '#e5e5e5',
   'border-muted': '#e5e5e5',

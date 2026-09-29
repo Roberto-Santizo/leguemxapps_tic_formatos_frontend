@@ -79,7 +79,7 @@ function InlineEditableText({
       type="button"
       onClick={() => setEditing(true)}
       title={title || 'Clic para editar'}
-      className={`group inline-flex items-center gap-1 rounded-sm text-left underline-offset-4 decoration-outline-variant transition duration-fast ease-standard hover:underline hover:decoration-outline active:scale-[0.97] cursor-text focus:outline-none focus-visible:ring-2 focus-visible:ring-foco focus-visible:ring-offset-2 ${className}`}
+      className={`group inline-flex min-h-6 items-center gap-1 rounded-sm text-left underline-offset-4 decoration-outline-variant transition duration-fast ease-standard hover:underline hover:decoration-outline active:scale-[0.97] cursor-text focus:outline-none focus-visible:ring-2 focus-visible:ring-foco focus-visible:ring-offset-2 ${className}`}
     >
       <span>{value || placeholder}</span>
       {/* Antes solo aparecía con group-hover, así que en celular (sin hover)

@@ -12,7 +12,8 @@ const ETIQUETA_ROL = {
 }
 
 // Ítem del menú con el estilo del aside Sierra: transparente sobre el papel;
-// el activo va en tarjeta blanca con filete y sombra corta.
+// el activo va en tarjeta blanca con filete y sombra corta, y una barra de 3 px a la
+// izquierda (en oscuro el fondo solo no alcanzaba a distinguirlo).
 function NavItem({ to, icon: Icon, label, end, onNavigate, recorrido }) {
   return (
     <NavLink
@@ -25,7 +26,7 @@ function NavItem({ to, icon: Icon, label, end, onNavigate, recorrido }) {
           'group flex h-11 items-center gap-2.5 rounded-menu px-2.5 font-body-md text-body-md',
           'transition-[transform,background-color,box-shadow,color] duration-fast ease-standard active:scale-[0.97]',
           isActive
-            ? 'bg-sel-bg font-medium text-on-surface shadow-[0_1px_2px_rgba(0,0,0,0.06),0_0_0_1px_rgb(var(--c-sel-borde))]'
+            ? 'relative bg-sel-bg font-medium text-on-surface shadow-[0_1px_2px_rgba(0,0,0,0.06),0_0_0_1px_rgb(var(--c-sel-borde))] before:absolute before:inset-y-3 before:left-0 before:w-[3px] before:rounded-full before:bg-on-surface'
             : 'text-on-surface-variant hover:bg-surface-container-lowest/60 hover:text-on-surface active:bg-surface-container-high',
         ].join(' ')
       }

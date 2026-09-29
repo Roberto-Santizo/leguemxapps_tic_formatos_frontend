@@ -48,7 +48,7 @@ function EditorFechaLocal({ value, corregida, onChange, onRestablecer, title }) 
         type="button"
         onClick={abrir}
         title={title || 'Clic para corregir la fecha (solo en este navegador)'}
-        className="group inline-flex items-center gap-1 rounded-sm text-left underline-offset-4 decoration-outline-variant transition duration-fast ease-standard hover:underline hover:decoration-outline active:scale-[0.97] focus:outline-none focus-visible:ring-2 focus-visible:ring-foco focus-visible:ring-offset-2"
+        className="group inline-flex min-h-6 items-center gap-1 rounded-sm text-left underline-offset-4 decoration-outline-variant transition duration-fast ease-standard hover:underline hover:decoration-outline active:scale-[0.97] focus:outline-none focus-visible:ring-2 focus-visible:ring-foco focus-visible:ring-offset-2"
       >
         <span>{formatearFecha(value)}</span>
         <Pencil className="h-3 w-3 shrink-0 opacity-40 transition-opacity duration-fast group-hover:opacity-80" strokeWidth={2} />
