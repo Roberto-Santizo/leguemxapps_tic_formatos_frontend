@@ -12,9 +12,9 @@ import SierraFondo from '../components/SierraFondo.jsx'
 // con el código de error en mono como el resto de estados del sistema.
 function NotFound() {
   return (
-    <div className="relative min-h-screen w-full overflow-hidden bg-papel font-body-lg">
+    <div className="relative min-h-screen min-h-dvh w-full overflow-hidden bg-papel font-body-lg">
       <SierraFondo />
-      <div className="relative z-10 flex min-h-screen items-center justify-center px-4 py-10">
+      <div className="relative z-10 flex min-h-screen min-h-dvh items-center justify-center px-4 py-10">
         <div className="animate-card-rise w-full max-w-sm rounded-tarjeta bg-white p-6 text-center shadow-flotante sm:p-8">
           <div className="flex flex-col items-center gap-4">
             <div className="grid h-14 w-14 place-items-center rounded-xl bg-surface-container-high text-on-surface">

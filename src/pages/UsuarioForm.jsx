@@ -164,6 +164,9 @@ function UsuarioForm() {
                 <label className={labelClasses}>Usuario</label>
                 <input
                   className={inputClasses}
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
                   value={username}
                   disabled={guardando}
                   maxLength={255}

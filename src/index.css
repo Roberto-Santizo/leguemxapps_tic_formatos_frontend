@@ -284,7 +284,7 @@ main[data-sheet] > .bg-background {
 }
 [data-toaster][data-sobre-barra] {
   top: auto;
-  bottom: calc(var(--alto-barra, 112px) + 12px);
+  bottom: calc(var(--alto-barra, 112px) + 12px + var(--vv-abajo, 0px));
   /* El aviso nuevo aparece arriba y el que ya estaba no se mueve. */
   flex-direction: column-reverse;
 }
@@ -1106,4 +1106,53 @@ main[data-sheet] > .bg-background {
 @keyframes guardandoEntra {
   from { opacity: 0; transform: translateY(-4px); }
   to { opacity: 1; transform: none; }
+}
+
+/* ── Teléfono y tablet: teclado, zoom y toques (Tickets TIC, "iPhone y iPad") ──
+   Variables del teclado: src/utils/tecladoMovil.js (--vv-alto, --vv-arriba,
+   --vv-abajo y html[data-teclado]). */
+
+/* Sin zoom al escribir: Safari agranda la página al tocar un campo con letra menor a
+   16 px y la deja agrandada. En táctil y en cualquier iPhone/iPad los campos van a 16 px;
+   un campo nuevo no necesita nada. El texto no se infla al girar. */
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+@media (pointer: coarse) {
+  input:not([type=checkbox]):not([type=radio]):not([type=range]), textarea, select { font-size: 16px !important; }
+}
+@supports (-webkit-touch-callout: none) {
+  input:not([type=checkbox]):not([type=radio]):not([type=range]), textarea, select { font-size: 16px !important; }
+}
+
+/* La página no se corre hacia los lados (clip no rompe los sticky; hidden de respaldo),
+   sin rebote lateral, y el doble toque no agranda (el pellizco sí). */
+html { overflow-x: hidden; overscroll-behavior-x: none; touch-action: manipulation; }
+@supports (overflow: clip) { html { overflow-x: clip; } }
+
+/* Lo fijo abajo sube sobre el teclado del iPhone (en Android --vv-abajo es 0). */
+[data-barra-inferior] { bottom: var(--vv-abajo, 0px) !important; }
+@media not all and (min-width: 640px) and (hover: hover) and (pointer: fine) {
+  html[data-teclado] [data-toaster]:not([data-sobre-barra]) { bottom: calc(16px + var(--vv-abajo, 0px)); }
+}
+/* Capas a pantalla completa con campos (buscador del selector, diálogos, ficha del
+   equipo): con el teclado abierto ocupan solo lo visible, nunca debajo del teclado. */
+html[data-teclado] [data-sobre-teclado] {
+  top: var(--vv-arriba, 0px) !important;
+  bottom: auto !important;
+  height: var(--vv-alto, 100%) !important;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  /* Nada de globos de mouse: con el dedo quedaban pegados. */
+  [role="tooltip"] { display: none !important; }
+  /* Área de toque de al menos 40 px en botones chicos, sin cambiar su dibujo: un
+     seudoelemento invisible 9 px más grande por lado. Los botones posicionados por su
+     cuenta (absolute, fixed, sticky) o que ya usan ::before quedan como están. */
+  button:not(.absolute):not(.fixed):not(.sticky):not([class*="before:"]) { position: relative; }
+  button:not([class*="before:"])::before { content: ""; position: absolute; inset: -9px; }
+  a[href][aria-label]:not(.absolute):not(.fixed) { position: relative; }
+  a[href][aria-label]::before { content: ""; position: absolute; inset: -9px; }
+  /* Buscadores con tecla "Buscar" (type=search) sin la X del navegador. */
+  input[type=search] { -webkit-appearance: none; appearance: none; }
+  input[type=search]::-webkit-search-decoration,
+  input[type=search]::-webkit-search-cancel-button { -webkit-appearance: none; display: none; }
 }

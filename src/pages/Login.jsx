@@ -346,6 +346,9 @@ function Login() {
                 placeholder="admin"
                 ref={inputUsuario}
                 autoComplete="username"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
               />
             </div>
 

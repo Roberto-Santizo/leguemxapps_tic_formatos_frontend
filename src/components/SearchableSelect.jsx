@@ -189,6 +189,10 @@ function SearchableSelect({
                 elegir(filtradas[0])
               }
             }}
+            type="search"
+            enterKeyHint="search"
+            autoCorrect="off"
+            spellCheck={false}
             placeholder="Buscar..."
             className={`h-10 w-full rounded-boton border border-outline-variant bg-white pl-9 pr-3 font-body-md text-input-movil text-on-surface placeholder:text-on-surface-subtle transition-colors duration-fast ease-standard ${usarMd ? 'md:h-9 md:text-body-md' : 'sm:h-9 sm:text-body-md'}`}
           />
@@ -327,6 +331,7 @@ function SearchableSelect({
           // con animate-view-in crea su propio contexto de apilamiento y
           // puede atrapar un position:fixed dentro de él.
           <div
+            data-sobre-teclado
             className={`fixed inset-0 z-50 flex items-center justify-center bg-tinta/40 p-4 transition-opacity duration-base ease-standard ${
               visibleMobil ? 'opacity-100' : 'opacity-0'
             } ${usarMd ? 'md:hidden' : 'sm:hidden'}`}

@@ -266,6 +266,7 @@ function EquipoDetalleModal({ equipoId, onCerrar, editable = false, onActualizad
 
   return createPortal(
     <div
+      data-sobre-teclado
       className={`fixed inset-0 z-50 flex items-center justify-center bg-tinta/40 p-4 transition-opacity ease-standard sm:p-6 ${
         visible ? 'opacity-100 duration-base' : 'opacity-0 duration-fast'
       }`}

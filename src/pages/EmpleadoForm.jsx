@@ -134,6 +134,9 @@ function EmpleadoForm() {
                 <label className={labelClasses}>Código</label>
                 <input
                   className={inputClasses}
+                  autoCapitalize="characters"
+                  autoCorrect="off"
+                  spellCheck={false}
                   value={code}
                   disabled={guardando}
                   maxLength={255}

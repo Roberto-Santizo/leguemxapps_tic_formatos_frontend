@@ -378,6 +378,9 @@ function EquipoForm() {
                   <label className={labelClasses}>Serie</label>
                   <input
                     className={inputClasses}
+                    autoCapitalize="characters"
+                    autoCorrect="off"
+                    spellCheck={false}
                     value={form.serie}
                     disabled={guardando}
                     maxLength={255}
