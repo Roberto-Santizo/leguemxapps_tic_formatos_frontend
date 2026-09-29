@@ -276,7 +276,7 @@ function HistorialDevolucionView() {
   return (
     <div className="flex-1 [&+footer]:pb-[calc(88px+env(safe-area-inset-bottom))] md:[&+footer]:pb-[88px]">
       <div className="px-4 pt-6 pb-10 tablet:px-8 tablet:pt-8 md:px-8 md:pt-10">
-        <div data-papel className="mx-auto max-w-4xl animate-view-in space-y-stack-lg">
+        <div className="mx-auto max-w-4xl animate-view-in space-y-stack-lg">
           <div className="flex flex-col items-start gap-5 md:gap-6">
             <Link
               to={origen.ruta}
@@ -714,7 +714,7 @@ function HistorialDevolucionView() {
                             <p className="shrink-0 font-label-sm text-label-sm text-on-surface-variant">{firma.subtitulo}</p>
                           )}
                         </div>
-                        <div className="grid aspect-[5/2] w-full place-items-center rounded-lg border border-outline-variant bg-surface-container-low p-2">
+                        <div data-claro className="grid aspect-[5/2] w-full place-items-center rounded-lg border border-outline-variant bg-surface-container-low p-2">
                           <FirmaImagen url={url} alt={`Firma de ${firma.titulo}`} />
                         </div>
                       </div>

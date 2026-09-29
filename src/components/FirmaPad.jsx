@@ -2,6 +2,9 @@ import { useRef, useState } from 'react'
 import SignatureCanvas from 'react-signature-canvas'
 import { CheckCircle2, Upload } from 'lucide-react'
 
+// Los recuadros donde se dibuja o se ve la firma llevan data-claro: siempre en la paleta
+// clara, porque la firma es tinta negra y en modo oscuro no se vería.
+
 // --- Firma "Registro histórico / firmado en papel" (Fase 1.3) ---
 // Sin campo de nota (se quitó a pedido -- solo se confirma, sin texto
 // personalizado): genera siempre la misma leyenda fija como imagen (PNG),
@@ -101,7 +104,7 @@ function FirmaPad({ titulo, subtitulo, firmaUrl, onConfirmar, onReiniciar }) {
     return (
       <div className="flex flex-col rounded-xl border border-outline-variant bg-white p-3">
         <EncabezadoFirma titulo={titulo} subtitulo={subtitulo} />
-        <div className="grid aspect-[5/2] w-full animate-pop-in place-items-center rounded-boton border border-outline-variant bg-surface-container-low p-2">
+        <div data-claro className="grid aspect-[5/2] w-full animate-pop-in place-items-center rounded-boton border border-outline-variant bg-surface-container-low p-2">
           <img src={firmaUrl} alt={`Firma de ${titulo}`} className="max-h-full max-w-full object-contain" />
         </div>
         <div className="mt-3 flex items-center justify-between gap-2">
@@ -175,6 +178,7 @@ function FirmaPad({ titulo, subtitulo, firmaUrl, onConfirmar, onReiniciar }) {
         // touch-action: none evita que un trazo con el dedo se interprete
         // como scroll de la página en móvil (Fase 1.1).
         <div
+          data-claro
           className="grid aspect-[5/2] w-full place-items-center overflow-hidden rounded-boton border border-dashed border-outline bg-white"
           style={{ touchAction: 'none' }}
         >
@@ -188,7 +192,7 @@ function FirmaPad({ titulo, subtitulo, firmaUrl, onConfirmar, onReiniciar }) {
       )}
 
       {modo === 'subir' && (
-        <div className="grid aspect-[5/2] w-full place-items-center rounded-boton border border-dashed border-outline bg-white">
+        <div data-claro className="grid aspect-[5/2] w-full place-items-center rounded-boton border border-dashed border-outline bg-white">
           {previewSubida ? (
             <img
               src={previewSubida}

@@ -7,8 +7,9 @@
 //
 // - `white` (bg-white) es la SUPERFICIE: blanca en claro, verde muy oscuro en oscuro.
 //   El texto sobre el botón negro usa `text-on-tinta` (no `text-white`).
-// - El papel (hojas de entrega y devolución) vuelve a la paleta clara con
-//   [data-papel]: se imprime y se ve siempre como la hoja aprobada.
+// - Los recuadros de firma vuelven a la paleta clara con [data-claro]: la firma es
+//   tinta negra (PNG transparente) y en fondo oscuro no se vería. Las hojas de las
+//   actas siguen el tema (decisión 2026-09-29); el PDF tiene sus propios colores.
 // - Oscuro: la paleta de Tickets TIC (fondo #0e100e, superficie #171a17, marca clara).
 
 export const CLARO = {

@@ -1188,18 +1188,17 @@ html[data-teclado] [data-sobre-teclado] {
 }
 
 /* ── Modo oscuro: excepciones ─────────────────────────────────────────────
-   El papel (hojas de entrega y devolución en pantalla, [data-papel]) conserva la
-   paleta clara (plugin de tailwind.config.js) porque se imprime tal cual; en oscuro
-   se ve como una hoja clara sobre la mesa oscura. El logo verde se aclara fuera del papel. */
+   Las hojas de las actas siguen el tema (el PDF no: tiene sus propios colores). Los
+   recuadros de firma ([data-claro]) conservan la paleta clara: la firma es tinta negra.
+   El logo verde se aclara en oscuro. */
 @media (prefers-color-scheme: dark) {
-  :root:not([data-tema="claro"]) img[src*="logo-legumex"]:not([data-papel] img) { filter: brightness(0) invert(0.9); }
+  :root:not([data-tema="claro"]) img[src*="logo-legumex"] { filter: brightness(0) invert(0.9); }
 }
-:root[data-tema="oscuro"] img[src*="logo-legumex"]:not([data-papel] img) { filter: brightness(0) invert(0.9); }
+:root[data-tema="oscuro"] img[src*="logo-legumex"] { filter: brightness(0) invert(0.9); }
 
 /* ── Cielo según la hora (Tickets TIC, "Cielo según la hora" y "Sistema vivo") ──
    La hora de Guatemala (<html data-fase>, src/config/cielo.js) decide QUÉ hay en el
-   cielo; el tema solo cambia la paleta. Sin data-fase (sin JS) queda el día. El papel
-   ([data-papel]) queda fuera: tiene su propio fondo de hoja. */
+   cielo; el tema solo cambia la paleta. Sin data-fase (sin JS) queda el día. */
 :root {
   --cielo-app: #b4d3ea;          /* tinte del fondo (celeste de día) */
   --sol-1: #fff4c7;
@@ -1249,9 +1248,6 @@ body {
     linear-gradient(180deg, color-mix(in srgb, var(--cielo-app) 74%, rgb(var(--c-background))) 0, rgb(var(--c-background)) 66vh);
   background-attachment: fixed;
 }
-
-/* El papel queda fuera del cielo y del modo oscuro: una hoja propia sobre la mesa. */
-[data-papel] { background: rgb(var(--c-papel)); border-radius: 1.5rem; padding: 1.25rem; color: rgb(var(--c-on-surface)); }
 
 /* Escena del sistema (src/components/CieloSistema.jsx). */
 .cielo-sistema { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }

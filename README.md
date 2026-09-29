@@ -45,8 +45,8 @@ La rama `sistema-vivo` (2026-09-29, sale de `tablet`) suma: cielo según la hora
 Guatemala (día, amanecer, atardecer, noche) en el sistema, el login y el menú del
 teléfono; modo oscuro (Automático / Claro / Oscuro, botón junto al nombre); recorrido
 guiado "¿Cómo funciona?" por rol (la primera vez y con el botón **?**); ajustes para
-teclado y toque en iPhone, Android y tablet; y clases de botón. Las hojas de las actas se
-ven siempre en claro, como el papel impreso (pendiente: decidir si también van en oscuro).
+teclado y toque en iPhone, Android y tablet; y clases de botón. Las hojas de las actas
+también cambian a oscuro (las firmas quedan en recuadro claro); el PDF sale igual.
 Probada con navegador automatizado; falta probarla en equipos reales.
 
 ## Pendientes y mejoras sugeridas

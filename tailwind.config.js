@@ -199,8 +199,8 @@ export default {
     // genera cuando los breakpoints llevan condición de dispositivo.
     ({ addVariant }) => addVariant('movil', `@media not all and (min-width: 640px) and ${ESCRITORIO}`),
     // Variables de color: claro en :root; oscuro con data-tema="oscuro" o, en
-    // "Auto" (sin data-tema), cuando el equipo está en oscuro. El papel
-    // ([data-papel]) vuelve a la paleta clara: se ve siempre como la hoja impresa.
+    // "Auto" (sin data-tema), cuando el equipo está en oscuro. [data-claro] vuelve a
+    // la paleta clara: solo los recuadros de firma (tinta negra sobre fondo claro).
     ({ addBase }) => {
       const claro = { ...variables(CLARO), '--sombra-verde': '11 42 30', colorScheme: 'light' }
       const oscuro = { ...variables(OSCURO), '--sombra-verde': '0 0 0', colorScheme: 'dark' }
@@ -208,7 +208,7 @@ export default {
         ':root': claro,
         '@media (prefers-color-scheme: dark)': { ':root:not([data-tema="claro"])': oscuro },
         ':root[data-tema="oscuro"]': oscuro,
-        '[data-papel]': claro,
+        '[data-claro]': claro,
       })
     },
   ],
