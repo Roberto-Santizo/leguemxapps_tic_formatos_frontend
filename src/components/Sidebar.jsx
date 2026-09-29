@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom'
-import { FilePlus2, ClipboardList, BookOpen, Users, LogOut, X } from 'lucide-react'
+import { FilePlus2, ClipboardList, BookOpen, Users, LogOut, X, CircleHelp } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 import BotonTema from './BotonTema.jsx'
 
@@ -13,11 +13,12 @@ const ETIQUETA_ROL = {
 
 // Ítem del menú con el estilo del aside Sierra: transparente sobre el papel;
 // el activo va en tarjeta blanca con filete y sombra corta.
-function NavItem({ to, icon: Icon, label, end, onNavigate }) {
+function NavItem({ to, icon: Icon, label, end, onNavigate, recorrido }) {
   return (
     <NavLink
       to={to}
       end={end}
+      data-recorrido={recorrido}
       onClick={onNavigate}
       className={({ isActive }) =>
         [
@@ -45,7 +46,7 @@ function NavItem({ to, icon: Icon, label, end, onNavigate }) {
   )
 }
 
-function Sidebar({ abierto, onCerrar }) {
+function Sidebar({ abierto, onCerrar, onAyuda }) {
   const { user, isAdmin, logout } = useAuth()
   const navigate = useNavigate()
 
@@ -110,7 +111,7 @@ function Sidebar({ abierto, onCerrar }) {
         </div>
 
         {/* Main Tabs */}
-        <div className="flex flex-col gap-1">
+        <div data-recorrido="menu" className="flex flex-col gap-1">
           {/*
             El primer ítem ya no es un formato concreto: ahora abre el
             selector de los formatos. Se deja SIN "end" para que quede
@@ -121,9 +122,9 @@ function Sidebar({ abierto, onCerrar }) {
           {/* "user" queda restringido a Historial (ver + corregir fechas):
               Nueva Acta, Catálogo y Usuarios son solo para admin. */}
           {isAdmin && <NavItem to="/" icon={FilePlus2} label="Nueva Acta" onNavigate={onCerrar} />}
-          <NavItem to="/historial" icon={ClipboardList} label="Historial de Actas" onNavigate={onCerrar} />
-          {isAdmin && <NavItem to="/catalogo" icon={BookOpen} label="Catálogo" onNavigate={onCerrar} />}
-          {isAdmin && <NavItem to="/usuarios" icon={Users} label="Usuarios" onNavigate={onCerrar} />}
+          <NavItem to="/historial" icon={ClipboardList} label="Historial de Actas" onNavigate={onCerrar} recorrido="nav-historial" />
+          {isAdmin && <NavItem to="/catalogo" icon={BookOpen} label="Catálogo" onNavigate={onCerrar} recorrido="nav-catalogo" />}
+          {isAdmin && <NavItem to="/usuarios" icon={Users} label="Usuarios" onNavigate={onCerrar} recorrido="nav-usuarios" />}
         </div>
 
         {/* Tarjeta de perfil: usuario actual + cerrar sesión */}
@@ -138,6 +139,17 @@ function Sidebar({ abierto, onCerrar }) {
                 {ETIQUETA_ROL[user?.role] ?? 'Usuario'}
               </p>
             </div>
+            {/* ¿Cómo funciona?: repite el recorrido guiado (components/Recorrido.jsx). */}
+            <button
+              type="button"
+              data-recorrido="ayuda"
+              onClick={onAyuda}
+              title="¿Cómo funciona?"
+              aria-label="¿Cómo funciona? Recorrido guiado del sistema"
+              className="btn-icono h-9 w-9 shrink-0"
+            >
+              <CircleHelp className="h-4.5 w-4.5" strokeWidth={1.75} />
+            </button>
             <BotonTema />
           </div>
           <button

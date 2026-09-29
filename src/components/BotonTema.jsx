@@ -15,6 +15,7 @@ function BotonTema() {
   return (
     <button
       type="button"
+      data-recorrido="tema"
       onClick={() => {
         aplicarTema(siguiente)
         setTema(siguiente)

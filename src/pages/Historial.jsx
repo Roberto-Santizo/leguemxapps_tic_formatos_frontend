@@ -45,7 +45,7 @@ function Historial() {
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 rounded-tarjeta bg-white px-5 py-3.5 shadow-tarjeta">
+        <div data-recorrido="vigencia" className="flex flex-wrap items-center gap-x-6 gap-y-2 rounded-tarjeta bg-white px-5 py-3.5 shadow-tarjeta">
           <div className="flex items-center gap-2 text-on-surface-variant">
             <CalendarClock className="h-4 w-4 shrink-0" strokeWidth={1.75} />
             <span className="font-mono text-micro font-medium uppercase tracking-[0.1em]">Vigencia de los formatos</span>
@@ -78,7 +78,7 @@ function Historial() {
             ícono y título son los mismos de Catalogo.jsx (la pantalla de
             referencia): antes cada una de las tres pantallas hermanas tenía
             los suyos y se notaba que eran de momentos distintos. */}
-        <div className="grid gap-stack-lg" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))' }}>
+        <div data-recorrido="formatos-historial" className="grid gap-stack-lg" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))' }}>
           {LISTA_FORMATOS.map((formato) => {
             const Icon = formato.icon
             return (

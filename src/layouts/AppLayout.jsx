@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Outlet } from 'react-router-dom'
+import { useCallback, useEffect, useState } from 'react'
+import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import Sidebar from '../components/Sidebar.jsx'
 import MobileHeader from '../components/MobileHeader.jsx'
 import Footer from '../components/Footer.jsx'
@@ -7,6 +7,27 @@ import SierraFondo from '../components/SierraFondo.jsx'
 import CieloSistema from '../components/CieloSistema.jsx'
 import { Toaster } from '../components/Toast.jsx'
 import AvisoSesion from '../components/AvisoSesion.jsx'
+import Recorrido from '../components/Recorrido.jsx'
+import { useAuth } from '../context/AuthContext.jsx'
+import { CLAVE_RECORRIDO, RECORRIDO_ADMIN, RECORRIDO_USUARIO } from '../config/recorrido.js'
+
+// Recorrido ya visto por este usuario (por equipo: vive en localStorage).
+function recorridoVisto(usuario) {
+  try {
+    return (JSON.parse(localStorage.getItem(CLAVE_RECORRIDO) || '[]') || []).includes(usuario)
+  } catch {
+    return true
+  }
+}
+
+function marcarRecorridoVisto(usuario) {
+  try {
+    const vistos = JSON.parse(localStorage.getItem(CLAVE_RECORRIDO) || '[]') || []
+    if (!vistos.includes(usuario)) localStorage.setItem(CLAVE_RECORRIDO, JSON.stringify([...vistos, usuario]))
+  } catch {
+    // sin almacenamiento: se volverá a ofrecer la próxima vez
+  }
+}
 
 /*
   "Body" del sistema Sierra: papel cálido de fondo, la cordillera fija al pie
@@ -30,6 +51,27 @@ import AvisoSesion from '../components/AvisoSesion.jsx'
 */
 function AppLayout() {
   const [menuAbierto, setMenuAbierto] = useState(false)
+  const [recorridoAbierto, setRecorridoAbierto] = useState(false)
+  const { user, isAdmin } = useAuth()
+  const navigate = useNavigate()
+  const { pathname } = useLocation()
+  const recorrido = isAdmin ? RECORRIDO_ADMIN : RECORRIDO_USUARIO
+
+  // "¿Cómo funciona?": arranca siempre desde el inicio del rol, con el menú cerrado.
+  const iniciarRecorrido = useCallback(() => {
+    setMenuAbierto(false)
+    if (user?.username) marcarRecorridoVisto(user.username)
+    if (pathname !== recorrido.inicio) navigate(recorrido.inicio)
+    setRecorridoAbierto(true)
+  }, [user, pathname, recorrido, navigate])
+
+  // La primera vez de cada usuario se ofrece solo, si entra por su pantalla de inicio.
+  useEffect(() => {
+    if (!user?.username || recorridoVisto(user.username) || pathname !== recorrido.inicio) return undefined
+    const t = setTimeout(iniciarRecorrido, 900)
+    return () => clearTimeout(t)
+    // solo al entrar; no cada vez que cambia la ruta
+  }, [user?.username])
 
   return (
     <div className="h-full font-body-lg text-on-surface">
@@ -39,7 +81,7 @@ function AppLayout() {
       <MobileHeader onAbrirMenu={() => setMenuAbierto(true)} />
 
       <div data-shell className="relative flex h-full overflow-hidden">
-        <Sidebar abierto={menuAbierto} onCerrar={() => setMenuAbierto(false)} />
+        <Sidebar abierto={menuAbierto} onCerrar={() => setMenuAbierto(false)} onAyuda={iniciarRecorrido} />
 
         <main
           data-sheet
@@ -55,6 +97,9 @@ function AppLayout() {
       <Toaster />
       {/* Cuenta regresiva de los últimos 5 minutos de la sesión. */}
       <AvisoSesion />
+      {recorridoAbierto && (
+        <Recorrido pasos={recorrido.pasos} onMenu={setMenuAbierto} onCerrar={() => setRecorridoAbierto(false)} />
+      )}
     </div>
   )
 }

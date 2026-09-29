@@ -44,7 +44,7 @@ function NuevaActa() {
             veían chicas y descuadradas. Márgenes, separación, radio, título y
             encabezado son los mismos de Catalogo.jsx (la pantalla de
             referencia): antes esta pantalla tenía los suyos propios. */}
-        <div className="grid gap-stack-lg" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))' }}>
+        <div data-recorrido="formatos" className="grid gap-stack-lg" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))' }}>
           {LISTA_FORMATOS.map((formato) => {
             const Icon = formato.icon
             return (
