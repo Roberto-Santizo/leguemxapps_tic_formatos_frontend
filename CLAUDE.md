@@ -80,12 +80,22 @@ en español; mantener ese idioma.
   `utils/generatePdfPapelFisico.js` monta la plantilla off-screen y cuenta hojas con las
   mismas constantes (`ALTO_PDF_MM`, `MIN_CONTENIDO_MM`) -- si cambian en uno, cambiar en
   el otro.
+- Colores = variables CSS por tema: `tema/paleta.js` (`CLARO`/`OSCURO`) → `tailwind.config.js`.
+  Un color nuevo va en las dos paletas; texto sobre `bg-tinta` = `text-on-tinta`.
+  `<html data-tema>` (`utils/tema.js`, `BotonTema`) y `<html data-fase>` (hora de
+  Guatemala, `config/cielo.js`) los ponen scripts tempranos de `index.html` y `main.jsx`.
+  Las 4 pantallas de acta van en `data-papel` (siempre claras, como la hoja impresa).
+- `utils/tecladoMovil.js`: `--vv-alto/--vv-arriba/--vv-abajo` y `html[data-teclado]`;
+  fijos abajo con `data-barra-inferior`, hojas/diálogos con `data-sobre-teclado`.
+- Recorrido guiado: `components/Recorrido.jsx` + pasos en `config/recorrido.js`; ilumina
+  marcas `data-recorrido="..."` (si se mueve algo que un paso explica, mover su marca).
 - `utils/fecha.js` / `hooks/useFechaLocal.js`: fechas locales sin desfase de zona horaria;
   usar estas utilidades, no `new Date(str)` directo.
 - Componentes compartidos existentes (reusar, no duplicar): `ConfirmDialog`, `Toast`,
   `EstadoVacio`, `SearchableSelect`, `InlineEditableText`, `Buscador`, `Skeleton`,
   `FirmaPad`, `CaracteristicasEditor`, `EditorFechaLocal`, `Paginador`, `EquipoDetalleModal`,
-  `SierraFondo` (cordillera decorativa del fondo y del 404), `IsotipoCarga` (carga en
+  `SierraFondo` (cordillera decorativa del fondo y del 404), `CieloSistema` (cielo de la
+  hora, en `AppLayout` y login), `BotonTema`, `Recorrido`, `IsotipoCarga` (carga en
   botones), `IndicadorGuardando` (pastilla de "guardando", en `Toast.jsx`), `EsperaLogo`
   (espera a pantalla completa, solo actas y PDF), `ActaRegistrada` (momento de éxito) y `SaludoDelDia`
   ("Buenos días, {nombre}." una vez al día en Nueva Acta / Historial).
@@ -106,8 +116,9 @@ en español; mantener ese idioma.
 - Presentar plan y esperar confirmación antes de implementar, salvo instrucción concreta ya
   dada.
 - Tocar solo los archivos estrictamente necesarios.
-- No crear componentes compartidos nuevos (ej. `<Button>` genérico) sin autorización;
-  el estilo es Tailwind repetido por elemento, a propósito.
+- No crear componentes compartidos nuevos (ej. `<Button>` genérico) sin autorización.
+  Aspecto de botones y campos: clases `.btn-primario`, `.btn-secundario`, `.btn-icono`,
+  `.btn-icono-peligro`, `.campo` (index.css); tamaños como utilidades. Colores solo por token.
 - Vistas "ver" cargan por ID contra la API (funcionan con URL directa / refresh).
 - "Nuevo" y "Editar" son páginas dedicadas, nunca modales. Única excepción: editar un equipo
   desde su ficha (`EquipoDetalleModal editable`) a mitad de un acta.

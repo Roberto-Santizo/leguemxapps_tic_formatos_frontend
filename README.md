@@ -41,6 +41,14 @@ animaciones de la cordillera, el borrador automático, el aviso de sesión, "Ver
 colaborador y las actas con el mismo estilo que el resto del sistema. Probada con navegador automatizado en escritorio, teléfono y tablet; falta
 probarla en tablets reales con el backend real.
 
+La rama `sistema-vivo` (2026-09-29, sale de `tablet`) suma: cielo según la hora de
+Guatemala (día, amanecer, atardecer, noche) en el sistema, el login y el menú del
+teléfono; modo oscuro (Automático / Claro / Oscuro, botón junto al nombre); recorrido
+guiado "¿Cómo funciona?" por rol (la primera vez y con el botón **?**); ajustes para
+teclado y toque en iPhone, Android y tablet; y clases de botón. Las hojas de las actas se
+ven siempre en claro, como el papel impreso (pendiente: decidir si también van en oscuro).
+Probada con navegador automatizado; falta probarla en equipos reales.
+
 ## Pendientes y mejoras sugeridas
 
 Revisión del 2026-09-27. Nada de esto bloquea el uso diario; es para mantenimiento.
@@ -55,7 +63,8 @@ Revisión del 2026-09-27. Nada de esto bloquea el uso diario; es para mantenimie
 - **Peso del código.** El paquete principal pasa de 500 KB. Cargar cada pantalla bajo
   demanda (`React.lazy`) y `jspdf`/`html2canvas` solo al generar un PDF aceleraría la
   primera carga.
-- **Accesibilidad.** Falta una revisión formal (lector de pantalla, contraste, teclado).
+- **Accesibilidad.** Contraste AA revisado en claro y oscuro y teclado en el recorrido
+  (2026-09-29); falta una prueba con lector de pantalla real (VoiceOver / TalkBack).
 
 ### Backend (`legumexapps_tic_formatos_backend`)
 

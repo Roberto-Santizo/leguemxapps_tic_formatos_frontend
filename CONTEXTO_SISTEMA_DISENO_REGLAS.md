@@ -2,7 +2,7 @@
 
 > Este archivo es el punto de partida para cualquier agente de IA (o persona) que retome
 > este proyecto sin haber estado en las sesiones anteriores. Describe cómo está el sistema
-> HOY y las reglas de trabajo que se han pedido explícitamente. Actualizado al 2026-09-27.
+> HOY y las reglas de trabajo que se han pedido explícitamente. Actualizado al 2026-09-29.
 >
 > Documentos del repositorio y para qué sirve cada uno:
 > - `README.md`: presentación corta, cómo levantarlo y **pendientes / mejoras sugeridas**
@@ -19,6 +19,8 @@
 >
 > Después de "Diseño visual" vienen las secciones con fecha (aproximadamente de la más
 > nueva a la más vieja):
+> 2026-09-29 (sistema vivo: cielo según la hora, modo oscuro, recorrido guiado, teclado
+> y toque en teléfono/tablet, clases de botón),
 > 2026-09-27 (actas con el estilo del sistema; nueva entrega seguida, filtro por
 > departamento, historial del colaborador),
 > 2026-09-26 (borrador, aviso de sesión, "Ver acta", volver por origen; destello y viento),
@@ -117,7 +119,8 @@ nunca escribir un componente de página nuevo para eso.
 ## Diseño visual
 
 - **Sistema visual "Sierra"** (2026-09-24; referencia: mockup "Mesa TIC —
-  Propuesta sierra"). Solo modo claro. Se conservaron los nombres de token Material 3
+  Propuesta sierra"). **Claro y oscuro** desde el 2026-09-29 (antes solo claro; ver
+  "Sistema vivo"): los valores de abajo son los del tema claro. Se conservaron los nombres de token Material 3
   (`primary`, `surface`, `on-surface-variant`, `outline`, etc.) y cambiaron sus valores, así
   que el rediseño llegó a todo el sistema sin reescribir cada className:
   - **Papel** `#f4f5f1` de fondo (`background` = `papel`); superficies **blancas** encima;
@@ -132,7 +135,8 @@ nunca escribir un componente de página nuevo para eso.
       `outline` (#a3a3a3, 2.5:1) nunca va en texto: solo filetes y chevrons decorativos.
   - **Foco y enlaces**: azul `foco` (`#2563eb`).
   - **Verde de marca** (`bosque #0b2a1e`, `brote`, `linea`, `exito`): SOLO en marca, login y
-    cordillera de fondo. En la app no hay verde en superficies ni textos. El login no usa
+    cordillera de fondo, y (desde el 2026-09-29) el cielo de la hora detrás de todo. En
+    la app no hay verde en superficies ni textos. El login no usa
     las clases: repite esos valores como variables `--lg-bosque`, `--lg-acento`,
     `--lg-linea` y `--lg-exito` en `index.css` (bloque `.lg-raiz`); si cambia uno, cambiar
     ambos.
@@ -474,6 +478,65 @@ nunca escribir un componente de página nuevo para eso.
 - Botón de "registrar nuevo" en las listas de historial: siempre visible en el encabezado
   de la pantalla (junto al título), no solo cuando la lista está vacía -- patrón consistente
   entre `HistorialEntregaList.jsx` y `HistorialDevolucionList.jsx`.
+
+## Sistema vivo (2026-09-29, rama `sistema-vivo`)
+
+Lo "vivo" de Tickets TIC traído a Formatos, adaptado a su arquitectura. El papel aprobado
+(hojas de entrega/devolución en pantalla y el PDF) queda fuera del modo oscuro y del cielo.
+
+- **Colores como variables** (`src/tema/paleta.js`): `CLARO` y `OSCURO` con todos los
+  tokens; `tailwind.config.js` los registra como `rgb(var(--c-<token>) / <alpha-value>)`
+  y su plugin escribe `:root` (claro), oscuro bajo `prefers-color-scheme` (si no se
+  eligió claro) y bajo `[data-tema="oscuro"]`, y `[data-papel]` de vuelta a claro. Las
+  clases no cambiaron (`bg-white` = superficie; en oscuro es gris muy oscuro). Texto sobre
+  `bg-tinta` = `text-on-tinta` (no `text-white`). Selección del menú: `sel-bg`,
+  `sel-borde`; segmentados: `seg-on`, `seg-borde`. Sombras en `rgb(var(...))`.
+  Un color nuevo se agrega en las DOS paletas.
+- **Tema** (`utils/tema.js`, `components/BotonTema.jsx`): Automático → Claro → Oscuro,
+  guardado en `localStorage 'legumex_tema'` y aplicado en `<html data-tema>` por un script
+  temprano de `index.html` (sin parpadeo). El botón va en la tarjeta de perfil del menú.
+  Excepciones en oscuro (index.css, "Modo oscuro: excepciones"): logo invertido fuera del
+  papel, destello de la sierra atenuado.
+- **Papel** (`data-papel` en el envoltorio de FormatoActa, RegistrarDevolucion,
+  HistorialEntregaView e HistorialDevolucionView): siempre en la paleta clara, con fondo
+  papel y esquinas redondeadas, como la hoja impresa. (Opción pendiente de decisión del
+  PM: papel también oscuro -- ver el informe del 2026-09-29.)
+- **Cielo según la hora de Guatemala** (`config/cielo.js`, UTC-6 fijo, no la hora del
+  equipo): noche < 5:30, amanecer < 7:00, día < 17:15, atardecer < 18:45, noche. Se marca
+  en `<html data-fase>` (script temprano en `index.html` con los mismos cortes + revisión
+  cada minuto desde `main.jsx`). La fase decide QUÉ hay en el cielo; el tema, la paleta.
+  `saludoHora()` da "Buenos días / Buenas tardes / Buenas noches" coherente con el cielo
+  (Login y `SaludoDelDia`).
+- **`CieloSistema`** (componente autorizado, en `AppLayout` y en el login): tinte del
+  fondo por fase, sol con halo y rayos (o luna creciente y estrellas con una fugaz cada
+  5 min), nubes en dos capas, motas de luz y bandada ocasional. Fijo detrás de todo, sin
+  clics, ids SVG únicos (`useId`), quieto con "reducir movimiento", no se imprime.
+- **Login**: su escena propia más el cielo de la hora (amanecer/atardecer con sol cálido,
+  noche con luna, estrellas y fugaz). Siempre en paleta clara, en cualquier tema.
+- **Cajón del menú** (teléfono y tablet): tinte de la hora arriba, sol o luna junto al logo
+  y dos cordilleras al pie, detrás de la tarjeta de perfil (`.cajon-*` en index.css).
+- **Recorrido guiado "¿Cómo funciona?"** (componente autorizado `Recorrido.jsx`, pasos en
+  `config/recorrido.js`): por rol (admin arranca en `/`, user en `/historial`); se ofrece
+  solo la primera vez de cada usuario en ese equipo (`localStorage
+  'legumex_recorrido_visto'`, lista de usernames) y lo repite el botón **?** junto al
+  tema. Ilumina el elemento (`data-recorrido="..."`), coloca la tarjeta sin taparlo, en
+  teléfono/tablet abre el cajón en los pasos del menú. Teclado ←/→/Esc, foco atrapado.
+  Si se agrega o mueve algo que un paso explica, actualizar su marca `data-recorrido`.
+- **Teclado en pantalla** (`utils/tecladoMovil.js`): publica `--vv-alto`, `--vv-arriba`,
+  `--vv-abajo` y `<html data-teclado>` con `visualViewport` (iPhone pone el teclado
+  encima; Android achica con `interactive-widget=resizes-content`). Barras inferiores
+  (`data-barra-inferior`) y avisos suben sobre el teclado; hojas y diálogos con
+  `data-sobre-teclado` se ajustan al alto visible. Al tocar un campo se centra (no con el
+  autofoco del código).
+- **Táctil**: campos a 16 px en táctil (iOS no hace zoom), sin desborde horizontal, área de
+  toque de ≥ 40 px en botones y enlaces chicos con un `::before` invisible (regla con
+  `:where()` para no pisar posiciones por clase), buscadores `type="search"` con tecla
+  "Buscar", usuario/serie/código sin autocorrección ni mayúscula automática.
+- **Clases de botón** (`@layer components` en index.css): `.btn-primario`,
+  `.btn-secundario`, `.btn-icono`, `.btn-icono-peligro` y `.campo` dan el ASPECTO
+  (colores, borde, radio, transiciones, estados); el tamaño (`h-*`, `px-*`, `w-*`) sigue
+  como utilidad en cada elemento. Reemplazan a las recetas repetidas (aprobado
+  2026-09-29).
 
 ## Actas con el estilo del sistema (2026-09-27)
 
@@ -862,9 +925,13 @@ pida solo la última entrega del colaborador), probarlos contra el backend real.
 - No se inventan endpoints ni comportamientos del backend: si no está documentado o
   confirmado, se pregunta antes de asumir.
 - No se crean componentes compartidos nuevos (por ejemplo un `<Button>` genérico) sin
-  autorización explícita, aunque parezca que "ordenaría" el código -- el estilo actual es
-  cada elemento con su propia clase de Tailwind repetida, y así se ha mantenido a propósito
-  incluso al tocar 102 botones en 29 archivos.
+  autorización explícita, aunque parezca que "ordenaría" el código. El aspecto de botones
+  y campos va en las clases `.btn-primario`, `.btn-secundario`, `.btn-icono`,
+  `.btn-icono-peligro` y `.campo` (index.css, desde el 2026-09-29; antes era la receta de
+  Tailwind repetida en cada elemento); el tamaño y la posición siguen como utilidades.
+  Un botón nuevo usa esas clases, no una receta copiada.
+- Colores solo por token (clases de Tailwind o `rgb(var(--c-token))` en CSS), nunca hex en
+  JSX: así funcionan en claro y oscuro.
 
 ## Reglas de trabajo (las más importantes)
 
@@ -885,7 +952,8 @@ Reglas relacionadas que se han repetido en las peticiones de trabajo:
   Acta e Historial, no un ancho distinto "a ojo".
 - Reusar componentes y patrones ya existentes (`ConfirmDialog`, `Toast`, `EstadoVacio`,
   `SearchableSelect`, `InlineEditableText`, `Buscador`, `Skeleton*`, `Paginador`,
-  `EquipoDetalleModal`, `SierraFondo` (decorativo), etc.) en
+  `EquipoDetalleModal`, `SierraFondo` (decorativo), `CieloSistema` (decorativo),
+  `BotonTema`, `Recorrido`, etc.) en
   vez de crear uno nuevo con el mismo propósito.
 - No crear componentes compartidos nuevos sin autorización explícita.
 - Tocar solo los archivos estrictamente necesarios para el cambio pedido.
