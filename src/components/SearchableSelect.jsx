@@ -339,7 +339,7 @@ function SearchableSelect({
           >
             <div
               onClick={(e) => e.stopPropagation()}
-              className={`flex max-h-[70vh] w-full max-w-sm flex-col overflow-hidden rounded-tarjeta bg-white shadow-modal transition-[opacity,transform] duration-base ease-standard ${
+              className={`flex max-h-[min(70vh,calc(var(--vv-alto,100dvh)-2rem))] w-full max-w-sm flex-col overflow-hidden rounded-tarjeta bg-white shadow-modal transition-[opacity,transform] duration-base ease-standard ${
                 visibleMobil ? 'translate-y-0 scale-100 opacity-100' : 'translate-y-2 scale-95 opacity-0'
               }`}
             >

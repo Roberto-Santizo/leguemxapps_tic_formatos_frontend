@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '../context/AuthContext.jsx'
+import { saludoHora } from '../config/cielo.js'
 
 // Saludo "Buenos días, Gerardo." (mockup Sierra) arriba del título de la
 // pantalla a la que llega cada rol al entrar: Nueva Acta (admin) e Historial
@@ -11,13 +12,6 @@ const CLAVE = 'legumex_saludo_dia'
 function hoyLocal() {
   const d = new Date()
   return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`
-}
-
-function saludoSegunHora() {
-  const hora = new Date().getHours()
-  if (hora < 12) return 'Buenos días'
-  if (hora < 19) return 'Buenas tardes'
-  return 'Buenas noches'
 }
 
 function SaludoDelDia() {
@@ -46,7 +40,7 @@ function SaludoDelDia() {
 
   return (
     <p className="mb-5 animate-view-in font-body-lg text-body-lg font-semibold text-on-surface">
-      {saludoSegunHora()}
+      {saludoHora()}
       {nombre ? `, ${nombre}` : ''}.
     </p>
   )

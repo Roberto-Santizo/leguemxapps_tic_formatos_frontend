@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { Clock3, Eye, EyeOff, LogIn, TriangleAlert } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 import { RAFAGAS } from '../components/SierraFondo.jsx'
+import { saludoHora } from '../config/cielo.js'
 
 // El telón verde solo se muestra la primera vez por sesión del navegador;
 // si vuelve al login (cerrar sesión, sesión vencida) entra directo.
@@ -42,12 +43,6 @@ function parallaxPermitido() {
   )
 }
 
-function saludoSegunHora() {
-  const hora = new Date().getHours()
-  if (hora < 12) return 'Buenos días'
-  if (hora < 19) return 'Buenas tardes'
-  return 'Buenas noches'
-}
 
 // Parte un texto en letras que saltan en ola, una tras otra cada 8 ms (menos
 // si el texto es largo), para que la última termine su salto antes de navegar
@@ -304,7 +299,7 @@ function Login() {
           ) : (
             <h1 className="lg-titulo">Iniciar sesión</h1>
           )}
-          <p className="lg-saludo">{saludoSegunHora()}. Ingresa con tu usuario del sistema.</p>
+          <p className="lg-saludo">{saludoHora()}. Ingresa con tu usuario del sistema.</p>
 
           {/* Llegó aquí porque la sesión venció (no cerró a mano). */}
           {sesionVencida && !error && (

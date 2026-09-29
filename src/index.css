@@ -1176,8 +1176,9 @@ html[data-teclado] [data-sobre-teclado] {
      cuenta (absolute, fixed, sticky) o que ya usan ::before quedan como están. */
   button:not(.absolute):not(.fixed):not(.sticky):not([class*="before:"]) { position: relative; }
   button:not([class*="before:"])::before { content: ""; position: absolute; inset: -9px; }
-  a[href][aria-label]:not(.absolute):not(.fixed) { position: relative; }
-  a[href][aria-label]::before { content: ""; position: absolute; inset: -9px; }
+  /* Enlaces con ícono y los botones "volver" (enlaces inline-flex de 36 px). */
+  a[href][aria-label]:not(.absolute):not(.fixed), a[href].inline-flex:not(.absolute):not(.fixed) { position: relative; }
+  a[href][aria-label]::before, a[href].inline-flex::before { content: ""; position: absolute; inset: -9px; }
   /* Buscadores con tecla "Buscar" (type=search) sin la X del navegador. */
   input[type=search] { -webkit-appearance: none; appearance: none; }
   input[type=search]::-webkit-search-decoration,

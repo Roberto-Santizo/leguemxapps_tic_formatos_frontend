@@ -24,7 +24,7 @@ function NavItem({ to, icon: Icon, label, end, onNavigate }) {
           'group flex h-11 items-center gap-2.5 rounded-menu px-2.5 font-body-md text-body-md',
           'transition-[transform,background-color,box-shadow,color] duration-fast ease-standard active:scale-[0.97]',
           isActive
-            ? 'bg-surface-container-lowest font-medium text-on-surface shadow-tarjeta'
+            ? 'bg-sel-bg font-medium text-on-surface shadow-[0_1px_2px_rgba(0,0,0,0.06),0_0_0_1px_rgb(var(--c-sel-borde))]'
             : 'text-on-surface-variant hover:bg-surface-container-lowest/60 hover:text-on-surface active:bg-surface-container-high',
         ].join(' ')
       }

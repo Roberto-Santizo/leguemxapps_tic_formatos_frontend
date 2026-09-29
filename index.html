@@ -17,6 +17,8 @@
     <script src="/env.js"></script>
     <!-- Tema guardado (claro u oscuro) antes de pintar, para que no parpadee (src/utils/tema.js) -->
     <script>try{var t=localStorage.getItem('legumex_tema');if(t==='claro'||t==='oscuro')document.documentElement.setAttribute('data-tema',t)}catch(e){}</script>
+    <!-- Fase del cielo por la hora de Guatemala (mismos cortes que FASES_CIELO en src/config/cielo.js) -->
+    <script>try{var g=new Date(Date.now()+(new Date().getTimezoneOffset()-360)*6e4),m=g.getHours()*60+g.getMinutes();document.documentElement.setAttribute('data-fase',m<330?'noche':m<420?'amanecer':m<1035?'dia':m<1125?'atardecer':'noche')}catch(e){}</script>
   </head>
   <body>
     <div id="root"></div>
