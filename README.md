@@ -41,7 +41,7 @@ animaciones de la cordillera, el borrador automático, el aviso de sesión, "Ver
 colaborador y las actas con el mismo estilo que el resto del sistema. Probada con navegador automatizado en escritorio, teléfono y tablet; falta
 probarla en tablets reales con el backend real.
 
-La rama `sistema-vivo` (2026-09-29, sale de `tablet`) suma: cielo según la hora de
+El 2026-09-29 se sumó a `tablet` el trabajo de la rama `sistema-vivo`: cielo según la hora de
 Guatemala (día, amanecer, atardecer, noche) en el sistema, el login y el menú del
 teléfono; modo oscuro (Automático / Claro / Oscuro, botón junto al nombre); recorrido
 guiado "¿Cómo funciona?" por rol (la primera vez y con el botón **?**); ajustes para
