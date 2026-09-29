@@ -22,9 +22,9 @@ import { etiquetaTipoEquipo } from './EquipoForm.jsx'
  */
 // Recetas visuales "Sierra" (BRIEF, ola 2), repetidas a propósito.
 const botonVolver =
-  'inline-flex h-9 items-center gap-2 self-start rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]'
+  'btn-secundario h-9 gap-2 self-start px-3'
 const botonSecundario =
-  'inline-flex h-10 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface shadow-sm transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]'
+  'btn-secundario h-10 shrink-0 gap-2 whitespace-nowrap px-4 shadow-sm'
 const tarjeta = 'rounded-tarjeta bg-white p-4 shadow-tarjeta md:p-6'
 const tituloSeccion =
   'mb-4 flex items-center gap-2 font-headline-md text-headline-md font-bold text-on-surface'

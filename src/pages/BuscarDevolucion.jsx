@@ -95,7 +95,7 @@ function BuscarDevolucion() {
       <div className="mx-auto flex max-w-[1200px] flex-col gap-stack-lg">
         <Link
           to="/historial/devolucion"
-          className="inline-flex h-9 items-center gap-2 self-start rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
+          className="btn-secundario h-9 gap-2 self-start px-3"
         >
           <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={1.75} />
           Devolución de Equipo
@@ -135,7 +135,7 @@ function BuscarDevolucion() {
                 accion={
                   <Link
                     to="/actas/entrega/nueva"
-                    className="inline-flex h-10 items-center justify-center rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97]"
+                    className="btn-primario h-10 px-4 shadow-sm"
                   >
                     Registrar una entrega
                   </Link>

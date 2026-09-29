@@ -18,13 +18,13 @@ import IsotipoCarga from '../components/IsotipoCarga.jsx'
  */
 
 const inputClasses =
-  'h-11 w-full rounded-boton border border-outline-variant bg-white px-3 font-body-md text-input-movil md:text-body-md text-on-surface placeholder:text-on-surface-subtle transition duration-fast ease-standard hover:[&:not(:focus)]:border-outline disabled:opacity-60'
+  'campo h-11 w-full px-3 disabled:opacity-60'
 
 // Etiqueta de campo del mockup (12px, semibold).
 const labelClasses = 'text-meta font-semibold leading-4 text-on-surface'
 // Ojo de mostrar/ocultar contraseña, dentro del input.
 const ojoClasses =
-  'absolute right-1 top-1/2 -translate-y-1/2 grid h-8 w-8 place-items-center rounded-boton text-on-surface-variant transition duration-fast ease-standard hover:bg-surface-container hover:text-on-surface disabled:opacity-50 active:scale-[0.90]'
+  'btn-icono absolute right-1 top-1/2 -translate-y-1/2 grid h-8 w-8 place-items-center disabled:opacity-50'
 
 function UsuarioForm() {
   const { id } = useParams()
@@ -119,7 +119,7 @@ function UsuarioForm() {
       <div className="max-w-[600px] ml-[max(0px,calc((100%_-_1200px)/2))] flex flex-col gap-stack-lg">
         <Link
           to={origen.ruta}
-          className="inline-flex h-9 items-center gap-2 self-start rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
+          className="btn-secundario h-9 gap-2 self-start px-3"
         >
           <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={1.75} />
           {origen.etiqueta}
@@ -278,14 +278,14 @@ function UsuarioForm() {
             <div className="flex flex-col-reverse gap-3 border-t border-outline-variant pt-5 sm:flex-row sm:justify-end">
               <Link
                 to={origen.ruta}
-                className="inline-flex h-10 items-center justify-center gap-2 rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
+                className="btn-secundario h-10 gap-2 px-4"
               >
                 Cancelar
               </Link>
               <button
                 type="submit"
                 disabled={guardando || !completo}
-                className="inline-flex h-10 items-center justify-center gap-2 rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97] disabled:opacity-50 disabled:hover:bg-tinta disabled:active:scale-100"
+                className="btn-primario h-10 gap-2 px-4 shadow-sm disabled:opacity-50 disabled:hover:bg-tinta disabled:active:scale-100"
               >
                 {guardando ? <IsotipoCarga className="h-3" /> : <Save className="h-4 w-4" strokeWidth={1.75} />}
                 {esEdicion ? 'Guardar cambios' : 'Crear usuario'}

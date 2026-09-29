@@ -102,7 +102,7 @@ export function FilasCaracteristicas({ filas, onChange, disabled, nombresExisten
                 disabled={disabled || filas.length === 1}
                 aria-label="Quitar característica"
                 title={filas.length === 1 ? 'Debe quedar al menos una fila' : 'Quitar'}
-                className="grid h-10 w-10 shrink-0 place-items-center self-end rounded-boton text-on-surface-variant transition duration-fast ease-standard hover:bg-error-container/60 hover:text-error disabled:cursor-not-allowed disabled:opacity-55 disabled:hover:bg-transparent disabled:hover:text-on-surface-variant sm:mt-6 sm:self-start active:scale-[0.90]"
+                className="btn-icono-peligro grid h-10 w-10 shrink-0 place-items-center self-end disabled:cursor-not-allowed disabled:opacity-55 disabled:hover:bg-transparent disabled:hover:text-on-surface-variant sm:mt-6 sm:self-start"
               >
                 <Trash2 className="h-4 w-4" strokeWidth={1.75} />
               </button>
@@ -283,7 +283,7 @@ export function CaracteristicasDeEquipo({
                   type="button"
                   onClick={confirmarNueva}
                   disabled={guardando}
-                  className="inline-flex h-10 items-center justify-center gap-2 rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97] disabled:opacity-50"
+                  className="btn-primario h-10 gap-2 px-4 shadow-sm disabled:opacity-50"
                 >
                   {guardando ? (
                     <IsotipoCarga className="h-3" />
@@ -296,7 +296,7 @@ export function CaracteristicasDeEquipo({
                   type="button"
                   onClick={cerrarAlta}
                   disabled={guardando}
-                  className="inline-flex h-10 items-center justify-center gap-2 rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container disabled:opacity-60 active:scale-[0.97]"
+                  className="btn-secundario h-10 gap-2 px-4 disabled:opacity-60"
                 >
                   <X className="h-4 w-4" strokeWidth={1.75} />
                   Cancelar

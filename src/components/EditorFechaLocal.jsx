@@ -67,7 +67,7 @@ function EditorFechaLocal({ value, corregida, onChange, onRestablecer, title }) 
             onClick={onRestablecer}
             title="Restablecer a la fecha original del sistema"
             aria-label="Restablecer fecha original"
-            className="grid h-6 w-6 place-items-center rounded-boton text-on-surface-variant transition duration-fast ease-standard hover:bg-surface-container hover:text-on-surface active:scale-[0.90]"
+            className="btn-icono grid h-6 w-6 place-items-center"
           >
             <RotateCcw className="h-3.5 w-3.5" strokeWidth={1.75} />
           </button>

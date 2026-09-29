@@ -51,7 +51,7 @@ function FiltrosActas({ grupos, selectores = [], desde, hasta, onDesde, onHasta,
           <SlidersHorizontal className="h-4 w-4" strokeWidth={1.75} />
           Filtros
           {puestos > 0 && (
-            <span className="grid h-5 min-w-5 place-items-center rounded-full bg-tinta px-1.5 font-mono text-micro text-white tabular-nums">
+            <span className="grid h-5 min-w-5 place-items-center rounded-full bg-tinta px-1.5 font-mono text-micro text-on-tinta tabular-nums">
               {puestos}
             </span>
           )}
@@ -87,7 +87,7 @@ function FiltrosActas({ grupos, selectores = [], desde, hasta, onDesde, onHasta,
                 className={[
                   chip,
                   puesto
-                    ? 'border-transparent bg-tinta text-white'
+                    ? 'border-transparent bg-tinta text-on-tinta'
                     : 'border-outline-variant bg-white text-on-surface-variant hover:bg-surface-container hover:text-on-surface',
                 ].join(' ')}
               >

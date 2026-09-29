@@ -63,7 +63,7 @@ function dataUrlToBlob(dataUrl) {
 const valorClass = 'flex min-h-6 items-center'
 
 const inputClass =
-  'h-11 w-full rounded-boton border border-outline-variant bg-white px-3 font-body-md text-input-movil text-on-surface placeholder:text-on-surface-subtle transition duration-fast ease-standard hover:[&:not(:focus)]:border-outline disabled:opacity-60 md:text-body-md'
+  'campo h-11 w-full px-3 disabled:opacity-60'
 
 const celdaInputClass =
   'w-full border-0 border-b border-transparent bg-transparent p-1 font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/70 focus:border-primary focus:ring-0'
@@ -282,7 +282,7 @@ function RegistrarDevolucion() {
             <Link
               to={`/historial/entrega/${id}`}
               state={estadoEntrega}
-              className="inline-flex h-9 items-center gap-2 rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
+              className="btn-secundario h-9 gap-2 px-3"
             >
               <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={1.75} />
               Entrega
@@ -317,14 +317,14 @@ function RegistrarDevolucion() {
                 <button
                   type="button"
                   onClick={() => setConfirmandoDescartar(true)}
-                  className="inline-flex h-9 flex-1 items-center justify-center rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97] sm:flex-none"
+                  className="btn-secundario h-9 flex-1 px-3 sm:flex-none"
                 >
                   Descartar
                 </button>
                 <button
                   type="button"
                   onClick={() => setAvisoBorrador(null)}
-                  className="inline-flex h-9 flex-1 items-center justify-center rounded-boton bg-tinta px-3 font-body-md text-body-md font-medium text-white transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97] sm:flex-none"
+                  className="btn-primario h-9 flex-1 px-3 sm:flex-none"
                 >
                   Continuar
                 </button>
@@ -345,7 +345,7 @@ function RegistrarDevolucion() {
                 accion={
                   <Link
                     to="/historial/entrega"
-                    className="inline-flex h-10 items-center justify-center rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface shadow-sm transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
+                    className="btn-secundario h-10 px-4 shadow-sm"
                   >
                     Volver al historial
                   </Link>
@@ -625,7 +625,7 @@ function RegistrarDevolucion() {
                     maxLength={500}
                     onChange={(e) => setObservacionesGenerales(e.target.value)}
                     placeholder={formato.placeholderObs}
-                    className="min-h-24 w-full resize-y rounded-boton border border-outline-variant bg-white px-3 py-2.5 font-body-md text-input-movil text-on-surface placeholder:text-on-surface-subtle transition duration-fast ease-standard hover:[&:not(:focus)]:border-outline md:text-body-md"
+                    className="campo min-h-24 w-full resize-y px-3 py-2.5"
                   />
                 </div>
               </SeccionCard>
@@ -674,7 +674,7 @@ function RegistrarDevolucion() {
                 state={estadoEntrega}
                 // Cancelar es abandonar la hoja a propósito: sin borrador.
                 onClick={() => borrador.limpiar()}
-                className="inline-flex flex-1 sm:flex-none h-10 items-center justify-center rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface shadow-toast transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
+                className="btn-secundario flex-1 sm:flex-none h-10 px-4 shadow-toast"
               >
                 Cancelar
               </Link>
@@ -682,7 +682,7 @@ function RegistrarDevolucion() {
                 type="button"
                 onClick={handleClicFinalizarDevolucion}
                 disabled={guardando || pendientes.length === 0}
-                className="inline-flex flex-1 sm:flex-none h-10 items-center justify-center gap-2 rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-toast transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50"
+                className="btn-primario flex-1 sm:flex-none h-10 gap-2 px-4 shadow-toast disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {guardando && <IsotipoCarga className="h-3 movil:!hidden" />}
                 {formato.textoAccion}

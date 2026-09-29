@@ -248,7 +248,7 @@ function SearchableSelect({
                   onClick={() => onVerDetalle(String(opcion.id))}
                   aria-label={`Ver detalle de ${[opcion.name, opcion.codigo].filter(Boolean).join(' ')}`}
                   title="Ver detalle del equipo"
-                  className="grid h-9 w-9 shrink-0 place-items-center rounded-boton text-on-surface-variant transition duration-fast ease-standard hover:bg-surface-container hover:text-on-surface active:scale-[0.90]"
+                  className="btn-icono grid h-9 w-9 shrink-0 place-items-center"
                 >
                   <Eye className="h-4 w-4" strokeWidth={1.75} />
                 </button>
@@ -307,7 +307,7 @@ function SearchableSelect({
             }}
             aria-label={`Ver detalle de ${[seleccionado.name, seleccionado.codigo].filter(Boolean).join(' ')}`}
             title="Ver detalle del equipo"
-            className="pointer-events-auto grid h-8 w-8 place-items-center rounded-boton text-on-surface-variant transition duration-fast ease-standard hover:bg-surface-container hover:text-on-surface active:scale-[0.90]"
+            className="btn-icono pointer-events-auto grid h-8 w-8 place-items-center"
           >
             <Eye className="h-4 w-4" strokeWidth={1.75} />
           </button>

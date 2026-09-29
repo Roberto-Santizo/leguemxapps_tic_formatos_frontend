@@ -49,7 +49,7 @@ import { IndicadorGuardando, mostrarToast } from './Toast.jsx'
  * `onActualizado(equipo)` (opcional): se llama tras guardar cambios.
  */
 const inputClasses =
-  'h-11 w-full rounded-boton border border-outline-variant bg-white px-3 font-body-md text-input-movil text-on-surface placeholder:text-on-surface-subtle transition duration-fast ease-standard hover:[&:not(:focus)]:border-outline disabled:opacity-60 md:text-body-md'
+  'campo h-11 w-full px-3 disabled:opacity-60'
 const labelClasses = 'mb-1.5 block text-meta font-semibold leading-4 text-on-surface'
 const errorCampo = 'mt-1 text-meta leading-4 text-error'
 
@@ -321,7 +321,7 @@ function EquipoDetalleModal({ equipoId, onCerrar, editable = false, onActualizad
             disabled={guardando}
             aria-label={editando ? 'Cancelar edición' : 'Cerrar'}
             title={editando ? 'Cancelar edición' : 'Cerrar'}
-            className="inline-flex h-9 w-9 disabled:opacity-50 shrink-0 items-center justify-center rounded-boton text-on-surface-variant transition duration-fast ease-standard hover:bg-surface-container hover:text-on-surface active:scale-[0.90]"
+            className="btn-icono h-9 w-9 disabled:opacity-50 shrink-0"
           >
             <X className="h-4 w-4" strokeWidth={1.75} />
           </button>
@@ -336,7 +336,7 @@ function EquipoDetalleModal({ equipoId, onCerrar, editable = false, onActualizad
               <button
                 type="button"
                 onClick={() => setIntento((n) => n + 1)}
-                className="inline-flex h-10 items-center justify-center rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
+                className="btn-secundario h-10 px-4"
               >
                 Reintentar
               </button>
@@ -425,7 +425,7 @@ function EquipoDetalleModal({ equipoId, onCerrar, editable = false, onActualizad
                             className={[
                               'inline-flex h-10 flex-1 items-center justify-center rounded-boton border font-body-md text-body-md font-medium transition duration-fast ease-standard active:scale-[0.97] disabled:opacity-60',
                               puesto
-                                ? 'border-transparent bg-tinta text-white'
+                                ? 'border-transparent bg-tinta text-on-tinta'
                                 : 'border-outline-variant bg-white text-on-surface hover:bg-surface-container',
                             ].join(' ')}
                           >
@@ -498,7 +498,7 @@ function EquipoDetalleModal({ equipoId, onCerrar, editable = false, onActualizad
                 type="button"
                 onClick={() => setEditando(false)}
                 disabled={guardando}
-                className="inline-flex h-10 items-center justify-center rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container disabled:opacity-60 active:scale-[0.97]"
+                className="btn-secundario h-10 px-4 disabled:opacity-60"
               >
                 Cancelar
               </button>
@@ -507,7 +507,7 @@ function EquipoDetalleModal({ equipoId, onCerrar, editable = false, onActualizad
                 form="equipo-edicion"
                 disabled={!completo || guardando}
                 aria-busy={guardando}
-                className="inline-flex h-10 items-center justify-center gap-2 rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover disabled:opacity-50 active:scale-[0.97]"
+                className="btn-primario h-10 gap-2 px-4 shadow-sm disabled:opacity-50"
               >
                 {guardando && <IsotipoCarga className="h-3" />}
                 Guardar cambios
@@ -520,7 +520,7 @@ function EquipoDetalleModal({ equipoId, onCerrar, editable = false, onActualizad
                   ref={editarRef}
                   type="button"
                   onClick={empezarEdicion}
-                  className="inline-flex h-10 items-center justify-center gap-2 rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
+                  className="btn-secundario h-10 gap-2 px-4"
                 >
                   <Pencil className="h-4 w-4" strokeWidth={1.75} />
                   Editar
@@ -529,7 +529,7 @@ function EquipoDetalleModal({ equipoId, onCerrar, editable = false, onActualizad
               <button
                 type="button"
                 onClick={onCerrar}
-                className="inline-flex h-10 items-center justify-center rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
+                className="btn-secundario h-10 px-4"
               >
                 Cerrar
               </button>

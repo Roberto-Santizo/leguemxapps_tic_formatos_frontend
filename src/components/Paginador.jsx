@@ -54,7 +54,7 @@ function Paginador({ pagina, ultimaPagina, total, plural, tamano = TAMANO_PAGINA
   // dibujar una caja dentro de otra; en móvil (tarjetas) sigue siendo tarjeta.
   // Botones de 40px en móvil (objetivo táctil) y 32px desde md: dentro del pie.
   const flecha =
-    'inline-flex h-10 items-center justify-center gap-1 rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97] md:h-8 disabled:cursor-not-allowed disabled:text-on-surface-subtle disabled:hover:bg-white disabled:active:scale-100'
+    'btn-secundario h-10 gap-1 px-3 md:h-8 disabled:cursor-not-allowed disabled:text-on-surface-subtle disabled:hover:bg-white disabled:active:scale-100'
   const numero =
     'inline-grid h-10 min-w-10 place-items-center rounded-boton px-2 md:h-8 md:min-w-8 font-mono text-meta tabular-nums transition duration-fast ease-standard active:scale-[0.97]'
 
@@ -108,7 +108,7 @@ function Paginador({ pagina, ultimaPagina, total, plural, tamano = TAMANO_PAGINA
                 className={[
                   numero,
                   n === pagina
-                    ? 'bg-tinta text-white shadow-sm'
+                    ? 'bg-tinta text-on-tinta shadow-sm'
                     : 'text-on-surface-variant hover:bg-white hover:text-on-surface',
                 ].join(' ')}
               >

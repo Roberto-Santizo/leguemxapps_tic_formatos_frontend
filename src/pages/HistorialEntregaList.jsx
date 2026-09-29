@@ -131,7 +131,7 @@ function HistorialEntregaList({ departamento } = {}) {
   const sinContenido = !cargando && (Boolean(errorCarga) || !hayRegistros)
 
   const botonSecundario =
-    'inline-flex h-10 items-center justify-center gap-2 rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface shadow-sm transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]'
+    'btn-secundario h-10 gap-2 px-4 shadow-sm'
 
   const estado = errorCarga ? (
     <EstadoVacio
@@ -190,13 +190,13 @@ function HistorialEntregaList({ departamento } = {}) {
   )
 
   const iconoActivo =
-    'inline-flex h-9 w-9 items-center justify-center rounded-boton text-on-surface-variant transition duration-fast ease-standard hover:bg-surface-container hover:text-on-surface active:scale-[0.90]'
+    'btn-icono h-9 w-9'
   // La basura es la única acción irreversible de la tabla: gris en reposo
   // (como el ojo) pero roja al pasar el mouse, igual que "quitar equipo" en
   // HistorialEntregaView -- rojo = borrar, la regla de la paleta. Antes usaba
   // iconoActivo y se veía igual de inofensiva que "ver".
   const iconoPeligro =
-    'inline-flex h-9 w-9 items-center justify-center rounded-boton text-on-surface-variant transition duration-fast ease-standard hover:bg-error-container/60 hover:text-error active:scale-[0.90]'
+    'btn-icono-peligro h-9 w-9'
 
   function verDocumento(documento) {
     // Con la lista como origen: al abrirla desde el historial de un
@@ -212,7 +212,7 @@ function HistorialEntregaList({ departamento } = {}) {
       <div className="max-w-[1200px] mx-auto flex flex-col gap-stack-lg">
         <Link
           to={enDepto ? `/catalogo/departamentos/${departamento?.id}/ver` : '/historial'}
-          className="inline-flex h-9 max-w-full items-center gap-2 self-start rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
+          className="btn-secundario h-9 max-w-full gap-2 self-start px-3"
         >
           <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={1.75} />
           <span className="min-w-0 truncate">{enDepto ? departamento?.name || 'Departamento' : 'Historial de Actas'}</span>
@@ -242,7 +242,7 @@ function HistorialEntregaList({ departamento } = {}) {
               disabled={exportando || cargando || Boolean(errorCarga) || todosFiltrados.length === 0}
               aria-busy={exportando}
               title={todosFiltrados.length === 0 && !cargando ? 'No hay registros para exportar' : undefined}
-              className="inline-flex h-10 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover disabled:opacity-50 aria-busy:opacity-100 active:scale-[0.97]"
+              className="btn-primario h-10 shrink-0 gap-2 whitespace-nowrap px-4 shadow-sm disabled:opacity-50 aria-busy:opacity-100"
             >
               {exportando ? <IsotipoCarga className="h-3" /> : <Download className="h-4 w-4" strokeWidth={1.75} />}
               Exportar CSV
@@ -251,7 +251,7 @@ function HistorialEntregaList({ departamento } = {}) {
             isAdmin && (
               <Link
                 to="/actas/entrega/nueva"
-                className="inline-flex h-10 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97]"
+                className="btn-primario h-10 shrink-0 gap-2 whitespace-nowrap px-4 shadow-sm"
               >
                 <Plus className="h-4 w-4" strokeWidth={1.75} />
                 Registrar entrega

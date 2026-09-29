@@ -1,5 +1,32 @@
 @tailwind base;
 @tailwind components;
+/* ── Clases del sistema: botones y campos ───────────────────────────────
+   Definen SOLO el aspecto (color, borde, letra, transición, presión); el tamaño
+   (h-9/h-10, px-3/px-4, ancho) va como utilidad en cada uno, así cada botón
+   conserva su medida. Un cambio aquí llega a todo el sistema y al modo oscuro.
+     btn-primario     negro (tinta), el principal de la pantalla
+     btn-secundario   blanco con borde (Cancelar, Editar, volver, Reintentar…)
+     btn-icono        solo ícono (ver, editar) en tablas y tarjetas
+     btn-icono-peligro  solo ícono que borra (gris, rojo al pasar el mouse)
+     campo            input / textarea de formulario */
+@layer components {
+  .btn-primario {
+    @apply inline-flex items-center justify-center rounded-boton bg-tinta font-body-md text-body-md font-medium text-on-tinta transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97];
+  }
+  .btn-secundario {
+    @apply inline-flex items-center justify-center rounded-boton border border-outline-variant bg-white font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97];
+  }
+  .btn-icono {
+    @apply inline-flex items-center justify-center rounded-boton text-on-surface-variant transition duration-fast ease-standard hover:bg-surface-container hover:text-on-surface active:scale-[0.90];
+  }
+  .btn-icono-peligro {
+    @apply inline-flex items-center justify-center rounded-boton text-on-surface-variant transition duration-fast ease-standard hover:bg-error-container/60 hover:text-error active:scale-[0.90];
+  }
+  .campo {
+    @apply rounded-boton border border-outline-variant bg-white font-body-md text-input-movil text-on-surface transition duration-fast ease-standard placeholder:text-on-surface-subtle hover:[&:not(:focus)]:border-outline md:text-body-md;
+  }
+}
+
 @tailwind utilities;
 
 /* ── Tablet: el diseño móvil a tamaño de tablet ────────────────────────

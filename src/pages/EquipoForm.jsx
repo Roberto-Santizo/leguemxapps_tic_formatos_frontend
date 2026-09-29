@@ -40,17 +40,17 @@ import IsotipoCarga from '../components/IsotipoCarga.jsx'
 
 // Recetas visuales "Sierra" (BRIEF, ola 2), repetidas a propósito.
 const inputClasses =
-  'h-11 w-full rounded-boton border border-outline-variant bg-white px-3 font-body-md text-input-movil text-on-surface placeholder:text-on-surface-subtle transition duration-fast ease-standard hover:[&:not(:focus)]:border-outline disabled:opacity-60 md:text-body-md'
+  'campo h-11 w-full px-3 disabled:opacity-60'
 const labelClasses = 'text-meta font-semibold leading-4 text-on-surface'
 const ayudaClasses = 'text-meta leading-4 text-on-surface-subtle'
 const enlaceAyuda = 'font-medium text-foco underline-offset-2 hover:text-foco-hover hover:underline'
 const errorCampo = 'animate-hint-in font-label-sm text-label-sm text-error'
 const botonVolver =
-  'inline-flex h-9 items-center gap-2 self-start rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]'
+  'btn-secundario h-9 gap-2 self-start px-3'
 const botonSecundario =
-  'inline-flex h-10 items-center justify-center gap-2 rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]'
+  'btn-secundario h-10 gap-2 px-4'
 const botonPrimario =
-  'inline-flex h-10 items-center justify-center gap-2 rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97] disabled:opacity-50 disabled:active:scale-100'
+  'btn-primario h-10 gap-2 px-4 shadow-sm disabled:opacity-50 disabled:active:scale-100'
 const tituloSeccion = 'font-headline-md text-headline-md font-bold text-on-surface'
 
 /**
@@ -119,7 +119,7 @@ function ElijeSiNo({ label, value, onChange, disabled, ayuda }) {
             onClick={() => onChange(opcion.valor)}
             className={`inline-flex h-11 min-w-[84px] items-center justify-center rounded-boton border px-4 font-body-md text-body-md font-medium transition duration-fast ease-standard active:scale-[0.97] disabled:opacity-60 ${
               value === opcion.valor
-                ? 'border-tinta bg-tinta text-white shadow-sm'
+                ? 'border-tinta bg-tinta text-on-tinta shadow-sm'
                 : 'border-outline-variant bg-white text-on-surface hover:bg-surface-container'
             }`}
           >

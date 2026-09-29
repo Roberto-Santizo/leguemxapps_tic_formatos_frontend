@@ -84,7 +84,7 @@ function Usuarios() {
   const sinContenido = !cargando && (Boolean(errorCarga) || !hayRegistros)
 
   const botonSecundario =
-    'inline-flex h-10 items-center justify-center gap-2 rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface shadow-sm transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]'
+    'btn-secundario h-10 gap-2 px-4 shadow-sm'
 
   const estado = errorCarga ? (
     <EstadoVacio
@@ -122,7 +122,7 @@ function Usuarios() {
   )
 
   const iconoActivo =
-    'inline-flex h-9 w-9 items-center justify-center rounded-boton text-on-surface-variant transition duration-fast ease-standard hover:bg-surface-container hover:text-on-surface active:scale-[0.90]'
+    'btn-icono h-9 w-9'
   // Avatar con iniciales: círculo blanco con filete, como el mockup.
   const avatar =
     'grid shrink-0 place-items-center rounded-full border border-outline bg-white font-semibold text-on-surface'
@@ -152,7 +152,7 @@ function Usuarios() {
           </div>
           <Link
             to="/usuarios/nuevo"
-            className="inline-flex h-10 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97]"
+            className="btn-primario h-10 shrink-0 gap-2 whitespace-nowrap px-4 shadow-sm"
           >
             <Plus className="h-4 w-4" strokeWidth={1.75} />
             Nuevo usuario

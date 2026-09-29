@@ -314,7 +314,7 @@ function HistorialEntregaView() {
           <div className="flex flex-col items-start gap-5 md:gap-6">
             <Link
               to={origen.ruta}
-              className="inline-flex h-9 max-w-full items-center gap-2 rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
+              className="btn-secundario h-9 max-w-full gap-2 px-3"
             >
               <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={1.75} />
               <span className="min-w-0 truncate">{origen.etiqueta}</span>
@@ -338,7 +338,7 @@ function HistorialEntregaView() {
                 accion={
                   <Link
                     to={origen.ruta}
-                    className="inline-flex h-10 items-center justify-center gap-2 rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface shadow-sm transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
+                    className="btn-secundario h-10 gap-2 px-4 shadow-sm"
                   >
                     {origen.propio ? 'Volver' : 'Volver al historial'}
                   </Link>
@@ -777,7 +777,7 @@ function HistorialEntregaView() {
               <button
                 type="button"
                 onClick={() => navigate(`/historial/entrega/${id}/devolucion`, { state: origen.estado })}
-                className="col-span-2 inline-flex h-10 w-full items-center justify-center gap-2 whitespace-nowrap rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface shadow-toast transition duration-fast ease-standard hover:bg-surface-container disabled:opacity-50 active:scale-[0.97] md:w-auto"
+                className="btn-secundario col-span-2 h-10 w-full gap-2 whitespace-nowrap px-4 shadow-toast disabled:opacity-50 md:w-auto"
               >
                 <Undo2 className="h-4 w-4" strokeWidth={1.75} />
                 Registrar devolución
@@ -787,7 +787,7 @@ function HistorialEntregaView() {
               type="button"
               onClick={handleDescargarPdf}
               disabled={generandoPdf}
-              className="inline-flex h-10 w-full items-center justify-center gap-2 whitespace-nowrap rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-toast transition duration-fast ease-standard hover:bg-tinta-hover disabled:opacity-50 active:scale-[0.97] only:col-span-2 md:w-auto"
+              className="btn-primario h-10 w-full gap-2 whitespace-nowrap px-4 shadow-toast disabled:opacity-50 only:col-span-2 md:w-auto"
             >
               {generandoPdf ? (
                 <IsotipoCarga className="h-3" />

@@ -1,3 +1,5 @@
+import { CLARO, OSCURO, variables } from './src/tema/paleta.js'
+
 /*
   Breakpoints por DISPOSITIVO, no solo por ancho: el diseño de escritorio
   (sidebar, tablas, dos columnas) es para mouse o trackpad (puntero fino con
@@ -20,6 +22,12 @@ const desde = (px) => ({ raw: `(min-width: ${px}px) and ${ESCRITORIO}` })
 // tablet index.css sube la base y todo el diseño móvil crece en proporción.
 const rem = (px) => `${px / 16}rem`
 
+// Colores como variables: `rgb(var(--c-x) / <alpha-value>)` deja usar opacidad
+// (bg-tinta/40) y el mismo nombre de clase en claro y en oscuro.
+const coloresComoVariables = Object.fromEntries(
+  Object.keys(CLARO).map((k) => [k, `rgb(var(--c-${k}) / <alpha-value>)`]),
+)
+
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ['./index.html', './src/**/*.{js,jsx}'],
@@ -41,110 +49,11 @@ export default {
       'tablet-h': { raw: '(min-width: 1000px) and (min-height: 600px) and (hover: none) and (pointer: coarse)' },
     },
     extend: {
+      // Colores del sistema: cada token es una variable CSS (src/tema/paleta.js, claro
+      // y oscuro), así el tema cambia sin tocar ninguna clase de las pantallas.
       colors: {
-        /*
-          ==========================================================================
-          LEGUMEX · Control Operativo — sistema visual "Sierra" (SOLO MODO CLARO)
-          --------------------------------------------------------------------------
-          Se conservan los MISMOS nombres de token Material 3 que ya usan todas las
-          pantallas; solo cambian los valores, para que el rediseño llegue a todo el
-          sistema sin tocar cada className:
-            - papel cálido #f4f5f1 de fondo, superficies blancas encima;
-            - tinta #171717 para títulos y CTA negros, #525252 / #737373 de apoyo;
-            - bordes #e5e5e5; activos suaves / paneles de solo lectura #ebede7.
-          El verde de marca (bosque, brote, línea, éxito) vive en tokens aparte y
-          se usa SOLO en marca/login/cordillera: en la app no hay verde en
-          superficies ni textos. El rojo queda reservado para eliminar / errores.
-          ==========================================================================
-        */
-        background: '#f4f5f1',
-        'on-background': '#171717',
-
-        surface: '#ffffff',
-        'surface-bright': '#ffffff',
-        'surface-container-lowest': '#ffffff',
-        'surface-container-low': '#fafafa',
-        'surface-container': '#f5f5f5',
-        'surface-container-high': '#ebede7',
-        'surface-container-highest': '#e5e5e5',
-        'surface-dim': '#dcdcd6',
-        'surface-variant': '#e5e5e5',
-        'surface-blue': '#f5f5f5',
-        'header-fill': '#f5f5f5',
-        'surface-tint': '#171717',
-
-        'on-surface': '#171717',
-        'on-surface-variant': '#525252',
-        'on-surface-subtle': '#737373',
-
-        outline: '#a3a3a3',
-        'outline-variant': '#e5e5e5',
-        'border-muted': '#e5e5e5',
-
-        primary: '#171717',
-        'on-primary': '#ffffff',
-        'primary-container': '#ebede7',
-        'on-primary-container': '#171717',
-        'primary-fixed': '#ebede7',
-        'primary-fixed-dim': '#d4d4d4',
-        'on-primary-fixed': '#171717',
-        'on-primary-fixed-variant': '#404040',
-        'inverse-primary': '#d4d4d4',
-
-        secondary: '#525252',
-        'secondary-container': '#f5f5f5',
-        'on-secondary-container': '#262626',
-        'secondary-fixed': '#f5f5f5',
-        'secondary-fixed-dim': '#d4d4d4',
-        'on-secondary-fixed': '#262626',
-        'on-secondary-fixed-variant': '#404040',
-
-        tertiary: '#171717',
-        'on-tertiary': '#ffffff',
-        'tertiary-container': '#171717',
-        'on-tertiary-container': '#737373',
-        'tertiary-fixed': '#e5e5e5',
-        'tertiary-fixed-dim': '#d4d4d4',
-        'on-tertiary-fixed': '#171717',
-        'on-tertiary-fixed-variant': '#404040',
-
-        'inverse-surface': '#262626',
-        'inverse-on-surface': '#f5f5f5',
-
-        error: '#b3453b',
-        'on-error': '#ffffff',
-        'error-container': '#f1dcd9',
-        'on-error-container': '#7a2f27',
-
-        /*
-          Estado de un equipo en Catálogo → Equipos (badge de EquiposList.jsx):
-          Disponible (verde) / En posesión (ámbar). Son los únicos acentos
-          además del rojo `error`, y siguen su misma receta para no desentonar
-          con los grises: fondo muy claro, texto oscuro y un punto intermedio,
-          todo con la saturación apagada del ladrillo #b3453b -- verde salvia
-          y ocre, no el verde/ámbar de fábrica de Tailwind. Texto sobre fondo
-          con contraste >= 4.5:1 (AA) en ambos.
-        */
-        available: '#5b8a6b',
-        'available-container': '#e3ede5',
-        'on-available-container': '#3f6b4f',
-        assigned: '#b58a3e',
-        'assigned-container': '#f3ead6',
-        'on-assigned-container': '#7a5a1e',
-
-        /* ── Tokens nuevos del sistema Sierra ─────────────────────────────── */
-        papel: '#f4f5f1', // fondo de página (mismo valor que `background`)
-        'papel-velo': 'rgba(244, 245, 241, 0.9)', // velo sobre la cordillera (sin blur: la sierra deriva y el blur repinta cada cuadro)
-        tinta: '#0a0a0a', // botón primario negro
-        'tinta-hover': '#262626', // hover del botón primario
-        // Marca: solo login, logo y cordillera de fondo.
-        bosque: '#0b2a1e',
-        brote: '#4d7c2a',
-        linea: '#9bc96a',
-        exito: '#15803d',
-        // Foco de teclado y enlaces.
-        foco: '#2563eb',
-        'foco-hover': '#1e40af',
+        ...coloresComoVariables,
+        'papel-velo': 'rgba(244, 245, 241, 0.9)', // velo sobre la cordillera (sin uso hoy)
       },
       borderRadius: {
         DEFAULT: '0.625rem',
@@ -163,18 +72,18 @@ export default {
         md: '0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.08)',
         lg: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
         // Tarjeta blanca del mockup: sombra corta + filete de 1px en vez de borde.
-        tarjeta: '0 1px 2px rgba(0, 0, 0, 0.06), 0 0 0 1px #e5e5e5',
+        tarjeta: '0 1px 2px rgba(0, 0, 0, 0.06), 0 0 0 1px rgb(var(--c-outline-variant))',
         // Variantes del filete para cajas sin borde propio (Buscador): hover
         // gris medio y foco en tinta de 2px (mismo grosor que los inputs).
-        'tarjeta-hover': '0 1px 2px rgba(0, 0, 0, 0.06), 0 0 0 1px #a3a3a3',
-        'tarjeta-foco': '0 1px 2px rgba(0, 0, 0, 0.06), 0 0 0 2px #171717',
+        'tarjeta-hover': '0 1px 2px rgba(0, 0, 0, 0.06), 0 0 0 1px rgb(var(--c-outline))',
+        'tarjeta-foco': '0 1px 2px rgba(0, 0, 0, 0.06), 0 0 0 2px rgb(var(--c-on-surface))',
         // Paneles flotantes (menús, avisos, cajón móvil) con la sombra verde larga.
-        flotante: '0 1px 2px rgba(0, 0, 0, 0.06), 0 0 0 1px #e5e5e5, 0 24px 48px -24px rgba(11, 42, 30, 0.3)',
+        flotante: '0 1px 2px rgba(0, 0, 0, 0.06), 0 0 0 1px rgb(var(--c-outline-variant)), 0 24px 48px -24px rgb(var(--sombra-verde) / 0.3)',
         modal: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1)',
         toast: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
-        cajon: '0 0 0 1px #e5e5e5, 24px 0 48px -24px rgba(11, 42, 30, 0.35)',
-        'barra-movil': '0 1px 0 #e5e5e5',
-        'barra-inferior': '0 -1px 0 #e5e5e5',
+        cajon: '0 0 0 1px rgb(var(--c-outline-variant)), 24px 0 48px -24px rgb(var(--sombra-verde) / 0.35)',
+        'barra-movil': '0 1px 0 rgb(var(--c-outline-variant))',
+        'barra-inferior': '0 -1px 0 rgb(var(--c-outline-variant))',
       },
       spacing: {
         'stack-xs': rem(4),
@@ -289,5 +198,18 @@ export default {
     // escritorio de menos de 640px). Reemplaza a `max-sm:`, que Tailwind no
     // genera cuando los breakpoints llevan condición de dispositivo.
     ({ addVariant }) => addVariant('movil', `@media not all and (min-width: 640px) and ${ESCRITORIO}`),
+    // Variables de color: claro en :root; oscuro con data-tema="oscuro" o, en
+    // "Auto" (sin data-tema), cuando el equipo está en oscuro. El papel
+    // ([data-papel]) vuelve a la paleta clara: se ve siempre como la hoja impresa.
+    ({ addBase }) => {
+      const claro = { ...variables(CLARO), '--sombra-verde': '11 42 30', colorScheme: 'light' }
+      const oscuro = { ...variables(OSCURO), '--sombra-verde': '0 0 0', colorScheme: 'dark' }
+      addBase({
+        ':root': claro,
+        '@media (prefers-color-scheme: dark)': { ':root:not([data-tema="claro"])': oscuro },
+        ':root[data-tema="oscuro"]': oscuro,
+        '[data-papel]': claro,
+      })
+    },
   ],
 }

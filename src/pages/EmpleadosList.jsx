@@ -22,9 +22,9 @@ import { listarEmpleados, listarDepartamentos } from '../services/api.js'
  */
 // Recetas visuales "Sierra" (BRIEF, ola 2), repetidas a propósito.
 const botonVolver =
-  'inline-flex h-9 items-center gap-2 self-start rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]'
+  'btn-secundario h-9 gap-2 self-start px-3'
 const botonPrimario =
-  'inline-flex h-10 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white shadow-sm transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97]'
+  'btn-primario h-10 shrink-0 gap-2 whitespace-nowrap px-4 shadow-sm'
 const celdaEncabezado =
   'h-11 px-4 font-mono text-micro font-medium uppercase tracking-[0.1em] text-on-surface-variant whitespace-nowrap'
 
@@ -96,7 +96,7 @@ function EmpleadosList() {
   const sinContenido = !cargando && (Boolean(errorCarga) || !hayRegistros)
 
   const botonSecundario =
-    'inline-flex h-10 items-center justify-center gap-2 rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface shadow-sm transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]'
+    'btn-secundario h-10 gap-2 px-4 shadow-sm'
 
   const estado = errorCarga ? (
     <EstadoVacio
@@ -134,7 +134,7 @@ function EmpleadosList() {
   )
 
   const iconoActivo =
-    'inline-flex h-9 w-9 items-center justify-center rounded-boton text-on-surface-variant transition duration-fast ease-standard hover:bg-surface-container hover:text-on-surface active:scale-[0.90]'
+    'btn-icono h-9 w-9'
 
   function verEmpleado(emp) {
     navigate(`/catalogo/empleados/${emp.id}/ver`, {

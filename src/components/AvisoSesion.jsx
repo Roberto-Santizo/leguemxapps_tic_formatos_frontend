@@ -74,7 +74,7 @@ function AvisoSesion() {
           <button
             type="button"
             onClick={() => window.dispatchEvent(new CustomEvent(EVENTO_SESION_EXPIRADA))}
-            className="ml-auto inline-flex h-9 shrink-0 items-center justify-center rounded-boton bg-tinta px-3 font-body-md text-body-md font-medium text-white transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97]"
+            className="btn-primario ml-auto h-9 shrink-0 px-3"
           >
             Iniciar sesión
           </button>
@@ -82,7 +82,7 @@ function AvisoSesion() {
           <button
             type="button"
             onClick={() => setOculto(true)}
-            className="ml-auto inline-flex h-9 shrink-0 items-center justify-center rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]"
+            className="btn-secundario ml-auto h-9 shrink-0 px-3"
           >
             Entendido
           </button>

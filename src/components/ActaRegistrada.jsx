@@ -69,7 +69,7 @@ function ActaRegistrada({ codigo, titulo, detalle, acciones }) {
               <button
                 type="button"
                 onClick={acciones.otra || acciones.cerrar}
-                className="inline-flex h-10 items-center justify-center rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97] sm:min-w-[8.5rem] sm:flex-1"
+                className="btn-secundario h-10 px-4 sm:min-w-[8.5rem] sm:flex-1"
               >
                 {acciones.otra ? acciones.textoOtra || 'Nueva entrega' : 'Cerrar'}
               </button>
@@ -77,7 +77,7 @@ function ActaRegistrada({ codigo, titulo, detalle, acciones }) {
                 ref={botonVer}
                 type="button"
                 onClick={acciones.ver}
-                className="inline-flex h-10 items-center justify-center rounded-boton bg-tinta px-4 font-body-md text-body-md font-medium text-white transition duration-fast ease-standard hover:bg-tinta-hover active:scale-[0.97] sm:min-w-[8.5rem] sm:flex-1"
+                className="btn-primario h-10 px-4 sm:min-w-[8.5rem] sm:flex-1"
               >
                 {acciones.textoVer || 'Ver acta'}
               </button>

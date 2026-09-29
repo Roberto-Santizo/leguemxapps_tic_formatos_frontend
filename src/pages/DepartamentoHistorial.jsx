@@ -26,9 +26,9 @@ import HistorialDevolucionList from './HistorialDevolucionList.jsx'
 const TIPOS = ['entrega', 'devolucion']
 
 const botonVolver =
-  'inline-flex h-9 items-center gap-2 self-start rounded-boton border border-outline-variant bg-white px-3 font-body-md text-body-md font-medium text-on-surface transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]'
+  'btn-secundario h-9 gap-2 self-start px-3'
 const botonSecundario =
-  'inline-flex h-10 items-center justify-center gap-2 rounded-boton border border-outline-variant bg-white px-4 font-body-md text-body-md font-medium text-on-surface shadow-sm transition duration-fast ease-standard hover:bg-surface-container active:scale-[0.97]'
+  'btn-secundario h-10 gap-2 px-4 shadow-sm'
 
 function DepartamentoHistorial() {
   const { id, tipo } = useParams()
